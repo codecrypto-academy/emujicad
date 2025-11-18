@@ -172,6 +172,7 @@ contract SupplyChainTest is Test {
         assertEq(features, "{}", "Token features should match");
         assertEq(parentId, 0, "Raw material should have parentId 0");
         assertEq(supplyChain.getTokenBalance(1, producerAddress), 100, "Producer should have full balance");
+        assertEq(dateCreated, block.timestamp, "Date created should match current block timestamp");
     }
 
     function testGetToken() public {
@@ -237,12 +238,15 @@ contract SupplyChainTest is Test {
         supplyChain.createToken("Chair", SupplyChain.TokenType.FinishedProduct, 50, "{}", 1);
 
         (uint256 id, address creator, string memory name, SupplyChain.TokenType tokenType, uint256 totalSupply, string memory features, uint256 parentId, uint256 dateCreated) = supplyChain.getToken(2);
+        assertEq(id, 2, "Token ID should be 2");
         assertEq(creator, factoryAddress, "Token creator should be factory");
         assertEq(name, "Chair", "Token name should be Chair");
         assertEq(uint(tokenType), uint(SupplyChain.TokenType.FinishedProduct), "Token type should be FinishedProduct");
         assertEq(totalSupply, 50, "Token total supply should be 50");
         assertEq(features, "{}", "Token features should match");
         assertEq(parentId, 1, "Finished product should have parentId");
+        assertEq(supplyChain.getTokenBalance(2, factoryAddress), 50, "Factory should have full balance");
+        assertEq(dateCreated, block.timestamp, "Date created should match current block timestamp");
     }
 
     function testUnapprovedUserCannotCreateToken() public {
@@ -494,9 +498,14 @@ contract SupplyChainTest is Test {
 
         // 7. Verify traceability - check token parent relationship
         (uint256 id, address creator, string memory name, SupplyChain.TokenType tokenType, uint256 totalSupply, string memory features, uint256 parentId, uint256 dateCreated) = supplyChain.getToken(2);
+        assertEq(id, 2, "Token ID should be 2 for chair");
         assertEq(parentId, 1, "Chair should trace back to oak wood");
+        assertEq(name, "Oak Chair", "Token name should be Oak Chair");
+        assertEq(totalSupply, 100, "Total supply should be 100 chairs");
+        assertEq(features, "Handcrafted oak chair", "Features should match description");
         assertEq(creator, factoryAddress, "Chair should be created by factory");
         assertEq(uint(tokenType), uint(SupplyChain.TokenType.FinishedProduct), "Should be finished product");
+        assertEq(dateCreated, block.timestamp, "Date created should match current block timestamp");
 
         // 8. Verify total transfers in the system
         assertEq(supplyChain.getTotalTransfers(), 3, "Should have 3 total transfers");
@@ -586,8 +595,14 @@ contract SupplyChainTest is Test {
         
         // Verify parent relationship
         (uint256 id, address creator, string memory name, SupplyChain.TokenType tokenType, uint256 totalSupply, string memory features, uint256 parentId, uint256 dateCreated) = supplyChain.getToken(2);
+        assertEq(id, 2, "Token ID should be 2");
+        assertEq(creator, factoryAddress, "Token creator should be factory");
+        assertEq(name, "Chair", "Token name should be Chair");
+        assertEq(totalSupply, 25, "Total supply should be 25 chairs");
+        assertEq(features, "", "Features should be empty");
         assertEq(parentId, 1, "Child token should have correct parent ID");
         assertEq(uint(tokenType), uint(SupplyChain.TokenType.FinishedProduct), "Child should be finished product");
+        assertEq(dateCreated, block.timestamp, "Date created should match current block timestamp");
     }
 
     function testTokenMetadata() public {
@@ -598,11 +613,16 @@ contract SupplyChainTest is Test {
         supplyChain.createToken("Oak Wood", SupplyChain.TokenType.RowMaterial, 100, features, 0);
         
         (uint256 id, address creator, string memory name, SupplyChain.TokenType tokenType, uint256 totalSupply, string memory returnedFeatures, uint256 parentId, uint256 dateCreated) = supplyChain.getToken(1);
-        
+
+        assertEq(id, 1, "Token ID should be 1");
         assertEq(name, "Oak Wood", "Token name should match");
+        assertEq(uint(tokenType), uint(SupplyChain.TokenType.RowMaterial), "Token type should match");
+        assertEq(totalSupply, 100, "Total supply should match");
         assertEq(returnedFeatures, features, "Token features should match");
+        assertEq(parentId, 0, "Parent ID should be 0 for root token");
         assertEq(creator, producerAddress, "Creator should match");
         assertEq(totalSupply, 100, "Total supply should match");
+        assertEq(dateCreated, block.timestamp, "Date created should match current block timestamp");
     }
 
     function testUnapprovedUserCannotTransfer() public {
@@ -1111,6 +1131,9 @@ contract SupplyChainTest is Test {
         assertEq(creator, factoryAddress, "Product creator should be factory");
         assertEq(name, "OakChair", "Product name should be OakChair");
         assertEq(uint(tokenType), uint(SupplyChain.TokenType.FinishedProduct), "Should be finished product");
+        assertEq(totalSupply, 25, "Total supply should be 25 chairs");
+        assertEq(features, "Handcrafted oak chair, batch #001", "Features should match description");
+        assertEq(dateCreated, block.timestamp, "Date created should match current block timestamp");
         assertEq(parentId, 1, "Should trace back to raw material token 1");
         
         // Verify raw material traceability
@@ -1121,6 +1144,8 @@ contract SupplyChainTest is Test {
         assertEq(rawName, "RawWood", "Raw material name should be RawWood");
         assertEq(uint(rawType), uint(SupplyChain.TokenType.RowMaterial), "Should be raw material");
         assertEq(rawParentId, 0, "Raw material should have no parent");
+        assertEq(rawFeatures, "Oak wood from sustainable forest", "Raw material features should match description");
+        //assertEq(rawDateCreated, block.timestamp, "Raw material date created should match current block timestamp");
         
         // Verify consumer received the product
         assertEq(supplyChain.getTokenBalance(2, consumerAddress), 1, "Consumer should have 1 chair");
