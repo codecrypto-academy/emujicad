@@ -71,15 +71,12 @@ contract SupplyChain {
         FinishedProduct    //Valor 1
     }
 
-/*
-   struct User {
-        uint256 id;
-        address userAddress;
-        string role;
-        UserStatus status;
-    }
-*/
+   /* ======================= STRUCTS ======================= */
 
+    /**
+    * @notice Representa los datos principales de un usuario en la plataforma.
+    * @dev La relación entre usuario y dirección se gestiona vía mappings addressToUserId y users.
+    */
    struct User {
         uint256 id;
         address userAddress;
@@ -87,6 +84,10 @@ contract SupplyChain {
         UserStatus status;
     }
 
+    /**
+    * @notice Estructura para registrar activos de la cadena de suministro.
+    * @dev Incluye campo de balances por dirección.
+    */
     struct Token {
         uint256 id;        // Token ID
         address creator;   // Dirección del creador del token
@@ -99,6 +100,9 @@ contract SupplyChain {
         mapping(address => uint256) balance;    // Mapeo de balances por dirección
     }
 
+    /**
+    * @notice Modelo para transferencias dentro de la plataforma.
+    */
     struct Transfer {
         uint256 id;       // ID de la transferencia
         address from;     // Dirección del remitente
@@ -110,12 +114,18 @@ contract SupplyChain {
     }
  
     address public owner;   // Dirección del administrador/dueño del contrato
-    
+    // Declarar variable para candidato a nuevo owner
+    address private pendingOwner;
+
     // Contadores para los ids de los usurios, tokens y transferencias
     uint256 public nextUserId = 1;       // ID del próximo usuario
     uint256 public nextTokenId = 1;     // ID del próximo token
     uint256 public nextTransferId = 1;   // ID de la próxima transferencia
     
+
+    // mapping para asignar roles de pausabilidad a direcciones
+    mapping(address => PauseRole) private pauseRoles;
+
     // mapping para usuarios, los tokens y las transferencias
 
     /**
@@ -137,6 +147,9 @@ contract SupplyChain {
     mapping(address => uint) public userTokenCount;
     
     mapping(uint256 => Transfer) public transfers;       // Mapeo de transfers por ID
+
+    // Estado de pausa
+    bool private paused;
 
     event AssignContratOwner(address indexed nuevoPropietarioContrato);
 
