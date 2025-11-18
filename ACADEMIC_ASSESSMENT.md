@@ -150,24 +150,32 @@
 - **Pérdida**: -3.0 puntos (componente completo ausente)
 - **Consecuencia**: Sin interfaz para demostrar funcionalidad
 
-### 🤖 **OBJETIVOS DE IA (0.0/1.0 puntos) - FALTANTE**
+### **⭐ EXTRAS (0.0/1.0 puntos) - PENDIENTE**
 
 **Estado**: ❌ **NO CUMPLIDO**
 
-#### Requerimientos Específicos:
+#### Oportunidades de Puntos Extra:
 ```markdown
-❌ Archivo IA.md requerido con:
+❌ Calidad Excepcional (+0.5 pts):
+  - Tests de frontend implementados
+  - Manejo de errores robusto
+  - Performance optimizada
+  - Documentación excepcional adicional
+
+❌ Deploy en Testnet (+0.5 pts):
+  - Deploy en testnet real (Sepolia, Mumbai, Polygon Amoy)
+  - Verificación del contrato en Etherscan
+  - URL pública del contrato verificado
+```
+
+#### Aspectos IA Relevantes (No puntuados directamente):
+```markdown
+ℹ️ Recomendado documentar (mejora la presentación):
   - IAs utilizadas en el desarrollo
   - Tiempo consumido (smart contract vs frontend)
   - Análisis de errores comunes
-  - Ficheros de chat de IA
-
-❌ Construcción de MCP:
-  - Wrapper CLI de Foundry (anvil, cast, forge)
-  
-❌ Retrospectiva del uso de IA:
-  - Documentación del proceso
-  - Lecciones aprendidas
+  - Prompts y estrategias efectivas
+  - (Opcional) MCP para Foundry CLI
 ```
 
 ### 📹 **PRESENTACIÓN VIDEO (0.0/1.5 puntos) - PENDIENTE**
@@ -183,22 +191,36 @@
 
 ## 📊 Puntuación Detallada
 
-### **Puntuación Actual: 5.5/10**
+### **Puntuación Actual: 5.0/10**
 
 | Componente | Puntos Máximos | Puntos Obtenidos | Estado |
 |------------|----------------|------------------|---------|
 | Smart Contract | 4.0 | **4.0** | ✅ Completo |
-| Testing | Bonus | **+1.0** | ✅ Excepcional |
 | Frontend | 3.0 | **0.0** | ❌ Ausente |
 | Calidad Código | 0.5 | **0.5** | ✅ Excelente |
-| Objetivos IA | 1.0 | **0.0** | ❌ Faltante |
+| Extras | 1.0 | **0.0** | ❌ Pendiente |
 | Video Demo | 1.5 | **0.0** | ⏳ Pendiente |
-| **TOTAL** | **10.0** | **5.5** | ⚠️ **Insuficiente** |
+| **TOTAL** | **10.0** | **5.0** | ⚠️ **Insuficiente** |
+
+#### **📝 Desglose de Extras (1.0 punto disponible):**
+- **Calidad Excepcional** (+0.5 pts):
+  - Tests de frontend implementados
+  - Manejo de errores robusto
+  - Performance optimizada
+- **Deploy en testnet** (+0.5 pts):
+  - Deploy en testnet real (Sepolia, Mumbai, etc.)
+
+#### **❌ Penalizaciones Aplicables:**
+- Tests fallando: -1.0 pt por cada test crítico que falle
+- Aplicación no funcional: -2.0 pts si no se puede ejecutar
+- Smart contract sin deploy: -1.5 pts
+- Sin conexión MetaMask: -1.0 pt
+- Código sin comentarios: -0.5 pts
 
 ### **🚨 Resultado: NO APROBATORIO**
 - **Mínimo requerido**: 6.0/10
-- **Score actual**: 5.5/10
-- **Déficit**: -0.5 puntos
+- **Score actual**: 5.0/10
+- **Déficit**: -1.0 puntos
 
 ---
 
@@ -221,45 +243,34 @@
    - src/contexts/Web3Context.tsx (conexión)
    ```
 
-2. **Archivo IA.md** (1.0 punto):
-   ```markdown
-   # Uso de IA en el Proyecto
-   
-   ## IAs Utilizadas
-   - GitHub Copilot
-   - [Otras herramientas]
-   
-   ## Tiempo Consumido
-   - Smart Contract: X horas
-   - Frontend: X horas
-   
-   ## Errores Comunes
-   - [Análisis de errores]
-   ```
-
-3. **Video Demo** (1.5 puntos):
+2. **Video Demo** (1.5 puntos):
    - 5 minutos mostrando funcionalidad básica
    - Conexión MetaMask + interacción contrato
+   - Demo de tests y calidad del código
 
-**Resultado Esperado**: 6.5-7.0/10 ✅ APROBATORIO
+3. **Posibles Extras** (+0.5 a +1.0 puntos):
+   - Deploy en testnet (Sepolia/Polygon): +0.5 pts
+   - Tests de frontend: +0.3 pts
+   - Documentación excepcional IA: evaluación cualitativa
 
-### **🚀 OPCIÓN 2: Video Demo Comprensivo**
+**Resultado Esperado**: 6.0-7.0/10 ✅ APROBATORIO
 
-**Si el tiempo es limitado**:
+### **🚀 OPCIÓN 2: Video Demo Comprensivo (Sin Frontend completo)**
+
+**Si el tiempo es muy limitado**:
 
 #### Video Detallado (5 minutos):
-1. **Minuto 1**: Explicación del smart contract
-2. **Minuto 2**: Demo de tests pasando (forge test)
-3. **Minuto 3**: Explicación de la arquitectura
-4. **Minuto 4**: Interacción directa con contrato (cast)
-5. **Minuto 5**: Documentación y calidad del código
+1. **Minuto 1**: Explicación del smart contract y arquitectura
+2. **Minuto 2**: Demo de tests pasando (forge test + coverage)
+3. **Minuto 3**: Interacción directa con contrato (cast/script)
+4. **Minuto 4**: Documentación técnica y calidad del código
+5. **Minuto 5**: Frontend básico (aunque incompleto) o mockups
 
-#### Archivo IA.md completo:
-- Documentar todo el proceso con IA
-- Incluir ejemplos de prompts utilizados
-- Análisis detallado del tiempo y errores
+#### Posibles Extras para compensar:
+- Deploy en testnet (Sepolia): +0.5 pts
+- Documentación excepcional: considerar en calidad
 
-**Resultado Esperado**: 6.0-6.5/10 ✅ APROBATORIO MÍNIMO
+**Resultado Esperado**: 6.0/10 ✅ APROBATORIO MÍNIMO (sin extras)
 
 ---
 
@@ -428,14 +439,13 @@ video_demo.mp4 ❌ (Presentación)
   - Mejoras de UX/UI
   - Validación de funcionalidad completa
 
-#### **Semana 4 (25-28 Nov): Entregables Finales**
-- **Día 1-2 (25-26 Nov)**: Documentación IA
-  - Crear archivo IA.md en raíz del proyecto
-  - Documentar IAs utilizadas (GitHub Copilot, ChatGPT, Claude)
-  - Análisis de tiempo consumido (Smart Contract: ~80h, Frontend: ~50h)
-  - Documentación de errores comunes y soluciones
-  - Guardar/referenciar chats de IA utilizados
-  - (Opcional) Iniciar MCP para Foundry CLI
+#### **Semana 4 (25-28 Nov): Entregables Finales y Extras**
+- **Día 1-2 (25-26 Nov)**: Extras y mejoras
+  - (Opcional) Deploy en testnet Sepolia/Polygon (+0.5 pts)
+  - (Opcional) Tests de frontend (+0.3 pts)
+  - Documentación adicional sobre uso de IA (mejora presentación)
+  - Optimizaciones de rendimiento
+  - Manejo robusto de errores
 
 - **Día 3 (27 Nov)**: Preparación y grabación video demo
   - Script del video (5 minutos):
@@ -449,29 +459,32 @@ video_demo.mp4 ❌ (Presentación)
 
 - **Día 4 (28 Nov)**: Revisión final y entrega 🎯
   - Verificación checklist completo:
-    * ✅ Smart contract desplegado y funcional
-    * ✅ 73 tests pasando (100%)
-    * ✅ Frontend funcionando con MetaMask
-    * ✅ Archivo IA.md completo
-    * ✅ Video demo de 5 minutos
-    * ✅ Documentación completa
+    * ✅ Smart contract desplegado y funcional (4.0 pts)
+    * ✅ 73 tests pasando 100% (incluido en SC)
+    * ✅ Frontend funcionando con MetaMask (3.0 pts)
+    * ✅ Calidad del código y documentación (0.5 pts)
+    * ✅ Video demo de 5 minutos (1.5 pts)
+    * ⭐ Extras si implementados (hasta 1.0 pt)
   - Backup final del proyecto
   - Push a GitHub
   - **ENTREGA DEL PROYECTO** 🚀
 
 ### **🎯 Métricas de Éxito**
 
-#### Objetivos Mínimos:
-- [ ] Frontend básico funcionando (2+ puntos)
-- [ ] Archivo IA.md completo (1 punto)
-- [ ] Video demo de 5 minutos (1.5 puntos)
-- [ ] **Total: 6.5+ puntos** ✅ APROBATORIO
+#### Objetivos Mínimos para Aprobar (6.0/10):
+- [x] Smart Contract completo y funcional (4.0 pts) ✅
+- [x] Calidad del código (0.5 pts) ✅
+- [ ] Frontend básico funcionando (2.0+ pts de 3.0)
+- [ ] Video demo de 5 minutos (1.5 pts)
+- [ ] **Total: 6.0+ puntos** ✅ APROBATORIO
 
 #### Objetivos Ideales:
-- [ ] Frontend completo con todas las páginas (3 puntos)
-- [ ] Tests de frontend implementados (+0.5 puntos)
-- [ ] Deploy en testnet (+0.5 puntos)
-- [ ] **Total: 8.5+ puntos** 🌟 EXCELENTE
+- [x] Smart Contract (4.0 pts) ✅
+- [x] Calidad código (0.5 pts) ✅
+- [ ] Frontend completo con todas las páginas (3.0 pts)
+- [ ] Video demo profesional (1.5 pts)
+- [ ] Extras: Deploy testnet + tests frontend (1.0 pt)
+- [ ] **Total: 10.0 puntos** 🌟 EXCELENTE
 
 ---
 
