@@ -257,15 +257,183 @@ contract SupplyChainTest is Test {
         supplyChain.createToken("Illegal Token", SupplyChain.TokenType.RowMaterial, 100, "", 0);
     }
 
-    // Tests de transferencias
-    function testTransferFromProducerToFactory() public { }
-    function testTransferFromFactoryToRetailer() public { }
-    function testTransferFromRetailerToConsumer() public { }
-    function testAcceptTransfer() public { }
-    function testRejectTransfer() public { }
-    function testTransferInsufficientBalance() public { }
-    function testGetTransfer() public { }
-    function testGetUserTransfers() public { }
+    // --- Tests de transferencias básicas ---
+    function testTransferFromProducerToFactory() public {
+        _registerAndApproveUser(producerAddress, SupplyChain.UserRole.Producer);
+        _registerAndApproveUser(factoryAddress, SupplyChain.UserRole.Factory);
+
+        // Create token
+        vm.prank(producerAddress);
+        supplyChain.createToken("Wood", SupplyChain.TokenType.RowMaterial, 100, "", 0);
+
+        // Transfer
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+
+        SupplyChain.Transfer memory transferItem = supplyChain.getTransfer(1);
+        assertEq(transferItem.from, producerAddress, "Transfer from should be producer");
+        assertEq(transferItem.to, factoryAddress, "Transfer to should be factory");
+        assertEq(transferItem.tokenId, 1, "Transfer token ID should be 1");
+        assertEq(transferItem.amount, 50, "Transfer amount should be 50");
+        assertEq(uint(transferItem.status), uint(SupplyChain.TransferStatus.Pending), "Transfer should be pending");
+
+        // Verify balances after transfer
+        assertEq(supplyChain.getTokenBalance(1, producerAddress), 50, "Producer balance should be 50 after transfer");
+        assertEq(supplyChain.getTokenBalance(1, factoryAddress), 0, "Factory balance should be 0 before acceptance");
+    }
+
+    function testTransferFromFactoryToRetailer() public {
+        // Setup complete chain: Producer → Factory → Retailer
+        _registerAndApproveUser(producerAddress, SupplyChain.UserRole.Producer);
+        _registerAndApproveUser(factoryAddress, SupplyChain.UserRole.Factory);
+        _registerAndApproveUser(retailerAddress, SupplyChain.UserRole.Retailer);
+
+        // 1. Producer creates raw material
+        vm.prank(producerAddress);
+        supplyChain.createToken("Wood", SupplyChain.TokenType.RowMaterial, 100, "", 0);
+
+        // 2. Producer transfers to Factory
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 80);
+        
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+
+        // 3. Factory creates finished product
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Chair", SupplyChain.TokenType.FinishedProduct, 40, "", 1);
+
+        // 4. Factory transfers finished product to Retailer
+        vm.prank(factoryAddress);
+        supplyChain.transfer(retailerAddress, 2, 25);
+
+        // Test transfer details
+        SupplyChain.Transfer memory transferItem = supplyChain.getTransfer(2);
+        assertEq(transferItem.from, factoryAddress, "Transfer from should be factory");
+        assertEq(transferItem.to, retailerAddress, "Transfer to should be retailer");
+        assertEq(transferItem.tokenId, 2, "Transfer token ID should be 2 (finished product)");
+        assertEq(transferItem.amount, 25, "Transfer amount should be 25");
+        assertEq(uint(transferItem.status), uint(SupplyChain.TransferStatus.Pending), "Transfer should be pending");
+
+        // Test balances before acceptance
+        assertEq(supplyChain.getTokenBalance(2, factoryAddress), 15, "Factory should have 15 chairs left");
+        assertEq(supplyChain.getTokenBalance(2, retailerAddress), 0, "Retailer should have 0 before acceptance");
+
+        // Accept transfer
+        vm.prank(retailerAddress);
+        supplyChain.acceptTransfer(2);
+
+        // Test final balances
+        assertEq(supplyChain.getTokenBalance(2, factoryAddress), 15, "Factory should have 15 chairs");
+        assertEq(supplyChain.getTokenBalance(2, retailerAddress), 25, "Retailer should have 25 chairs");
+    }
+
+    function testTransferFromRetailerToConsumer() public {
+        // Setup complete chain: Producer → Factory → Retailer → Consumer
+        _registerAndApproveUser(producerAddress, SupplyChain.UserRole.Producer);
+        _registerAndApproveUser(factoryAddress, SupplyChain.UserRole.Factory);
+        _registerAndApproveUser(retailerAddress, SupplyChain.UserRole.Retailer);
+        _registerAndApproveUser(consumerAddress, SupplyChain.UserRole.Consumer);
+
+        // 1. Producer creates and transfers raw material to Factory
+        vm.prank(producerAddress);
+        supplyChain.createToken("Wood", SupplyChain.TokenType.RowMaterial, 100, "", 0);
+        
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+
+        // 2. Factory creates finished product and transfers to Retailer
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Chair", SupplyChain.TokenType.FinishedProduct, 20, "", 1);
+        
+        vm.prank(factoryAddress);
+        supplyChain.transfer(retailerAddress, 2, 15);
+        vm.prank(retailerAddress);
+        supplyChain.acceptTransfer(2);
+
+        // 3. Retailer transfers to Consumer (final step)
+        vm.prank(retailerAddress);
+        supplyChain.transfer(consumerAddress, 2, 8);
+
+        // Test transfer details
+        SupplyChain.Transfer memory transferItem = supplyChain.getTransfer(3);
+        assertEq(transferItem.from, retailerAddress, "Transfer from should be retailer");
+        assertEq(transferItem.to, consumerAddress, "Transfer to should be consumer");
+        assertEq(transferItem.tokenId, 2, "Transfer token ID should be 2 (finished product)");
+        assertEq(transferItem.amount, 8, "Transfer amount should be 8");
+        assertEq(uint(transferItem.status), uint(SupplyChain.TransferStatus.Pending), "Transfer should be pending");
+
+        // Test balances before acceptance
+        assertEq(supplyChain.getTokenBalance(2, retailerAddress), 7, "Retailer should have 7 chairs left");
+        assertEq(supplyChain.getTokenBalance(2, consumerAddress), 0, "Consumer should have 0 before acceptance");
+
+        // Accept transfer (Consumer receives final product)
+        vm.prank(consumerAddress);
+        supplyChain.acceptTransfer(3);
+
+        // Test final balances - chain completed
+        assertEq(supplyChain.getTokenBalance(2, retailerAddress), 7, "Retailer should have 7 chairs");
+        assertEq(supplyChain.getTokenBalance(2, consumerAddress), 8, "Consumer should have 8 chairs");
+        
+        // Verify transfer status
+        transferItem = supplyChain.getTransfer(3);
+        assertEq(uint(transferItem.status), uint(SupplyChain.TransferStatus.Accepted), "Transfer should be accepted");
+    }
+
+    function testGetTransfer() public {
+        // Setup: Create transfer scenario
+        _registerAndApproveUser(producerAddress, SupplyChain.UserRole.Producer);
+        _registerAndApproveUser(factoryAddress, SupplyChain.UserRole.Factory);
+
+        vm.prank(producerAddress);
+        supplyChain.createToken("Wood", SupplyChain.TokenType.RowMaterial, 100, "", 0);
+
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+
+        // Test: Get transfer information
+        SupplyChain.Transfer memory transferItem = supplyChain.getTransfer(1);
+        
+        // Assertions
+        assertEq(transferItem.id, 1, "Transfer ID should be 1");
+        assertEq(transferItem.from, producerAddress, "Transfer from should be producer");
+        assertEq(transferItem.to, factoryAddress, "Transfer to should be factory");
+        assertEq(transferItem.tokenId, 1, "Transfer token ID should be 1");
+        assertEq(transferItem.amount, 50, "Transfer amount should be 50");
+        assertEq(uint(transferItem.status), uint(SupplyChain.TransferStatus.Pending), "Transfer should be pending");
+        assertTrue(transferItem.dateCreated > 0, "Date created should be greater than 0");
+
+        // Test with accepted transfer
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+
+        transferItem = supplyChain.getTransfer(1);
+        assertEq(uint(transferItem.status), uint(SupplyChain.TransferStatus.Accepted), "Transfer should be accepted after acceptance");
+    }
+    function testGetUserTransfers() public {
+        _registerAndApproveUser(producerAddress, SupplyChain.UserRole.Producer);
+        _registerAndApproveUser(factoryAddress, SupplyChain.UserRole.Factory);
+        
+        vm.prank(producerAddress);
+        supplyChain.createToken("Wood", SupplyChain.TokenType.RowMaterial, 100, "", 0);
+        
+        // Create multiple transfers
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 30);
+        
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 20);
+        
+        // Test getUserTransfers function exists and can be called
+        uint[] memory producerTransfers = supplyChain.getUserTransfers(producerAddress);
+        uint[] memory factoryTransfers = supplyChain.getUserTransfers(factoryAddress);
+        
+        assertEq(producerTransfers.length, 2, "Producer should have 2 transfers");
+        assertEq(factoryTransfers.length, 2, "Factory should have 2 transfers");
+    }
+
 
     // Tests de validaciones y permisos
     function testInvalidRoleTransfer() public { }
