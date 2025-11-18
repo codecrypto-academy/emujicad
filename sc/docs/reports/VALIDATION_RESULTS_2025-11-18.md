@@ -1,6 +1,6 @@
 # ✅ RESULTADOS DE VALIDACIÓN COMPLETA
 
-**Fecha de Validación**: 2025-11-18 10:43:36  
+**Fecha de Validación**: 2025-11-18 15:26:24  
 **Proyecto**: SupplyChain Smart Contract  
 **Ubicación**: `/mnt/backups/emujicad/Documents/master_blockchainweb3/web3/PFM/emujicad/sc/`  
 
@@ -16,8 +16,8 @@
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
-**Total de Validaciones**: 20  
-**Validaciones Pasadas**: 20 ✅  
+**Total de Validaciones**: 26  
+**Validaciones Pasadas**: 26 ✅  
 **Validaciones Fallidas**: 0 ❌  
 **Porcentaje de Éxito**: 100%
 
@@ -50,8 +50,8 @@
 - Functions Coverage verificado
 
 ### ✅ FASE 6: Scripts de Reporte (2/2)
-- coverage-reporter-simple.sh funcional
-- coverage-reporter.sh funcional
+- coverage-reporter.sh (modo interactivo)
+- coverage-reporter.sh (modo automático)
 
 ### ✅ FASE 7: Estructura de Archivos (5/5)
 - SupplyChain.sol
@@ -71,8 +71,11 @@ forge clean && forge build
 # Tests
 forge test -vv
 
-# Coverage
-bash coverage-reporter-simple.sh
+# Coverage (interactivo)
+bash coverage-reporter.sh
+
+# Coverage (automático)
+bash coverage-reporter.sh --auto
 
 # Deployment
 PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
@@ -94,7 +97,7 @@ bash validate-all.sh
 ║                                                               ║
 ║           ✅ PROYECTO COMPLETAMENTE VALIDADO ✅                           ║
 ║                                                               ║
-║  Validado el: 2025-11-18 10:43:36                          ║
+║  Validado el: 2025-11-18 15:26:24                          ║
 ║  Sistema: Validación Automatizada Integral                   ║
 ║  Estado: ✅ APROBADO                            ║
 ║                                                               ║

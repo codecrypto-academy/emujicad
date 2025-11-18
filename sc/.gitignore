@@ -8,7 +8,7 @@ out/
 /broadcast/**/dry-run/
 
 # Docs
-docs/
+# docs/
 
 # Dotenv file
 .env
@@ -16,6 +16,9 @@ docs/
 # Remix
 .states/
 artifacts/
+
+# Archive (deprecated files)
+.archive/
 
 # Modules
 node_modules/

@@ -123,9 +123,13 @@ extract_metrics() {
 # Función para generar reporte markdown
 generate_markdown_report() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local report_file="COVERAGE_REPORT.md"
+    local date_filename=$(date '+%Y-%m-%d')
+    local report_file="docs/reports/COVERAGE_REPORT_${date_filename}.md"
     
     echo -e "\n${BLUE}📝 Generando reporte markdown...${NC}"
+    
+    # Crear directorio si no existe
+    mkdir -p docs/reports
     
     cat > $report_file << EOF
 # 📊 Reporte Automático de Cobertura - SupplyChain
@@ -184,10 +188,14 @@ forge test --match-path "test/*" -vv
 \`\`\`
 
 ---
-*Reporte generado automáticamente por coverage-reporter.sh*
+
+**Última Ejecución**: $timestamp  
+*Reporte generado automáticamente por coverage-reporter.sh*  
+*Ubicación*: \`docs/reports/COVERAGE_REPORT_${date_filename}.md\`
 EOF
 
     echo -e "${GREEN}✅ Reporte guardado en: $report_file${NC}"
+    echo -e "${BLUE}📂 Ubicación: docs/reports/${NC}"
 }
 
 get_status() {
@@ -233,16 +241,37 @@ main() {
     check_dependencies
     extract_metrics
     
-    # Preguntar si generar reporte markdown
-    echo ""
-    read -p "¿Generar reporte markdown? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # Generar reporte automáticamente si se pasa --auto, -y, o --yes
+    local auto_mode=false
+    for arg in "$@"; do
+        if [[ "$arg" == "--auto" ]] || [[ "$arg" == "-y" ]] || [[ "$arg" == "--yes" ]]; then
+            auto_mode=true
+            break
+        fi
+    done
+    
+    if [ "$auto_mode" = true ]; then
+        echo ""
+        echo -e "${BLUE}📝 Generando reporte automáticamente (modo --auto)...${NC}"
         generate_markdown_report
+    else
+        # Preguntar si generar reporte markdown
+        echo ""
+        read -p "¿Generar reporte markdown? (y/N): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            generate_markdown_report
+        fi
     fi
     
     echo ""
     echo -e "${GREEN}🎉 Análisis de cobertura completado exitosamente${NC}"
+    
+    # Mostrar ayuda si se ejecutó sin argumentos
+    if [ "$auto_mode" = false ] && [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo ""
+        echo -e "${BLUE}💡 Tip: Usa './coverage-reporter.sh --auto' para generar reporte sin preguntar${NC}"
+    fi
 }
 
 # Ejecutar script principal

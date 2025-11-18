@@ -15,6 +15,49 @@ RED='\033[0;31m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# ═══════════════════════════════════════════════════════════════════
+# FUNCIONES AUXILIARES
+# ═══════════════════════════════════════════════════════════════════
+
+# Extrae métricas de coverage de forge
+extract_coverage_metrics() {
+    local coverage_output=$(forge coverage --match-path "test/*" 2>&1 | grep -E "^\| src/SupplyChain\.sol[^/]" | head -1)
+    
+    if [ -n "$coverage_output" ]; then
+        if [[ "$coverage_output" =~ ([0-9]+\.[0-9]+)%[[:space:]]*\(([0-9]+)/([0-9]+)\)[[:space:]]*\|[[:space:]]*([0-9]+\.[0-9]+)%[[:space:]]*\(([0-9]+)/([0-9]+)\)[[:space:]]*\|[[:space:]]*([0-9]+\.[0-9]+)%[[:space:]]*\(([0-9]+)/([0-9]+)\)[[:space:]]*\|[[:space:]]*([0-9]+\.[0-9]+)% ]]; then
+            LINES_COV="${BASH_REMATCH[1]}"
+            STMT_COV="${BASH_REMATCH[4]}"
+            BRANCH_COV="${BASH_REMATCH[7]}"
+            FUNC_COV="${BASH_REMATCH[10]}"
+            return 0
+        fi
+    fi
+    
+    # Valores por defecto si falla
+    LINES_COV="N/A"
+    STMT_COV="N/A"
+    BRANCH_COV="N/A"
+    FUNC_COV="N/A"
+    return 1
+}
+
+# Evalúa si una métrica cumple con el umbral
+evaluate_threshold() {
+    local value=$1
+    local threshold=$2
+    
+    if [ "$value" = "N/A" ]; then
+        return 2  # No disponible
+    fi
+    
+    local value_int=$(echo "$value" | cut -d'.' -f1)
+    if [ "$value_int" -ge "$threshold" ]; then
+        return 0  # Cumple
+    else
+        return 1  # No cumple
+    fi
+}
+
 echo -e "${CYAN}"
 echo "╔═══════════════════════════════════════════════════════════════╗"
 echo "║                                                               ║"
@@ -89,61 +132,46 @@ echo -e "\n${CYAN}════════════════════�
 echo -e "${CYAN}  FASE 5: MÉTRICAS DE COVERAGE${NC}"
 echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 
-# Verificar métricas específicas
-COVERAGE_OUTPUT=$(forge coverage --match-path "test/*" 2>&1 | grep -E "^\| src/SupplyChain\.sol[^/]" | head -1)
-
-if [ -n "$COVERAGE_OUTPUT" ]; then
-    # Extraer métricas actuales con regex más precisa
-    if [[ "$COVERAGE_OUTPUT" =~ ([0-9]+\.[0-9]+)%[[:space:]]*\(([0-9]+)/([0-9]+)\)[[:space:]]*\|[[:space:]]*([0-9]+\.[0-9]+)%[[:space:]]*\(([0-9]+)/([0-9]+)\)[[:space:]]*\|[[:space:]]*([0-9]+\.[0-9]+)%[[:space:]]*\(([0-9]+)/([0-9]+)\)[[:space:]]*\|[[:space:]]*([0-9]+\.[0-9]+)% ]]; then
-        LINES_COV="${BASH_REMATCH[1]}"
-        STMT_COV="${BASH_REMATCH[4]}"
-        BRANCH_COV="${BASH_REMATCH[7]}"
-        FUNC_COV="${BASH_REMATCH[10]}"
-        
-        echo -e "${BLUE}[${TOTAL}] 🔍 Verificando cobertura de Lines (>80%)...${NC}"
-        TOTAL=$((TOTAL + 1))
-        if (( $(echo "$LINES_COV >= 80" | bc -l) )); then
-            echo -e "${GREEN}✅ PASSED - Lines: $LINES_COV%${NC}"
-            PASSED=$((PASSED + 1))
-        else
-            echo -e "${YELLOW}⚠️  WARNING - Lines: $LINES_COV% (esperado >80%)${NC}"
-            PASSED=$((PASSED + 1))  # Count as passed with warning
-        fi
-        
-        echo -e "${BLUE}[${TOTAL}] 🔍 Verificando cobertura de Statements (>75%)...${NC}"
-        TOTAL=$((TOTAL + 1))
-        if (( $(echo "$STMT_COV >= 75" | bc -l) )); then
-            echo -e "${GREEN}✅ PASSED - Statements: $STMT_COV%${NC}"
-            PASSED=$((PASSED + 1))
-        else
-            echo -e "${YELLOW}⚠️  WARNING - Statements: $STMT_COV% (esperado >75%)${NC}"
-            PASSED=$((PASSED + 1))
-        fi
-        
-        echo -e "${BLUE}[${TOTAL}] 🔍 Verificando cobertura de Branches (>50%)...${NC}"
-        TOTAL=$((TOTAL + 1))
-        if (( $(echo "$BRANCH_COV >= 50" | bc -l) )); then
-            echo -e "${GREEN}✅ PASSED - Branches: $BRANCH_COV%${NC}"
-            PASSED=$((PASSED + 1))
-        else
-            echo -e "${RED}❌ FAILED - Branches: $BRANCH_COV% (esperado >50%)${NC}"
-            FAILED=$((FAILED + 1))
-        fi
-        
-        echo -e "${BLUE}[${TOTAL}] 🔍 Verificando cobertura de Functions (>75%)...${NC}"
-        TOTAL=$((TOTAL + 1))
-        if (( $(echo "$FUNC_COV >= 75" | bc -l) )); then
-            echo -e "${GREEN}✅ PASSED - Functions: $FUNC_COV%${NC}"
-            PASSED=$((PASSED + 1))
-        else
-            echo -e "${YELLOW}⚠️  WARNING - Functions: $FUNC_COV% (esperado >75%)${NC}"
-            PASSED=$((PASSED + 1))
-        fi
+# Extraer métricas usando función compartida
+if extract_coverage_metrics; then
+    echo -e "${BLUE}[${TOTAL}] 🔍 Verificando cobertura de Lines (>80%)...${NC}"
+    TOTAL=$((TOTAL + 1))
+    if evaluate_threshold "$LINES_COV" 80; then
+        echo -e "${GREEN}✅ PASSED - Lines: $LINES_COV%${NC}"
+        PASSED=$((PASSED + 1))
     else
-        echo -e "${RED}❌ FAILED - Error parseando métricas de coverage${NC}"
-        echo -e "${YELLOW}Output recibido: $COVERAGE_OUTPUT${NC}"
-        TOTAL=$((TOTAL + 4))
-        FAILED=$((FAILED + 4))
+        echo -e "${YELLOW}⚠️  WARNING - Lines: $LINES_COV% (esperado >80%)${NC}"
+        PASSED=$((PASSED + 1))  # Count as passed with warning
+    fi
+    
+    echo -e "${BLUE}[${TOTAL}] 🔍 Verificando cobertura de Statements (>75%)...${NC}"
+    TOTAL=$((TOTAL + 1))
+    if evaluate_threshold "$STMT_COV" 75; then
+        echo -e "${GREEN}✅ PASSED - Statements: $STMT_COV%${NC}"
+        PASSED=$((PASSED + 1))
+    else
+        echo -e "${YELLOW}⚠️  WARNING - Statements: $STMT_COV% (esperado >75%)${NC}"
+        PASSED=$((PASSED + 1))
+    fi
+    
+    echo -e "${BLUE}[${TOTAL}] 🔍 Verificando cobertura de Branches (>50%)...${NC}"
+    TOTAL=$((TOTAL + 1))
+    if evaluate_threshold "$BRANCH_COV" 50; then
+        echo -e "${GREEN}✅ PASSED - Branches: $BRANCH_COV%${NC}"
+        PASSED=$((PASSED + 1))
+    else
+        echo -e "${RED}❌ FAILED - Branches: $BRANCH_COV% (esperado >50%)${NC}"
+        FAILED=$((FAILED + 1))
+    fi
+    
+    echo -e "${BLUE}[${TOTAL}] 🔍 Verificando cobertura de Functions (>75%)...${NC}"
+    TOTAL=$((TOTAL + 1))
+    if evaluate_threshold "$FUNC_COV" 75; then
+        echo -e "${GREEN}✅ PASSED - Functions: $FUNC_COV%${NC}"
+        PASSED=$((PASSED + 1))
+    else
+        echo -e "${YELLOW}⚠️  WARNING - Functions: $FUNC_COV% (esperado >75%)${NC}"
+        PASSED=$((PASSED + 1))
     fi
 else
     echo -e "${RED}❌ FAILED - No se pudo obtener coverage de forge${NC}"
@@ -156,8 +184,8 @@ echo -e "\n${CYAN}════════════════════�
 echo -e "${CYAN}  FASE 6: SCRIPTS DE REPORTE${NC}"
 echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 
-run_validation "coverage-reporter-simple.sh funcional" "bash coverage-reporter-simple.sh" "Análisis de cobertura completado exitosamente"
-run_validation "coverage-reporter.sh funcional" "echo 'N' | bash coverage-reporter.sh" "Análisis de cobertura completado exitosamente"
+run_validation "coverage-reporter.sh (modo interactivo)" "echo 'N' | bash coverage-reporter.sh" "Análisis de cobertura completado exitosamente"
+run_validation "coverage-reporter.sh (modo automático)" "bash coverage-reporter.sh --auto" "Análisis de cobertura completado exitosamente"
 
 echo -e "\n${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "${CYAN}  FASE 7: ESTRUCTURA DE ARCHIVOS${NC}"
@@ -168,17 +196,17 @@ run_validation "SupplyChain.t.sol existe" "test -f test/SupplyChain.t.sol" ""
 run_validation "EdgeCasesTest.t.sol existe" "test -f test/EdgeCasesTest.t.sol" ""
 run_validation "SupplyChainDeploy.s.sol existe" "test -f script/SupplyChainDeploy.s.sol" ""
 run_validation "SupplyChainInteractions.s.sol existe" "test -f script/SupplyChainInteractions.s.sol" ""
-#run_validation "README.md existe" "test -f src/README.md" ""
-#run_validation "TODO.md existe" "test -f src/TODO.md" ""
+run_validation "docs/README.md existe" "test -f docs/README.md" ""
+run_validation "docs/ARCHITECTURE.md existe" "test -f docs/ARCHITECTURE.md" ""
 
 echo -e "\n${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "${CYAN}  FASE 8: VALIDACIÓN DE DOCUMENTACIÓN${NC}"
 echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 
-#run_validation "README menciona 73 tests" "grep -q '73 tests' src/README.md" ""
-#run_validation "README documenta scripts" "grep -q 'Scripts de Automatización' src/README.md" ""
-#run_validation "README documenta SupplyChainDeploy.s.sol" "grep -q 'SupplyChainDeploy.s.sol' src/README.md" ""
-#run_validation "README documenta SupplyChainInteractions.s.sol" "grep -q 'SupplyChainInteractions.s.sol' src/README.md" ""
+run_validation "README menciona 73 tests" "grep -q '73 tests' docs/README.md" ""
+run_validation "README documenta SupplyChain" "grep -q 'SupplyChain' docs/README.md" ""
+run_validation "ARCHITECTURE documenta proyecto" "grep -q 'SupplyChain.*Documentación' docs/ARCHITECTURE.md" ""
+run_validation "TESTING existe y documenta tests" "test -f docs/TESTING.md && grep -q 'test' docs/TESTING.md" ""
 
 echo -e "\n${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║                    RESUMEN FINAL                              ║${NC}"
@@ -195,7 +223,8 @@ echo -e "\n🎯 ${BLUE}Porcentaje de éxito: ${CYAN}${PERCENTAGE}%${NC}"
 # Generar reporte markdown
 generate_validation_report() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local report_file="VALIDATION_RESULTS.md"
+    local date_filename=$(date '+%Y-%m-%d')
+    local report_file="docs/reports/VALIDATION_RESULTS_${date_filename}.md"
     
     cat > $report_file << 'EOF'
 # ✅ RESULTADOS DE VALIDACIÓN COMPLETA
@@ -250,8 +279,8 @@ generate_validation_report() {
 - Functions Coverage verificado
 
 ### ✅ FASE 6: Scripts de Reporte (2/2)
-- coverage-reporter-simple.sh funcional
-- coverage-reporter.sh funcional
+- coverage-reporter.sh (modo interactivo)
+- coverage-reporter.sh (modo automático)
 
 ### ✅ FASE 7: Estructura de Archivos (5/5)
 - SupplyChain.sol
@@ -271,8 +300,11 @@ forge clean && forge build
 # Tests
 forge test -vv
 
-# Coverage
-bash coverage-reporter-simple.sh
+# Coverage (interactivo)
+bash coverage-reporter.sh
+
+# Coverage (automático)
+bash coverage-reporter.sh --auto
 
 # Deployment
 PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
