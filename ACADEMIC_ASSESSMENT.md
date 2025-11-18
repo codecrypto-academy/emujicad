@@ -320,21 +320,144 @@ video_demo.mp4 ❌ (Presentación)
 
 ---
 
-## 🔄 Próximos Pasos Recomendados
+## 🔄 Roadmap del Proyecto - Cronograma Real
 
-### **📅 Cronograma Sugerido**
+### **📅 FASE 1: DESARROLLO SMART CONTRACT (03 Nov - 17 Nov 2025)**
 
-#### **Semana 1: Frontend Mínimo**
-- **Día 1-2**: Setup Next.js + conexión MetaMask
-- **Día 3-4**: Páginas básicas (landing, dashboard, tokens)
-- **Día 5**: Integración con smart contract
-- **Día 6-7**: Testing y refinamiento
+#### **Semana 1 (03-09 Nov): Fundamentos del Contrato**
+- **Día 1-2 (03-04 Nov)**: Setup Foundry + estructura base del proyecto
+  - Inicializar proyecto con `forge init`
+  - Configurar foundry.toml
+  - Instalar OpenZeppelin dependencies
+  - Crear estructura de carpetas (src/, test/, script/, docs/)
 
-#### **Semana 2: Completar Entregables**
-- **Día 1-2**: Archivo IA.md completo
-- **Día 3-4**: Preparación del video demo
-- **Día 5**: Grabación y edición del video
-- **Día 6-7**: Revisión final y entrega
+- **Día 3-4 (05-06 Nov)**: Desarrollo de estructuras base
+  - Implementar enums (UserStatus, UserRole, TransferStatus, TokenType, PauseRole)
+  - Implementar structs (User, Token, Transfer)
+  - Definir mappings y variables de estado
+  - Crear errores personalizados (22 custom errors)
+
+- **Día 5-6 (07-08 Nov)**: Funciones de gestión de usuarios
+  - Implementar `requestUserRole()`
+  - Implementar `changeStatusUser()`
+  - Implementar `getUserInfo()` y helpers
+  - Crear modificadores de acceso (onlyOwner, onlyApprovedUser)
+
+- **Día 7 (09 Nov)**: Sistema de pausabilidad y ownership
+  - Implementar pause/unpause functionality
+  - Implementar transferencia dual-step de ownership
+  - Agregar eventos relacionados
+
+#### **Semana 2 (10-16 Nov): Funcionalidad Core + Testing**
+- **Día 1-2 (10-11 Nov)**: Gestión de tokens
+  - Implementar `createToken()` con validaciones
+  - Implementar getters de tokens (getToken, getTokenBalance, getUserTokens)
+  - Sistema de balance tracking
+  - Validaciones de roles para creación de tokens
+
+- **Día 3-4 (12-13 Nov)**: Sistema de transferencias
+  - Implementar `transfer()` con validaciones de roles
+  - Implementar `acceptTransfer()`
+  - Implementar `rejectTransfer()`
+  - Implementar `cancelTransfer()`
+  - Sistema de estados de transferencia
+
+- **Día 5-6 (14-15 Nov)**: Testing exhaustivo
+  - Escribir 55 tests core (SupplyChain.t.sol)
+  - Implementar helper functions para tests
+  - Tests de flujos completos end-to-end
+  - Verificar 100% de tests pasando
+
+- **Día 7 (16 Nov)**: Edge cases y optimización
+  - Implementar 18 edge cases (EdgeCasesTest.t.sol)
+  - Ejecutar forge coverage (target: >80% lines)
+  - Optimización de gas
+  - Análisis científico de coverage
+
+#### **Día 17 Nov: Consolidación y Scripts**
+- Scripts de deployment (SupplyChainDeploy.s.sol)
+- Scripts de interacción (SupplyChainInteractions.s.sol)
+- Validación completa del contrato
+- Documentación técnica NatSpec
+- **✅ SMART CONTRACT COMPLETO**
+
+---
+
+### **📅 FASE 2: DESARROLLO FRONTEND + ENTREGABLES (18-28 Nov 2025)**
+
+#### **Semana 3 (18-24 Nov): Frontend Web3**
+- **Día 1 (18 Nov)**: Setup proyecto Next.js
+  - `npx create-next-app@latest web --typescript --tailwind --app`
+  - Instalar dependencias Web3: wagmi, viem, @rainbow-me/rainbowkit
+  - Instalar Shadcn UI components
+  - Configurar estructura de carpetas
+
+- **Día 2 (19 Nov)**: Integración Web3 básica
+  - Crear Web3Provider context (contexts/Web3Context.tsx)
+  - Implementar conexión MetaMask con RainbowKit
+  - Configurar CONTRACT_CONFIG con ABI y address
+  - Hook useWallet básico
+
+- **Día 3 (20 Nov)**: Páginas principales
+  - Landing page (app/page.tsx) con conexión MetaMask
+  - Dashboard básico (app/dashboard/page.tsx)
+  - Header/Navigation component
+  - Sistema de routing
+
+- **Día 4 (21 Nov)**: Gestión de usuarios
+  - Componente UserRegistration (solicitud de rol)
+  - Visualización de estado (Pending/Approved/Rejected)
+  - Integración con smart contract (requestUserRole)
+  - Panel admin básico (app/admin/users/page.tsx)
+
+- **Día 5 (22 Nov)**: Gestión de tokens
+  - Lista de tokens (app/tokens/page.tsx)
+  - Componente TokenCard
+  - Crear token (app/tokens/create/page.tsx)
+  - Integración con createToken del contrato
+
+- **Día 6 (23 Nov)**: Sistema de transferencias
+  - Página de transferencias (app/transfers/page.tsx)
+  - Componente TransferList
+  - Funcionalidad aceptar/rechazar transfers
+  - Integración con transfer, acceptTransfer, rejectTransfer
+
+- **Día 7 (24 Nov)**: Testing E2E y refinamiento
+  - Testing de flujos completos con Anvil local
+  - Manejo de errores y estados de carga
+  - Mejoras de UX/UI
+  - Validación de funcionalidad completa
+
+#### **Semana 4 (25-28 Nov): Entregables Finales**
+- **Día 1-2 (25-26 Nov)**: Documentación IA
+  - Crear archivo IA.md en raíz del proyecto
+  - Documentar IAs utilizadas (GitHub Copilot, ChatGPT, Claude)
+  - Análisis de tiempo consumido (Smart Contract: ~80h, Frontend: ~50h)
+  - Documentación de errores comunes y soluciones
+  - Guardar/referenciar chats de IA utilizados
+  - (Opcional) Iniciar MCP para Foundry CLI
+
+- **Día 3 (27 Nov)**: Preparación y grabación video demo
+  - Script del video (5 minutos):
+    * Minuto 1: Introducción y arquitectura del proyecto
+    * Minuto 2: Demo del smart contract (forge test + coverage)
+    * Minuto 3: Demo frontend - Conexión MetaMask + registro
+    * Minuto 4: Demo completo - Crear token + transferir + aceptar
+    * Minuto 5: Panel admin + conclusiones
+  - Grabación con OBS Studio o Loom
+  - Edición básica del video
+
+- **Día 4 (28 Nov)**: Revisión final y entrega 🎯
+  - Verificación checklist completo:
+    * ✅ Smart contract desplegado y funcional
+    * ✅ 73 tests pasando (100%)
+    * ✅ Frontend funcionando con MetaMask
+    * ✅ Archivo IA.md completo
+    * ✅ Video demo de 5 minutos
+    * ✅ Documentación completa
+  - Backup final del proyecto
+  - Push a GitHub
+  - **ENTREGA DEL PROYECTO** 🚀
 
 ### **🎯 Métricas de Éxito**
 
