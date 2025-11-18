@@ -113,7 +113,7 @@ contract SupplyChainTest is Test {
         assertEq(uint(user.status), uint(SupplyChain.UserStatus.Pending), "Returned user status should be Pending");
     }
 
-    function testIsAdmin() public view {
+    function testIsAdmin() public view{
         assertTrue(supplyChain.isAdmin(owner), "Owner should be admin");
         assertFalse(supplyChain.isAdmin(producerAddress), "Producer should not be admin");
         assertFalse(supplyChain.isAdmin(address(1)), "Random address should not be admin");
@@ -157,16 +157,105 @@ contract SupplyChainTest is Test {
     }
 
     // --- Tests de creación de tokens ---
+    function testCreateTokenByProducer() public {
+        _registerAndApproveUser(producerAddress, SupplyChain.UserRole.Producer);
 
-    // Tests de creación de tokens
-    function testCreateTokenByProducer() public { }
-    function testCreateTokenByFactory() public { }
-    function testCreateTokenByRetailer() public { }
-    function testTokenWithParentId() public { }
-    function testTokenMetadata() public { }
-    function testTokenBalance() public { }
-    function testGetToken() public { }
-    function testGetUserTokens() public { }
+        vm.prank(producerAddress);
+        supplyChain.createToken("Wood", SupplyChain.TokenType.RowMaterial, 100, "{}", 0);
+
+        (uint256 id, address creator, string memory name, SupplyChain.TokenType tokenType, uint256 totalSupply, string memory features, uint256 parentId, uint256 dateCreated) = supplyChain.getToken(1);
+        assertEq(id, 1, "Token ID should be 1");
+        assertEq(creator, producerAddress, "Token creator should be producer");
+        assertEq(name, "Wood", "Token name should be Wood");
+        assertEq(uint(tokenType), uint(SupplyChain.TokenType.RowMaterial), "Token type should be RowMaterial");
+        assertEq(totalSupply, 100, "Token total supply should be 100");
+        assertEq(features, "{}", "Token features should match");
+        assertEq(parentId, 0, "Raw material should have parentId 0");
+        assertEq(supplyChain.getTokenBalance(1, producerAddress), 100, "Producer should have full balance");
+    }
+
+    function testGetToken() public {
+        // Setup: Create a token first
+        _registerAndApproveUser(producerAddress, SupplyChain.UserRole.Producer);
+        vm.prank(producerAddress);
+        supplyChain.createToken("Wood", SupplyChain.TokenType.RowMaterial, 100, "High quality oak wood", 0);
+
+        // Test: Get token information
+        (uint256 id, address creator, string memory name, SupplyChain.TokenType tokenType, uint256 totalSupply, string memory features, uint256 parentId, uint256 dateCreated) = supplyChain.getToken(1);
+        
+        // Assertions
+        assertEq(id, 1, "Token ID should be 1");
+        assertEq(creator, producerAddress, "Creator should be producer");
+        assertEq(name, "Wood", "Name should be Wood");
+        assertEq(uint(tokenType), uint(SupplyChain.TokenType.RowMaterial), "Type should be RowMaterial");
+        assertEq(totalSupply, 100, "Total supply should be 100");
+        assertEq(features, "High quality oak wood", "Features should match");
+        assertEq(parentId, 0, "Parent ID should be 0 for raw material");
+        assertTrue(dateCreated > 0, "Date created should be greater than 0");
+    }
+
+    function testTokenBalance() public {
+        // Setup: Create users and token
+        _registerAndApproveUser(producerAddress, SupplyChain.UserRole.Producer);
+        _registerAndApproveUser(factoryAddress, SupplyChain.UserRole.Factory);
+        
+        // Create a token
+        vm.prank(producerAddress);
+        supplyChain.createToken("Wood", SupplyChain.TokenType.RowMaterial, 100, "", 0);
+        
+        // Test initial balances
+        assertEq(supplyChain.getTokenBalance(1, producerAddress), 100, "Producer should have initial balance of 100");
+        assertEq(supplyChain.getTokenBalance(1, factoryAddress), 0, "Factory should have initial balance of 0");
+        assertEq(supplyChain.getTokenBalance(1, owner), 0, "Owner should have balance of 0");
+        
+        // Transfer some tokens and test balances
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 30);
+        
+        // After transfer (before acceptance)
+        assertEq(supplyChain.getTokenBalance(1, producerAddress), 70, "Producer balance should be 70 after transfer");
+        assertEq(supplyChain.getTokenBalance(1, factoryAddress), 0, "Factory balance should still be 0 before acceptance");
+        
+        // Accept transfer
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // After acceptance
+        assertEq(supplyChain.getTokenBalance(1, producerAddress), 70, "Producer balance should remain 70");
+        assertEq(supplyChain.getTokenBalance(1, factoryAddress), 30, "Factory balance should be 30 after acceptance");
+    }
+
+    function testCreateTokenByFactory() public {
+        // First create a raw material token (parentId will be 1)
+        _registerAndApproveUser(producerAddress, SupplyChain.UserRole.Producer);
+        vm.prank(producerAddress);
+        supplyChain.createToken("Wood", SupplyChain.TokenType.RowMaterial, 100, "{}", 0);
+
+        // Now factory can create finished product with parentId 1
+        _registerAndApproveUser(factoryAddress, SupplyChain.UserRole.Factory);
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Chair", SupplyChain.TokenType.FinishedProduct, 50, "{}", 1);
+
+        (uint256 id, address creator, string memory name, SupplyChain.TokenType tokenType, uint256 totalSupply, string memory features, uint256 parentId, uint256 dateCreated) = supplyChain.getToken(2);
+        assertEq(creator, factoryAddress, "Token creator should be factory");
+        assertEq(name, "Chair", "Token name should be Chair");
+        assertEq(uint(tokenType), uint(SupplyChain.TokenType.FinishedProduct), "Token type should be FinishedProduct");
+        assertEq(totalSupply, 50, "Token total supply should be 50");
+        assertEq(features, "{}", "Token features should match");
+        assertEq(parentId, 1, "Finished product should have parentId");
+    }
+
+    function testUnapprovedUserCannotCreateToken() public {
+        vm.prank(consumerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Consumer);
+        
+        vm.prank(owner);
+        supplyChain.changeStatusUser(consumerAddress, SupplyChain.UserStatus.Approved);
+
+        vm.prank(consumerAddress);
+        vm.expectRevert(SupplyChain.Unauthorized.selector);
+        supplyChain.createToken("Illegal Token", SupplyChain.TokenType.RowMaterial, 100, "", 0);
+    }
 
     // Tests de transferencias
     function testTransferFromProducerToFactory() public { }
@@ -180,7 +269,6 @@ contract SupplyChainTest is Test {
 
     // Tests de validaciones y permisos
     function testInvalidRoleTransfer() public { }
-    function testUnapprovedUserCannotCreateToken() public { }
     function testUnapprovedUserCannotTransfer() public { }
     function testOnlyAdminCanChangeStatus() public { }
     function testConsumerCannotTransfer() public { }
