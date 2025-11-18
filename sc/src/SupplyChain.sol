@@ -24,7 +24,18 @@ contract SupplyChain {
     error ExistingUserWithApprovedRole(string message); // Si se intenta registrar una empresa con una dirección que ya existe. 
     error UserWithExistingRole(string message); // Si se intenta registrar una empresa con una dirección que ya existe.
 
-    //Estados del usuario 
+    /* ======================= ENUMS ======================= */
+    /**
+    * @notice Enum para roles de pausabilidad, básico/pausador.
+    */
+    enum PauseRole {
+        None,
+        Pauser
+    }
+
+    /**
+    * @notice Enum para estados de usuario: pendiente, aprobado, rechazado o cancelado.
+    */
     enum UserStatus { 
         Pending,    //Valor 0 
         Approved,   //Valor 1
@@ -32,6 +43,9 @@ contract SupplyChain {
         Canceled    //Valor 3
     }
 
+    /**
+    * @notice Enum para los roles básicos de la cadena de suministro.
+    */
     enum UserRole { 
         Producer,   //Valor 0
         Factory,    //Valor 1
@@ -39,14 +53,19 @@ contract SupplyChain {
         Consumer    //Valor 3
     }
 
-    // Estados de transferencia 
+    /**
+    * @notice Enum para el estado de una transferencia de tokens.
+    */
     enum TransferStatus {
         Pending,    //Valor 0
         Accepted,   //Valor 1
-        Rejected    //Valor 2
+        Rejected,    //Valor 2
+        Cancelled   //Valor 3
     }
 
-    // Tipo de token 
+    /**
+    * @notice Enum para diferenciar tokens de materia prima y producto terminado.
+    */ 
     enum TokenType {
         RowMaterial,       //Valor 0
         FinishedProduct    //Valor 1
