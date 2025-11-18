@@ -433,9 +433,82 @@ contract SupplyChain  is ReentrancyGuard {
         if (paused) revert ContractPaused();
     }
 
+    /**
+    * @notice Asigna o revoca el rol Pauser a una dirección, controlando autorización para pausar/reanudar.
+    * @param account Dirección a la que se asignará el rol.
+    * @param role El rol a asignar (None o Pauser).
+    */
+    function setPauseRole(address account, PauseRole role) external onlyOwner {
+        pauseRoles[account] = role;
+        emit PauseRoleChanged(account, role);
+    }
+
+    /**
+    * @notice Pausa todas las funciones críticas del contrato.
+    * @dev Solo el owner o usuarios con rol Pauser pueden pausar si el contrato no está ya pausado.
+    */
+    // Función para pausar el contrato (solo el owner)
+    function pause() external onlyPauser whenNotPaused {
+        paused = true;
+        emit Paused(msg.sender);
+    }
+
+    /**
+    * @notice Reanuda la operación normal del contrato si está pausado.
+    * @dev Solo el owner o usuarios con rol Pauser pueden reanudar si el contrato estaba pausado.
+    */
+    // Función para reanudar el contrato (solo el owner)
+    function unpause() external onlyPauser whenPaused {
+        paused = false;
+        emit Unpaused(msg.sender);
+    }
+
+    /**
+    * @notice Consulta el estado actual de pausabilidad del contrato.
+    * @return bool True si el contrato está pausado, false en caso contrario.
+    */
+    function isPaused() public view returns (bool) {
+        return paused;
+    }
+
+
+    /**
+    * @notice Inicializa la transferencia de ownership a otra dirección.
+    * @param newOwner Dirección del nuevo propietario candidato.
+    * @dev Solo puede ser llamada por el owner y requiere contrato activo (no pausado).
+    */
+    function initiateOwnershipTransfer(address newOwner) external onlyOwner whenNotPaused {
+        if (newOwner == address(0)) revert InvalidAddress();
+        pendingOwner = newOwner;
+        emit OwnershipTransferInitiated(owner, newOwner);
+    }
+
+    /**
+    * @notice El candidato a owner debe aceptar para completar la transferencia de ownership.
+    * @dev Solo llamable por el address pendingOwner previamente configurado.
+    */
+    function acceptOwnership() external whenNotPaused {
+        if (msg.sender != pendingOwner) revert Unauthorized();
+        address oldOwner = owner;
+        owner = pendingOwner;
+        pendingOwner = address(0);
+        emit OwnershipTransferred(oldOwner, owner);
+    }
+
+    /**
+     * @notice Getter público para ver quién es el pendingOwner actual.
+     * @return Dirección del usuario que debe aceptar la transferencia de ownership.
+     */
+    function getPendingOwner() public view returns (address) {
+        return pendingOwner;
+    }
+
     // Gestión de Usuarios
-    //function requestUserRole(string memory role) public { 
-    function requestUserRole(UserRole role) public { 
+    /**
+    * @notice Función para que usuarios, excepto el owner, soliciten un rol en la plataforma.
+    * @param role Role solicitado.
+    */
+    function requestUserRole(UserRole role) external whenNotPaused { 
         uint256 userId;
 
         //if (msg.sender == address(0) || owner == msg.sender ) revert InvalidAddress();
