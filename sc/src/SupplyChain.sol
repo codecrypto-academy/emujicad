@@ -885,4 +885,12 @@ contract SupplyChain  is ReentrancyGuard {
         return userTransfers;
     }
 */
+
+    receive() external payable {
+    revert("Este contrato no acepta ETH");
+    }
+
+    fallback() external payable {
+    revert("Funcion no soportada");
+    }
 }
