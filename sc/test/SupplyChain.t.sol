@@ -1,20 +1,30 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+// Define la versión del compilador de Solidity a utilizar.
+// En este caso, es compatible con versiones desde 0.8.30.
+
+pragma solidity 0.8.30;
 
 import {Test} from "forge-std/Test.sol";
 import {SupplyChain} from "../src/SupplyChain.sol";
 
 contract SupplyChainTest is Test {
-    // Setup y configuración inicial
-
-    // This declares a state variable 'supplyChain' of type 'SupplyChain'.
-    // This variable will hold an instance of the 'SupplyChain' contract, allowing us to interact with it in our tests.
     SupplyChain public supplyChain;
+    address owner;
+    address producerAddress;
+    address factoryAddress;
+    address retailerAddress;
+    address consumerAddress;
+
 
     function setUp() public {
-        // Inicializar el contrato SupplyChain
+        owner = address(this);
+        producerAddress = makeAddr("producer");
+        factoryAddress = makeAddr("factory");
+        retailerAddress = makeAddr("retailer");
+        consumerAddress = makeAddr("consumer");
+        
+        vm.prank(owner);
         supplyChain = new SupplyChain();
-        // Configurar usuarios de prueba, roles y estados iniciales
     }
 
     // Tests de gestión de usuarios
