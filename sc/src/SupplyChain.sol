@@ -19,9 +19,29 @@ contract SupplyChain {
     error NoApproved(); // Se emite cuando una dirección no autorizada intenta ejecutar una función protegida.
 
     error InvalidEntry(string campo); // Para entradas de datos no válidas, como un nombre.
-    error InvalidAddress(string message); // Si la direccion es invalida o no existe.
+    /**
+    * @notice Lanza si la dirección es nula o no está permitida.
+    */
+    error InvalidAddress(); // Si la direccion es invalida o no existe.
+
     error Unauthorized(string message); // Se emite cuando una dirección no autorizada intenta ejecutar una función protegida.
-    error ExistingUserWithApprovedRole(string message); // Si se intenta registrar una empresa con una dirección que ya existe. 
+    /**
+    * @notice Acción emitida cuando el contrado está pausado.
+    */
+    error ContractPaused(); // Se emite cuando. 
+
+   /**
+    * @notice Acción emitida cuando el contrado no está pausado.
+    */
+    error ContractNotPaused(); // Se emite cuando.
+
+    error ExistingUserWithApprovedRole(string message); // Si se intenta registrar una empresa con una dirección que ya existe.
+
+     /**
+    * @notice La consulta o acción requiere un Usuario existente.
+    */
+    error UserDoesNotExist(); // Si se intenta consultar un usuario que no existe. 
+
     error UserWithExistingRole(string message); // Si se intenta registrar una empresa con una dirección que ya existe.
 
     /* ======================= ENUMS ======================= */
@@ -151,24 +171,85 @@ contract SupplyChain {
     // Estado de pausa
     bool private paused;
 
-    event AssignContratOwner(address indexed nuevoPropietarioContrato);
+    /* ======================= EVENTOS ======================= */
+
+    /**
+     * @notice Evento para pausar el contrato.
+     */
+    // Evento para emitir cuando cambie el estado de pausa
+    event Paused(address account);
+
+    /**
+    * @notice Evento para reanudar el contrato.
+    */
+    event Unpaused(address account);
+
+    /**
+    * @notice Evento al asignar roles especiales de pausador o revocar.
+    */
+    // Evento para asignar o revocar rol Pauser
+    event PauseRoleChanged(address indexed account, PauseRole role);
+
+    /**
+    * @notice Evento de asignación inicial de ownership.
+    */
+    event AssignInitialContractOwner(address indexed initialContractOwner);
+
+    /**
+    * @notice Evento al iniciar la transferencia de ownership.
+    */
+    event OwnershipTransferInitiated(address indexed previousOwner, address indexed newContractOwner);
+    /**
+    * @notice Evento cuando la transferencia de ownership es confirmada/completada.
+    */
+    event OwnershipTransferred(address indexed previousOwner, address indexed newContractOwner);
 
     // eventos para los users tokens y transfers
-    //event UserRoleRequested(address indexed user, string role); // Evento de solicitud de rol de usuario
+ 
+    /**
+    * @notice Evento al solicitar un nuevo rol de usuario.
+    */
     event UserRoleRequested(address indexed user, UserRole role); // Evento de solicitud de rol de usuario
-    event UserStatusChanged(address indexed user, UserStatus status); // Evento de cambio de estado de usuario
+
+    /**
+    * @notice Evento por cambio de estado de usuario.
+    */
+    event UserStatusChanged(address indexed user, UserStatus oldStatus, UserStatus newStatus);
 
 
-    event TokenCreated(uint256 indexed tokenId, address indexed creator, string name, uint256 totalSupply); // Evento de creación de token
+    /**
+    * @notice Evento cuando se crea un nuevo token.
+    */
+    event TokenCreated(uint256 indexed tokenId, address indexed creator, string name, TokenType tokenType, uint256 totalSupply, uint256 parentId);
+
+    /**
+    * @notice Evento que representa una solicitud de transferencia.
+    */
     event TransferRequested(uint256 indexed transferId, address indexed from, address indexed to, uint256 tokenId, uint256 amount); // Evento de solicitud de transferencia
+ 
+     /**
+    * @notice Evento ante la cancelacion de una transferencia.
+    */
+    event TransferCancelled(uint256 indexed transferId); // Evento de cancellación de transferencia
+
+    /**
+    * @notice Evento ante la aceptación de una transferencia.
+    */
     event TransferAccepted(uint256 indexed transferId); // Evento de aceptación de transferencia
+    /**
+    * @notice Evento cuando una transferencia ha sido rechazada.
+    */
     event TransferRejected(uint256 indexed transferId); // Evento de rechazo de transferencia
+
+    event TransferProcessed(uint indexed transferId, address from, address to, TransferStatus status, uint256 amount);
+
+    /* ======================= CONSTRUCTOR ======================= */
 
     constructor() {
         owner = msg.sender; // Establece el administrador del contrato como el creador del contrato
-        emit AssignContratOwner(owner);
-    }   
-    
+        emit AssignInitialContractOwner(owner);
+    }
+     
     // --- Modificadores (Modifiers) ---
     // Los modificadores son código reutilizable que se puede añadir a las funciones para
     // verificar condiciones (permisos, estados, etc.) antes de que se ejecuten.
@@ -190,14 +271,40 @@ contract SupplyChain {
         _; // Este símbolo especial indica que se debe ejecutar el cuerpo de la función que usa el modificador.
     }
 
+/* ======================= FUNCIONES PRINCIPALES: ======================= */
 
+    /**
+    * @dev Restringe ejecución si el contrato está pausado.
+    */
+    // Modificador para funciones que solo pueden ejecutarse si el contrato NO está pausado
+    modifier whenNotPaused() {
+        _whenNotPaused();
+        _;
+    }
+
+    /**
+    * @dev Restringe ejecución si el contrato no está pausado (opcional).
+    */
+    // Modificador para funciones que solo pueden ejecutarse si el contrato está pausado (opcional)
+    modifier whenPaused() {
+        _whenPaused();
+        _;
+    }
+
+    function _whenPaused() internal view {
+        if (!paused) revert ContractNotPaused();
+    }
+
+    function _whenNotPaused() internal view {
+        if (paused) revert ContractPaused();
+    }
 
     // Gestión de Usuarios
     //function requestUserRole(string memory role) public { 
     function requestUserRole(UserRole role) public { 
         uint256 userId;
 
-        if (msg.sender == address(0) || owner == msg.sender ) revert InvalidAddress("Direccion invalida para hacer esta solicitud");
+        if (msg.sender == address(0) || owner == msg.sender ) revert InvalidAddress();
 
         //if (bytes(role).length == 0) revert InvalidEntry("role");
         if (uint(role) > 3 ) revert InvalidEntry("Error: No es un rol admitido");
@@ -244,16 +351,19 @@ contract SupplyChain {
         }
     }
 
-    function changeStatusUser(address userAddress, UserStatus newStatus) public onlyOwner {
-        if (msg.sender == address(0) || owner == userAddress ) revert InvalidAddress("Direccion invalida para hacer esta solicitud");
-       // userId = addressToUserId[userAddress]; 
-        User storage u = users[addressToUserId[userAddress]]; //establece la relación entre la dirección y el ID del usuario. 
-        u.status = newStatus;
-        emit UserStatusChanged(userAddress, newStatus); 
+    function changeStatusUser(address userAddress, UserStatus newStatus) external onlyOwner whenNotPaused {
+        if (addressToUserId[userAddress] == 0) revert UserDoesNotExist();
+
+        if (msg.sender == address(0) || owner == userAddress ) revert InvalidAddress();
+        User storage user = users[addressToUserId[userAddress]]; //establece la relación entre la dirección y el ID del usuario.
+
+        UserStatus oldStatus = user.status;
+        user.status = newStatus;
+        emit UserStatusChanged(userAddress, oldStatus, newStatus); 
     }
 
     function getUserInfo(address userAddress) public view returns (User memory) {
-        if (msg.sender == address(0) || owner == userAddress ) revert InvalidAddress("Direccion invalida para hacer esta solicitud");
+        if (msg.sender == address(0) || owner == userAddress ) revert InvalidAddress();
         return users[addressToUserId[userAddress]];
     }
 
@@ -279,7 +389,7 @@ contract SupplyChain {
         newToken.dateCreated = block.timestamp;
         newToken.balance[msg.sender] = totalSupply;
 
-        emit TokenCreated(nextTokenId, msg.sender, name, totalSupply);
+        emit TokenCreated(nextTokenId, msg.sender, name, tokenType, totalSupply, parentId);
         nextTokenId++;
         userTokenCount[msg.sender]++;
     }
@@ -290,7 +400,7 @@ contract SupplyChain {
 }
 
     function getTokenBalance(uint tokenId, address userAddress) public view returns (uint) {
-        if (msg.sender == address(0) || owner == userAddress ) revert InvalidAddress("Direccion invalida para hacer esta solicitud");
+        if (msg.sender == address(0) || owner == userAddress ) revert InvalidAddress();
         return tokens[tokenId].balance[userAddress];
     }
 /*
