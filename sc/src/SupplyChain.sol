@@ -471,7 +471,6 @@ contract SupplyChain  is ReentrancyGuard {
         return paused;
     }
 
-
     /**
     * @notice Inicializa la transferencia de ownership a otra dirección.
     * @param newOwner Dirección del nuevo propietario candidato.
@@ -523,41 +522,47 @@ contract SupplyChain  is ReentrancyGuard {
         bool userExists = (userId != 0);
         if ( userExists) {
             
-            //userRole=u.role;
-            User storage u = users[userId];
+            User storage user = users[userId];
 
             //if (uint(role) ==  users[nextUserId].role) {
-            if (uint(role) ==  uint(u.role)) {
+            if (uint(role) ==  uint(user.role)) {
                 revert UserWithExistingRole();
             }
 
-            if  (u.status == UserStatus.Approved) {
+            if  (user.status == UserStatus.Approved) {
                 revert ExistingUserWithApprovedRole();
             }
 
-            if  (u.status != UserStatus.Pending) {
-                u.status = UserStatus.Pending;
+            if  (user.status != UserStatus.Pending) {
+                user.status = UserStatus.Pending;
             }
-            u.role = role;
+            user.role = role;
             emit UserRoleRequested(msg.sender, role);
         }
             
         else{
-            //users[nextUserId] = User(nextUserId, msg.sender, role, UserStatus.Pending); //crea un nuevo User con el ID actual, la dirección que llamó a la función (msg.sender), el rol recibido como parámetro, y un estado definido Pending
             //crea un nuevo User con el ID actual, la dirección que llamó a la función (msg.sender), el rol recibido como parámetro, y un estado definido Pending
-            User storage u = users[nextUserId];
-            u.id = nextUserId;
-            u.userAddress = msg.sender;
-            u.role = role;
-            u.status = UserStatus.Pending;
+            User storage user = users[nextUserId];
+            user.id = nextUserId;
+            user.userAddress = msg.sender;
+            user.role = role;
+            user.status = UserStatus.Pending;
 
             addressToUserId[msg.sender] = nextUserId; //establece la relación entre la dirección y el ID del usuario. 
             // Incrementar el ID para el próximo usuario
-            nextUserId++;
+            
+            unchecked {
+                nextUserId++;
+            }
             emit UserRoleRequested(msg.sender, role);
         }
     }
 
+    /**
+    * @notice Solo el owner puede cambiar el estado de un usuario.
+    * @param userAddress Dirección del usuario.
+    * @param newStatus Estado a asignar.
+    */
     function changeStatusUser(address userAddress, UserStatus newStatus) external onlyOwner whenNotPaused {
         if (addressToUserId[userAddress] == 0) revert UserDoesNotExist();
 
@@ -569,12 +574,43 @@ contract SupplyChain  is ReentrancyGuard {
         emit UserStatusChanged(userAddress, oldStatus, newStatus); 
     }
 
+    /**
+    * @notice Devuelve información completa de un usuario registrado.
+    * @param userAddress Dirección del usuario consultado.
+    * @return user Información del usuario.
+    */
     function getUserInfo(address userAddress) public view returns (User memory) {
         if (msg.sender == address(0) || owner == userAddress ) revert InvalidAddress();
         return users[addressToUserId[userAddress]];
     }
 
+    /**
+    * @notice Devuelve información de un usuario registrado a partir de su ID.
+    * @param userId Identificador del usuario.
+    * @return User Estructura con datos del usuario.
+    * @dev Requiere que el ID sea válido (mayor que 0 y menor que el próximo ID).
+    */
+    function getUserInfoById(uint userId) public view returns (User memory) {
+        if (userId == 0 || userId >= nextUserId) revert InvalidUserId();
+        return users[userId];
+    }
+
+    /**
+    * @notice Devuelve el total de usuarios registrados en el contrato.
+    * @return uint Cantidad total de usuarios (ID máximo asignado menos 1).
+    */
+    function getTotalUsers() public view returns (uint) {
+        return nextUserId - 1;
+    }
+
+    /**
+    * @notice Devuelve si el usuario dado es admin del contrato.
+    * @param userAddress Dirección a consultar.
+    * @return True si es owner, false en caso contrario.
+    */
     function isAdmin(address userAddress) public view returns (bool) {
+        if (userAddress == address(0)) revert InvalidAddress();
+
         if (owner == userAddress ) {
             return true;
         }
