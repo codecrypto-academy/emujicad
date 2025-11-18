@@ -345,11 +345,40 @@ contract SupplyChain  is ReentrancyGuard {
     }
 
     /**
+    * @dev Modificador que restringe la ejecución solo a usuarios con estado Approved
+    *      y rol Producer, Factory o Retailer. Usado para controlar permisos en funciones
+    *      de transferencia de tokens (emisión y envío).
+    */
+    modifier onlyTransfersAllowed() {
+        _onlyTransfersAllowed();
+        _;        
+    }
+
+    /**
+    * @dev Modificador que restringe la ejecución solo a usuarios con estado Approved
+    *      y rol Factory, Retailer o Consumer. Usado para controlar permisos en funciones
+    *      que aceptan o rechazan tokens recibidos en transferencias.
+    */
+    modifier onlyReceiverAllowed() {
+        _onlyReceiverAllowed();
+        _;
+    }
+
+    /**
     * @dev Solo permite acceso al administrator/dueño actual del contrato.
     */
     modifier onlyOwner() {
         _onlyOwner();
         _; // Este símbolo especial indica que se debe ejecutar el cuerpo de la función que usa el modificador.
+    }
+
+    /**
+     * @dev Solo permite acceso a usuarios con rol de pausador o dueño/administrador.
+    */
+    // Modificador para restringir funciones solo a pausadores autorizados
+    modifier onlyPauser() {
+        _onlyPauser();
+        _;
     }
 
     /**
@@ -369,17 +398,31 @@ contract SupplyChain  is ReentrancyGuard {
         _whenPaused();
         _;
     }
-
+    
 /* ======================= FUNCIONES PRINCIPALES: ======================= */
 
     function _onlyOwner() internal view {
         if (owner != msg.sender) revert NoOwner();
     }
 
+    function _onlyPauser() internal view {
+        if (pauseRoles[msg.sender] != PauseRole.Pauser && msg.sender != owner) revert Unauthorized();
+    }
+
     function _onlyTokenCreators() internal view {
         User storage user = users[addressToUserId[msg.sender]];
         if (msg.sender == owner) revert Unauthorized();
          if (!((user.role == UserRole.Producer || user.role == UserRole.Factory) && user.status == UserStatus.Approved)) revert Unauthorized();
+     }
+
+    function _onlyReceiverAllowed() internal view {
+        User storage user = users[addressToUserId[msg.sender]];
+        if (!(user.status == UserStatus.Approved && (user.role == UserRole.Factory || user.role == UserRole.Retailer || user.role == UserRole.Consumer))) revert NoReceiverAllowed();
+    }
+
+    function _onlyTransfersAllowed() internal view {
+        User storage user = users[addressToUserId[msg.sender]];
+        if (!(user.status == UserStatus.Approved && (user.role == UserRole.Producer || user.role == UserRole.Factory || user.role == UserRole.Retailer))) revert NoTransfersAllowed();
     }
 
     function _whenPaused() internal view {
