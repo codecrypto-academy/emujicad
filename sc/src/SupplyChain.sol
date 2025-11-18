@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT
 // Define la versión del compilador de Solidity a utilizar.
-// En este caso, es compatible con versiones desde 0.8.2 hasta antes de 0.9.0.
+// En este caso, es compatible con versiones desde 0.8.30.
 
-pragma solidity ^0.8.13;
+pragma solidity 0.8.30;
+
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 
 /**
  * @title SupplyChain
@@ -14,17 +17,49 @@ pragma solidity ^0.8.13;
  *      datos complejos en Solidity, una práctica común para simular bases de datos en la blockchain.
  */
 
-contract SupplyChain {
+contract SupplyChain  is ReentrancyGuard {
 
+    /* ======================= ERRORES PERSONALIZADOS ======================= */
+    /**
+    * @notice Lanza si el usuario no tiene aprobación suficiente.
+    */
     error NoApproved(); // Se emite cuando una dirección no autorizada intenta ejecutar una función protegida.
 
-    error InvalidEntry(string campo); // Para entradas de datos no válidas, como un nombre.
+    /**
+    * @notice Lanza si el nombre proporcionado es inválido o vacío.
+    */
+    error InvalidName(); // Para entradas de datos no válidas, como un nombre.
+
     /**
     * @notice Lanza si la dirección es nula o no está permitida.
     */
     error InvalidAddress(); // Si la direccion es invalida o no existe.
+ 
+    /**
+    * @notice Lanza si el usuario intenta registrar un rol inválido.
+    */
+    error InvalidRole(); // Para entradas de roles no válidos.
 
-    error Unauthorized(string message); // Se emite cuando una dirección no autorizada intenta ejecutar una función protegida.
+    /**
+    * @notice Acción no realizada por el owner.
+    */
+    error NoOwner(); // Se emite cuando una dirección no autorizada intenta ejecutar una función protegida que solo el owner o administrador del contrato puede ejecutar. 
+
+    /**
+    * @notice No autorizado para Transferir token.
+    */   
+    error NoTransfersAllowed();
+
+    /**
+    * @notice No autorizado para Recibir token.
+    */   
+    error NoReceiverAllowed();
+
+    /**
+    * @notice Acción no autorizada por el rol actual.
+    */
+    error Unauthorized(); // Se emite cuando una dirección no autorizada intenta ejecutar una función protegida.
+
     /**
     * @notice Acción emitida cuando el contrado está pausado.
     */
@@ -35,14 +70,60 @@ contract SupplyChain {
     */
     error ContractNotPaused(); // Se emite cuando.
 
-    error ExistingUserWithApprovedRole(string message); // Si se intenta registrar una empresa con una dirección que ya existe.
-
+    /**
+    * @notice El usuario ya tiene al menos un rol aprobado.
+    */
+    error ExistingUserWithApprovedRole(); // Si se intenta registrar. 
+ 
      /**
     * @notice La consulta o acción requiere un Usuario existente.
     */
     error UserDoesNotExist(); // Si se intenta consultar un usuario que no existe. 
 
-    error UserWithExistingRole(string message); // Si se intenta registrar una empresa con una dirección que ya existe.
+     /**
+    * @notice La consulta o acción requiere un Id de Usuario existente.
+    */
+    error InvalidUserId(); // Si se intenta consultar un id de usuario que no existe. 
+
+    /**
+    * @notice El usuario ya tiene el rol solicitado.
+    */
+    error UserWithExistingRole(); // Si se intenta asignar el mismo rol a un usuario ya existente.
+ 
+    /**
+    * @notice El total de suministro no es válido (>0).
+    */
+    error InvalidTotalSupply();
+ 
+    /**
+    * @notice La consulta o acción requiere un token existente.
+    */
+    error TokenDoesNotExist(); 
+ 
+    /**
+    * @notice La cantidad debe ser mayor a 0.
+    */
+    error InvalidAmount(); 
+
+    /**
+    * @notice La cantidad debe ser mayor a 0.
+    */
+    error InsufficientBalance(uint256 senderBalance, uint256 amount); 
+
+    /**
+    * @notice El token padre solicitado no existe.
+    */
+    error ParentTokenDoesNotExist(); 
+
+    /**
+    * @notice La consulta o acción requiere que la transferencia existenta.
+    */
+    error TransferDoesNotExist(); 
+
+    /**
+    * @notice Transferencia debe estar en Pendiente.
+    */
+    error TransferNotPending(); 
 
     /* ======================= ENUMS ======================= */
     /**
@@ -91,7 +172,7 @@ contract SupplyChain {
         FinishedProduct    //Valor 1
     }
 
-   /* ======================= STRUCTS ======================= */
+    /* ======================= STRUCTS ======================= */
 
     /**
     * @notice Representa los datos principales de un usuario en la plataforma.
@@ -248,30 +329,28 @@ contract SupplyChain {
     constructor() {
         owner = msg.sender; // Establece el administrador del contrato como el creador del contrato
         emit AssignInitialContractOwner(owner);
-    }
-     
-    // --- Modificadores (Modifiers) ---
+    }   
+    
+    /* ======================= MODIFICADORES ======================= */
+
     // Los modificadores son código reutilizable que se puede añadir a las funciones para
     // verificar condiciones (permisos, estados, etc.) antes de que se ejecuten.
 
     /**
-     * @dev Verifica que quien llama a la función (`msg.sender`) es el dueño o administrador del contrato.
-     *      o el propietario del contrato. Si no, revierte la transacción.
-     */
+    * @dev Solo permite acceso a usuarios con rol Producer o Factory y status Approved.
+    */
     modifier onlyTokenCreators() {
-        require(msg.sender != address(0), "Direccion invalida para hacer esta solicitud");
-        require(msg.sender != owner, "El dueno del contrato no puede crear tokens");
-        User storage user = users[addressToUserId[msg.sender]];
-        require((user.role == UserRole.Producer || user.role == UserRole.Factory) && user.status == UserStatus.Approved, "No posee el rol o su usuario no esta aprobado");  
+        _onlyTokenCreators();
         _; // Este símbolo especial indica que se debe ejecutar el cuerpo de la función que usa el modificador.
     }
 
+    /**
+    * @dev Solo permite acceso al administrator/dueño actual del contrato.
+    */
     modifier onlyOwner() {
-        require(owner == msg.sender, "No es el administrador o dueno del contrato");
+        _onlyOwner();
         _; // Este símbolo especial indica que se debe ejecutar el cuerpo de la función que usa el modificador.
     }
-
-/* ======================= FUNCIONES PRINCIPALES: ======================= */
 
     /**
     * @dev Restringe ejecución si el contrato está pausado.
@@ -291,6 +370,18 @@ contract SupplyChain {
         _;
     }
 
+/* ======================= FUNCIONES PRINCIPALES: ======================= */
+
+    function _onlyOwner() internal view {
+        if (owner != msg.sender) revert NoOwner();
+    }
+
+    function _onlyTokenCreators() internal view {
+        User storage user = users[addressToUserId[msg.sender]];
+        if (msg.sender == owner) revert Unauthorized();
+         if (!((user.role == UserRole.Producer || user.role == UserRole.Factory) && user.status == UserStatus.Approved)) revert Unauthorized();
+    }
+
     function _whenPaused() internal view {
         if (!paused) revert ContractNotPaused();
     }
@@ -304,10 +395,10 @@ contract SupplyChain {
     function requestUserRole(UserRole role) public { 
         uint256 userId;
 
-        if (msg.sender == address(0) || owner == msg.sender ) revert InvalidAddress();
-
+        //if (msg.sender == address(0) || owner == msg.sender ) revert InvalidAddress();
+        if (owner == msg.sender ) revert InvalidAddress();
         //if (bytes(role).length == 0) revert InvalidEntry("role");
-        if (uint(role) > 3 ) revert InvalidEntry("Error: No es un rol admitido");
+        if (uint(role) > 3 ) revert InvalidRole();
 
         // `storage` crea una referencia a la variable en el almacenamiento de la blockchain.
         // Modificar `u` modifica directamente el estado del contrato.
@@ -321,11 +412,11 @@ contract SupplyChain {
 
             //if (uint(role) ==  users[nextUserId].role) {
             if (uint(role) ==  uint(u.role)) {
-                revert UserWithExistingRole("Usuario no puede solicitar el mismo rol");
+                revert UserWithExistingRole();
             }
 
             if  (u.status == UserStatus.Approved) {
-                revert ExistingUserWithApprovedRole("Usuario con rol Aprobado no puede cambiar de rol");
+                revert ExistingUserWithApprovedRole();
             }
 
             if  (u.status != UserStatus.Pending) {
