@@ -1145,7 +1145,6 @@ contract SupplyChainTest is Test {
         assertEq(uint(rawType), uint(SupplyChain.TokenType.RowMaterial), "Should be raw material");
         assertEq(rawParentId, 0, "Raw material should have no parent");
         assertEq(rawFeatures, "Oak wood from sustainable forest", "Raw material features should match description");
-        //assertEq(rawDateCreated, block.timestamp, "Raw material date created should match current block timestamp");
         
         // Verify consumer received the product
         assertEq(supplyChain.getTokenBalance(2, consumerAddress), 1, "Consumer should have 1 chair");
