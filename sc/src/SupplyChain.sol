@@ -699,35 +699,167 @@ contract SupplyChain  is ReentrancyGuard {
     }
 
     // Gestión de Transferencias
-    function transfer(address to, uint tokenId, uint amount) public { 
-        uint transferId = nextTransferId++;
-        Transfer storage newTransfer = transfers[transferId];
-        newTransfer.id = transferId;
-        newTransfer.from = msg.sender;
-        newTransfer.to = to;
-        newTransfer.tokenId = tokenId;
-        newTransfer.amount = amount;
-        newTransfer.dateCreated = block.timestamp;
-        newTransfer.status = TransferStatus.Pending;
 
-        emit TransferRequested(transferId, msg.sender, to, tokenId, amount);
+    /**
+    * @notice Solicita una transferencia de una cantidad específica de un token a otro usuario.
+    * @param to Dirección destinataria de la transferencia.
+    * @param tokenId ID del token a transferir.
+    * @param amount Cantidad de tokens a transferir.
+    * @dev Solo usuarios con balance suficiente pueden hacer la transferencia, y solo usuarios aprobados y con rol adecuado.
+    * @dev Se crea una transferencia en estado Pending, su aceptación o rechazo se debe manejar con funciones específicas.
+    */
+    function transfer(address to, uint tokenId, uint amount) external whenNotPaused onlyTransfersAllowed nonReentrant{
+        if (to == address(0)) revert InvalidAddress();
+        if (amount == 0) revert InvalidAmount();
+        
+        Token storage token = tokens[tokenId];
+        if (token.id == 0) revert TokenDoesNotExist();
+
+        uint256 senderBalance = token.balance[msg.sender];
+        if (senderBalance < amount) revert InsufficientBalance(senderBalance, amount);
+
+        // Disminuir balance del remitente inmediatamente para evitar doble gasto
+        token.balance[msg.sender] = senderBalance - amount;
+
+        // Crear nueva transferencia tipo pending
+        Transfer storage transferItem = transfers[nextTransferId];
+        transferItem.id = nextTransferId;
+        transferItem.from = msg.sender;
+        transferItem.to = to;
+        transferItem.tokenId = tokenId;
+        transferItem.amount = amount;
+        transferItem.dateCreated = block.timestamp;
+        transferItem.status = TransferStatus.Pending;
+
+        emit TransferRequested(nextTransferId, msg.sender, to, tokenId, amount);
+
+        unchecked {
+            nextTransferId++;
+        }
     }
-    function acceptTransfer(uint transferId) public {
-        Transfer storage transfer = transfers[transferId];
-        require(transfer.status == TransferStatus.Pending, "Transfer not pending");
-        transfer.status = TransferStatus.Accepted;
+
+    /**
+    * @notice Acepta una transferencia pendiente, completando el movimiento de tokens entre usuarios.
+    * @param transferId ID de la transferencia a aceptar.
+    * @dev Solo puede ser llamada por el destinatario de la transferencia..
+    *      Actualiza balances y estado de transferencia.
+    *      Emite el evento TransferAccepted.
+    *      Requiere que el contrato no esté pausado.
+    */
+    function acceptTransfer(uint transferId) external whenNotPaused onlyReceiverAllowed nonReentrant{
+        if (transfers[transferId].id == 0) revert TransferDoesNotExist();
+
+        Transfer storage transferItem = transfers[transferId];
+
+        if (transferItem.status != TransferStatus.Pending) revert TransferNotPending();
+        if (transferItem.to != msg.sender) revert Unauthorized();
+        
+        Token storage token = tokens[transferItem.tokenId];
+        
+        // Incrementar balance del receptor
+        token.balance[transferItem.to] += transferItem.amount;
+
+        // 🔹 ACTUALIZAR CONTADORES DE TOKENS POR USUARIO 🔹
+        // Si el emisor ya no tiene saldo de este token, reduce su contador
+        if (token.balance[transferItem.from] == 0 && userTokenCount[transferItem.from] > 0) {
+            userTokenCount[transferItem.from]--;
+        }
+
+        // Si el receptor no tenía este token antes, incrementa su contador
+        if (token.balance[transferItem.to] == transferItem.amount) {
+            userTokenCount[transferItem.to]++;
+        }
+
+        // Marcar transferencia como aceptada
+        transferItem.status = TransferStatus.Accepted;
+        // Emitir eventos
         emit TransferAccepted(transferId);
+        emit TransferProcessed(transferId, transferItem.from, transferItem.to, transferItem.status, transferItem.amount);
     }
-    function rejectTransfer(uint transferId) public {
-        Transfer storage transfer = transfers[transferId];
-        require(transfer.status == TransferStatus.Pending, "Transfer not pending");
-        transfer.status = TransferStatus.Rejected;
+
+    /**
+    * @notice Cancela una transferencia pendiente por parte del emisor, completando el movimiento de tokens entre usuarios.
+    * @param transferId ID de la transferencia a cancelar.
+    * @dev Solo puede ser llamada por el emisor de la transferencia..
+    *      Actualiza balances y estado de transferencia.
+    *      Emite el evento TransferCanceller.
+    *      Requiere que el contrato no esté pausado.
+    */
+    function cancelTransfer(uint transferId) external whenNotPaused onlyTransfersAllowed nonReentrant{
+        if (transfers[transferId].id == 0) revert TransferDoesNotExist();
+
+        Transfer storage transferItem = transfers[transferId];
+
+        if (transferItem.status != TransferStatus.Pending) revert TransferNotPending();
+        if (transferItem.from != msg.sender) revert Unauthorized();
+        
+        Token storage token = tokens[transferItem.tokenId];
+        
+        // 🔹 Verificar si el emisor tenía 0 unidades antes de devolver los tokens
+        bool senderHadZeroBefore = (token.balance[transferItem.from] == 0);
+
+        // Regresar tokens al remitente
+        token.balance[transferItem.from] += transferItem.amount;
+
+        // 🔹 Si el emisor no tenía este token antes, incrementa su contador
+        if (senderHadZeroBefore) {
+            userTokenCount[transferItem.from]++;
+        }
+
+        // Marcar transferencia como aceptada
+        transferItem.status = TransferStatus.Cancelled;
+        // Emitir eventos
+        emit TransferCancelled(transferId);
+        emit TransferProcessed(transferId, transferItem.from, transferItem.to, transferItem.status, transferItem.amount);  
+    }
+
+    /**
+    * @notice Rechaza una transferencia pendiente, retornando la cantidad al remitente.
+    * @param transferId ID de la transferencia a rechazar.
+    * @dev Solo puede ser llamada por el destinatario de la transferencia.
+    *      Restaura balance del remitente, actualiza estado y emite evento TransferRejected.
+    *      Requiere que el contrato no esté pausado.
+    */
+    function rejectTransfer(uint transferId) external whenNotPaused onlyReceiverAllowed nonReentrant {
+        Transfer storage transferItem = transfers[transferId];
+        if (transferItem.status != TransferStatus.Pending) revert TransferNotPending();
+        if (transferItem.to != msg.sender) revert Unauthorized();
+
+        Token storage token = tokens[transferItem.tokenId];
+
+        // 🔹 Verificar si el emisor tenía 0 unidades antes de devolver los tokens
+        bool senderHadZeroBefore = (token.balance[transferItem.from] == 0);
+
+        // Regresar tokens al remitente
+        token.balance[transferItem.from] += transferItem.amount;
+
+        // 🔹 Si el emisor no tenía este token antes, incrementa su contador
+        if (senderHadZeroBefore) {
+            userTokenCount[transferItem.from]++;
+        }
+
+        // Marcar transferencia como rechazada
+        transferItem.status = TransferStatus.Rejected;
         emit TransferRejected(transferId);
+        emit TransferProcessed(transferId, transferItem.from, transferItem.to, transferItem.status, transferItem.amount);
     }
+    /**
+     * @notice Consulta el detalle completo de una transferencia por su ID.
+     * @param transferId ID de la transferencia a consultar.
+     * @return Transfer Estructura completa con datos de la transferencia.
+     */
     function getTransfer(uint transferId) public view returns (Transfer memory) {
         return transfers[transferId];
     }
-*/
+
+    /**
+    * @notice Devuelve el total de transferencias creadas en el contrato.
+    * @return uint Cantidad total de transferencias (ID máximo asignado menos 1).
+    */
+    function getTotalTransfers() public view returns (uint) {
+        return nextTransferId - 1;
+    }
+
     // Funciones auxiliares
     function getUserTokens(address userAddress) public view returns (uint[] memory) {
         uint[] memory userTokens = new uint[](userTokenCount[userAddress]);
