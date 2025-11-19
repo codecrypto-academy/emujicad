@@ -1,6 +1,6 @@
 # 📊 Reporte Automático de Cobertura - SupplyChain
 
-**Generado**: 2025-11-19 01:49:17  
+**Generado**: 2025-11-19 02:18:55  
 **Comando**: `forge coverage --match-path "test/*"`  
 **Total Tests**: 73 (55 core + 18 edge cases)
 
@@ -55,6 +55,6 @@ forge test --match-path "test/*" -vv
 
 ---
 
-**Última Ejecución**: 2025-11-19 01:49:17  
+**Última Ejecución**: 2025-11-19 02:18:55  
 *Reporte generado automáticamente por coverage-reporter.sh*  
 *Ubicación*: `docs/sc/reports/COVERAGE_REPORT_2025-11-19.md`

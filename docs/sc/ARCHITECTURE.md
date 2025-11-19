@@ -15,11 +15,11 @@
 
 [![Solidity](https://img.shields.io/badge/Solidity-v0.8.30-blue?style=flat-square&logo=solidity)](https://soliditylang.org/)
 [![Foundry](https://img.shields.io/badge/Foundry-Framework-green?style=flat-square&logo=ethereum)](https://book.getfoundry.sh/)
-[![Tests](https://img.shields.io/badge/Tests-73%20Passing-brightgreen?style=flat-square&logo=checkmarx)](/)
-[![Lines](https://img.shields.io/badge/Coverage%20Lines-83.33%25-brightgreen?style=flat-square&logo=codecov)](/)
-[![Statements](https://img.shields.io/badge/Coverage%20Statements-80.09%25-yellow?style=flat-square&logo=codecov)](/)
-[![Functions](https://img.shields.io/badge/Coverage%20Functions-80.95%25-yellow?style=flat-square&logo=codecov)](/)
-[![Branches](https://img.shields.io/badge/Coverage%20Branches-61.22%25-orange?style=flat-square&logo=codecov)](/)
+[![Tests](https://img.shields.io/badge/Tests-73%20Passing-brightgreen?style=flat-square&logo=checkmarx)]()
+[![Lines](https://img.shields.io/badge/Coverage%20Lines-83.33%25-brightgreen?style=flat-square&logo=codecov)]()
+[![Statements](https://img.shields.io/badge/Coverage%20Statements-80.09%25-brightgreen?style=flat-square&logo=codecov)]()
+[![Functions](https://img.shields.io/badge/Coverage%20Functions-80.95%25-brightgreen?style=flat-square&logo=codecov)]()
+[![Branches](https://img.shields.io/badge/Coverage%20Branches-61.22%25-yellow?style=flat-square&logo=codecov)]()
 
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square&logo=github)](LICENSE)
 [![Academic](https://img.shields.io/badge/Academic-PFM%20Project-purple?style=flat-square&logo=academic)](/)
@@ -321,56 +321,60 @@ graph TB
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ff0000', 'primaryTextColor': '#000000', 'primaryBorderColor': '#ff0000', 'lineColor': '#ff0000', 'sectionBkColor': '#ffffff', 'altSectionBkColor': '#ffffff', 'gridColor': '#000000', 'tertiaryColor': '#ffffff', 'background': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryTextColor': '#000000'}}}%%
 pie title Code Coverage Metrics - SupplyChain.sol
-    "Lines Covered (78.22%)" : 78.22
-    "Lines Not Covered" : 21.78
+    "Lines Covered (83.33%)" : 83.33
+    "Lines Not Covered" : 16.67
 ```
 
 | **Métrica** | **Cobertura** | **Detalle** | **Estado** |
 |-------------|---------------|-------------|------------|
-| **📏 Lines Coverage** | **78.22%** | 158/202 líneas cubiertas | 🟢 **Excelente** |
-| **📝 Statements Coverage** | **73.21%** | 164/224 statements cubiertos | 🟢 **Muy Bueno** |
-| **🌿 Branches Coverage** | **36.73%** | 18/49 branches cubiertos | 🟡 **Mejorable** |
-| **⚡ Functions Coverage** | **77.14%** | 27/35 funciones cubiertas | 🟢 **Excelente** |
+| **📏 Lines Coverage** | **83.33%** | 180/216 líneas cubiertas | 🟢 **Excelente** |
+| **📝 Statements Coverage** | **80.09%** | 185/231 statements cubiertos | 🟢 **Excelente** |
+| **🌿 Branches Coverage** | **61.22%** | 30/49 branches cubiertos | 🟢 **Bueno** |
+| **⚡ Functions Coverage** | **80.95%** | 34/42 funciones cubiertas | 🟢 **Excelente** |
 
 #### **📈 Análisis de Cobertura Corporate-Grade**
 
 ##### **✅ Fortalezas Identificadas:**
-- 🎯 **Lines Coverage Superior**: 78.22% supera estándares industriales (>75%)
-- 🎯 **Functions Coverage Excelente**: 77.14% indica testing comprehensivo de APIs
-- 🎯 **Statements Coverage Sólido**: 73.21% demuestra lógica bien probada
+- 🎯 **Lines Coverage Superior**: 83.33% supera estándares industriales (>80% Excellent)
+- 🎯 **Functions Coverage Excelente**: 80.95% indica testing comprehensivo de APIs
+- 🎯 **Statements Coverage Excelente**: 80.09% demuestra lógica bien probada
 
 ##### **🔍 Áreas de Optimización:**
-- 🔶 **Branch Coverage**: 36.73% - Oportunidad para más test de casos edge
-- 🔶 **Casos condicionales**: Algunos flujos if/else requieren coverage adicional
-- 🔶 **Error paths**: Validaciones de error pueden expandirse
+- 🟢 **Branch Coverage**: 61.22% - Buen nivel, alcanzado con suite de edge cases
+- 🔶 **Casos condicionales avanzados**: Algunos flujos complejos pueden expandirse
+- 🔶 **Error paths específicos**: Validaciones de error en escenarios extremos
 
 ##### **📊 Comparación con Estándares Industriales:**
 
 | **Métrica** | **Nuestro Proyecto** | **Estándar Industrial** | **Rating** |
 |-------------|---------------------|-------------------------|------------|
-| Lines Coverage | **78.22%** | >70% (Good), >80% (Excellent) | 🟢 **Very Good** |
-| Functions Coverage | **77.14%** | >75% (Good), >85% (Excellent) | 🟢 **Good+** |
-| Statements Coverage | **73.21%** | >70% (Good), >80% (Excellent) | 🟢 **Good** |
-| Branches Coverage | **36.73%** | >60% (Good), >75% (Excellent) | 🟡 **Needs Improvement** |
+| Lines Coverage | **83.33%** | >70% (Good), >80% (Excellent) | 🟢 **Excellent** |
+| Functions Coverage | **80.95%** | >75% (Good), >85% (Excellent) | 🟢 **Good+** |
+| Statements Coverage | **80.09%** | >70% (Good), >80% (Excellent) | 🟢 **Excellent** |
+| Branches Coverage | **61.22%** | >60% (Good), >75% (Excellent) | 🟢 **Good** |
 
 ##### **🚀 Comando de Reproducción:**
 ```bash
-# Generar métricas de cobertura actualizadas
+# Generar métricas de cobertura completas (RECOMENDADO - incluye todos los tests)
 cd /path/to/smart-contracts
-forge coverage --match-path test/pfm/SupplyChain.t.sol
+forge coverage --match-path "test/*"
 
-# Métricas específicas del contrato
-forge coverage --match-path test/pfm/SupplyChain.t.sol | grep "src/pfm/SupplyChain.sol"
+# Métricas específicas del contrato SupplyChain.sol
+forge coverage --match-path "test/*" | grep "src/SupplyChain.sol"
 
 # Generar reporte detallado con LCOV
-forge coverage --match-path test/pfm/SupplyChain.t.sol --report lcov
+forge coverage --match-path "test/*" --report lcov
+
+# ⚠️ NOTA: Usar "test/*" incluye todos los tests (SupplyChain.t.sol + EdgeCasesTest.t.sol)
+# Para métricas de un solo archivo (no recomendado para reportes oficiales):
+# forge coverage --match-path test/SupplyChain.t.sol
 ```
 
 ##### **📋 Interpretación Ejecutiva:**
-- ✅ **Testing Quality**: **Excelente** - 78.22% lines coverage
-- ✅ **Production Readiness**: **Alta** - APIs bien probadas (77.14% functions)
-- 🔶 **Risk Assessment**: **Bajo-Medio** - Branch coverage mejorable
-- ✅ **Recomendación**: **Deploy Ready** con monitoreo continuo
+- ✅ **Testing Quality**: **Excelente** - 83.33% lines coverage (>80% Excellent)
+- ✅ **Production Readiness**: **Muy Alta** - APIs bien probadas (80.95% functions)
+- ✅ **Risk Assessment**: **Bajo** - Branch coverage en nivel Good (61.22%)
+- ✅ **Recomendación**: **Deploy Ready - Producción Aprobado**
 
 #### 🏅 **Calidad de Código**
 ```
@@ -1028,11 +1032,14 @@ Los diagramas Mermaid incluidos en esta documentación son compatibles con:
 # Plan de Edge Cases para Mejorar Branch Coverage
 cat src/pfm/EDGE_CASES_PLAN.md
 
-# Forge Coverage Estándar
-forge coverage --match-path test/pfm/SupplyChain.t.sol
+# Forge Coverage Completo (todos los tests)
+forge coverage --match-path "test/*"
 
 # Análisis detallado por función
-forge coverage --match-path test/pfm/SupplyChain.t.sol --report debug
+forge coverage --match-path "test/*" --report debug
+
+# Coverage de un solo archivo (solo para desarrollo/debug)
+forge coverage --match-path test/SupplyChain.t.sol
 ```
 
 #### **📊 Plan de Mejora de Coverage (36.73% → 65%+)**
