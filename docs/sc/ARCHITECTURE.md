@@ -92,7 +92,7 @@ erDiagram
         string features
         uint256 parentId FK
         uint256 dateCreated
-        mapping_balance "mapping(address => uint256)"
+        string balanceMapping
     }
 
     Transfer {
@@ -189,7 +189,7 @@ graph TD
 flowchart TD
     Start([Usuario Conecta Wallet]) --> CheckReg{¿Usuario Registrado?}
     
-    CheckReg -->|No| RegRole[requestUserRole()]
+    CheckReg -->|No| RegRole[requestUserRole]
     CheckReg -->|Sí| CheckStatus{¿Status Approved?}
     
     RegRole --> WaitApproval[Estado: Pending]
@@ -202,8 +202,8 @@ flowchart TD
     
     Approved --> ChooseAction
     
-    ChooseAction -->|Crear Token| CreateToken[createToken()]
-    ChooseAction -->|Transferir| InitTransfer[transfer()]
+    ChooseAction -->|Crear Token| CreateToken[createToken]
+    ChooseAction -->|Transferir| InitTransfer[transfer]
     ChooseAction -->|Gestionar Transferencias| ManageTransfers{Acción}
     
     CreateToken --> TokenCreated[Token creado con balance completo]
@@ -211,15 +211,15 @@ flowchart TD
     
     InitTransfer --> TransferPending[Transfer en estado Pending]
     TransferPending --> ReceiverAction{Receptor decide}
-    ReceiverAction -->|Aceptar| AcceptTx[acceptTransfer()]
-    ReceiverAction -->|Rechazar| RejectTx[rejectTransfer()]
+    ReceiverAction -->|Aceptar| AcceptTx[acceptTransfer]
+    ReceiverAction -->|Rechazar| RejectTx[rejectTransfer]
     
     AcceptTx --> TokensTransferred[Tokens transferidos al receptor]
     RejectTx --> TokensReturned[Tokens devueltos al emisor]
     
     ManageTransfers -->|Aceptar Incoming| AcceptTx
     ManageTransfers -->|Rechazar Incoming| RejectTx
-    ManageTransfers -->|Cancelar Outgoing| CancelTx[cancelTransfer()]
+    ManageTransfers -->|Cancelar Outgoing| CancelTx[cancelTransfer]
     
     CancelTx --> TokensReturned
     TokensTransferred --> ChooseAction
