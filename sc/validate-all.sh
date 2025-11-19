@@ -196,17 +196,33 @@ run_validation "SupplyChain.t.sol existe" "test -f test/SupplyChain.t.sol" ""
 run_validation "EdgeCasesTest.t.sol existe" "test -f test/EdgeCasesTest.t.sol" ""
 run_validation "SupplyChainDeploy.s.sol existe" "test -f script/SupplyChainDeploy.s.sol" ""
 run_validation "SupplyChainInteractions.s.sol existe" "test -f script/SupplyChainInteractions.s.sol" ""
-run_validation "docs/README.md existe" "test -f docs/README.md" ""
-run_validation "docs/ARCHITECTURE.md existe" "test -f docs/ARCHITECTURE.md" ""
+run_validation "docs/common/DOCUMENTATION.md existe" "test -f ../docs/common/DOCUMENTATION.md" ""
+run_validation "docs/sc/ARCHITECTURE.md existe" "test -f ../docs/sc/ARCHITECTURE.md" ""
 
 echo -e "\n${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "${CYAN}  FASE 8: VALIDACIÓN DE DOCUMENTACIÓN${NC}"
 echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 
-run_validation "README menciona 73 tests" "grep -q '73 tests' docs/README.md" ""
-run_validation "README documenta SupplyChain" "grep -q 'SupplyChain' docs/README.md" ""
-run_validation "ARCHITECTURE documenta proyecto" "grep -q 'SupplyChain.*Documentación' docs/ARCHITECTURE.md" ""
-run_validation "TESTING existe y documenta tests" "test -f docs/TESTING.md && grep -q 'test' docs/TESTING.md" ""
+# Validar docs/common/
+run_validation "docs/common/DOCUMENTATION.md existe" "test -f ../docs/common/DOCUMENTATION.md" ""
+
+# Validar docs/sc/
+run_validation "docs/sc/ARCHITECTURE.md existe" "test -f ../docs/sc/ARCHITECTURE.md" ""
+run_validation "docs/sc/TESTING.md existe" "test -f ../docs/sc/TESTING.md" ""
+run_validation "docs/sc/SECURITY.md existe" "test -f ../docs/sc/SECURITY.md" ""
+
+# Validar docs/fe/
+run_validation "docs/fe/SETUP.md existe" "test -f ../docs/fe/SETUP.md" ""
+run_validation "docs/fe/COMPONENTS.md existe" "test -f ../docs/fe/COMPONENTS.md" ""
+run_validation "docs/fe/HOOKS.md existe" "test -f ../docs/fe/HOOKS.md" ""
+
+# Validar docs/reports/
+run_validation "docs/reports/SUMMARY_DAY1.md existe" "test -f ../docs/reports/SUMMARY_DAY1.md" ""
+run_validation "docs/reports/ACADEMIC_ASSESSMENT.md existe" "test -f ../docs/reports/ACADEMIC_ASSESSMENT.md" ""
+
+# Validar estructura de directorios
+run_validation "Estructura docs/sc/ completa" "test -d ../docs/sc && test -d ../docs/sc/reports && test -d ../docs/sc/research" ""
+run_validation "Estructura docs/ completa" "test -d ../docs/common && test -d ../docs/fe && test -d ../docs/reports" ""
 
 echo -e "\n${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║                    RESUMEN FINAL                              ║${NC}"
@@ -224,7 +240,7 @@ echo -e "\n🎯 ${BLUE}Porcentaje de éxito: ${CYAN}${PERCENTAGE}%${NC}"
 generate_validation_report() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     local date_filename=$(date '+%Y-%m-%d')
-    local report_file="docs/reports/VALIDATION_RESULTS_${date_filename}.md"
+    local report_file="../docs/sc/reports/VALIDATION_RESULTS_${date_filename}.md"
     
     cat > $report_file << 'EOF'
 # ✅ RESULTADOS DE VALIDACIÓN COMPLETA

@@ -164,20 +164,20 @@
 └── IA.md                  ✅ Retrospectiva IA (500+ líneas) ⭐ NUEVO
 ```
 
-**Documentación Organizada (docs/):**
+**Documentación Organizada (docs/):** - 30 archivos
 ```
 docs/
-├── common/
-│   └── DOCUMENTATION.md       ✅ Doc técnica completa (940 líneas)
-├── sc/                    ✅ 18 archivos smart contract
+├── common/                ✅ 1 archivo
+│   └── DOCUMENTATION.md       (940 líneas)
+├── sc/                    ✅ 10 archivos + subdirectorios
 │   ├── API_REFERENCE.md       (721 líneas)
 │   ├── ARCHITECTURE.md        (1071 líneas)
 │   ├── TESTING.md             (364 líneas)
 │   ├── DEPLOYMENT.md          (502 líneas)
 │   ├── SECURITY.md            (221 líneas)
-│   ├── reports/               (4 archivos)
-│   └── research/              (3 archivos)
-├── fe/                    ✅ 5 archivos frontend (~5400 líneas)
+│   ├── reports/               ✅ 8 reportes automatizados
+│   └── research/              ✅ 3 archivos investigación
+├── fe/                    ✅ 4 archivos frontend (~5400 líneas)
 │   ├── SETUP.md               (40KB)
 │   ├── COMPONENTS.md          (1800 líneas)
 │   ├── HOOKS.md               (2200 líneas)

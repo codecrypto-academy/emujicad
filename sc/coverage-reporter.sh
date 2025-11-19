@@ -124,12 +124,12 @@ extract_metrics() {
 generate_markdown_report() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     local date_filename=$(date '+%Y-%m-%d')
-    local report_file="docs/reports/COVERAGE_REPORT_${date_filename}.md"
+    local report_file="../docs/sc/reports/COVERAGE_REPORT_${date_filename}.md"
     
     echo -e "\n${BLUE}📝 Generando reporte markdown...${NC}"
     
     # Crear directorio si no existe
-    mkdir -p docs/reports
+    mkdir -p ../docs/sc/reports
     
     cat > $report_file << EOF
 # 📊 Reporte Automático de Cobertura - SupplyChain
@@ -191,11 +191,11 @@ forge test --match-path "test/*" -vv
 
 **Última Ejecución**: $timestamp  
 *Reporte generado automáticamente por coverage-reporter.sh*  
-*Ubicación*: \`docs/reports/COVERAGE_REPORT_${date_filename}.md\`
+*Ubicación*: \`docs/sc/reports/COVERAGE_REPORT_${date_filename}.md\`
 EOF
 
     echo -e "${GREEN}✅ Reporte guardado en: $report_file${NC}"
-    echo -e "${BLUE}📂 Ubicación: docs/reports/${NC}"
+    echo -e "${BLUE}📂 Ubicación: docs/sc/reports/${NC}"
 }
 
 get_status() {

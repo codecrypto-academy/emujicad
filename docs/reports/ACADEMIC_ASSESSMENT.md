@@ -317,14 +317,15 @@ web/ ✅ Base implementado
 ├── tsconfig.json ✅
 └── next.config.ts ✅
 
+✅ COMPLETADO:
+└── IA.md ✅ (Retrospectiva de IA - 500+ líneas) ⭐ Día 2
+
 ⚠️ PENDIENTE (para frontend completo):
 ├── src/app/dashboard/ ❌ (Panel principal)
 ├── src/app/tokens/ ❌ (Gestión tokens)
 ├── src/app/admin/ ❌ (Panel admin)
-└── src/app/transfers/ ❌ (Transferencias)
-
-IA.md ❌ (Retrospectiva de IA)
-video_demo.mp4 ❌ (Presentación)
+├── src/app/transfers/ ❌ (Transferencias)
+└── video_demo.mp4 ❌ (Presentación final)
 ```
 
 ---

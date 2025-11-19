@@ -86,7 +86,7 @@ echo -e "${NC}"
 # Variables globales
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 DATE_FILENAME=$(date '+%Y-%m-%d')
-REPORTS_DIR="docs/reports"
+REPORTS_DIR="../docs/sc/reports"
 
 # Crear directorio de reportes si no existe
 mkdir -p "$REPORTS_DIR"
@@ -135,10 +135,13 @@ generate_documentation_audit() {
     fi
     
     # Contar archivos de documentación
-    local total_docs=$(find docs/ -name "*.md" -type f | wc -l)
-    local core_docs=$(find docs/ -maxdepth 1 -name "*.md" -type f | wc -l)
-    local research_docs=$(find docs/research/ -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
-    local reports_docs=$(find docs/reports/ -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+    local total_docs=$(find ../docs/ -name "*.md" -type f | wc -l)
+    local common_docs=$(find ../docs/common/ -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+    local sc_docs=$(find ../docs/sc/ -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+    local sc_reports=$(find ../docs/sc/reports/ -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+    local sc_research=$(find ../docs/sc/research/ -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+    local fe_docs=$(find ../docs/fe/ -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+    local reports_docs=$(find ../docs/reports/ -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
     
     # Buscar inconsistencias (referencias a números incorrectos)
     local incorrect_96=$(grep -r "96.*test" --include="*.md" docs/ 2>/dev/null | grep -v "Historical\|Exploración\|96 (exploración)" | wc -l || echo "0")
@@ -166,9 +169,12 @@ generate_documentation_audit() {
 
 **Documentación:**
 - **Total archivos:** $total_docs documentos
-- **Archivos core:** $core_docs documentos
-- **Archivos research:** $research_docs documentos
-- **Archivos reports:** $reports_docs reportes
+- **docs/common/:** $common_docs documentos
+- **docs/sc/ (root):** $sc_docs documentos
+- **docs/sc/reports/:** $sc_reports reportes
+- **docs/sc/research/:** $sc_research documentos
+- **docs/fe/:** $fe_docs documentos
+- **docs/reports/:** $reports_docs reportes
 
 ---
 
@@ -202,19 +208,34 @@ $coverage_output
 
 ## 📁 Estructura de Documentación
 
-### Core Documentation (docs/)
+### Common Documentation (docs/common/)
 \`\`\`
-$(find docs/ -maxdepth 1 -name "*.md" -type f -exec basename {} \; | sort)
-\`\`\`
-
-### Research Documents (docs/research/)
-\`\`\`
-$(find docs/research/ -name "*.md" -type f -exec basename {} \; 2>/dev/null | sort || echo "N/A")
+$(find ../docs/common/ -name "*.md" -type f -exec basename {} \; 2>/dev/null | sort || echo "N/A")
 \`\`\`
 
-### Reports (docs/reports/)
+### Smart Contract Docs (docs/sc/)
 \`\`\`
-$(find docs/reports/ -name "*.md" -type f -exec basename {} \; 2>/dev/null | sort || echo "N/A")
+$(find ../docs/sc/ -maxdepth 1 -name "*.md" -type f -exec basename {} \; 2>/dev/null | sort || echo "N/A")
+\`\`\`
+
+### SC Reports (docs/sc/reports/)
+\`\`\`
+$(find ../docs/sc/reports/ -name "*.md" -type f -exec basename {} \; 2>/dev/null | sort || echo "N/A")
+\`\`\`
+
+### SC Research (docs/sc/research/)
+\`\`\`
+$(find ../docs/sc/research/ -name "*.md" -type f -exec basename {} \; 2>/dev/null | sort || echo "N/A")
+\`\`\`
+
+### Frontend Docs (docs/fe/)
+\`\`\`
+$(find ../docs/fe/ -name "*.md" -type f -exec basename {} \; 2>/dev/null | sort || echo "N/A")
+\`\`\`
+
+### Project Reports (docs/reports/)
+\`\`\`
+$(find ../docs/reports/ -name "*.md" -type f -exec basename {} \; 2>/dev/null | sort || echo "N/A")
 \`\`\`
 
 ---
@@ -257,15 +278,26 @@ $(ls -1 *.sh 2>/dev/null | sort)
 ## 📋 Checklist de Calidad
 
 ### Documentación Técnica
-- [$(check_file_exists "docs/README.md")] Landing page principal existe
-- [$(check_file_exists "docs/ARCHITECTURE.md")] Documentación de arquitectura
-- [$(check_file_exists "docs/TESTING.md")] Guía de testing
-- [$(check_file_exists "docs/SECURITY.md")] Documentación de seguridad
-- [$(check_file_exists "docs/DEPLOYMENT.md")] Guía de deployment
+- [$(check_file_exists "../docs/common/DOCUMENTATION.md")] Documentación principal existe
+- [$(check_file_exists "../docs/sc/ARCHITECTURE.md")] Documentación de arquitectura SC
+- [$(check_file_exists "../docs/sc/TESTING.md")] Guía de testing SC
+- [$(check_file_exists "../docs/sc/SECURITY.md")] Documentación de seguridad SC
+- [$(check_file_exists "../docs/sc/DEPLOYMENT.md")] Guía de deployment SC
 
-### Reportes Automatizados
-- [$(check_file_exists "docs/reports/COVERAGE_REPORT_${DATE_FILENAME}.md")] Reporte de coverage del día
-- [$(check_file_exists "docs/reports/VALIDATION_RESULTS.md")] Reporte de validación
+### Documentación Frontend
+- [$(check_file_exists "../docs/fe/SETUP.md")] Setup frontend existe
+- [$(check_file_exists "../docs/fe/COMPONENTS.md")] Documentación de componentes
+- [$(check_file_exists "../docs/fe/HOOKS.md")] Documentación de hooks
+- [$(check_file_exists "../docs/fe/WEB3.md")] Documentación Web3
+
+### Reportes del Proyecto
+- [$(check_file_exists "../docs/reports/SUMMARY_DAY1.md")] Resumen de días completados
+- [$(check_file_exists "../docs/reports/ACADEMIC_ASSESSMENT.md")] Evaluación académica
+- [$(check_file_exists "../docs/reports/PROYECTO_EVALUACION_COMPLETA.md")] Evaluación completa
+
+### Reportes Automatizados SC
+- [$(check_file_exists "../docs/sc/reports/COVERAGE_REPORT_${DATE_FILENAME}.md")] Reporte de coverage del día
+- [$(check_file_exists "../docs/sc/reports/VALIDATION_RESULTS_${DATE_FILENAME}.md")] Reporte de validación
 
 ### Scripts Funcionales
 - [$(test -x coverage-reporter.sh && echo "x" || echo " ")] coverage-reporter.sh ejecutable

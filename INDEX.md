@@ -320,23 +320,38 @@ grep -i error logs/*.log
 ├── 📄 README.md                    ⭐ README original del proyecto
 ├── 📄 QUICKSTART.md                ⭐ Quick start (INICIO AQUÍ)
 ├── 📄 INDEX.md                     ⭐ Este archivo (maestro)
+├── 📄 IA.md                        ⭐ Retrospectiva uso de IA
 ├── 🚀 deploy.sh                    ⭐ Script automatizado
 │
-├── 📁 docs/                        ⭐ Toda la documentación
-│   ├── README.md                    (Navegación docs/)
-│   ├── common/                      (Documentación general)
+├── 📁 docs/                        ⭐ Toda la documentación (30 archivos)
+│   ├── common/                      (1 archivo)
 │   │   └── DOCUMENTATION.md         (940+ líneas completas)
-│   ├── sc/                          (18 archivos SC)
+│   ├── sc/                          (10 archivos + subdirectorios)
 │   │   ├── API_REFERENCE.md
 │   │   ├── ARCHITECTURE.md
-│   │   ├── reports/
-│   │   └── research/
-│   ├── fe/                          (5 archivos frontend)
+│   │   ├── CHANGELOG.md
+│   │   ├── CONTRIBUTING.md
+│   │   ├── DEPLOYMENT.md
+│   │   ├── GETTING_STARTED.md
+│   │   ├── SCRIPTS_ARCHITECTURE.md
+│   │   ├── SCRIPTS.md
+│   │   ├── SECURITY.md
+│   │   ├── TESTING.md
+│   │   ├── reports/                 (8 reportes automatizados)
+│   │   │   ├── COVERAGE_REPORT_*.md
+│   │   │   ├── DOCUMENTATION_AUDIT_*.md
+│   │   │   ├── TEST_INTEGRITY_AUDIT_*.md
+│   │   │   └── VALIDATION_RESULTS_*.md
+│   │   └── research/                (3 documentos investigación)
+│   │       ├── COVERAGE_ANALYSIS.md
+│   │       ├── MIGRATION_HISTORY.md
+│   │       └── SCRIPT_EVOLUTION.md
+│   ├── fe/                          (4 archivos frontend)
 │   │   ├── SETUP.md                 (40KB detallado)
 │   │   ├── COMPONENTS.md            (1800 líneas)
 │   │   ├── HOOKS.md                 (2200 líneas)
 │   │   └── WEB3.md                  (1400 líneas)
-│   └── reports/                     (4 evaluaciones)
+│   └── reports/                     (4 evaluaciones proyecto)
 │       ├── SUMMARY_DAY1.md
 │       ├── ACADEMIC_ASSESSMENT.md
 │       ├── TESTING_REPORT.md
@@ -375,6 +390,7 @@ Por frecuencia de uso:
 4. **[docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)** - Referencia técnica
 5. **[docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md)** - Revisión rápida
 6. **[docs/reports/TESTING_REPORT.md](./docs/reports/TESTING_REPORT.md)** ⭐ - Validación del script
+7. **[IA.md](./IA.md)** ⭐ - Retrospectiva del uso de IA en el proyecto
 
 ---
 
@@ -414,9 +430,12 @@ Por frecuencia de uso:
 **¿El script está probado?**
 → [docs/reports/TESTING_REPORT.md](./docs/reports/TESTING_REPORT.md)
 
+**¿Cómo se usó la IA?**
+→ [IA.md](./IA.md)
+
 ---
 
 **Índice creado**: 18 de Noviembre, 2025  
 **Última actualización**: 19 de Noviembre, 2025  
-**Versión**: 2.0.0 - Documentación reorganizada en /docs  
-**Estado**: ✅ Documentación profesional + Script validado 100%
+**Versión**: 2.1.0 - Documentación completa + Scripts validados + IA.md  
+**Estado**: ✅ 34 archivos .md | 30 en docs/ | 4 en root | Scripts 100% funcionales

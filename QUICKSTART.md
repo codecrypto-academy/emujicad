@@ -78,6 +78,7 @@ chmod +x deploy.sh
 
 - **[QUICKSTART.md](./QUICKSTART.md)** - Esta guía rápida
 - **[INDEX.md](./INDEX.md)** - Índice maestro de toda la documentación
+- **[IA.md](./IA.md)** ⭐ - Retrospectiva del uso de IA en el proyecto
 - **¿Necesitas entender la arquitectura?**
 → [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)
 - **[docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md)** - Resumen del Día 1
@@ -335,6 +336,7 @@ Ver **[docs/reports/ACADEMIC_ASSESSMENT.md](./docs/reports/ACADEMIC_ASSESSMENT.m
 
 ### Documentación del Proyecto
 - [INDEX.md](./INDEX.md) - Índice maestro de toda la documentación
+- [IA.md](./IA.md) - Retrospectiva del uso de IA
 - [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md) - Guía técnica completa
 - [docs/fe/SETUP.md](./docs/fe/SETUP.md) - Documentación del frontend
 - [docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md) - Resumen del Día 1
