@@ -14,11 +14,12 @@ import {
 
 export function ConnectWallet() {
   const { address, isConnected } = useAccount()
-  const { connect, connectors } = useConnect()
+  const { connect, connectors, isPending } = useConnect()
   const { disconnect } = useDisconnect()
   const [mounted, setMounted] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
   const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false)
+  const [isConnecting, setIsConnecting] = useState(false)
 
   // Evitar hydration mismatch - usar useEffect sin setState directo
   useEffect(() => {
@@ -90,10 +91,27 @@ export function ConnectWallet() {
     )
   })
 
-  const handleConnect = (connector: typeof connectors[0]) => {
-    connect({ connector })
+  const handleConnect = async (connector: typeof connectors[0]) => {
+    if (isConnecting || isPending) return
+    
+    setIsConnecting(true)
     setShowDialog(false)
+    
+    try {
+      await connect({ connector })
+    } catch (error) {
+      console.error('Connection error:', error)
+      setIsConnecting(false)
+    }
   }
+
+  // Cerrar el diálogo y resetear isConnecting cuando se conecta exitosamente
+  useEffect(() => {
+    if (isConnected) {
+      setShowDialog(false)
+      setIsConnecting(false)
+    }
+  }, [isConnected])
 
   if (!mounted) {
     return (
@@ -160,6 +178,7 @@ export function ConnectWallet() {
                   onClick={() => handleConnect(connector)}
                   variant="outline"
                   className="w-full justify-start h-auto py-3 px-4"
+                  disabled={isConnecting || isPending}
                 >
                   <div className="flex items-center gap-3">
                     <div className="text-2xl">{icon}</div>

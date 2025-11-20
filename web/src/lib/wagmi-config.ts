@@ -11,6 +11,7 @@ export const config = createConfig({
   transports: {
     [localhost.id]: http('http://127.0.0.1:8545'), // URL de Anvil
   },
+  multiInjectedProviderDiscovery: false, // Prevenir múltiples solicitudes de conexión
 })
 
 declare module 'wagmi' {

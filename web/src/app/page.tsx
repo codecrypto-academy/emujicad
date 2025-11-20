@@ -82,6 +82,10 @@ export default function Home() {
     return statusConfig[status as UserStatus] || { label: 'Unknown', variant: 'outline' as const }
   }
 
+  if (!mounted) {
+    return null
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-6xl flex-col py-8 px-4 md:px-8 space-y-6 bg-white dark:bg-black">
@@ -93,10 +97,10 @@ export default function Home() {
         )}
 
         {/* Header - Show only when connected */}
-        {isConnected && mounted && <Header />}
+        {isConnected && <Header />}
 
         {/* User Status Messages and Registration */}
-        {isConnected && mounted && (
+        {isConnected && !isAdmin && (
           <div className="w-full mb-8">
             {isLoadingOwner || isLoadingUser ? (
               <Card>
@@ -140,24 +144,24 @@ export default function Home() {
                     </CardContent>
                   </Card>
                 )}
-                {Number(userInfo.status) === UserStatus.Suspended && (
-                  <Card className="border-orange-200 bg-orange-50">
+                {Number(userInfo.status) === UserStatus.Canceled && (
+                  <Card className="border-gray-200 bg-gray-50">
                     <CardContent className="pt-6">
                       <div className="space-y-2">
-                        <p className="text-sm text-orange-700">
-                          ⚠️ Your account has been suspended
+                        <p className="text-sm text-gray-700">
+                          🚫 Your account has been canceled
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Please contact the administrator to restore access
+                          Please contact the administrator for more information
                         </p>
                       </div>
                     </CardContent>
                   </Card>
                 )}
               </>
-            ) : !isAdmin ? (
+            ) : (
               <RegisterForm />
-            ) : null}
+            )}
           </div>
         )}
 
@@ -199,12 +203,7 @@ export default function Home() {
         {/* Bienvenida */}
         <div className="flex flex-col items-center gap-6 text-center">
           <h2 className="max-w-xs text-2xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            {!mounted 
-              ? 'Supply Chain Tracker'
-              : isConnected 
-                ? '¡Bienvenido a la DApp!' 
-                : 'Conecta tu wallet para comenzar'
-            }
+            {isConnected ? '¡Bienvenido a la DApp!' : 'Conecta tu wallet para comenzar'}
           </h2>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
             Sistema descentralizado de tracking para supply chain basado en blockchain.{" "}

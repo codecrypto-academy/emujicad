@@ -36,7 +36,7 @@ export enum UserStatus {
   Pending = 0,    // Pendiente de aprobación
   Approved = 1,   // Aprobado por admin
   Rejected = 2,   // Rechazado por admin
-  Suspended = 3,  // Suspendido
+  Canceled = 3,   // Cancelado
 }
 
 export enum TokenType {

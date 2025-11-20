@@ -23,10 +23,13 @@ export default function AdminUsersPage() {
     setMounted(true)
   }, [])
 
-  // Redireccionar si no es owner
+  // Redireccionar si no es owner o si se desconecta
   useEffect(() => {
-    if (mounted && !isLoadingOwner && isConnected && !isOwner) {
-      router.push('/')
+    if (mounted && !isLoadingOwner) {
+      // Si no está conectado O si está conectado pero no es owner
+      if (!isConnected || (isConnected && !isOwner)) {
+        router.push('/')
+      }
     }
   }, [isOwner, isConnected, isLoadingOwner, router, mounted])
 

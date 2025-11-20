@@ -20,7 +20,6 @@ export function useWeb3Context() {
 export function Web3Provider({ children }: { children: ReactNode }) {
   const { address, isConnected } = useAccount()
   const { disconnect } = useDisconnect()
-  const { connect, connectors } = useConnect()
   const [isInitialized, setIsInitialized] = useState(false)
   const [lastConnectedAddress, setLastConnectedAddress] = useState<string | null>(null)
   const [wasConnected, setWasConnected] = useState(false)
@@ -114,11 +113,11 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     }
   }, [address, disconnect])
 
-  // 5. 🆕 SINCRONIZACIÓN MULTI-PESTAÑA: Detectar cambios de localStorage en otras pestañas
+  // 5. SINCRONIZACIÓN MULTI-PESTAÑA: Solo detectar desconexiones
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const handleStorageChange = async (e: StorageEvent) => {
+    const handleStorageChange = (e: StorageEvent) => {
       // Solo reaccionar a cambios de lastConnectedAddress
       if (e.key !== 'lastConnectedAddress') return
 
@@ -128,52 +127,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
         newValue: e.newValue
       })
 
-      // Nueva dirección conectada en otra pestaña → Reconectar silenciosamente
-      if (e.newValue && !isConnected) {
-        console.log('✅ New connection detected in another tab, reconnecting silently...')
-        
-        // Esperar a que MetaMask esté disponible (si no lo está aún)
-        let attempts = 0
-        const maxAttempts = 10
-        
-        const waitForMetaMask = async () => {
-          while (!window.ethereum && attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 100))
-            attempts++
-          }
-          return window.ethereum !== undefined
-        }
-
-        const hasMetaMask = await waitForMetaMask()
-        
-        if (hasMetaMask) {
-          // Buscar el conector correcto (injected o metaMask)
-          const injectedConnector = connectors.find(c => 
-            c.id === 'injected' || c.name === 'MetaMask' || c.id === 'io.metamask'
-          )
-          
-          if (injectedConnector) {
-            try {
-              console.log('🔌 Attempting silent reconnection with connector:', injectedConnector.name)
-              await connect({ connector: injectedConnector })
-              console.log('✅ Silent reconnection successful')
-            } catch (error) {
-              console.error('❌ Silent reconnection failed:', error)
-              // Fallback: recargar página
-              window.location.reload()
-            }
-          } else {
-            console.warn('⚠️ No injected connector found, reloading page...')
-            window.location.reload()
-          }
-        } else {
-          console.warn('⚠️ MetaMask not detected after waiting, reloading page...')
-          window.location.reload()
-        }
-      }
-      
       // Desconexión en otra pestaña SOLO si había un valor anterior
-      // (Evita desconectar cuando se abre una nueva pestaña sin MetaMask)
       if (!e.newValue && e.oldValue && isConnected) {
         console.log('❌ Disconnection detected in another tab, disconnecting here too...')
         disconnect()
@@ -185,7 +139,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener('storage', handleStorageChange)
     }
-  }, [isConnected, disconnect, connect, connectors])
+  }, [isConnected, disconnect])
 
   return (
     <Web3Context.Provider value={{ isInitialized, lastConnectedAddress }}>
