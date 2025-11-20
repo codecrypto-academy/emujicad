@@ -62,7 +62,7 @@ export function Header() {
   const isOnAdminPage = pathname === '/admin/users'
 
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
       <div className="p-6">
         <div className="flex flex-col gap-4">
           {/* Row 1: Title and Actions */}
@@ -71,8 +71,8 @@ export function Header() {
             <div className="flex items-center gap-3 w-80">
               <div className="text-2xl">📦</div>
               <div>
-                <h1 className="text-xl font-bold">Supply Chain Tracker</h1>
-                <p className="text-xs text-muted-foreground">Blockchain-based supply chain management</p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Supply Chain Tracker</h1>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Blockchain-based supply chain management</p>
               </div>
             </div>
 
@@ -120,8 +120,8 @@ export function Header() {
           <div className="flex flex-col gap-2">
             {/* User Address */}
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Dirección:</span>
-              <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Dirección:</span>
+              <code className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded font-mono border border-gray-200 dark:border-gray-700">
                 {address}
               </code>
             </div>
@@ -139,32 +139,32 @@ export function Header() {
                   <span className="mr-1">{getRoleIcon(userInfo.role)}</span>
                   {getRoleName(userInfo.role)}
                 </Badge>
-                <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 border-blue-200 dark:border-blue-800">
                   ID: {userInfo.id?.toString()}
                 </Badge>
                 {Number(userInfo.status) === UserStatus.Pending && (
-                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
+                  <Badge variant="secondary" className="bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800">
                     ⏳ Pending Approval
                   </Badge>
                 )}
                 {Number(userInfo.status) === UserStatus.Approved && (
-                  <Badge variant="default" className="bg-green-600">
+                  <Badge variant="default" className="bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-800">
                     ✅ Approved
                   </Badge>
                 )}
                 {Number(userInfo.status) === UserStatus.Rejected && (
-                  <Badge variant="destructive">
+                  <Badge variant="destructive" className="bg-red-600 dark:bg-red-700">
                     ❌ Rejected
                   </Badge>
                 )}
                 {Number(userInfo.status) === 3 && (
-                  <Badge variant="outline" className="bg-gray-100">
+                  <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">
                     🚫 Canceled
                   </Badge>
                 )}
               </>
             ) : mounted ? (
-              <Badge variant="outline" className="bg-gray-100">
+              <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">
                 👤 Not Registered
               </Badge>
             ) : null}
@@ -174,12 +174,12 @@ export function Header() {
             {!isAdmin && userInfo && mounted && Number(userInfo.status) === UserStatus.Approved && (
               <div className="flex items-center gap-2 mt-2">
                 <Link href="/dashboard">
-                  <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700">
+                  <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
                     Dashboard
                   </Button>
                 </Link>
                 <Link href="/tokens">
-                  <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700">
+                  <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
                     My Tokens
                   </Button>
                 </Link>
