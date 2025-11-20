@@ -106,11 +106,25 @@ export function RegisterForm() {
             </div>
           )}
 
-          {/* Error */}
+          {/* Error Message */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-              <p className="font-semibold">Error:</p>
-              <p>{error.message || 'Failed to submit registration'}</p>
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-700 font-semibold mb-1">❌ Registration Failed</p>
+              <p className="text-xs text-red-600">
+                {error.message?.includes('User rejected') || error.message?.includes('User denied')
+                  ? 'Transaction cancelled by user in MetaMask'
+                  : error.message?.includes('InvalidAddress')
+                  ? 'The contract owner cannot register as a user. Administrators have full access by default.'
+                  : error.message?.includes('ExistingUserWithApprovedRole')
+                  ? 'This address is already registered and approved'
+                  : error.message?.includes('UserWithExistingRole')
+                  ? 'You already have this role assigned'
+                  : error.message?.includes('InvalidRole')
+                  ? 'Invalid role selected'
+                  : error.message?.includes('execution reverted')
+                  ? 'Transaction rejected by the contract. Please check the requirements.'
+                  : error.message || 'An unexpected error occurred during registration'}
+              </p>
             </div>
           )}
 

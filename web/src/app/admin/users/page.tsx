@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { useRouter } from 'next/navigation'
 import { useContractOwner } from '@/hooks/useContractOwner'
+import { Header } from '@/components/Header'
 import { UserManagementTable } from '@/components/admin/UserManagementTable'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -88,17 +89,15 @@ export default function AdminUsersPage() {
   // Si llegamos aquí, el usuario es el owner
   return (
     <div className="container mx-auto py-8 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">👤 Gestión de Usuarios</h1>
-          <p className="text-muted-foreground mt-1">
-            Administración de usuarios y permisos del sistema
-          </p>
-        </div>
-        <Link href="/">
-          <Button variant="outline">← Volver al inicio</Button>
-        </Link>
+      {/* Header Común */}
+      <Header />
+
+      {/* Page Title */}
+      <div>
+        <h1 className="text-3xl font-bold">👤 Gestión de Usuarios</h1>
+        <p className="text-muted-foreground mt-1">
+          Administración de usuarios y permisos del sistema
+        </p>
       </div>
 
       {/* Tabla de gestión (incluye stats internamente para sincronización) */}

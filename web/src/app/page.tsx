@@ -1,6 +1,7 @@
 'use client'
 
 import { ConnectWallet } from '@/components/ConnectWallet'
+import { Header } from '@/components/Header'
 import { RegisterForm } from '@/components/RegisterForm'
 import { ChangeRoleDialog } from '@/components/ChangeRoleDialog'
 import { useAccount } from 'wagmi'
@@ -83,12 +84,16 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center py-32 px-16 bg-white dark:bg-black">
-        {/* Header */}
-        <div className="w-full flex justify-between items-center mb-16">
-          <h1 className="text-3xl font-bold">Supply Chain Tracker</h1>
-          <ConnectWallet />
-        </div>
+      <main className="flex min-h-screen w-full max-w-7xl flex-col py-8 px-4 md:px-8 bg-white dark:bg-black">
+        {/* Connect Wallet - Show only if not connected */}
+        {!isConnected && (
+          <div className="w-full flex justify-center mb-8">
+            <ConnectWallet />
+          </div>
+        )}
+
+        {/* Header - Show only when connected */}
+        {isConnected && mounted && <Header />}
 
         {/* Detección de Rol del Usuario */}
         {isConnected && mounted && (
@@ -97,33 +102,6 @@ export default function Home() {
               <Card>
                 <CardContent className="pt-6">
                   <p className="text-center text-muted-foreground">Loading user information...</p>
-                </CardContent>
-              </Card>
-            ) : isAdmin ? (
-              <Card className="border-purple-200 bg-purple-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span>👑</span>
-                    <span>Administrator</span>
-                  </CardTitle>
-                  <CardDescription>Contract Owner</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm font-mono text-muted-foreground mb-2">
-                    {address}
-                  </p>
-                  <div className="flex gap-2">
-                    <Link href="/admin/users">
-                      <Button size="sm" variant="default" className="bg-purple-600 hover:bg-purple-700">
-                        Manage Users
-                      </Button>
-                    </Link>
-                    <Link href="/dashboard">
-                      <Button size="sm" variant="default" className="bg-purple-600 hover:bg-purple-700">
-                        View Statistics
-                      </Button>
-                    </Link>
-                  </div>
                 </CardContent>
               </Card>
             ) : userInfo && typeof userInfo === 'object' && 'id' in userInfo && Number(userInfo.id) > 0 ? (
@@ -194,9 +172,9 @@ export default function Home() {
                   )}
                 </CardContent>
               </Card>
-            ) : (
+            ) : !isAdmin ? (
               <RegisterForm />
-            )}
+            ) : null}
           </div>
         )}
 
