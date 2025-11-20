@@ -84,7 +84,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-7xl flex-col py-8 px-4 md:px-8 bg-white dark:bg-black">
+      <main className="flex min-h-screen w-full max-w-6xl flex-col py-8 px-4 md:px-8 space-y-6 bg-white dark:bg-black">
         {/* Connect Wallet - Show only if not connected */}
         {!isConnected && (
           <div className="w-full flex justify-center mb-8">

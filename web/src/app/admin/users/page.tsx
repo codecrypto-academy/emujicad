@@ -88,7 +88,8 @@ export default function AdminUsersPage() {
 
   // Si llegamos aquí, el usuario es el owner
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+      <main className="flex min-h-screen w-full max-w-6xl flex-col py-8 px-4 md:px-8 bg-white dark:bg-black">
       {/* Header Común */}
       <Header />
 
@@ -102,6 +103,7 @@ export default function AdminUsersPage() {
 
       {/* Tabla de gestión (incluye stats internamente para sincronización) */}
       <UserManagementTable />
+      </main>
     </div>
   )
 }
