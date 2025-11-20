@@ -95,7 +95,7 @@ export default function Home() {
         {/* Header - Show only when connected */}
         {isConnected && mounted && <Header />}
 
-        {/* Detección de Rol del Usuario */}
+        {/* User Status Messages and Registration */}
         {isConnected && mounted && (
           <div className="w-full mb-8">
             {isLoadingOwner || isLoadingUser ? (
@@ -105,73 +105,56 @@ export default function Home() {
                 </CardContent>
               </Card>
             ) : userInfo && typeof userInfo === 'object' && 'id' in userInfo && Number(userInfo.id) > 0 ? (
-              <Card className="border-blue-200 bg-blue-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span>{getRoleIcon(Number(userInfo.role))}</span>
-                    <span>{getRoleName(Number(userInfo.role))}</span>
-                    <Badge variant={getStatusBadge(Number(userInfo.status)).variant}>
-                      {getStatusBadge(Number(userInfo.status)).label}
-                    </Badge>
-                  </CardTitle>
-                  <CardDescription>User ID: {userInfo.id?.toString()}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm font-mono text-muted-foreground mb-3">
-                    {address}
-                  </p>
-                  {Number(userInfo.status) === UserStatus.Approved && (
-                    <div className="flex gap-2">
-                      <Link href="/dashboard">
-                        <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700">
-                          Dashboard
-                        </Button>
-                      </Link>
-                      <Link href="/tokens">
-                        <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700">
-                          My Tokens
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                  {Number(userInfo.status) === UserStatus.Pending && (
-                    <div className="space-y-3">
-                      <p className="text-sm text-yellow-700 bg-yellow-100 p-2 rounded">
-                        ⏳ Your registration is pending approval by the administrator
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs text-muted-foreground">
-                          Want to change your role?
+              <>
+                {Number(userInfo.status) === UserStatus.Pending && (
+                  <Card className="border-yellow-200 bg-yellow-50">
+                    <CardContent className="pt-6">
+                      <div className="space-y-3">
+                        <p className="text-sm text-yellow-700">
+                          ⏳ Your registration is pending approval by the administrator
                         </p>
-                        <ChangeRoleDialog 
-                          currentRole={Number(userInfo.role)} 
-                          onSuccess={() => refetchUserInfo()}
-                        />
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-muted-foreground">
+                            Want to change your role?
+                          </p>
+                          <ChangeRoleDialog 
+                            currentRole={Number(userInfo.role)} 
+                            onSuccess={() => refetchUserInfo()}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {Number(userInfo.status) === UserStatus.Rejected && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-red-700 bg-red-100 p-2 rounded">
-                        ❌ Your registration was rejected by the administrator
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Please contact the administrator for more information
-                      </p>
-                    </div>
-                  )}
-                  {Number(userInfo.status) === UserStatus.Suspended && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-orange-700 bg-orange-100 p-2 rounded">
-                        ⚠️ Your account has been suspended
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Please contact the administrator to restore access
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+                )}
+                {Number(userInfo.status) === UserStatus.Rejected && (
+                  <Card className="border-red-200 bg-red-50">
+                    <CardContent className="pt-6">
+                      <div className="space-y-2">
+                        <p className="text-sm text-red-700">
+                          ❌ Your registration was rejected by the administrator
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Please contact the administrator for more information
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                {Number(userInfo.status) === UserStatus.Suspended && (
+                  <Card className="border-orange-200 bg-orange-50">
+                    <CardContent className="pt-6">
+                      <div className="space-y-2">
+                        <p className="text-sm text-orange-700">
+                          ⚠️ Your account has been suspended
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Please contact the administrator to restore access
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
             ) : !isAdmin ? (
               <RegisterForm />
             ) : null}

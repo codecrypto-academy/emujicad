@@ -9,6 +9,7 @@ import { useContractOwner } from '@/hooks/useContractOwner'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UserStatus } from '@/contracts/config'
+import { useState, useEffect } from 'react'
 
 type UserInfo = {
   id: bigint
@@ -24,6 +25,11 @@ export function Header() {
   const { owner } = useContractOwner()
   const { data: rawUserInfo } = useUserInfo(address)
   const userInfo = rawUserInfo as UserInfo | undefined
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const isAdmin = address && owner && address.toLowerCase() === owner.toLowerCase()
 
@@ -115,17 +121,20 @@ export function Header() {
             </div>
 
             {/* User Role & Status */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
             {isAdmin ? (
               <Badge className="bg-purple-600 hover:bg-purple-700">
                 <span className="mr-1">👑</span>
                 Administrator
               </Badge>
-            ) : userInfo ? (
+            ) : userInfo && mounted ? (
               <>
                 <Badge variant="outline">
                   <span className="mr-1">{getRoleIcon(userInfo.role)}</span>
                   {getRoleName(userInfo.role)}
+                </Badge>
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                  ID: {userInfo.id?.toString()}
                 </Badge>
                 {Number(userInfo.status) === UserStatus.Pending && (
                   <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
@@ -148,12 +157,28 @@ export function Header() {
                   </Badge>
                 )}
               </>
-            ) : (
+            ) : mounted ? (
               <Badge variant="outline" className="bg-gray-100">
                 👤 Not Registered
               </Badge>
-            )}
+            ) : null}
             </div>
+
+            {/* Action Buttons for Approved Users */}
+            {!isAdmin && userInfo && mounted && Number(userInfo.status) === UserStatus.Approved && (
+              <div className="flex items-center gap-2 mt-2">
+                <Link href="/dashboard">
+                  <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700">
+                    Dashboard
+                  </Button>
+                </Link>
+                <Link href="/tokens">
+                  <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700">
+                    My Tokens
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
