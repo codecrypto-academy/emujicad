@@ -203,6 +203,30 @@ deploy_contract() {
         return 1
     fi
     
+    # Verificar si ya hay un contrato desplegado y Anvil sigue corriendo
+    local contract_address_file="$LOGS_DIR/contract_address.txt"
+    if [ -f "$contract_address_file" ]; then
+        local existing_contract=$(cat "$contract_address_file")
+        if [ -n "$existing_contract" ]; then
+            # Verificar si el contrato sigue accesible (Anvil no se reinició)
+            local rpc_check=$(curl -s -X POST \
+                -H "Content-Type: application/json" \
+                --data '{"jsonrpc":"2.0","method":"eth_getCode","params":["'$existing_contract'","latest"],"id":1}' \
+                "http://$ANVIL_HOST:$ANVIL_PORT" 2>/dev/null)
+            
+            # Si el contrato tiene código (no es "0x"), está desplegado
+            if echo "$rpc_check" | grep -q '"result":"0x[0-9a-f]\{10,\}"'; then
+                print_warning "Contrato ya desplegado en: $existing_contract"
+                print_info "Anvil no se reinició, usando contrato existente"
+                print_info "Para redesplegar, ejecuta: ./deploy.sh restart"
+                return 0
+            else
+                print_warning "Contrato anterior no encontrado (Anvil reiniciado)"
+                print_info "Desplegando nuevo contrato..."
+            fi
+        fi
+    fi
+    
     print_step "Desplegando SupplyChain.sol en Anvil..."
     
     cd "$SC_DIR"

@@ -18,6 +18,7 @@ export function ConnectWallet() {
   const { disconnect } = useDisconnect()
   const [mounted, setMounted] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
+  const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false)
 
   // Evitar hydration mismatch - usar useEffect sin setState directo
   useEffect(() => {
@@ -25,6 +26,31 @@ export function ConnectWallet() {
     const timer = setTimeout(() => setMounted(true), 0)
     return () => clearTimeout(timer)
   }, [])
+
+  // Detectar MetaMask después de montar el componente
+  useEffect(() => {
+    if (!mounted || typeof window === 'undefined') return
+
+    // Verificar si MetaMask ya está disponible
+    const checkMetaMask = () => {
+      const isInstalled = window.ethereum?.isMetaMask === true
+      setIsMetaMaskInstalled(isInstalled)
+    }
+
+    // Verificar inmediatamente
+    checkMetaMask()
+
+    // Verificar de nuevo después de 100ms (por si MetaMask tarda en inyectarse)
+    const timer = setTimeout(checkMetaMask, 100)
+
+    // Escuchar evento de MetaMask (por si se instala después)
+    window.addEventListener('ethereum#initialized', checkMetaMask)
+
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('ethereum#initialized', checkMetaMask)
+    }
+  }, [mounted])
 
   // Detectar wallets disponibles y eliminar duplicados
   // Si hay 'injected' Y 'MetaMask', solo mostrar 'injected' (es MetaMask)
@@ -40,10 +66,6 @@ export function ConnectWallet() {
   })() : []
   
   const hasWallets = availableConnectors.length > 0
-  
-  // Detectar específicamente MetaMask
-  const isMetaMaskInstalled = mounted && typeof window !== 'undefined' && 
-    window.ethereum?.isMetaMask === true
 
   // Top 5 wallets recomendadas - excluir las ya instaladas
   const allRecommendedWallets = [
