@@ -183,8 +183,8 @@ export default function Home() {
           </div>
         )}
 
-        {/* Stats cuando esté conectado */}
-        {isConnected && mounted && (
+        {/* Stats - Solo para administradores y usuarios aprobados */}
+        {isConnected && mounted && (isAdmin || (userInfo && Number(userInfo.status) === UserStatus.Approved)) && (
           <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <Card>
               <CardHeader>
@@ -196,15 +196,18 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Usuarios</CardTitle>
-                <CardDescription>Total registrados</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{totalUsers?.toString() || '0'}</p>
-              </CardContent>
-            </Card>
+            {/* Solo admin puede ver total de usuarios */}
+            {isAdmin && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Usuarios</CardTitle>
+                  <CardDescription>Total registrados</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold">{totalUsers?.toString() || '0'}</p>
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardHeader>

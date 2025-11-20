@@ -9,12 +9,17 @@ export function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true)
-    // Leer el tema guardado en localStorage
+    // Leer el tema guardado en localStorage, por defecto siempre claro
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
     const initialTheme = savedTheme || 'light'
     
+    // Si no hay tema guardado, asegurar que inicie en claro
+    if (!savedTheme) {
+      document.documentElement.classList.remove('dark')
+    } else {
+      document.documentElement.classList.toggle('dark', initialTheme === 'dark')
+    }
     setTheme(initialTheme)
-    document.documentElement.classList.toggle('dark', initialTheme === 'dark')
   }, [])
 
   const toggleTheme = () => {
