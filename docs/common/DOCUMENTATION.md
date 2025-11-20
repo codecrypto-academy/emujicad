@@ -1,7 +1,7 @@
 # 📚 Documentación Completa - Supply Chain Tracker
 
-**Fecha**: 18 Noviembre 2025  
-**Versión**: 1.0.0  
+**Fecha**: 20 Noviembre 2025  
+**Versión**: 1.1.0  
 **Proyecto**: Supply Chain DApp (PFM Web3)
 
 ---
@@ -46,10 +46,11 @@ Supply Chain Tracker es una DApp descentralizada para gestionar cadenas de sumin
 - **Smart Contract**: 934 líneas de código
 - **Tests**: 73 tests (100% passing)
 - **Coverage**: 83.33% líneas, 80.09% statements, 61.22% branches
-- **Frontend**: ~500 líneas de código productivo
-- **Hooks**: 12 hooks personalizados
-- **Componentes**: 10 componentes UI
-- **Tiempo de desarrollo**: ~10 horas (Día 1)
+- **Frontend**: ~1200+ líneas de código productivo
+- **Hooks**: 15 hooks personalizados (12 originales + 3 admin)
+- **Componentes**: 16 componentes UI (9 Shadcn + 7 personalizados)
+- **Páginas**: 2 páginas implementadas (landing + admin/users)
+- **Tiempo de desarrollo**: ~20 horas (Días 1-3)
 
 ---
 
@@ -250,8 +251,11 @@ web/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx          # Root layout con providers
-│   │   ├── page.tsx            # Landing page
-│   │   └── globals.css         # Estilos globales
+│   │   ├── page.tsx            # Landing page con stats
+│   │   ├── globals.css         # Estilos globales
+│   │   └── admin/
+│   │       └── users/
+│   │           └── page.tsx    # Admin panel - gestión usuarios
 │   │
 │   ├── components/
 │   │   ├── ui/                 # Shadcn UI components (9)
@@ -265,7 +269,18 @@ web/
 │   │   │   ├── dialog.tsx
 │   │   │   └── alert.tsx
 │   │   │
-│   │   └── ConnectWallet.tsx   # Componente de conexión
+│   │   ├── admin/              # Componentes admin
+│   │   │   ├── UserManagementTable.tsx  # Tabla + filtros + acciones
+│   │   │   └── UserStatsCards.tsx       # Cards estadísticas
+│   │   │
+│   │   ├── ConnectWallet.tsx   # Conexión wallet
+│   │   ├── Header.tsx          # Navegación unificada + branding
+│   │   ├── ThemeToggle.tsx     # Modo claro/oscuro
+│   │   ├── RegisterForm.tsx    # Formulario registro usuarios
+│   │   └── ChangeRoleDialog.tsx # Diálogo cambiar rol
+│   │
+│   ├── contexts/
+│   │   └── Web3Context.tsx     # Multi-tab sync
 │   │
 │   ├── contracts/
 │   │   ├── config.ts           # Dirección + ABI + Enums
@@ -275,7 +290,9 @@ web/
 │   │   ├── useContractReads.ts    # 5 hooks de lectura
 │   │   ├── useRequestRole.ts      # Solicitar rol
 │   │   ├── useCreateToken.ts      # Crear token
-│   │   └── useTransfer.ts         # Transferencias
+│   │   ├── useTransfer.ts         # 4 hooks transferencias
+│   │   ├── useAdminUsers.ts       # 2 hooks admin (getAllUsers, changeStatus)
+│   │   └── useContractOwner.ts    # Verificar ownership
 │   │
 │   └── lib/
 │       ├── utils.ts            # cn() helper
@@ -761,21 +778,27 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 
 ## 🗺️ Roadmap
 
-### **✅ Completado (Día 1 - 18 Nov 2025)**:
+### **✅ Completado (Días 1-3 - 18-20 Nov 2025)**:
 
 - [x] Smart contract implementado y testeado (934 líneas, 73 tests)
 - [x] Frontend base con Next.js 16 + TypeScript + Tailwind
 - [x] Integración Web3 con wagmi + viem + ethers
 - [x] Componentes UI con Shadcn (9 componentes)
-- [x] 12 hooks personalizados (5 lectura + 7 escritura)
+- [x] 15 hooks personalizados (5 lectura + 7 escritura + 3 admin)
 - [x] Script de deployment automatizado (`deploy.sh`)
 - [x] Documentación completa del proyecto
 - [x] Conexión MetaMask funcionando
 - [x] Landing page con stats en tiempo real
+- [x] Header unificado con navegación y branding
+- [x] Theme toggle (modo claro/oscuro)
+- [x] Admin panel completo (gestión de usuarios)
+- [x] Formulario de registro con validaciones
+- [x] Multi-tab synchronization
+- [x] Seguridad: restricciones por rol y estado
 
-### **🔄 Pendiente (Días 2-7 - 19-24 Nov 2025)**:
+### **🔄 Pendiente (Días 4-7 - 21-24 Nov 2025)**:
 
-#### **Día 2 (19 Nov)**: Dashboard de Usuario
+#### **Día 4 (21 Nov)**: Dashboard de Usuario
 - [ ] Página `/dashboard`
 - [ ] Mostrar perfil del usuario conectado
 - [ ] Mostrar rol y estado (Pending/Approved/etc.)
@@ -877,19 +900,22 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - **Modificadores**: 2
 
 ### **Frontend**:
-- **Líneas de código**: ~500
-- **Archivos creados**: 11
-- **Archivos modificados**: 2
-- **Hooks**: 12 (5 lectura + 7 escritura)
-- **Componentes**: 10 (9 Shadcn + 1 custom)
-- **Páginas**: 1 (landing)
+- **Líneas de código**: ~1200+
+- **Archivos creados**: 21
+- **Archivos modificados**: 5
+- **Hooks**: 15 (5 lectura + 7 escritura core + 3 admin)
+- **Componentes**: 16 (9 Shadcn + 7 personalizados)
+- **Páginas**: 2 (landing + admin/users)
+- **Features**: Theme toggle, Multi-tab sync, Admin panel completo
 
 ### **Tiempo de Desarrollo**:
-- **Smart Contract**: ~6 horas
-- **Frontend Setup**: ~2 horas
-- **Deployment Script**: ~1 hora
-- **Documentación**: ~1 hora
-- **Total Día 1**: ~10 horas
+- **Smart Contract**: ~6 horas (Día 1)
+- **Frontend Setup**: ~2 horas (Día 1)
+- **Deployment Script**: ~1 hora (Día 1)
+- **Documentación**: ~1 hora (Día 1)
+- **Admin Panel**: ~6 horas (Día 2-3)
+- **UI/UX Refinements**: ~4 horas (Día 3)
+- **Total Días 1-3**: ~20 horas
 
 ---
 

@@ -375,18 +375,153 @@ const result = useReadContract({
 
 ---
 
-## ❌ Hooks Faltantes (según funcionalidad del contrato)
+---
 
-Según el smart contract, podrían faltar:
+### Archivo: `useAdminUsers.ts` ✨ NUEVO (2 hooks admin)
+
+#### 13. **useGetAllUsers()**
+Hook para obtener todos los usuarios registrados en el sistema (solo admin).
+
+```typescript
+import { useGetAllUsers } from '@/hooks/useAdminUsers'
+
+function AdminPanel() {
+  const { users, isLoading, error, refetch } = useGetAllUsers()
+  
+  // users = Array de { id, address, role, status }
+  // status: 0=Pending, 1=Approved, 2=Rejected, 3=Canceled
+}
+```
+
+**Retorna**:
+```typescript
+{
+  users: Array<{
+    id: bigint
+    address: string
+    role: string
+    status: number
+  }>
+  isLoading: boolean
+  error: Error | null
+  refetch: () => void
+}
+```
+
+**Características**:
+- Usa RPC directo con fetch (ANVIL_RPC_URL hardcoded)
+- Itera userId desde 1 hasta totalUsers
+- Llama getUserInfoById con selector 0x31f01140
+- Parsea respuesta (4 campos × 64 hex cada uno)
+- Refetch inteligente con hash tracking
+
+#### 14. **useChangeUserStatus()**
+Hook para cambiar el estado de un usuario (aprobar, rechazar, cancelar).
+
+```typescript
+import { useChangeUserStatus } from '@/hooks/useAdminUsers'
+
+function UserActions({ userAddress }) {
+  const { changeStatus, isPending, error, hash } = useChangeUserStatus()
+  
+  return (
+    <>
+      <button 
+        onClick={() => changeStatus({ address: userAddress, newStatus: 1 })}
+        disabled={isPending}
+      >
+        Approve
+      </button>
+      <button 
+        onClick={() => changeStatus({ address: userAddress, newStatus: 2 })}
+        disabled={isPending}
+      >
+        Reject
+      </button>
+    </>
+  )
+}
+```
+
+**Parámetros**:
+```typescript
+{
+  address: string    // Dirección del usuario
+  newStatus: number  // 1=Approved, 2=Rejected, 3=Canceled
+}
+```
+
+**Retorna**:
+```typescript
+{
+  changeStatus: (params) => void
+  isPending: boolean
+  error: Error | null
+  hash: string | undefined  // Transaction hash
+}
+```
+
+---
+
+### Archivo: `useContractOwner.ts` ✨ NUEVO (1 hook)
+
+#### 15. **useContractOwner()**
+Hook para verificar si el usuario conectado es el owner del contrato.
+
+```typescript
+import { useContractOwner } from '@/hooks/useContractOwner'
+
+function AdminRoute() {
+  const { isOwner, isLoading } = useContractOwner()
+  
+  if (!isOwner) {
+    return <div>Access denied</div>
+  }
+  
+  return <AdminPanel />
+}
+```
+
+**Retorna**:
+```typescript
+{
+  isOwner: boolean
+  isLoading: boolean
+}
+```
+
+**Características**:
+- Compara address del usuario con owner del contrato
+- Usa useAccount y useReadContract
+- Útil para proteger rutas admin
+
+---
+
+## 📊 Resumen de Hooks
+
+| Archivo | Hooks | Tipo | Estado |
+|---------|-------|------|--------|
+| useContractReads.ts | 5 | Lectura | ✅ |
+| useRequestRole.ts | 1 | Escritura | ✅ |
+| useCreateToken.ts | 1 | Escritura | ✅ |
+| useTransfer.ts | 4 | Escritura | ✅ |
+| useAdminUsers.ts | 2 | Lectura + Escritura | ✅ |
+| useContractOwner.ts | 1 | Lectura | ✅ |
+| **TOTAL** | **15** | **5 lectura + 10 escritura** | **100%** |
+
+---
+
+## ❌ Hooks Pendientes (para futuras páginas)
+
+Según el smart contract, estos hooks mejorarían la funcionalidad:
 - `useGetToken(tokenId)` - Obtener info completa de un token
 - `useGetTokenBalance(tokenId, address)` - Balance específico
 - `useGetUserTokens(address)` - Array de tokens del usuario
 - `useGetTransfer(transferId)` - Info completa de transferencia
 - `useGetUserTransfers(address)` - Array de transfers del usuario
-- `useChangeStatusUser(address, status)` - Admin cambiar status (podría estar implícito)
 
-Estos hooks adicionales mejorarían la funcionalidad completa del frontend.
+Estos hooks son necesarios para las páginas Dashboard, Tokens y Transfers.
 
 ---
 
-**Última actualización**: 19 de Noviembre 2025
+**Última actualización**: 20 de Noviembre 2025

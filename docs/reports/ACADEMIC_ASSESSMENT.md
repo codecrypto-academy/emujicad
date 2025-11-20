@@ -1,8 +1,8 @@
 # 📊 Evaluación Académica - Supply Chain Tracker
 
-**Fecha de Evaluación**: 19 de Noviembre, 2025  
+**Fecha de Evaluación**: 20 de Noviembre, 2025  
 **Proyecto**: Supply Chain Tracker (PFM/TFM)  
-**Estado Actual**: Día 1-2 Completado (Documentación + IA.md)
+**Estado Actual**: Día 3 Completado (Admin Panel Funcional)
 
 > **⚠️ HISTORICAL DOCUMENT - November 2025**  
 > This assessment reflects intermediate development phases. References to "96 tests" represent exploratory research phases.  
@@ -19,11 +19,11 @@
 - **Calidad Técnica**: Código de nivel profesional + investigación científica
 - **Documentación**: Sistema completo enterprise-grade + research documentation
 
-### ✅ **IMPLEMENTADO (Actualización Nov 18, 2025)**
-- **Frontend**: Base implementado (2.0/3.0 pts) - Next.js 16 + 12 hooks + 10 componentes + MetaMask
+### ✅ **IMPLEMENTADO (Actualización Nov 20, 2025)**
+- **Frontend**: Infraestructura avanzada (2.5/3.0 pts - 83%) - 15 hooks + 16 componentes + Admin panel completo
 - **Deploy Script**: Validado 100% (10/10 tests, +0.5 pts extras)
-- **Integración Web3**: wagmi + viem + ethers configurado y funcional
-- **Score Actual**: 7.0/10 ✅ APROBATORIO (supera mínimo de 6.0)
+- **Integración Web3**: wagmi + viem + ethers + multi-tab sync + theme toggle
+- **Score Actual**: 7.5/10 ✅ APROBATORIO (supera mínimo de 6.0)
 
 ---
 
@@ -127,28 +127,47 @@
   - Tailwind CSS 3.4.14 + Shadcn UI (9 componentes)
   - wagmi 2.12.0 + viem 2.21.0 + ethers 6.13.0
 
-✅ Componentes React (10 totales):
-  - ConnectWallet (componente personalizado)
+✅ Componentes React (16 totales):
   - 9 componentes Shadcn UI (button, card, input, label, select, table, badge, dialog, alert)
+  - 7 componentes personalizados:
+    * ConnectWallet (conexión wallet con prevención double popup)
+    * Header (navegación unificada + branding + 194 líneas)
+    * ThemeToggle (modo claro/oscuro con localStorage)
+    * RegisterForm (registro con validaciones y manejo de errores)
+    * ChangeRoleDialog (cambiar rol de usuarios)
+    * admin/UserManagementTable (tabla + filtros + acciones)
+    * admin/UserStatsCards (estadísticas del sistema)
 
-✅ Hooks Personalizados (12 totales):
+✅ Hooks Personalizados (15 totales):
   - useContractReads.ts (5 hooks de lectura)
   - useRequestRole.ts (solicitar rol)
   - useCreateToken.ts (crear token)
-  - useTransfer.ts (transferencia de token)
+  - useTransfer.ts (4 hooks: transfer, accept, reject, cancel)
+  - useAdminUsers.ts (2 hooks: getAllUsers, changeUserStatus)
+  - useContractOwner.ts (verificar ownership)
 
 ✅ Configuración Web3:
-  - wagmi-config.ts (config Anvil local)
+  - wagmi-config.ts (config Anvil local + multiInjectedProviderDiscovery)
   - contracts/config.ts (dirección + ABI + Enums)
+  - contexts/Web3Context.tsx (multi-tab sync sin auto-reconnect)
   - Conexión MetaMask funcional
 
-✅ Páginas Next.js:
-  - / (Landing page con conexión MetaMask)
+✅ Páginas Next.js (2 de 7):
+  - / (Landing page con stats + registro + mensajes por estado)
+  - /admin/users (Panel admin completo con gestión de usuarios)
 
-⚠️ Pendiente (para 3.0/3.0 completo):
-  - Páginas adicionales (/dashboard, /tokens, /admin, etc.)
-  - Formularios completos de creación/transferencia
-  - Panel de administración de usuarios
+✅ Features UX:
+  - Theme toggle (claro/oscuro) restringido a admin y aprobados
+  - Security: datos sensibles ocultos según rol
+  - Redirect automático en desconexiones
+  - Sin flickering en tablas (hash-based refetch)
+  - Dark mode profesional en todos los componentes
+  - Responsive design (1/2/3/5 columnas según viewport)
+
+⚠️ Pendiente (para 3.0/3.0 completo - +0.5 pts):
+  - Páginas: Dashboard, Tokens (list + create), Transfers (5 de 7 faltantes)
+  - Componentes: TokenCard, TransferList (2 de 5 faltantes)
+  - Hooks: useGetToken, useGetUserTokens, useGetUserTransfers (3 faltantes)
 ```
 
 #### Impacto en la Calificación:
@@ -196,16 +215,16 @@
 
 ## 📊 Puntuación Detallada
 
-### **Puntuación Actual: 7.0/10**
+### **Puntuación Actual: 7.5/10**
 
 | Componente | Puntos Máximos | Puntos Obtenidos | Estado |
 |------------|----------------|------------------|---------|
 | Smart Contract | 4.0 | **4.0** | ✅ Completo |
-| Frontend | 3.0 | **2.0** | ⚠️ Base implementado |
+| Frontend | 3.0 | **2.5** | ⚠️ Infraestructura 83% |
 | Calidad Código | 0.5 | **0.5** | ✅ Excelente |
 | Extras | 1.0 | **0.5** | ⚠️ Parcial (deploy script validado) |
 | Video Demo | 1.5 | **0.0** | ⏳ Pendiente |
-| **TOTAL** | **10.0** | **7.0** | ✅ **APROBATORIO** |
+| **TOTAL** | **10.0** | **7.5** | ✅ **APROBATORIO** |
 
 #### **📝 Desglose de Extras (1.0 punto disponible):**
 - **Calidad Excepcional** (+0.5 pts):
@@ -224,8 +243,8 @@
 
 ### **✅ Resultado: APROBATORIO**
 - **Mínimo requerido**: 6.0/10
-- **Score actual**: 7.0/10
-- **Superávit**: +1.0 puntos
+- **Score actual**: 7.5/10
+- **Superávit**: +1.5 puntos
 
 ---
 
@@ -236,20 +255,27 @@
 **Objetivo**: Llegar a 6.5+ puntos
 
 #### Tareas Críticas:
-1. **Frontend Completo** (3.0 puntos - Base ya implementado: 2.0/3.0):
+1. **Frontend Completo** (3.0 puntos - Infraestructura avanzada: 2.5/3.0):
    ```bash
    cd web/
    
-   # ✅ YA IMPLEMENTADO:
-   - src/app/page.tsx (landing + MetaMask) ✅
+   # ✅ YA IMPLEMENTADO (Día 3):
+   - src/app/page.tsx (landing + MetaMask + stats) ✅
+   - src/app/admin/users/page.tsx (gestión usuarios completa) ✅
    - src/lib/wagmi-config.ts (conexión Web3) ✅
-   - src/hooks/* (12 hooks personalizados) ✅
+   - src/contexts/Web3Context.tsx (multi-tab sync) ✅
+   - src/hooks/* (15 hooks personalizados) ✅
+   - src/components/Header.tsx (navegación unificada) ✅
+   - src/components/ThemeToggle.tsx (modo claro/oscuro) ✅
+   - src/components/admin/* (tabla + stats + filtros) ✅
    
-   # ⚠️ FALTA IMPLEMENTAR:
-   - src/app/dashboard/page.tsx (panel básico)
+   # ⚠️ FALTA IMPLEMENTAR (+0.5 pts para 3.0/3.0):
+   - src/app/dashboard/page.tsx (panel usuario)
    - src/app/tokens/page.tsx (lista tokens)
-   - src/app/admin/users/page.tsx (gestión usuarios)
+   - src/app/tokens/create/page.tsx (crear token)
    - src/app/transfers/page.tsx (transferencias)
+   - src/components/TokenCard.tsx
+   - src/components/TransferList.tsx
    ```
 
 2. **Video Demo** (1.5 puntos):

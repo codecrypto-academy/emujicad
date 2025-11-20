@@ -1,7 +1,7 @@
 # 📚 Índice de Documentación - Supply Chain Tracker
 
 > **Guía completa de toda la documentación del proyecto**  
-> **Última actualización**: 19 de noviembre de 2025 | **Estructura profesional**: docs/
+> **Última actualización**: 20 de noviembre de 2025 | **Estructura profesional**: docs/
 
 ---
 
@@ -23,9 +23,9 @@ Si es tu primera vez con el proyecto, sigue este orden:
 **Propósito**: Single source of truth para el estado del proyecto  
 **Contenido**:
 - Estado actual completado vs pendiente
-- Puntuación académica detallada (7.0/10 actual)
-- Roadmap día a día (Días 3-8)
-- Próximo paso inmediato (Dashboard - Día 3)
+- Puntuación académica detallada (7.5/10 actual)
+- Roadmap día a día (Días 4-8)
+- Próximo paso inmediato (Dashboard - Día 4)
 - Checklist de tareas pendientes
 - Comandos rápidos de verificación
 - Métricas de progreso visuales
