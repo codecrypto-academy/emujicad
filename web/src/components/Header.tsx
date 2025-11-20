@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UserStatus } from '@/contracts/config'
 import { useState, useEffect } from 'react'
+import { ThemeToggle } from './ThemeToggle'
 
 type UserInfo = {
   id: bigint
@@ -79,7 +80,7 @@ export function Header() {
             <div className="flex-1"></div>
 
             {/* Right: Actions - Fixed width */}
-            <div className="flex items-center gap-2 w-60 justify-end">
+            <div className="flex items-center gap-2 justify-end">
               {/* Button container with fixed width to prevent layout shift */}
               <div className="w-36">
                 {isAdmin && !isOnAdminPage && (
@@ -97,6 +98,11 @@ export function Header() {
                   </Link>
                 )}
               </div>
+
+              {/* Theme Toggle - Only for Admin and Approved Users */}
+              {(isAdmin || (userInfo && Number(userInfo.status) === UserStatus.Approved)) && (
+                <ThemeToggle />
+              )}
 
               {/* Disconnect Button - Fixed width */}
               <Button 

@@ -49,6 +49,18 @@ export default function Home() {
   
   // Verificar si es admin
   const isAdmin = address && owner && address.toLowerCase() === owner.toLowerCase()
+
+  // Forzar modo claro para usuarios no autorizados (no admin ni aprobados)
+  useEffect(() => {
+    if (mounted && isConnected && !isLoadingOwner && !isLoadingUser) {
+      const isApproved = userInfo && Number(userInfo.status) === UserStatus.Approved
+      if (!isAdmin && !isApproved) {
+        // Forzar modo claro y limpiar localStorage
+        document.documentElement.classList.remove('dark')
+        localStorage.removeItem('theme')
+      }
+    }
+  }, [mounted, isConnected, isAdmin, userInfo, isLoadingOwner, isLoadingUser])
   
   // Helpers para UI
   const getRoleName = (roleNumber: number): string => {
