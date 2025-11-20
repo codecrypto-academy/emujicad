@@ -9,16 +9,32 @@
 
 Si es tu primera vez con el proyecto, sigue este orden:
 
-1. **[README.md](./README.md)** - Quick Start (3 comandos)
-2. **Ejecutar**: `./deploy.sh start`
-3. **Configurar**: `./deploy.sh metamask`
-4. **Abrir**: http://localhost:3000
+1. **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** ⭐ **NUEVO** - Estado actual y próximos pasos
+2. **[QUICKSTART.md](./QUICKSTART.md)** - Quick Start (3 comandos)
+3. **Ejecutar**: `./deploy.sh start`
+4. **Configurar**: `./deploy.sh metamask`
+5. **Abrir**: http://localhost:3000
 
 ---
 
 ## 📖 Documentación Principal
 
-### 1. [QUICKSTART.md](./QUICKSTART.md) ⭐ NUEVO
+### 1. [PROJECT_STATUS.md](./PROJECT_STATUS.md) ⭐ **CRÍTICO**
+**Propósito**: Single source of truth para el estado del proyecto  
+**Contenido**:
+- Estado actual completado vs pendiente
+- Puntuación académica detallada (7.0/10 actual)
+- Roadmap día a día (Días 3-8)
+- Próximo paso inmediato (Dashboard - Día 3)
+- Checklist de tareas pendientes
+- Comandos rápidos de verificación
+- Métricas de progreso visuales
+
+**Cuándo usarlo**: **SIEMPRE** antes de continuar desarrollo - evita leer todos los docs
+
+---
+
+### 2. [QUICKSTART.md](./QUICKSTART.md) ⭐ INICIO
 **Propósito**: Guía rápida de inicio  
 **Contenido**:
 - Quick start con deployment automatizado (3 comandos)
@@ -32,7 +48,7 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 ---
 
-### 2. [README.md](./README.md)
+### 3. [README.md](./README.md)
 **Propósito**: README del repositorio (NO MODIFICAR)  
 **Contenido**:
 - Información general del repositorio
@@ -42,7 +58,7 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 ---
 
-### 3. [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)
+### 4. [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)
 **Propósito**: Documentación técnica completa  
 **Contenido** (940+ líneas):
 - Resumen del proyecto y arquitectura
@@ -59,7 +75,7 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 ---
 
-### 4. [docs/fe/SETUP.md](./docs/fe/SETUP.md)
+### 5. [docs/fe/SETUP.md](./docs/fe/SETUP.md)
 **Propósito**: Documentación específica del frontend  
 **Contenido** (40KB):
 - Setup paso a paso (18 pasos documentados)
@@ -74,7 +90,7 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 ---
 
-### 5. [docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md)
+### 6. [docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md)
 **Propósito**: Resumen de lo implementado en el Día 1  
 **Contenido**:
 - Resumen ejecutivo del día
@@ -90,7 +106,7 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 ---
 
-### 6. [docs/reports/ACADEMIC_ASSESSMENT.md](./docs/reports/ACADEMIC_ASSESSMENT.md)
+### 7. [docs/reports/ACADEMIC_ASSESSMENT.md](./docs/reports/ACADEMIC_ASSESSMENT.md)
 **Propósito**: Evaluación académica del proyecto  
 **Contenido**:
 - Requisitos del PFM/TFM
@@ -104,7 +120,7 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 ---
 
-### 7. [docs/reports/TESTING_REPORT.md](./docs/reports/TESTING_REPORT.md) ⭐
+### 8. [docs/reports/TESTING_REPORT.md](./docs/reports/TESTING_REPORT.md) ⭐
 **Propósito**: Reporte completo de pruebas del script deploy.sh  
 **Contenido**:
 - Resumen ejecutivo (10/10 pruebas pasaron)
@@ -118,7 +134,7 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 ---
 
-### 8. [docs/reports/PROYECTO_EVALUACION_COMPLETA.md](./docs/reports/PROYECTO_EVALUACION_COMPLETA.md) ⭐
+### 9. [docs/reports/PROYECTO_EVALUACION_COMPLETA.md](./docs/reports/PROYECTO_EVALUACION_COMPLETA.md) ⭐
 **Propósito**: Evaluación exhaustiva y detallada del proyecto completo  
 **Contenido**:
 - Análisis detallado por componente (Smart Contract, Testing, Docs, Scripts)
@@ -134,7 +150,7 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 ## 🤖 Scripts y Herramientas
 
-### 8. [deploy.sh](./deploy.sh) ✅ VALIDADO 100%
+### 10. [deploy.sh](./deploy.sh) ✅ VALIDADO 100%
 **Propósito**: Script de deployment automatizado  
 **Contenido** (650 líneas):
 - Iniciar/detener Anvil
@@ -384,13 +400,14 @@ grep -i error logs/*.log
 
 Por frecuencia de uso:
 
-1. **[QUICKSTART.md](./QUICKSTART.md)** ⭐ - Quick start (todos los días)
-2. **[deploy.sh](./deploy.sh)** ✅ - Script validado (todos los días)
-3. **[docs/fe/SETUP.md](./docs/fe/SETUP.md)** - Frontend (desarrollo)
-4. **[docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)** - Referencia técnica
-5. **[docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md)** - Revisión rápida
-6. **[docs/reports/TESTING_REPORT.md](./docs/reports/TESTING_REPORT.md)** ⭐ - Validación del script
-7. **[IA.md](./IA.md)** ⭐ - Retrospectiva del uso de IA en el proyecto
+1. **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** 🔥 **CRÍTICO** - Estado y próximos pasos (LEER PRIMERO)
+2. **[QUICKSTART.md](./QUICKSTART.md)** ⭐ - Quick start (primera vez)
+3. **[deploy.sh](./deploy.sh)** ✅ - Script validado (todos los días)
+4. **[docs/fe/SETUP.md](./docs/fe/SETUP.md)** - Frontend (desarrollo)
+5. **[docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)** - Referencia técnica
+6. **[docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md)** - Revisión rápida
+7. **[docs/reports/TESTING_REPORT.md](./docs/reports/TESTING_REPORT.md)** ⭐ - Validación del script
+8. **[IA.md](./IA.md)** ⭐ - Retrospectiva del uso de IA en el proyecto
 
 ---
 
@@ -408,6 +425,9 @@ Por frecuencia de uso:
 ---
 
 ## 📞 Ayuda Rápida
+
+**🔥 ¿Qué sigue en el proyecto?**
+→ [PROJECT_STATUS.md](./PROJECT_STATUS.md) - **LEER ESTO PRIMERO**
 
 **¿No sabes por dónde empezar?**
 → [QUICKSTART.md](./QUICKSTART.md)
@@ -436,6 +456,6 @@ Por frecuencia de uso:
 ---
 
 **Índice creado**: 18 de Noviembre, 2025  
-**Última actualización**: 19 de Noviembre, 2025  
-**Versión**: 2.1.0 - Documentación completa + Scripts validados + IA.md  
-**Estado**: ✅ 34 archivos .md | 30 en docs/ | 4 en root | Scripts 100% funcionales
+**Última actualización**: 19 de Noviembre, 2025 - 21:30  
+**Versión**: 2.2.0 - + PROJECT_STATUS.md (Single Source of Truth)  
+**Estado**: ✅ 35 archivos .md | 30 en docs/ | 5 en root | Scripts 100% funcionales

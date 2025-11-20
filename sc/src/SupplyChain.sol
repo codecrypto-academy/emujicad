@@ -564,9 +564,12 @@ contract SupplyChain  is ReentrancyGuard {
     * @param newStatus Estado a asignar.
     */
     function changeStatusUser(address userAddress, UserStatus newStatus) external onlyOwner whenNotPaused {
-        if (addressToUserId[userAddress] == 0) revert UserDoesNotExist();
+        // El owner no puede ser gestionado como usuario registrado
+        if (owner == userAddress) revert InvalidAddress();
 
-        if (msg.sender == address(0) || owner == userAddress ) revert InvalidAddress();
+        // Validar que el usuario exista (tenga un ID asignado)
+        if (addressToUserId[userAddress] == 0) revert UserDoesNotExist();
+        
         User storage user = users[addressToUserId[userAddress]]; //establece la relación entre la dirección y el ID del usuario.
 
         UserStatus oldStatus = user.status;
@@ -580,8 +583,14 @@ contract SupplyChain  is ReentrancyGuard {
     * @return user Información del usuario.
     */
     function getUserInfo(address userAddress) public view returns (User memory) {
-        if (msg.sender == address(0) || owner == userAddress ) revert InvalidAddress();
-        return users[addressToUserId[userAddress]];
+        // El owner no es un usuario registrado en el sistema
+        if (owner == userAddress) revert InvalidAddress();
+        
+        // Validar que el usuario exista (tenga un ID asignado)
+        uint256 userId = addressToUserId[userAddress];
+        if (userId == 0) revert UserDoesNotExist();
+        
+        return users[userId];
     }
 
     /**
