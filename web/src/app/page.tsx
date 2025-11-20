@@ -89,10 +89,16 @@ export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-6xl flex-col py-8 px-4 md:px-8 space-y-6 bg-white dark:bg-black">
-        {/* Connect Wallet - Show only if not connected */}
+        {/* App Branding - Show when not connected */}
         {!isConnected && (
-          <div className="w-full flex justify-center mb-8">
-            <ConnectWallet />
+          <div className="w-full flex flex-col items-center gap-3 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="text-4xl">📦</div>
+              <div className="text-center">
+                <h1 className="text-3xl font-bold">Supply Chain Tracker</h1>
+                <p className="text-sm text-muted-foreground">Blockchain-based supply chain management</p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -200,22 +206,49 @@ export default function Home() {
           </div>
         )}
 
-        {/* Bienvenida */}
+        {/* Welcome Section */}
         <div className="flex flex-col items-center gap-6 text-center">
-          <h2 className="max-w-xs text-2xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            {isConnected ? '¡Bienvenido a la DApp!' : 'Conecta tu wallet para comenzar'}
-          </h2>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Sistema descentralizado de tracking para supply chain basado en blockchain.{" "}
-            <a
-              href="https://github.com"
-              className="font-medium text-zinc-950 dark:text-zinc-50 underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Ver repositorio
-            </a>
-          </p>
+          {!isConnected ? (
+            <>
+              <h2 className="max-w-md text-2xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
+                ¡Bienvenido a la DApp!
+              </h2>
+              <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
+                Sistema descentralizado de tracking para supply chain basado en blockchain.{" "}
+                <a
+                  href="https://github.com"
+                  className="font-medium text-zinc-950 dark:text-zinc-50 underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Ver repositorio
+                </a>
+              </p>
+              <p className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mt-4">
+                Conecta tu wallet para comenzar
+              </p>
+              <div className="mt-2">
+                <ConnectWallet />
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="max-w-md text-2xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
+                ¡Bienvenido a la DApp!
+              </h2>
+              <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
+                Sistema descentralizado de tracking para supply chain basado en blockchain.{" "}
+                <a
+                  href="https://github.com"
+                  className="font-medium text-zinc-950 dark:text-zinc-50 underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Ver repositorio
+                </a>
+              </p>
+            </>
+          )}
         </div>
       </main>
     </div>
