@@ -22,6 +22,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   const { disconnect } = useDisconnect()
   const [isInitialized, setIsInitialized] = useState(false)
   const [lastConnectedAddress, setLastConnectedAddress] = useState<string | null>(null)
+  const [wasConnected, setWasConnected] = useState(false)
 
   // 1. Inicializar: Cargar último address de localStorage
   useEffect(() => {
@@ -46,15 +47,18 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       if (isConnected && address) {
         localStorage.setItem('lastConnectedAddress', address)
         setLastConnectedAddress(address)
-      } else {
-        // Desconectado: limpiar localStorage
+        setWasConnected(true)  // Marcar que estuvo conectado
+      } else if (!isConnected && wasConnected) {
+        // Solo limpiar si ESTUVO conectado antes en ESTA pestaña
+        // (Evita limpiar cuando es pestaña nueva cargando por primera vez)
         localStorage.removeItem('lastConnectedAddress')
         setLastConnectedAddress(null)
+        setWasConnected(false)
       }
     }, 0)
 
     return () => clearTimeout(timer)
-  }, [isConnected, address, isInitialized])
+  }, [isConnected, address, isInitialized, wasConnected])
 
   // 3. Detección de cambio de cuenta: Desconectar si cambia
   useEffect(() => {
@@ -108,6 +112,42 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       window.ethereum?.removeListener('disconnect', handleDisconnect)
     }
   }, [address, disconnect])
+
+  // 5. 🆕 SINCRONIZACIÓN MULTI-PESTAÑA: Detectar cambios de localStorage en otras pestañas
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleStorageChange = (e: StorageEvent) => {
+      // Solo reaccionar a cambios de lastConnectedAddress
+      if (e.key !== 'lastConnectedAddress') return
+
+      console.log('📡 Storage changed in another tab:', {
+        key: e.key,
+        oldValue: e.oldValue,
+        newValue: e.newValue
+      })
+
+      // Nueva dirección conectada en otra pestaña
+      if (e.newValue && !isConnected) {
+        console.log('✅ New connection detected in another tab, triggering page reload...')
+        // Recargar la página para que wagmi reconecte
+        window.location.reload()
+      }
+      
+      // Desconexión en otra pestaña SOLO si había un valor anterior
+      // (Evita desconectar cuando se abre una nueva pestaña sin MetaMask)
+      if (!e.newValue && e.oldValue && isConnected) {
+        console.log('❌ Disconnection detected in another tab, disconnecting here too...')
+        disconnect()
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, [isConnected, disconnect])
 
   return (
     <Web3Context.Provider value={{ isInitialized, lastConnectedAddress }}>
