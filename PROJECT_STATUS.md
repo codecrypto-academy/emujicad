@@ -1,21 +1,21 @@
 # 📊 PROJECT STATUS - Supply Chain Tracker
 
-> **Última actualización**: 20 de Noviembre, 2025 - 01:40 AM  
+> **Última actualización**: 20 de Noviembre, 2025 - 04:30 AM  
 > **Propósito**: Single source of truth para estado del proyecto y próximos pasos
 
 ---
 
 ## 🎯 ESTADO ACTUAL (Snapshot)
 
-### Puntuación Académica: **7.0/10** ✅ APROBATORIO
+### Puntuación Académica: **7.5/10** ✅ APROBATORIO
 
 | Componente | Actual | Máximo | Estado |
 |------------|--------|---------|---------|
 | Smart Contract | 4.0 | 4.0 | ✅ 100% |
-| Frontend | 2.0 | 3.0 | ⚠️ 67% (falta +1.0) |
+| Frontend | 2.5 | 3.0 | ⚠️ 83% (falta +0.5) |
 | Extras | 0.5 | 1.0 | ⚠️ 50% (deploy script validado) |
 | Video | 0.0 | 1.5 | ❌ 0% |
-| **TOTAL** | **7.0** | **9.5** | **Falta +2.5 pts para 9.5** |
+| **TOTAL** | **7.5** | **9.5** | **Falta +2.0 pts para 9.5** |
 
 ---
 
@@ -31,22 +31,40 @@
 ✅ Documentación completa (18 archivos en docs/sc/)
 ```
 
-### Frontend - Infraestructura (2.0/3.0 puntos - 67%)
+### Frontend - Infraestructura (2.5/3.0 puntos - 83%)
 ```
 ✅ Next.js 16 + TypeScript + Tailwind
 ✅ wagmi 2.12 + viem 2.21 + ethers 6.13
 ✅ RainbowKit + MetaMask configurado
 ✅ Layout con providers (web/src/app/layout.tsx)
-✅ Landing page (web/src/app/page.tsx)
-✅ ConnectWallet component (1/5 componentes específicos)
+✅ Landing page MEJORADA (web/src/app/page.tsx)
+✅ Admin Users page (web/src/app/admin/users/page.tsx) - IMPLEMENTADO
+✅ 3 componentes específicos implementados:
+    - ConnectWallet.tsx (conexión wallet)
+    - Header.tsx (navegación + branding + info usuario)
+    - ThemeToggle.tsx (modo claro/oscuro)
 ✅ 9 componentes Shadcn UI instalados:
     - badge, button, card, input, label
     - select, alert, table, dialog
-✅ 12 hooks personalizados (4 archivos):
+✅ 15 hooks personalizados (6 archivos):
     - useContractReads.ts (5 hooks lectura)
     - useRequestRole.ts (1 hook escritura)
     - useCreateToken.ts (1 hook escritura)
     - useTransfer.ts (5 hooks escritura)
+    - useContractOwner.ts (1 hook lectura)
+    - useAdminUsers.ts (2 hooks: getAllUsers + changeUserStatus)
+✅ Componentes admin implementados:
+    - UserManagementTable.tsx (tabla + filtros + acciones)
+    - UserStatsCards.tsx (estadísticas de usuarios)
+    - ChangeRoleDialog.tsx (cambiar rol usuario)
+✅ Features UX implementados:
+    - Theme toggle (claro/oscuro) - solo admin y aprobados
+    - Modo claro por defecto para todos
+    - Stats cards responsivas
+    - Header consistente en todas las páginas
+    - Redirección automática en logout
+    - Prevención de flash de contenido (hydration)
+    - Doble conexión MetaMask arreglada
 ```
 
 ### Documentación (100%)
@@ -66,36 +84,36 @@
 
 ## ❌ PENDIENTE (Crítico para aprobar con 9.5/10)
 
-### 🚨 PRIORIDAD 1: Páginas Frontend (Falta +1.0 punto)
-**Tiempo estimado**: 4-5 días (27-36 horas)
+### 🚨 PRIORIDAD 1: Páginas Frontend (Falta +0.5 punto)
+**Tiempo estimado**: 3-4 días (20-27 horas)
 
 ```
 ❌ web/src/app/dashboard/page.tsx       - Dashboard usuario
 ❌ web/src/app/tokens/page.tsx          - Lista todos los tokens
 ❌ web/src/app/tokens/create/page.tsx   - Crear token
 ❌ web/src/app/transfers/page.tsx       - Gestión transferencias
-❌ web/src/app/admin/page.tsx           - Panel admin
-❌ web/src/app/admin/users/page.tsx     - Gestión usuarios (aprobar/rechazar)
+✅ web/src/app/admin/users/page.tsx     - IMPLEMENTADO (gestión usuarios)
 ```
 
-### 🚨 PRIORIDAD 2: Componentes Específicos (4/5 faltan)
+### 🚨 PRIORIDAD 2: Componentes Específicos (3/5 implementados)
 ```
 ✅ ConnectWallet.tsx                    - IMPLEMENTADO
-❌ Headers.tsx                          - Navegación principal
+✅ Header.tsx                           - IMPLEMENTADO (navegación + branding + theme toggle)
+✅ ThemeToggle.tsx                      - IMPLEMENTADO (modo claro/oscuro)
 ❌ TokenCard.tsx                        - Tarjeta de token
 ❌ TransferList.tsx                     - Lista transferencias
-❌ UserTable.tsx                        - Tabla usuarios admin
 ```
 
-### 🚨 PRIORIDAD 3: Hooks Adicionales (6 hooks faltan)
+### 🚨 PRIORIDAD 3: Hooks Adicionales (3/6 implementados)
 **Necesarios para las páginas**:
 ```
 ❌ useGetUserTokens(address)            - Tokens de un usuario
 ❌ useGetAllTokens()                    - Todos los tokens del sistema
 ❌ useGetToken(tokenId)                 - Token por ID
 ❌ useGetUserTransfers(address)         - Transferencias de un usuario
-❌ useGetAllUsers()                     - Todos los usuarios (admin)
-❌ useChangeUserStatus()                - Aprobar/Rechazar usuarios (admin)
+✅ useGetAllUsers()                     - IMPLEMENTADO (admin)
+✅ useChangeUserStatus()                - IMPLEMENTADO (aprobar/rechazar usuarios)
+✅ useContractOwner()                   - IMPLEMENTADO (verificar admin)
 ```
 
 ### 🚨 PRIORIDAD 4: Video Demo (Falta +1.5 puntos)
@@ -223,59 +241,91 @@ Tareas técnicas:
 
 ## 🎯 PRÓXIMO PASO INMEDIATO
 
-### ➡️ **EMPEZAR: Dashboard (Día 3)**
+### ➡️ **EMPEZAR: Dashboard (Día 4)**
 
 **Primer archivo a crear**: `web/src/app/dashboard/page.tsx`
 
 **Orden de implementación**:
 1. Crear página dashboard básica (estructura)
-2. Agregar componente UserProfile
-3. Agregar componente RequestRoleForm
-4. Agregar componente MyTokensList
-5. Testing manual con MetaMask
+2. Integrar Header component (ya existe ✅)
+3. Mostrar información del usuario (UserProfile)
+4. Listar tokens del usuario (MyTokensList)
+5. Agregar acciones rápidas (crear token, ver transferencias)
+6. Testing manual con MetaMask
+
+**Estado actual**:
+```
+✅ Header component - Ya implementado
+✅ useUserInfo hook - Ya disponible
+✅ useContractOwner hook - Ya disponible
+✅ Theme toggle - Ya funcional
+❌ Dashboard page - Por implementar
+❌ MyTokensList component - Por implementar
+```
 
 **Comando para empezar**:
 ```bash
 cd web/
-npm run dev  # Verificar que frontend corre
+npm run dev  # Frontend ya corriendo
 ```
 
 **Hooks ya disponibles**:
-- ✅ `useUserInfo(address)` - Para UserProfile
-- ✅ `useRequestRole()` - Para RequestRoleForm
-- ✅ `useTotalTokens()` - Para contar tokens
+- ✅ `useUserInfo(address)` - Info completa del usuario
+- ✅ `useContractOwner()` - Verificar si es admin
+- ✅ `useTotalTokens()` - Contar tokens del sistema
+- ❌ `useGetUserTokens(address)` - NECESARIO para dashboard
 
 ---
 
 ## 📊 MÉTRICAS DE PROGRESO
 
-### Frontend Progress: 40% → 100%
+### Frontend Progress: 65% → 100%
 ```
-[████████████░░░░░░░░░░░░░░░░] 40%
+[███████████████████░░░░░░░░░] 65%
 
 Completado:
 ├── ✅ Infraestructura (100%)
-├── ✅ Landing page (100%)
-├── ✅ 12 Hooks (100%)
-└── ✅ 9 Componentes UI (100%)
+├── ✅ Landing page mejorada (100%)
+├── ✅ Admin Users page (100%)
+├── ✅ 15 Hooks (100% de los necesarios hasta ahora)
+├── ✅ 9 Componentes UI Shadcn (100%)
+├── ✅ 3 Componentes específicos (60%)
+│   ├── ConnectWallet
+│   ├── Header
+│   └── ThemeToggle
+└── ✅ 4 Componentes admin (100%)
+    ├── UserManagementTable
+    ├── UserStatsCards
+    ├── ChangeRoleDialog
+    └── RegisterForm
 
 Pendiente:
-├── ❌ 6 Páginas (0%)
-├── ❌ 4 Componentes específicos (0%)
-└── ❌ 6 Hooks adicionales (0%)
+├── ❌ 4 Páginas (20% - 1/5 completada)
+│   ├── Dashboard
+│   ├── Tokens (lista)
+│   ├── Tokens (crear)
+│   └── Transfers
+├── ❌ 2 Componentes específicos (40%)
+│   ├── TokenCard
+│   └── TransferList
+└── ❌ 4 Hooks adicionales
+    ├── useGetUserTokens
+    ├── useGetAllTokens
+    ├── useGetToken
+    └── useGetUserTransfers
 ```
 
-### Timeline Progress: Día 2-3/12
+### Timeline Progress: Día 3/12
 ```
-[███░░░░░░░░░░░░░░░░░░░░░░░] 25%
+[████████░░░░░░░░░░░░░░░░░░] 33%
 
 ✅ Día 1 - Smart Contract + Frontend base
 ✅ Día 2 - Documentación + ConnectWallet fixes + IA.md actualizado
-→  Día 3 - Dashboard (SIGUIENTE - HOY)
-   Día 4 - Tokens (lista)
-   Día 5 - Tokens (crear)
-   Día 6 - Transferencias
-   Día 7 - Admin
+✅ Día 3 - Admin Panel + Header + Theme Toggle (COMPLETADO)
+→  Día 4 - Dashboard (SIGUIENTE)
+   Día 5 - Tokens (lista)
+   Día 6 - Tokens (crear)
+   Día 7 - Transferencias
    Día 8 - Video
    Día 9-11 - Buffer/refinamiento
    Día 12 - Entrega final
@@ -378,6 +428,60 @@ Video:
 
 ## 📋 CHANGELOG RECIENTE
 
+### Día 3 - Sesión Madrugada (20 Nov, 02:00 - 04:30)
+```
+✅ Implemented: Admin Users Management Page (web/src/app/admin/users/page.tsx)
+✅ Implemented: UserManagementTable component con filtros y acciones
+✅ Implemented: UserStatsCards component (5 cards: total, pending, approved, rejected, canceled)
+✅ Implemented: Header component unificado para todas las páginas
+✅ Implemented: ThemeToggle component (modo claro/oscuro)
+✅ Implemented: ChangeRoleDialog component
+✅ Created: useAdminUsers.ts hook (getAllUsers + changeUserStatus)
+✅ Created: useContractOwner.ts hook
+✅ Fixed: Admin panel data loading (RPC endpoint, function selector, data parsing)
+✅ Fixed: Table flickering (hash-based refetch control)
+✅ Fixed: Stats cards vertical alignment y responsive grid
+✅ Fixed: Header consistency entre páginas (fixed widths)
+✅ Fixed: Doble popup de MetaMask (removed auto-reconnect logic)
+✅ Fixed: Hydration errors (mounted state pattern)
+✅ Enhanced: Landing page reorganizada (branding primero, luego CTA)
+✅ Enhanced: Modo claro por defecto para todos los usuarios
+✅ Enhanced: Stats cards solo para admin y usuarios aprobados
+✅ Enhanced: Card de Usuarios solo visible para admin (seguridad)
+✅ Enhanced: Dark mode styling (colores modernos y profesionales)
+
+Features implementados en Día 3:
+- Panel de administración completo con gestión de usuarios
+- Sistema de estadísticas con 5 cards responsive
+- Header unificado con branding, info usuario y navegación
+- Toggle de tema claro/oscuro (solo admin y aprobados)
+- Protección de rutas admin (solo owner)
+- Redirección automática al desconectar en admin page
+- Prevención de información sensible (usuarios registrados)
+- UX mejorada con mensajes de estado específicos
+- Integración completa de todos los componentes
+
+Issues resueltos en Día 3:
+- Error 14: RPC endpoint undefined en cliente
+- Error 15: getUserInfoById selector incorrecto
+- Error 16: Tabla parpadeando cada 2 segundos
+- Error 17: Stats no actualizándose automáticamente
+- Error 18: Header inconsistente entre páginas
+- Error 19: Doble popup MetaMask al conectar
+- Error 20: Hydration mismatch errors
+- Error 21: Usuario cancelado mostrando dos mensajes
+- Error 22: Dirección no visible en modo oscuro
+- Error 23: Admin viendo card redundante
+
+Decisiones de diseño críticas:
+- ✅ Hardcoded ANVIL_RPC_URL en hook (no disponible en cliente desde env)
+- ✅ Hash-based refetch control (evita infinite loops)
+- ✅ Fixed widths en Header (w-80, w-60, w-36, w-24)
+- ✅ Modo claro por defecto (no detectar tema del sistema)
+- ✅ Stats solo para autorizados (admin + approved)
+- ✅ UserStatus.Canceled (no Suspended) - match con contrato
+```
+
 ### Día 2 - Sesión Nocturna (20 Nov, 22:30 - 01:40)
 ```
 ✅ Fixed: MetaMask duplication en ConnectWallet (deduplicación de connectors)
@@ -401,5 +505,5 @@ Lección crítica: 🚫 NUNCA usar git checkout/reset sin permiso explícito del
 
 ---
 
-**Última modificación**: 20 Nov 2025, 01:40 AM  
-**Próxima actualización**: Después de completar Dashboard (Día 3)
+**Última modificación**: 20 Nov 2025, 04:30 AM  
+**Próxima actualización**: Después de completar Dashboard o Tokens (Día 4)
