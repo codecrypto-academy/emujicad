@@ -186,58 +186,58 @@ export function UserManagementTable() {
   return (
     <>
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {/* Total Users */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
-            <CardDescription>Registrados</CardDescription>
+            <CardDescription className="text-xs">Registrados</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <p className="text-3xl font-bold">{stats.total}</p>
           </CardContent>
         </Card>
 
         {/* Pending */}
         <Card className="bg-yellow-50">
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-yellow-700">⏳ Pendientes</CardTitle>
-            <CardDescription className="text-yellow-600">Esperando aprobación</CardDescription>
+            <CardDescription className="text-xs text-yellow-600">Esperando aprobación</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <p className="text-3xl font-bold text-yellow-700">{stats.pending}</p>
           </CardContent>
         </Card>
 
         {/* Approved */}
         <Card className="bg-green-50">
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-green-700">✅ Aprobados</CardTitle>
-            <CardDescription className="text-green-600">Activos en el sistema</CardDescription>
+            <CardDescription className="text-xs text-green-600">Activos en el sistema</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <p className="text-3xl font-bold text-green-700">{stats.approved}</p>
           </CardContent>
         </Card>
 
         {/* Rejected */}
         <Card className="bg-red-50">
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-red-700">❌ Rechazados</CardTitle>
-            <CardDescription className="text-red-600">Solicitudes denegadas</CardDescription>
+            <CardDescription className="text-xs text-red-600">Solicitudes denegadas</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <p className="text-3xl font-bold text-red-700">{stats.rejected}</p>
           </CardContent>
         </Card>
 
         {/* Canceled */}
         <Card className="bg-gray-50">
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-700">🚫 Cancelados</CardTitle>
-            <CardDescription className="text-gray-600">Cuentas suspendidas</CardDescription>
+            <CardDescription className="text-xs text-gray-600">Cuentas suspendidas</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <p className="text-3xl font-bold text-gray-700">{stats.canceled}</p>
           </CardContent>
         </Card>
