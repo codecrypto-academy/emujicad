@@ -6,7 +6,7 @@
 
 ## 📦 Componentes Implementados
 
-### ✅ Componentes Personalizados (7 totales)
+### ✅ Componentes Personalizados (11 totales)
 
 #### **1. ConnectWallet.tsx**
 **Ubicación**: `web/src/components/ConnectWallet.tsx`
@@ -233,7 +233,162 @@ import { UserStatsCards } from '@/components/admin/UserStatsCards'
 
 ---
 
-### ✅ Componentes Shadcn UI (9 totales)
+#### **8. TokenCard.tsx** ✨ NUEVO (Día 4)
+**Ubicación**: `web/src/components/TokenCard.tsx`  
+**Líneas**: 124
+
+Componente reutilizable para mostrar información de un token.
+
+**Características**:
+- Muestra información completa del token (ID, nombre, tipo, supply, creador)
+- Soporte para mostrar balance del usuario (opcional)
+- Iconos diferentes para Raw Material (Package) vs Finished Product (Factory)
+- Badge con ID del token
+- Muestra parent token si es un producto derivado
+- Fecha de creación formateada
+- Features truncadas con line-clamp
+- Estados de carga con Skeleton
+- Hover effects (shadow, scale)
+- Click handler opcional para navegación
+- Dark mode compatible
+
+**Props**:
+```tsx
+interface TokenCardProps {
+  tokenId?: bigint
+  showBalance?: boolean  // Mostrar balance del usuario
+  onClick?: () => void    // Handler para click en la card
+}
+```
+
+**Uso**:
+```tsx
+import { TokenCard } from '@/components/TokenCard'
+
+// Card básica
+<TokenCard tokenId={1n} />
+
+// Con balance del usuario
+<TokenCard tokenId={1n} showBalance={true} />
+
+// Con click handler
+<TokenCard 
+  tokenId={1n} 
+  onClick={() => router.push(`/tokens/${1}`)} 
+/>
+```
+
+**Hooks utilizados**:
+- `useGetToken(tokenId)` - Obtiene datos del token
+- `useGetTokenBalance(tokenId, address)` - Obtiene balance del usuario
+
+---
+
+#### **9. UserProfileCard.tsx** ✨ NUEVO (Día 4)
+**Ubicación**: `web/src/components/UserProfileCard.tsx`  
+**Líneas**: 170
+
+Componente para mostrar el perfil del usuario conectado.
+
+**Características**:
+- Muestra User ID, Address, Role y Status
+- Badges de estado con iconos (Approved, Pending, Rejected, Canceled)
+- Colores por rol (Producer=azul, Factory=purple, Retailer=naranja, Consumer=verde)
+- Mensajes informativos según estado
+- Estados de carga con Skeleton
+- Manejo de usuarios no registrados
+- Dark mode compatible
+
+**Props**: Ninguno (usa `useAccount` internamente)
+
+**Uso**:
+```tsx
+import { UserProfileCard } from '@/components/UserProfileCard'
+
+<UserProfileCard />
+```
+
+**Hooks utilizados**:
+- `useAccount()` - Obtiene address conectada
+- `useUserInfo(address)` - Obtiene información del usuario
+
+---
+
+#### **10. QuickActions.tsx** ✨ NUEVO (Día 4)
+**Ubicación**: `web/src/components/QuickActions.tsx`  
+**Líneas**: 154
+
+Componente con botones de acciones rápidas para usuarios aprobados.
+
+**Características**:
+- Botones condicionales según rol:
+  - Producer: "Create Raw Material"
+  - Factory: "Create Product"
+  - Todos: "My Tokens", "Transfers"
+- Validación de estado (solo usuarios aprobados)
+- Deshabilitación cuando el contrato está pausado
+- Alert informativo cuando está pausado
+- Estados de carga con Skeleton
+- Manejo de usuarios no registrados/no aprobados
+- Dark mode compatible
+
+**Props**: Ninguno (usa hooks internos)
+
+**Uso**:
+```tsx
+import { QuickActions } from '@/components/QuickActions'
+
+<QuickActions />
+```
+
+**Hooks utilizados**:
+- `useAccount()` - Obtiene address conectada
+- `useUserInfo(address)` - Obtiene información del usuario
+- `useIsPaused()` - Verifica si el contrato está pausado
+
+---
+
+#### **11. PauseControl.tsx** ✨ NUEVO (Día 4 - Admin)
+**Ubicación**: `web/src/components/admin/PauseControl.tsx`  
+**Líneas**: 279
+
+Componente para que el administrador pause/reanude el contrato.
+
+**Características**:
+- Muestra estado actual del contrato (Pausado/Activo)
+- Botón para pausar con confirmación (requiere escribir "PAUSAR")
+- Botón para reanudar con confirmación
+- Dialog de confirmación para ambas acciones
+- Alert con lista de funciones deshabilitadas cuando está pausado
+- Estados de carga durante transacciones
+- Manejo de errores con alerts
+- Mensajes de éxito
+- Colores visuales (rojo=pausado, verde=activo)
+- Dark mode compatible
+
+**Props**: Ninguno
+
+**Uso**:
+```tsx
+import { PauseControl } from '@/components/admin/PauseControl'
+
+// Solo visible para admin
+{isAdmin && <PauseControl />}
+```
+
+**Hooks utilizados**:
+- `useIsPaused()` - Lee estado de pausa
+- `usePause()` - Hook para pausar
+- `useUnpause()` - Hook para reanudar
+
+**Validación de seguridad**:
+- Requiere escribir "PAUSAR" para confirmar pausa
+- Dialog de confirmación para ambas acciones
+- Solo accesible por administrador
+
+---
+
+### ✅ Componentes Shadcn UI (10 totales)
 
 Todos ubicados en `web/src/components/ui/`
 
@@ -379,33 +534,21 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 </Alert>
 ```
 
+#### 10. **skeleton.tsx** ✨ NUEVO (Día 4)
+Placeholder de carga animado
+
+```tsx
+import { Skeleton } from "@/components/ui/skeleton"
+
+<Skeleton className="h-4 w-full" />
+<Skeleton className="h-6 w-3/4" />
+```
+
 ---
 
 ---
 
 ## ❌ Componentes Pendientes
-
-### **TokenCard.tsx**
-**Propósito**: Tarjeta para mostrar información de un token
-
-**Props esperados**:
-```tsx
-interface TokenCardProps {
-  tokenId: number
-  name: string
-  totalSupply: number
-  balance: number
-  creator: string
-  features: string // JSON
-  parentId?: number
-}
-```
-
-**Funcionalidad esperada**:
-- Mostrar información del token
-- Badge para tipo (RawMaterial, FinishedProduct)
-- Botón "Transfer" si el usuario tiene balance
-- Link a detalles del token
 
 ### **TransferList.tsx**
 **Propósito**: Lista de transferencias pendientes/completadas
@@ -432,14 +575,18 @@ interface TransferListProps {
 ```
 web/src/components/
 ├── ConnectWallet.tsx          ✅ IMPLEMENTADO
-├── Header.tsx                 ✅ IMPLEMENTADO
-├── ThemeToggle.tsx            ✅ IMPLEMENTADO
-├── RegisterForm.tsx           ✅ IMPLEMENTADO
-├── ChangeRoleDialog.tsx       ✅ IMPLEMENTADO
+├── Header.tsx                 ✅ IMPLEMENTADO (Día 4: badge pausa)
+├── ThemeToggle.tsx            ✅ IMPLEMENTADO (Día 4: persistencia)
+├── RegisterForm.tsx           ✅ IMPLEMENTADO (Día 4: validación pausa)
+├── ChangeRoleDialog.tsx       ✅ IMPLEMENTADO (Día 4: validación pausa)
+├── TokenCard.tsx              ✅ IMPLEMENTADO (Día 4)
+├── UserProfileCard.tsx        ✅ IMPLEMENTADO (Día 4)
+├── QuickActions.tsx            ✅ IMPLEMENTADO (Día 4)
 ├── admin/
-│   ├── UserManagementTable.tsx  ✅ IMPLEMENTADO
-│   └── UserStatsCards.tsx       ✅ IMPLEMENTADO
-├── ui/                        ✅ 9 componentes Shadcn
+│   ├── UserManagementTable.tsx  ✅ IMPLEMENTADO (Día 4: validación pausa)
+│   ├── UserStatsCards.tsx       ✅ IMPLEMENTADO
+│   └── PauseControl.tsx         ✅ IMPLEMENTADO (Día 4)
+├── ui/                        ✅ 10 componentes Shadcn
 │   ├── button.tsx            ✅
 │   ├── card.tsx              ✅
 │   ├── input.tsx             ✅
@@ -448,24 +595,43 @@ web/src/components/
 │   ├── table.tsx             ✅
 │   ├── badge.tsx             ✅
 │   ├── dialog.tsx            ✅
-│   └── alert.tsx             ✅
-├── TokenCard.tsx              ❌ PENDIENTE
+│   ├── alert.tsx             ✅
+│   └── skeleton.tsx          ✅ (Día 4)
 └── TransferList.tsx           ❌ PENDIENTE
 ```
 
-**Total**: 16 componentes (9 Shadcn + 7 personalizados)
-- ✅ Implementados: 14 componentes
-- ❌ Pendientes: 2 componentes
+**Total**: 21 componentes (10 Shadcn + 11 personalizados)
+- ✅ Implementados: 20 componentes
+- ❌ Pendientes: 1 componente (TransferList.tsx)
 
 ---
 
 ## 🎯 Próximos Pasos
 
-1. **Implementar TokenCard.tsx** - Tarjetas de tokens (para página /tokens)
-2. **Implementar TransferList.tsx** - Lista de transferencias (para página /transfers)
+1. **Implementar TransferList.tsx** - Lista de transferencias (para página /transfers)
 
-Estos componentes se usarán en las páginas que faltan por implementar.
+Este componente se usará en la página `/transfers` que falta por implementar.
 
 ---
 
-**Última actualización**: 20 de Noviembre 2025
+## 📝 Notas de Actualización (Día 4)
+
+### Componentes Nuevos:
+- ✅ **TokenCard.tsx** - Tarjeta reutilizable para tokens
+- ✅ **UserProfileCard.tsx** - Perfil de usuario
+- ✅ **QuickActions.tsx** - Acciones rápidas con validación de pausa
+- ✅ **PauseControl.tsx** - Control de pausa para admin
+
+### Componentes Mejorados:
+- ✅ **Header.tsx** - Agregado badge de "Contract Pausado"
+- ✅ **ThemeToggle.tsx** - Persistencia de tema por usuario (localStorage)
+- ✅ **RegisterForm.tsx** - Validación cuando el contrato está pausado
+- ✅ **ChangeRoleDialog.tsx** - Validación de pausa y estados de usuario
+- ✅ **UserManagementTable.tsx** - Deshabilitación de acciones cuando está pausado
+
+### Componentes Shadcn Agregados:
+- ✅ **skeleton.tsx** - Para estados de carga
+
+---
+
+**Última actualización**: 21 de Noviembre 2025 (Día 4)

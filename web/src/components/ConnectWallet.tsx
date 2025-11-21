@@ -129,7 +129,20 @@ export function ConnectWallet() {
         <span className="text-sm font-mono">
           {address.slice(0, 6)}...{address.slice(-4)}
         </span>
-        <Button onClick={() => disconnect()} variant="outline">
+        <Button 
+          onClick={() => {
+            // Guardar la preferencia del tema actual para este usuario antes de desconectar
+            if (address) {
+              const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+              const userThemeKey = `theme_${address.toLowerCase()}`
+              localStorage.setItem(userThemeKey, currentTheme)
+            }
+            // Forzar modo claro al desconectar (pero mantener la preferencia guardada)
+            document.documentElement.classList.remove('dark')
+            disconnect()
+          }} 
+          variant="outline"
+        >
           Desconectar
         </Button>
       </div>

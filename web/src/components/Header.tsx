@@ -4,13 +4,16 @@ import { useAccount, useDisconnect } from 'wagmi'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useUserInfo } from '@/hooks/useContractReads'
 import { useContractOwner } from '@/hooks/useContractOwner'
+import { useIsPaused } from '@/hooks/usePause'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UserStatus } from '@/contracts/config'
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from './ThemeToggle'
+import { Pause, AlertTriangle } from 'lucide-react'
 
 type UserInfo = {
   id: bigint
@@ -25,6 +28,7 @@ export function Header() {
   const pathname = usePathname()
   const { owner } = useContractOwner()
   const { data: rawUserInfo } = useUserInfo(address)
+  const { data: isPaused } = useIsPaused()
   const userInfo = rawUserInfo as UserInfo | undefined
   const [mounted, setMounted] = useState(false)
 
@@ -109,7 +113,17 @@ export function Header() {
                 variant="destructive" 
                 size="sm"
                 className="w-24"
-                onClick={() => disconnect()}
+                onClick={() => {
+                  // Guardar la preferencia del tema actual para este usuario antes de desconectar
+                  if (address) {
+                    const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+                    const userThemeKey = `theme_${address.toLowerCase()}`
+                    localStorage.setItem(userThemeKey, currentTheme)
+                  }
+                  // Forzar modo claro al desconectar (pero mantener la preferencia guardada)
+                  document.documentElement.classList.remove('dark')
+                  disconnect()
+                }}
               >
                 Disconnect
               </Button>
@@ -118,6 +132,16 @@ export function Header() {
 
           {/* Row 2: User Info */}
           <div className="flex flex-col gap-2">
+            {/* Contract Paused Alert */}
+            {isPaused && (
+              <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 py-2">
+                <Pause className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <AlertDescription className="text-red-700 dark:text-red-300 text-sm">
+                  <strong>⚠️ Contrato Pausado:</strong> Las funciones críticas están deshabilitadas temporalmente.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* User Address */}
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Dirección:</span>

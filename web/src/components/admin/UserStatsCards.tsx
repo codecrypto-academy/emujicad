@@ -37,46 +37,46 @@ export function UserStatsCards() {
       </Card>
 
       {/* Pending */}
-      <Card className="border-yellow-200 bg-yellow-50">
+      <Card className="border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-yellow-700">⏳ Pendientes</CardTitle>
-          <CardDescription>Esperando aprobación</CardDescription>
+          <CardTitle className="text-sm font-medium text-yellow-700 dark:text-yellow-400">⏳ Pendientes</CardTitle>
+          <CardDescription className="dark:text-yellow-300/80">Esperando aprobación</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-3xl font-bold text-yellow-700">{stats.pending}</p>
+          <p className="text-3xl font-bold text-yellow-700 dark:text-yellow-400">{stats.pending}</p>
         </CardContent>
       </Card>
 
       {/* Approved */}
-      <Card className="border-green-200 bg-green-50">
+      <Card className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-green-700">✅ Aprobados</CardTitle>
-          <CardDescription>Activos en el sistema</CardDescription>
+          <CardTitle className="text-sm font-medium text-green-700 dark:text-green-400">✅ Aprobados</CardTitle>
+          <CardDescription className="dark:text-green-300/80">Activos en el sistema</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-3xl font-bold text-green-700">{stats.approved}</p>
+          <p className="text-3xl font-bold text-green-700 dark:text-green-400">{stats.approved}</p>
         </CardContent>
       </Card>
 
       {/* Rejected */}
-      <Card className="border-red-200 bg-red-50">
+      <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-red-700">❌ Rechazados</CardTitle>
-          <CardDescription>Solicitudes denegadas</CardDescription>
+          <CardTitle className="text-sm font-medium text-red-700 dark:text-red-400">❌ Rechazados</CardTitle>
+          <CardDescription className="dark:text-red-300/80">Solicitudes denegadas</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-3xl font-bold text-red-700">{stats.rejected}</p>
+          <p className="text-3xl font-bold text-red-700 dark:text-red-400">{stats.rejected}</p>
         </CardContent>
       </Card>
 
       {/* Canceled */}
-      <Card className="border-gray-200 bg-gray-50">
+      <Card className="border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-gray-700">🚫 Cancelados</CardTitle>
-          <CardDescription>Cuentas suspendidas</CardDescription>
+          <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">🚫 Cancelados</CardTitle>
+          <CardDescription className="dark:text-gray-400">Cuentas suspendidas</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-3xl font-bold text-gray-700">{stats.canceled}</p>
+          <p className="text-3xl font-bold text-gray-700 dark:text-gray-300">{stats.canceled}</p>
         </CardContent>
       </Card>
     </div>

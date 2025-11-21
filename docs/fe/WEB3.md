@@ -134,6 +134,133 @@ export default function RootLayout({ children }) {
 **Providers necesarios**:
 1. **WagmiProvider**: Provee config de wagmi a toda la app
 2. **QueryClientProvider**: Maneja caching y refetch de react-query
+3. **AuthProvider**: Provee contexto de autenticación (ver sección AuthContext) ⭐ Día 4
+
+---
+
+## 🔐 AuthContext ⭐ NUEVO (Día 4)
+
+### `contexts/AuthContext.tsx`
+
+Contexto global para manejar autenticación y autorización en toda la aplicación.
+
+**Ubicación**: `web/src/contexts/AuthContext.tsx`
+
+**Características**:
+- Detecta si el usuario es administrador
+- Detecta si el usuario está aprobado
+- Detecta si el usuario está autenticado
+- Optimización con `useUserIdByAddress` para detección rápida
+- Redirección inmediata para usuarios no registrados
+- Restauración de preferencia de tema al autenticar
+- Manejo mejorado de admin (no requiere userInfo)
+
+**Uso**:
+```typescript
+import { useAuth } from '@/contexts/AuthContext'
+
+function Component() {
+  const { isAdmin, isApproved, isAuthenticated, userInfo, isLoading } = useAuth()
+  
+  if (isLoading) return <div>Loading...</div>
+  
+  if (!isAuthenticated) {
+    return <div>Please connect your wallet</div>
+  }
+  
+  if (isAdmin) {
+    return <AdminPanel />
+  }
+  
+  if (isApproved) {
+    return <UserDashboard />
+  }
+  
+  return <PendingApproval />
+}
+```
+
+**API del Contexto**:
+```typescript
+type AuthContextType = {
+  isAdmin: boolean           // Es administrador del contrato
+  isApproved: boolean        // Usuario aprobado (status === Approved)
+  isAuthenticated: boolean  // Usuario conectado y registrado
+  userInfo: UserInfo | null  // Información completa del usuario
+  isLoading: boolean        // Estado de carga
+}
+```
+
+**Optimizaciones (Día 4)**:
+
+1. **Detección Rápida con `useUserIdByAddress`**:
+   - Usa `useUserIdByAddress` para verificar rápidamente si el usuario existe
+   - Si `userId === 0n`, marca como no autenticado inmediatamente
+   - Evita esperar por `useUserInfo` completo
+
+2. **Manejo de Admin**:
+   - Si `isAdmin === true`, autentica inmediatamente
+   - No espera por `useUserInfo` (admin puede no estar registrado como usuario)
+
+3. **Restauración de Tema**:
+   - Al autenticar, restaura preferencia de tema del usuario desde `localStorage`
+   - Key específica: `theme_${address.toLowerCase()}`
+
+**Integración en Layout**:
+```typescript
+import { AuthProvider } from '@/contexts/AuthContext'
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <WagmiProvider config={config}>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </QueryClientProvider>
+        </WagmiProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+**Hooks Utilizados Internamente**:
+- `useAccount()` - Obtiene address conectada
+- `useIsAdmin(address)` - Verifica si es admin
+- `useUserIdByAddress(address)` - Obtiene User ID rápidamente ⭐ Día 4
+- `useUserInfo(address)` - Obtiene información completa del usuario
+
+**Flujo de Autenticación**:
+
+1. **Usuario no conectado**:
+   - `isAuthenticated = false`
+   - `isAdmin = false`
+   - `isApproved = false`
+   - `userInfo = null`
+
+2. **Usuario conectado pero no registrado**:
+   - `isAuthenticated = false` (detectado rápidamente con `useUserIdByAddress`)
+   - Redirección inmediata a home
+
+3. **Usuario conectado y registrado (Pending/Rejected)**:
+   - `isAuthenticated = true`
+   - `isApproved = false`
+   - `userInfo` contiene datos del usuario
+
+4. **Usuario conectado y aprobado**:
+   - `isAuthenticated = true`
+   - `isApproved = true`
+   - `userInfo` contiene datos del usuario
+   - Tema restaurado desde localStorage
+
+5. **Administrador**:
+   - `isAuthenticated = true`
+   - `isAdmin = true`
+   - `isApproved = false` (admin no necesita aprobación)
+   - Autenticación inmediata sin esperar `useUserInfo`
 
 ---
 
@@ -483,4 +610,19 @@ Podríamos usar ethers.js directamente, pero wagmi + viem es:
 
 ---
 
-**Última actualización**: 19 de Noviembre 2025
+## 📝 Notas de Actualización (Día 4)
+
+### AuthContext Optimizado:
+- ✅ Agregado `useUserIdByAddress` para detección rápida
+- ✅ Redirección inmediata para usuarios no registrados
+- ✅ Manejo mejorado de admin (no requiere userInfo)
+- ✅ Restauración de preferencia de tema al autenticar
+
+### Referencias:
+- **Hooks**: [HOOKS.md](./HOOKS.md)
+- **Componentes**: [COMPONENTS.md](./COMPONENTS.md)
+- **Pausabilidad**: [PAUSABILITY.md](./PAUSABILITY.md) ⭐ NUEVO
+
+---
+
+**Última actualización**: 21 de Noviembre 2025 (Día 4)

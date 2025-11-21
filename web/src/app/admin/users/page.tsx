@@ -75,10 +75,10 @@ export default function AdminUsersPage() {
               Solo el propietario del contrato puede acceder a esta página.
             </p>
             <p className="text-sm text-muted-foreground mb-4">
-              Tu dirección: <code className="bg-gray-100 px-2 py-1 rounded">{address}</code>
+              Tu dirección: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{address}</code>
             </p>
             <p className="text-sm text-muted-foreground mb-6">
-              Owner: <code className="bg-gray-100 px-2 py-1 rounded">{owner}</code>
+              Owner: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{owner}</code>
             </p>
             <Link href="/">
               <Button>Volver al inicio</Button>
@@ -98,8 +98,8 @@ export default function AdminUsersPage() {
 
       {/* Page Title */}
       <div>
-        <h1 className="text-3xl font-bold">👤 Gestión de Usuarios</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">👤 Gestión de Usuarios</h1>
+        <p className="text-muted-foreground dark:text-slate-400 mt-1">
           Administración de usuarios y permisos del sistema
         </p>
       </div>

@@ -2,31 +2,67 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { useAccount } from 'wagmi'
+
+// Helper functions para manejar preferencias por usuario
+const getUserThemeKey = (address: string) => `theme_${address.toLowerCase()}`
+const getUserThemePreference = (address: string): 'light' | 'dark' | null => {
+  if (!address) return null
+  return localStorage.getItem(getUserThemeKey(address)) as 'light' | 'dark' | null
+}
+const setUserThemePreference = (address: string, theme: 'light' | 'dark') => {
+  if (!address) return
+  localStorage.setItem(getUserThemeKey(address), theme)
+}
 
 export function ThemeToggle() {
+  const { address } = useAccount()
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    // Leer el tema guardado en localStorage, por defecto siempre claro
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
-    const initialTheme = savedTheme || 'light'
     
-    // Si no hay tema guardado, asegurar que inicie en claro
-    if (!savedTheme) {
+    if (!address) {
+      // Si no hay usuario conectado, usar modo claro por defecto
       document.documentElement.classList.remove('dark')
-    } else {
-      document.documentElement.classList.toggle('dark', initialTheme === 'dark')
+      setTheme('light')
+      return
     }
-    setTheme(initialTheme)
-  }, [])
+    
+    // Leer la preferencia guardada para este usuario específico
+    const userPreference = getUserThemePreference(address)
+    
+    if (userPreference) {
+      // Si hay preferencia guardada para este usuario, restaurarla
+      if (userPreference === 'dark') {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+      setTheme(userPreference)
+    } else {
+      // Si no hay preferencia guardada, usar claro por defecto
+      document.documentElement.classList.remove('dark')
+      setTheme('light')
+    }
+  }, [address])
 
   const toggleTheme = () => {
+    if (!address) return
+    
     const newTheme = theme === 'light' ? 'dark' : 'light'
     setTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
-    document.documentElement.classList.toggle('dark', newTheme === 'dark')
+    
+    // Guardar la preferencia para este usuario específico
+    setUserThemePreference(address, newTheme)
+    
+    // Aplicar el tema de forma explícita
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
   }
 
   if (!mounted) {

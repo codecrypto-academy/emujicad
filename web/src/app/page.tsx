@@ -5,7 +5,7 @@ import { Header } from '@/components/Header'
 import { RegisterForm } from '@/components/RegisterForm'
 import { ChangeRoleDialog } from '@/components/ChangeRoleDialog'
 import { useAccount } from 'wagmi'
-import { useTotalTokens, useTotalUsers, useTotalTransfers, useUserInfo } from '@/hooks/useContractReads'
+import { useUserInfo } from '@/hooks/useContractReads'
 import { useContractOwner } from '@/hooks/useContractOwner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { UserStatus } from '@/contracts/config'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 // Tipo para la información del usuario retornada por getUserInfo
 type UserInfo = {
@@ -24,10 +25,8 @@ type UserInfo = {
 }
 
 export default function Home() {
+  const router = useRouter()
   const { address, isConnected } = useAccount()
-  const { data: totalTokens } = useTotalTokens()
-  const { data: totalUsers } = useTotalUsers()
-  const { data: totalTransfers } = useTotalTransfers()
   
   // Detección de roles
   const { owner, isLoading: isLoadingOwner } = useContractOwner()
@@ -49,18 +48,47 @@ export default function Home() {
   
   // Verificar si es admin
   const isAdmin = address && owner && address.toLowerCase() === owner.toLowerCase()
+  const isApproved = userInfo && Number(userInfo.status) === UserStatus.Approved
 
-  // Forzar modo claro para usuarios no autorizados (no admin ni aprobados)
+  // Forzar modo claro cuando no hay usuario conectado o cuando el usuario no está autorizado
   useEffect(() => {
-    if (mounted && isConnected && !isLoadingOwner && !isLoadingUser) {
-      const isApproved = userInfo && Number(userInfo.status) === UserStatus.Approved
+    if (!mounted) return
+    
+    // Si no está conectado, forzar modo claro (las preferencias se mantienen guardadas por usuario)
+    if (!isConnected) {
+      document.documentElement.classList.remove('dark')
+      return
+    }
+    
+    // Si está conectado pero no es admin ni aprobado, forzar modo claro
+    if (isConnected && !isLoadingOwner && !isLoadingUser) {
       if (!isAdmin && !isApproved) {
-        // Forzar modo claro y limpiar localStorage
+        // Forzar modo claro para usuarios no autorizados
         document.documentElement.classList.remove('dark')
-        localStorage.removeItem('theme')
+      } else if (address) {
+        // Si es admin o aprobado, restaurar su preferencia guardada específica
+        const userThemeKey = `theme_${address.toLowerCase()}`
+        const userPreference = localStorage.getItem(userThemeKey) as 'light' | 'dark' | null
+        if (userPreference) {
+          if (userPreference === 'dark') {
+            document.documentElement.classList.add('dark')
+          } else {
+            document.documentElement.classList.remove('dark')
+          }
+        } else {
+          // Si no hay preferencia guardada, usar claro por defecto
+          document.documentElement.classList.remove('dark')
+        }
       }
     }
-  }, [mounted, isConnected, isAdmin, userInfo, isLoadingOwner, isLoadingUser])
+  }, [mounted, isConnected, isAdmin, isApproved, isLoadingOwner, isLoadingUser, address])
+
+  // Redirigir usuarios autorizados al dashboard
+  useEffect(() => {
+    if (mounted && isConnected && (isAdmin || isApproved)) {
+      router.push('/dashboard')
+    }
+  }, [mounted, isConnected, isAdmin, isApproved, router])
   
   // Helpers para UI
   const getRoleName = (roleNumber: number): string => {
@@ -98,127 +126,115 @@ export default function Home() {
     return null
   }
 
+  // Si está conectado y es admin o aprobado, se redirigirá automáticamente
+  if (isConnected && (isAdmin || isApproved)) {
+    return null // Evitar flash de contenido antes de redirigir
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-6xl flex-col py-8 px-4 md:px-8 space-y-6 bg-white dark:bg-black">
-        {/* App Branding - Show when not connected */}
+        {/* Header solo para usuarios conectados */}
+        {isConnected && <Header />}
+
+        {/* App Branding (solo cuando NO está conectado) */}
         {!isConnected && (
-          <div className="w-full flex flex-col items-center gap-3 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="text-4xl">📦</div>
-              <div className="text-center">
-                <h1 className="text-3xl font-bold">Supply Chain Tracker</h1>
+          <div className="rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="text-5xl">📦</div>
+              <div>
+                <h1 className="text-2xl font-bold">Supply Chain Tracker</h1>
                 <p className="text-sm text-muted-foreground">Blockchain-based supply chain management</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Header - Show only when connected */}
-        {isConnected && <Header />}
-
-        {/* User Status Messages and Registration */}
+        {/* User Status and Registration Section */}
         {isConnected && !isAdmin && (
-          <div className="w-full mb-8">
-            {isLoadingOwner || isLoadingUser ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <p className="text-center text-muted-foreground">Loading user information...</p>
-                </CardContent>
-              </Card>
-            ) : userInfo && typeof userInfo === 'object' && 'id' in userInfo && Number(userInfo.id) > 0 ? (
+          <>
+            {/* User not registered */}
+            {!userInfo || userInfo.id === 0n ? (
+              <div className="space-y-6">
+                <Card className="border-blue-500/50">
+                  <CardHeader>
+                    <CardTitle>Welcome! 👋</CardTitle>
+                    <CardDescription>
+                      Please register to start using the supply chain tracker
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <RegisterForm />
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
               <>
+                {/* User Pending */}
                 {Number(userInfo.status) === UserStatus.Pending && (
-                  <Card className="border-yellow-200 bg-yellow-50">
-                    <CardContent className="pt-6">
-                      <div className="space-y-3">
-                        <p className="text-sm text-yellow-700">
-                          ⏳ Your registration is pending approval by the administrator
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs text-muted-foreground">
-                            Want to change your role?
-                          </p>
-                          <ChangeRoleDialog 
-                            currentRole={Number(userInfo.role)} 
-                            onSuccess={() => refetchUserInfo()}
-                          />
-                        </div>
+                  <Card className="border-yellow-500/50">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        ⏳ Approval Pending
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Your role request as <strong>{getRoleIcon(Number(userInfo.role))} {getRoleName(Number(userInfo.role))}</strong> is waiting for administrator approval.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        You will be able to access the system once approved.
+                      </p>
+                      <div className="pt-4 border-t">
+                        <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} />
                       </div>
                     </CardContent>
                   </Card>
                 )}
+
+                {/* User Rejected */}
                 {Number(userInfo.status) === UserStatus.Rejected && (
-                  <Card className="border-red-200 bg-red-50">
-                    <CardContent className="pt-6">
-                      <div className="space-y-2">
-                        <p className="text-sm text-red-700">
-                          ❌ Your registration was rejected by the administrator
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Please contact the administrator for more information
-                        </p>
+                  <Card className="border-red-500/50">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-red-600">
+                        ❌ Role Request Rejected
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Your role request as <strong>{getRoleIcon(Number(userInfo.role))} {getRoleName(Number(userInfo.role))}</strong> was rejected by the administrator.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        You can request a different role or contact the administrator for more information.
+                      </p>
+                      <div className="pt-4 border-t">
+                        <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} />
                       </div>
                     </CardContent>
                   </Card>
                 )}
+
+                {/* User Canceled */}
                 {Number(userInfo.status) === UserStatus.Canceled && (
-                  <Card className="border-gray-200 bg-gray-50">
-                    <CardContent className="pt-6">
-                      <div className="space-y-2">
-                        <p className="text-sm text-gray-700">
-                          🚫 Your account has been canceled
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Please contact the administrator for more information
-                        </p>
-                      </div>
+                  <Card className="border-gray-500/50">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        🚫 Registration Canceled
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Your previous registration was canceled.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Only the administrator can change your status. Please contact the administrator for more information.
+                      </p>
                     </CardContent>
                   </Card>
                 )}
               </>
-            ) : (
-              <RegisterForm />
             )}
-          </div>
-        )}
-
-        {/* Stats - Solo para administradores y usuarios aprobados */}
-        {isConnected && mounted && (isAdmin || (userInfo && Number(userInfo.status) === UserStatus.Approved)) && (
-          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Tokens</CardTitle>
-                <CardDescription>Total registrados</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{totalTokens?.toString() || '0'}</p>
-              </CardContent>
-            </Card>
-
-            {/* Solo admin puede ver total de usuarios */}
-            {isAdmin && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Usuarios</CardTitle>
-                  <CardDescription>Total registrados</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-3xl font-bold">{totalUsers?.toString() || '0'}</p>
-                </CardContent>
-              </Card>
-            )}
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Transferencias</CardTitle>
-                <CardDescription>Total realizadas</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{totalTransfers?.toString() || '0'}</p>
-              </CardContent>
-            </Card>
-          </div>
+          </>
         )}
 
         {/* Welcome Section */}
@@ -247,22 +263,17 @@ export default function Home() {
               </div>
             </>
           ) : (
-            <>
-              <h2 className="max-w-md text-2xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-                ¡Bienvenido a la DApp!
-              </h2>
-              <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-                Sistema descentralizado de tracking para supply chain basado en blockchain.{" "}
-                <a
-                  href="https://github.com"
-                  className="font-medium text-zinc-950 dark:text-zinc-50 underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Ver repositorio
-                </a>
-              </p>
-            </>
+            <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
+              Sistema descentralizado de tracking para supply chain basado en blockchain.{" "}
+              <a
+                href="https://github.com"
+                className="font-medium text-zinc-950 dark:text-zinc-50 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Ver repositorio
+              </a>
+            </p>
           )}
         </div>
       </main>

@@ -1,7 +1,7 @@
 # 📚 Documentación Completa - Supply Chain Tracker
 
-**Fecha**: 20 Noviembre 2025  
-**Versión**: 1.1.0  
+**Fecha**: 21 Noviembre 2025  
+**Versión**: 1.2.0  
 **Proyecto**: Supply Chain DApp (PFM Web3)
 
 ---
@@ -46,8 +46,10 @@ Supply Chain Tracker es una DApp descentralizada para gestionar cadenas de sumin
 - **Smart Contract**: 934 líneas de código
 - **Tests**: 73 tests (100% passing)
 - **Coverage**: 83.33% líneas, 80.09% statements, 61.22% branches
-- **Frontend**: ~1200+ líneas de código productivo
-- **Hooks**: 15 hooks personalizados (12 originales + 3 admin)
+- **Frontend**: ~2,800+ líneas de código productivo
+- **Hooks**: 18 hooks personalizados (12 originales + 3 admin + 3 pausa + 3 tokens)
+- **Componentes**: 21 componentes (11 personalizados + 10 Shadcn UI)
+- **Páginas**: 3 de 9 implementadas (33%)
 - **Componentes**: 16 componentes UI (9 Shadcn + 7 personalizados)
 - **Páginas**: 2 páginas implementadas (landing + admin/users)
 - **Tiempo de desarrollo**: ~20 horas (Días 1-3)
@@ -790,31 +792,37 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - [x] Conexión MetaMask funcionando
 - [x] Landing page con stats en tiempo real
 - [x] Header unificado con navegación y branding
-- [x] Theme toggle (modo claro/oscuro)
+- [x] Theme toggle (modo claro/oscuro) con persistencia por usuario ⭐ Día 4
 - [x] Admin panel completo (gestión de usuarios)
 - [x] Formulario de registro con validaciones
 - [x] Multi-tab synchronization
 - [x] Seguridad: restricciones por rol y estado
+- [x] Dashboard completo con perfil, tokens y acciones ⭐ Día 4
+- [x] Sistema de pausabilidad completo integrado ⭐ Día 4
+- [x] AuthContext optimizado para redirecciones rápidas ⭐ Día 4
 
-### **🔄 Pendiente (Días 4-7 - 21-24 Nov 2025)**:
+### **🔄 Pendiente (Días 5-7 - 22-24 Nov 2025)**:
 
-#### **Día 4 (21 Nov)**: Dashboard de Usuario
-- [ ] Página `/dashboard`
-- [ ] Mostrar perfil del usuario conectado
-- [ ] Mostrar rol y estado (Pending/Approved/etc.)
-- [ ] Lista de tokens propios
-- [ ] Formulario de solicitud de rol
-- [ ] Badge con estado del usuario
+#### **Día 4 (21 Nov)**: Dashboard de Usuario ✅ COMPLETADO
+- [x] Página `/dashboard`
+- [x] Mostrar perfil del usuario conectado (UserProfileCard)
+- [x] Mostrar rol y estado (Pending/Approved/etc.)
+- [x] Lista de tokens propios (TokenCard)
+- [x] Acciones rápidas (QuickActions)
+- [x] Control de pausa para admin (PauseControl)
+- [x] Estadísticas (solo admin ve "Total Users")
+- [x] Redirección inmediata para usuarios no autenticados
 
-#### **Día 3 (20 Nov)**: Gestión de Tokens
+#### **Día 5 (22 Nov)**: Gestión de Tokens - Lista
 - [ ] Página `/tokens`
 - [ ] Tabla de todos los tokens
+- [ ] Hook `useGetAllTokens()` necesario
 - [ ] Filtros por tipo (RowMaterial/FinishedProduct)
 - [ ] Búsqueda por nombre
 - [ ] Ordenamiento por columnas
 - [ ] Paginación
 
-#### **Día 4 (21 Nov)**: Crear Token
+#### **Día 5-6 (22-23 Nov)**: Crear Token
 - [ ] Página `/tokens/create`
 - [ ] Formulario con validaciones
 - [ ] Select para tipo de token

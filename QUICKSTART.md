@@ -6,50 +6,57 @@
 
 ## 📊 Estado de Implementación del Frontend
 
-### 📄 Páginas Implementadas (2 de 7)
+### 📄 Páginas Implementadas (3 de 9)
 
 ```
 web/src/app/
 ├── page.tsx                    ✅ IMPLEMENTADO - Landing con MetaMask + Stats
-├── dashboard/page.tsx          ❌ PENDIENTE - Panel principal por rol
+├── dashboard/page.tsx          ✅ IMPLEMENTADO - Panel principal por rol COMPLETO
 ├── tokens/
 │   ├── page.tsx               ❌ PENDIENTE - Lista de tokens usuario
-│   └── create/page.tsx        ❌ PENDIENTE - Formulario crear token
+│   ├── create/page.tsx        ❌ PENDIENTE - Formulario crear token
+│   ├── [id]/page.tsx          ❌ PENDIENTE - Detalles token
+│   └── [id]/transfer/page.tsx ❌ PENDIENTE - Transferir token
 ├── transfers/page.tsx         ❌ PENDIENTE - Gestión transferencias
-└── admin/
-    └── users/page.tsx         ✅ IMPLEMENTADO - Gestión completa de usuarios
+├── admin/
+│   ├── page.tsx               ❌ PENDIENTE - Panel admin principal
+│   └── users/page.tsx         ✅ IMPLEMENTADO - Gestión completa de usuarios
+└── profile/page.tsx           ❌ PENDIENTE - Perfil usuario
 ```
 
-**Progreso**: 2/7 páginas (29%)
+**Progreso**: 3/9 páginas (33%)
 
-### 🧩 Componentes Específicos (3 de 5 implementados)
+### 🧩 Componentes Específicos (4 de 5 implementados)
 
 ```
 web/src/components/
 ├── ConnectWallet.tsx          ✅ IMPLEMENTADO - Conexión MetaMask
-├── Header.tsx                 ✅ IMPLEMENTADO - Navegación unificada + branding
-├── ThemeToggle.tsx            ✅ IMPLEMENTADO - Modo claro/oscuro
-├── TokenCard.tsx              ❌ PENDIENTE - Tarjeta de token
+├── Header.tsx                 ✅ IMPLEMENTADO - Navegación + branding + pausa badge
+├── ThemeToggle.tsx            ✅ IMPLEMENTADO - Modo claro/oscuro con persistencia
+├── TokenCard.tsx              ✅ IMPLEMENTADO - Tarjeta de token completa
 └── TransferList.tsx           ❌ PENDIENTE - Lista transferencias
 ```
 
-**Progreso**: 3/5 componentes específicos (60%)
+**Progreso**: 4/5 componentes específicos (80%)
 
 ### 🎨 Componentes Adicionales Implementados
 
 ```
 web/src/components/
-├── RegisterForm.tsx           ✅ Formulario registro con validaciones
-├── ChangeRoleDialog.tsx       ✅ Diálogo cambiar rol de usuario
+├── RegisterForm.tsx           ✅ Formulario registro con validación de pausa
+├── ChangeRoleDialog.tsx       ✅ Diálogo cambiar rol con validación de pausa
+├── UserProfileCard.tsx        ✅ Perfil de usuario
+├── QuickActions.tsx           ✅ Acciones rápidas con validación de pausa
 └── admin/
-    ├── UserManagementTable.tsx  ✅ Tabla gestión usuarios con filtros
-    └── UserStatsCards.tsx       ✅ Cards estadísticas del sistema
+    ├── UserManagementTable.tsx  ✅ Tabla gestión usuarios con filtros + pausa
+    ├── UserStatsCards.tsx       ✅ Cards estadísticas del sistema
+    └── PauseControl.tsx         ✅ Control de pausa del contrato
 ```
 
-**Total componentes personalizados**: 7 implementados
-**Componentes Shadcn UI**: 9 componentes (button, card, input, label, select, table, badge, dialog, alert)
+**Total componentes personalizados**: 11 implementados
+**Componentes Shadcn UI**: 10 componentes (button, card, input, label, select, table, badge, dialog, alert, skeleton)
 
-### 🪝 Hooks Personalizados (15 implementados)
+### 🪝 Hooks Personalizados (18 implementados)
 
 ```
 web/src/hooks/
@@ -58,18 +65,21 @@ web/src/hooks/
 ├── useCreateToken.ts          ✅ Crear tokens
 ├── useTransfer.ts             ✅ 4 hooks transferencias (transfer, accept, reject, cancel)
 ├── useAdminUsers.ts           ✅ 2 hooks admin (getAllUsers, changeUserStatus)
-└── useContractOwner.ts        ✅ Verificar ownership del contrato
+├── useContractOwner.ts        ✅ Verificar ownership del contrato
+├── useGetUserTokens.ts        ✅ 3 hooks tokens (getUserTokens, getToken, getTokenBalance)
+└── usePause.ts                ✅ 3 hooks pausa (isPaused, pause, unpause)
 ```
 
-**Total**: 15 hooks personalizados (12 originales + 3 nuevos)
+**Total**: 18 hooks personalizados (8 archivos)
 
 ### 📁 Directorio `contexts/`
 
-✅ **Implementado**: `src/contexts/Web3Context.tsx`
-- Manejo de multi-tab synchronization
-- Control de desconexión entre pestañas
-- Sin auto-reconnect (previene MetaMask double popup)
-- Usa **wagmi** (práctica moderna recomendada)
+✅ **Implementado**: `src/contexts/AuthContext.tsx`
+- Gestión de autenticación y autorización
+- Detección de admin vs usuarios aprobados
+- Optimización de redirecciones (useUserIdByAddress)
+- Restauración de preferencias de tema por usuario
+- Manejo de estados de carga optimizado
 
 ---
 
@@ -333,11 +343,11 @@ Ver **[docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATI
 
 ## 📊 Estado Actual del Proyecto
 
-**Día 3 Completado** - 20 de Noviembre 2025
+**Día 4 Completado** - 21 de Noviembre 2025
 
 ### 🎯 Comparación con Estructura de Referencia
 
-**Puntuación General: 7.5/10** ✅ (Admin panel completo, infraestructura 83%)
+**Puntuación General: 8.0/10** ✅ (Dashboard completo, sistema de pausabilidad, infraestructura 93%)
 
 | Componente | README.md | Implementación Actual | Estado |
 |------------|-----------|----------------------|--------|
@@ -359,13 +369,13 @@ Este proyecto es parte de un **PFM/TFM** de Master en Blockchain y Web3.
 **Días restantes**: 8 días  
 **Estado**: Día 3 completado (Admin Panel funcional)
 
-**Puntuación actual**: 7.5/10 ✅ APROBATORIO
+**Puntuación actual**: 8.0/10 ✅ APROBATORIO
 - Smart Contract: 4.0/4.0 ✅
-- Frontend: 2.5/3.0 (83% infraestructura) ⚠️
-- Extras: 0.5/1.0 (deploy script validado) ⚠️
+- Frontend: 2.8/3.0 (93% infraestructura) ⚠️
+- Extras: 0.5/1.0 (deploy script + pausabilidad) ⚠️
 - Video: 0.0/1.5 ❌
 
-**Próximo objetivo**: Dashboard de usuario (Día 4) para completar frontend a 3.0/3.0
+**Próximo objetivo**: Páginas de Tokens y Transfers (Día 5-6) para completar frontend a 3.0/3.0
 
 Ver **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** para roadmap detallado y próximos pasos.
 
