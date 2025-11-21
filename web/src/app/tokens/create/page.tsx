@@ -27,6 +27,9 @@ export default function CreateTokenPage() {
   const { data: isPaused } = useIsPaused()
   const { tokens, isLoading: isLoadingTokens } = useGetAllTokens()
   const { createToken, isPending, isConfirming, isSuccess, error, hash } = useCreateToken()
+  
+  // Activar diseño moderno si está habilitado
+  const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
 
   // Form state
   const [name, setName] = useState('')
@@ -277,6 +280,287 @@ export default function CreateTokenPage() {
   // Submit button is disabled if form is disabled OR cannot submit (invalid parent/amount)
   const isSubmitDisabled = isFormDisabled || !canSubmit
 
+  // Diseño moderno 2025
+  if (useModernDesign) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+        <Header />
+
+        <main className="container mx-auto px-4 py-12 max-w-2xl">
+          <div className="mb-6">
+            <Link href="/tokens">
+              <Button variant="ghost" className="mb-4 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Tokens
+              </Button>
+            </Link>
+          </div>
+
+          <div className="group relative overflow-hidden rounded-3xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative p-8">
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-2">
+                  {tokenType === TokenType.RowMaterial ? 'Create Raw Material Token' : 'Create Finished Product Token'}
+                </h1>
+                <p className="text-slate-600 dark:text-slate-400">
+                  {tokenType === TokenType.RowMaterial
+                    ? 'Create a new raw material token. This will be the base material for finished products.'
+                    : 'Create a finished product token. Select a raw material token as the parent.'}
+                </p>
+              </div>
+
+              {/* Alerts Modernos */}
+              {isPaused === true && (
+                <Alert className="mb-6 rounded-xl bg-yellow-50/80 dark:bg-yellow-900/30 backdrop-blur border-yellow-200 dark:border-yellow-800">
+                  <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                  <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+                    <strong>⚠️ Contrato Pausado:</strong> No puedes crear tokens mientras el contrato esté pausado.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {isSuccess && (
+                <Alert className="mb-6 rounded-xl bg-green-50/80 dark:bg-green-900/30 backdrop-blur border-green-200 dark:border-green-800">
+                  <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <AlertDescription className="text-green-700 dark:text-green-300">
+                    <strong>✅ Token creado exitosamente!</strong> Redirigiendo a la página de tokens...
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {error && (
+                <Alert className="mb-6 rounded-xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur border-red-200 dark:border-red-800">
+                  <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                  <AlertDescription className="text-red-700 dark:text-red-300">
+                    <strong>❌ Error:</strong> {error.message || 'Failed to create token. Please try again.'}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Token Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-slate-700 dark:text-slate-300 font-medium">
+                    Token Name <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g., Organic Cotton, Premium Wood"
+                    disabled={isFormDisabled}
+                    className={`rounded-xl border-2 transition-all ${formErrors.name ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400'}`}
+                  />
+                  {formErrors.name && (
+                    <p className="text-sm text-red-500">{formErrors.name}</p>
+                  )}
+                </div>
+
+                {/* Total Supply */}
+                <div className="space-y-2">
+                  <Label htmlFor="totalSupply" className="text-slate-700 dark:text-slate-300 font-medium">
+                    Total Supply <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="totalSupply"
+                    type="number"
+                    min="1"
+                    value={totalSupply}
+                    onChange={(e) => setTotalSupply(e.target.value)}
+                    placeholder="e.g., 1000"
+                    disabled={isFormDisabled}
+                    className={`rounded-xl border-2 transition-all ${formErrors.totalSupply ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400'}`}
+                  />
+                  {formErrors.totalSupply && (
+                    <p className="text-sm text-red-500">{formErrors.totalSupply}</p>
+                  )}
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    The total amount of tokens to create. Must be greater than 0.
+                  </p>
+                </div>
+
+                {/* Parent Token (only for FinishedProduct) */}
+                {tokenType === TokenType.FinishedProduct && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="parentId" className="text-slate-700 dark:text-slate-300 font-medium">
+                        Parent Token (Raw Material) <span className="text-red-500">*</span>
+                      </Label>
+                      {isLoadingTokens ? (
+                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span className="text-sm">Loading available tokens...</span>
+                        </div>
+                      ) : availableParentTokens.length === 0 ? (
+                        <div className="p-4 rounded-xl bg-yellow-50/80 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800">
+                          <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                            No raw material tokens available. You need to create a raw material token first.
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <Select
+                            value={parentId}
+                            onValueChange={(value) => {
+                              setParentId(value)
+                              setParentAmount('')
+                            }}
+                            disabled={isFormDisabled}
+                          >
+                            <SelectTrigger className={`rounded-xl border-2 transition-all ${formErrors.parentId ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'}`}>
+                              <SelectValue placeholder="Select a raw material token" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                              {availableParentTokens.map((token) => (
+                                <SelectItem key={token.tokenId.toString()} value={token.tokenId.toString()}>
+                                  {token.name} (ID: {token.tokenId.toString()})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {formErrors.parentId && (
+                            <p className="text-sm text-red-500">{formErrors.parentId}</p>
+                          )}
+                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                            Select the raw material token that will be used to create this finished product.
+                          </p>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Parent Amount */}
+                    {parentId && parentId !== '0' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="parentAmount" className="text-slate-700 dark:text-slate-300 font-medium">
+                          Amount of Raw Material to Consume <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="parentAmount"
+                          type="number"
+                          min="1"
+                          max={parentBalance !== undefined ? Number(parentBalance) : undefined}
+                          value={parentAmount}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            if (parentBalance === BigInt(0)) return
+                            if (parentBalance !== undefined && value) {
+                              const numValue = parseInt(value, 10)
+                              if (!isNaN(numValue) && numValue > Number(parentBalance)) {
+                                setParentAmount(parentBalance.toString())
+                                return
+                              }
+                            }
+                            setParentAmount(value)
+                          }}
+                          placeholder="e.g., 100"
+                          disabled={isFormDisabled || isLoadingParentBalance || (parentBalance !== undefined && parentBalance === BigInt(0))}
+                          className={`rounded-xl border-2 transition-all ${formErrors.parentAmount ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400'}`}
+                        />
+                        {formErrors.parentAmount && (
+                          <p className="text-sm text-red-500">{formErrors.parentAmount}</p>
+                        )}
+                        {isLoadingParentBalance ? (
+                          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span className="text-sm">Loading balance...</span>
+                          </div>
+                        ) : parentBalance !== undefined ? (
+                          <div className="space-y-1 p-3 rounded-xl bg-slate-50/80 dark:bg-slate-800/50">
+                            <p className={`text-sm ${parentBalance === BigInt(0) ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
+                              Your available balance: <span className={`font-semibold ${parentBalance === BigInt(0) ? 'text-red-700 dark:text-red-300' : 'text-slate-700 dark:text-slate-300'}`}>{parentBalance.toString()}</span> tokens.
+                              {parentBalance === BigInt(0) && (
+                                <span className="ml-2 text-red-600 dark:text-red-400">⚠️ You need to receive tokens first!</span>
+                              )}
+                            </p>
+                            {parentAmount && parseInt(parentAmount, 10) > 0 && parentBalance > BigInt(0) && (
+                              <p className="text-sm text-slate-500 dark:text-slate-400">
+                                After creation: <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                  {parentBalance - BigInt(parseInt(parentAmount, 10) || 0) < BigInt(0) ? '0' : (parentBalance - BigInt(parseInt(parentAmount, 10) || 0)).toString()}
+                                </span> tokens remaining.
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-yellow-600 dark:text-yellow-400 p-3 rounded-xl bg-yellow-50/80 dark:bg-yellow-900/30">
+                            ⚠️ Unable to verify balance. Please check the parent token selection.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Features */}
+                <div className="space-y-2">
+                  <Label htmlFor="features" className="text-slate-700 dark:text-slate-300 font-medium">
+                    Features (JSON) <span className="text-slate-400">(optional)</span>
+                  </Label>
+                  <Textarea
+                    id="features"
+                    value={features}
+                    onChange={(e) => setFeatures(e.target.value)}
+                    placeholder='{"color": "blue", "size": "large", "quality": "premium"}'
+                    disabled={isFormDisabled}
+                    rows={4}
+                    className={`rounded-xl border-2 transition-all font-mono text-sm ${formErrors.features ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400'}`}
+                  />
+                  {formErrors.features && (
+                    <p className="text-sm text-red-500">{formErrors.features}</p>
+                  )}
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Additional token features in JSON format. Leave empty or use {'{}'} for no features.
+                  </p>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitDisabled}
+                    className={`flex-1 rounded-xl transition-all shadow-lg ${
+                      isSubmitDisabled && !isLoading
+                        ? 'bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed opacity-60'
+                        : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-xl'
+                    }`}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        {isConfirming ? 'Confirming...' : 'Creating...'}
+                      </>
+                    ) : (
+                      'Create Token'
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.back()}
+                    disabled={isLoading}
+                    className="rounded-xl"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+
+                {hash && (
+                  <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Transaction Hash: <span className="font-mono text-xs">{hash}</span>
+                    </p>
+                  </div>
+                )}
+              </form>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // Diseño original
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <Header />

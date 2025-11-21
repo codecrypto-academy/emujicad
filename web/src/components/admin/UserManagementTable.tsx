@@ -30,6 +30,9 @@ export function UserManagementTable() {
   const { data: isPaused } = useIsPaused()
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [lastSuccessHash, setLastSuccessHash] = useState<string | null>(null)
+  
+  // Activar diseño moderno si está habilitado
+  const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
 
   // Calcular estadísticas desde los usuarios actuales
   const stats = useMemo(() => ({
@@ -130,6 +133,23 @@ export function UserManagementTable() {
   }
 
   if (isLoading) {
+    if (useModernDesign) {
+      return (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-6 animate-pulse">
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-xl w-1/2 mb-4"></div>
+                <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded-xl w-1/3"></div>
+              </div>
+            ))}
+          </div>
+          <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8">
+            <p className="text-center text-slate-600 dark:text-slate-400">Cargando usuarios...</p>
+          </div>
+        </>
+      )
+    }
     return (
       <>
         {/* Stats Cards Skeleton */}
@@ -159,6 +179,25 @@ export function UserManagementTable() {
   }
 
   if (users.length === 0) {
+    if (useModernDesign) {
+      return (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+            <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg p-6">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Usuarios</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Registrados</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">0</p>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8 text-center">
+            <p className="text-slate-600 dark:text-slate-400">No hay usuarios registrados aún.</p>
+          </div>
+        </>
+      )
+    }
     return (
       <>
         {/* Stats Cards - Empty State */}
@@ -186,124 +225,179 @@ export function UserManagementTable() {
     )
   }
 
+  // Diseño moderno para stats cards
+  const StatsCards = useModernDesign ? (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+      {/* Total Users */}
+      <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="relative p-6">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Usuarios</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Registrados</p>
+          <p className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">{stats.total}</p>
+        </div>
+      </div>
+
+      {/* Pending */}
+      <div className="group relative overflow-hidden rounded-2xl bg-yellow-50/80 dark:bg-yellow-900/30 backdrop-blur-xl border border-yellow-200/50 dark:border-yellow-800/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+        <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="relative p-6">
+          <h3 className="text-sm font-semibold text-yellow-700 dark:text-yellow-400 mb-1">⏳ Pendientes</h3>
+          <p className="text-xs text-yellow-600 dark:text-yellow-300/80 mb-2">Esperando aprobación</p>
+          <p className="text-4xl font-bold text-yellow-700 dark:text-yellow-400">{stats.pending}</p>
+        </div>
+      </div>
+
+      {/* Approved */}
+      <div className="group relative overflow-hidden rounded-2xl bg-green-50/80 dark:bg-green-900/30 backdrop-blur-xl border border-green-200/50 dark:border-green-800/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="relative p-6">
+          <h3 className="text-sm font-semibold text-green-700 dark:text-green-400 mb-1">✅ Aprobados</h3>
+          <p className="text-xs text-green-600 dark:text-green-300/80 mb-2">Activos en el sistema</p>
+          <p className="text-4xl font-bold text-green-700 dark:text-green-400">{stats.approved}</p>
+        </div>
+      </div>
+
+      {/* Rejected */}
+      <div className="group relative overflow-hidden rounded-2xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur-xl border border-red-200/50 dark:border-red-800/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+        <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="relative p-6">
+          <h3 className="text-sm font-semibold text-red-700 dark:text-red-400 mb-1">❌ Rechazados</h3>
+          <p className="text-xs text-red-600 dark:text-red-300/80 mb-2">Solicitudes denegadas</p>
+          <p className="text-4xl font-bold text-red-700 dark:text-red-400">{stats.rejected}</p>
+        </div>
+      </div>
+
+      {/* Canceled */}
+      <div className="group relative overflow-hidden rounded-2xl bg-slate-50/80 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-500/5 to-gray-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="relative p-6">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">🚫 Cancelados</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Cuentas suspendidas</p>
+          <p className="text-4xl font-bold text-slate-700 dark:text-slate-300">{stats.canceled}</p>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      {/* Total Users */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
+          <CardDescription className="text-xs">Registrados</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <p className="text-3xl font-bold">{stats.total}</p>
+        </CardContent>
+      </Card>
+
+      {/* Pending */}
+      <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-yellow-700 dark:text-yellow-400">⏳ Pendientes</CardTitle>
+          <CardDescription className="text-xs text-yellow-600 dark:text-yellow-300/80">Esperando aprobación</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <p className="text-3xl font-bold text-yellow-700 dark:text-yellow-400">{stats.pending}</p>
+        </CardContent>
+      </Card>
+
+      {/* Approved */}
+      <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-green-700 dark:text-green-400">✅ Aprobados</CardTitle>
+          <CardDescription className="text-xs text-green-600 dark:text-green-300/80">Activos en el sistema</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <p className="text-3xl font-bold text-green-700 dark:text-green-400">{stats.approved}</p>
+        </CardContent>
+      </Card>
+
+      {/* Rejected */}
+      <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-red-700 dark:text-red-400">❌ Rechazados</CardTitle>
+          <CardDescription className="text-xs text-red-600 dark:text-red-300/80">Solicitudes denegadas</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <p className="text-3xl font-bold text-red-700 dark:text-red-400">{stats.rejected}</p>
+        </CardContent>
+      </Card>
+
+      {/* Canceled */}
+      <Card className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">🚫 Cancelados</CardTitle>
+          <CardDescription className="text-xs text-gray-600 dark:text-gray-400">Cuentas suspendidas</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <p className="text-3xl font-bold text-gray-700 dark:text-gray-300">{stats.canceled}</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+
   return (
     <>
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {/* Total Users */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
-            <CardDescription className="text-xs">Registrados</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <p className="text-3xl font-bold">{stats.total}</p>
-          </CardContent>
-        </Card>
+      {StatsCards}
 
-        {/* Pending */}
-        <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-700 dark:text-yellow-400">⏳ Pendientes</CardTitle>
-            <CardDescription className="text-xs text-yellow-600 dark:text-yellow-300/80">Esperando aprobación</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <p className="text-3xl font-bold text-yellow-700 dark:text-yellow-400">{stats.pending}</p>
-          </CardContent>
-        </Card>
+      {useModernDesign ? (
+        <div className="group relative overflow-hidden rounded-3xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-700 dark:from-slate-100 dark:to-blue-300 bg-clip-text text-transparent">Gestión de Usuarios</h2>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-48 rounded-xl border-2">
+                  <SelectValue placeholder="Filtrar por estado" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value={UserStatus.Pending.toString()}>⏳ Pendientes</SelectItem>
+                  <SelectItem value={UserStatus.Approved.toString()}>✅ Aprobados</SelectItem>
+                  <SelectItem value={UserStatus.Rejected.toString()}>❌ Rechazados</SelectItem>
+                  <SelectItem value={UserStatus.Canceled.toString()}>🚫 Cancelados</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {/* Mensajes de estado */}
+            {isPaused === true && (
+              <Alert className="mb-4 rounded-xl bg-yellow-50/80 dark:bg-yellow-900/30 backdrop-blur border-yellow-200 dark:border-yellow-800">
+                <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+                  <strong>⚠️ Contrato Pausado:</strong> No puedes cambiar el estado de los usuarios mientras el contrato esté pausado. 
+                  Solo puedes visualizar la información.
+                </AlertDescription>
+              </Alert>
+            )}
+            {isPending && (
+              <Alert className="mb-4 rounded-xl bg-blue-50/80 dark:bg-blue-900/30 backdrop-blur border-blue-200 dark:border-blue-800">
+                <AlertDescription className="text-blue-700 dark:text-blue-300">
+                  ⏳ Procesando transacción... Confirma en MetaMask.
+                </AlertDescription>
+              </Alert>
+            )}
 
-        {/* Approved */}
-        <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-700 dark:text-green-400">✅ Aprobados</CardTitle>
-            <CardDescription className="text-xs text-green-600 dark:text-green-300/80">Activos en el sistema</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <p className="text-3xl font-bold text-green-700 dark:text-green-400">{stats.approved}</p>
-          </CardContent>
-        </Card>
+            {isSuccess && (
+              <Alert className="mb-4 rounded-xl bg-green-50/80 dark:bg-green-900/30 backdrop-blur border-green-200 dark:border-green-800">
+                <AlertDescription className="text-green-700 dark:text-green-300">
+                  ✅ Estado actualizado exitosamente. Actualizando lista...
+                </AlertDescription>
+              </Alert>
+            )}
 
-        {/* Rejected */}
-        <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-700 dark:text-red-400">❌ Rechazados</CardTitle>
-            <CardDescription className="text-xs text-red-600 dark:text-red-300/80">Solicitudes denegadas</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <p className="text-3xl font-bold text-red-700 dark:text-red-400">{stats.rejected}</p>
-          </CardContent>
-        </Card>
+            {error && (
+              <Alert className="mb-4 rounded-xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur border-red-200 dark:border-red-800">
+                <AlertDescription className="text-red-700 dark:text-red-300">
+                  ❌ Error: {error.message}
+                </AlertDescription>
+              </Alert>
+            )}
 
-        {/* Canceled */}
-        <Card className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">🚫 Cancelados</CardTitle>
-            <CardDescription className="text-xs text-gray-600 dark:text-gray-400">Cuentas suspendidas</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <p className="text-3xl font-bold text-gray-700 dark:text-gray-300">{stats.canceled}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Gestión de Usuarios</CardTitle>
-          
-          {/* Filtro por estado */}
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filtrar por estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value={UserStatus.Pending.toString()}>⏳ Pendientes</SelectItem>
-              <SelectItem value={UserStatus.Approved.toString()}>✅ Aprobados</SelectItem>
-              <SelectItem value={UserStatus.Rejected.toString()}>❌ Rechazados</SelectItem>
-              <SelectItem value={UserStatus.Canceled.toString()}>🚫 Cancelados</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {/* Mensajes de estado */}
-        {isPaused === true && (
-          <Alert className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-            <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-            <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-              <strong>⚠️ Contrato Pausado:</strong> No puedes cambiar el estado de los usuarios mientras el contrato esté pausado. 
-              Solo puedes visualizar la información.
-            </AlertDescription>
-          </Alert>
-        )}
-        {isPending && (
-          <Alert className="mb-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-            <AlertDescription className="text-blue-700 dark:text-blue-300">
-              ⏳ Procesando transacción... Confirma en MetaMask.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {isSuccess && (
-          <Alert className="mb-4 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-            <AlertDescription className="text-green-700 dark:text-green-300">
-              ✅ Estado actualizado exitosamente. Actualizando lista...
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {error && (
-          <Alert className="mb-4 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-            <AlertDescription className="text-red-700 dark:text-red-300">
-              ❌ Error: {error.message}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Tabla de usuarios */}
-        <div className="rounded-md border">
-          <Table>
+            {/* Tabla de usuarios */}
+            <div className="rounded-xl border-2 border-slate-200/50 dark:border-slate-700/50 overflow-hidden">
+              <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
@@ -325,7 +419,7 @@ export function UserManagementTable() {
                   const actions = getAvailableActions(user)
                   
                   return (
-                    <TableRow key={user.id.toString()} className="transition-all duration-200 hover:bg-accent/50 animate-in fade-in slide-in-from-left-2">
+                    <TableRow key={user.id.toString()} className={`transition-all duration-200 ${useModernDesign ? 'hover:bg-slate-50/50 dark:hover:bg-slate-800/50' : 'hover:bg-accent/50'} animate-in fade-in slide-in-from-left-2`}>
                       <TableCell className="font-medium">{user.id.toString()}</TableCell>
                       <TableCell className="font-mono text-sm">
                         {user.userAddress.slice(0, 6)}...{user.userAddress.slice(-4)}
@@ -339,7 +433,7 @@ export function UserManagementTable() {
                       <TableCell>{getStatusBadge(user.status)}</TableCell>
                       <TableCell className="text-right">
                         {actions.length === 0 ? (
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-slate-500 dark:text-slate-400">
                             {Number(user.status) === UserStatus.Rejected 
                               ? 'Usuario debe re-registrarse' 
                               : 'Sin acciones'}
@@ -350,7 +444,7 @@ export function UserManagementTable() {
                               <Button
                                 key={action.value}
                                 size="sm"
-                                className={action.color}
+                                className={`${action.color} ${useModernDesign ? 'rounded-xl' : ''}`}
                                 onClick={() => handleStatusChange(user.userAddress, action.value)}
                                 disabled={isPending || isPaused === true}
                                 aria-label={`${action.label} user ${user.userAddress.slice(0, 6)}...${user.userAddress.slice(-4)}`}
@@ -368,20 +462,158 @@ export function UserManagementTable() {
               )}
             </TableBody>
           </Table>
-        </div>
+            </div>
 
-        {/* Info del flujo */}
-        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
-          <p className="text-sm text-blue-700 dark:text-blue-300 font-semibold mb-2">📋 Flujo de Estados:</p>
-          <ul className="text-xs text-blue-600 dark:text-blue-400 space-y-1">
-            <li>• <strong>Pending</strong> → Puedes Aprobar o Rechazar</li>
-            <li>• <strong>Approved</strong> → Puedes Cancelar (suspender cuenta)</li>
-            <li>• <strong>Rejected</strong> → Usuario debe hacer nueva solicitud</li>
-            <li>• <strong>Canceled</strong> → Puedes Reactivar a Pending</li>
-          </ul>
+            {/* Info del flujo */}
+            <div className={`mt-6 p-4 ${useModernDesign ? 'bg-blue-50/80 dark:bg-blue-900/30 backdrop-blur border border-blue-200/50 dark:border-blue-800/50 rounded-xl' : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded'}`}>
+              <p className="text-sm text-blue-700 dark:text-blue-300 font-semibold mb-2">📋 Flujo de Estados:</p>
+              <ul className="text-xs text-blue-600 dark:text-blue-400 space-y-1">
+                <li>• <strong>Pending</strong> → Puedes Aprobar o Rechazar</li>
+                <li>• <strong>Approved</strong> → Puedes Cancelar (suspender cuenta)</li>
+                <li>• <strong>Rejected</strong> → Usuario debe hacer nueva solicitud</li>
+                <li>• <strong>Canceled</strong> → Puedes Reactivar a Pending</li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle>Gestión de Usuarios</CardTitle>
+            
+            {/* Filtro por estado */}
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filtrar por estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value={UserStatus.Pending.toString()}>⏳ Pendientes</SelectItem>
+                <SelectItem value={UserStatus.Approved.toString()}>✅ Aprobados</SelectItem>
+                <SelectItem value={UserStatus.Rejected.toString()}>❌ Rechazados</SelectItem>
+                <SelectItem value={UserStatus.Canceled.toString()}>🚫 Cancelados</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Mensajes de estado */}
+          {isPaused === true && (
+            <Alert className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+              <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+              <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+                <strong>⚠️ Contrato Pausado:</strong> No puedes cambiar el estado de los usuarios mientras el contrato esté pausado. 
+                Solo puedes visualizar la información.
+              </AlertDescription>
+            </Alert>
+          )}
+          {isPending && (
+            <Alert className="mb-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+              <AlertDescription className="text-blue-700 dark:text-blue-300">
+                ⏳ Procesando transacción... Confirma en MetaMask.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {isSuccess && (
+            <Alert className="mb-4 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+              <AlertDescription className="text-green-700 dark:text-green-300">
+                ✅ Estado actualizado exitosamente. Actualizando lista...
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {error && (
+            <Alert className="mb-4 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+              <AlertDescription className="text-red-700 dark:text-red-300">
+                ❌ Error: {error.message}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Tabla de usuarios */}
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Dirección</TableHead>
+                  <TableHead>Rol</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
+                      No hay usuarios con el estado seleccionado.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredUsers.map((user) => {
+                    const actions = getAvailableActions(user)
+                    
+                    return (
+                      <TableRow key={user.id.toString()} className="transition-all duration-200 hover:bg-accent/50 animate-in fade-in slide-in-from-left-2">
+                        <TableCell className="font-medium">{user.id.toString()}</TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {user.userAddress.slice(0, 6)}...{user.userAddress.slice(-4)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span>{getRoleIcon(user.role)}</span>
+                            <span>{getRoleName(user.role)}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(user.status)}</TableCell>
+                        <TableCell className="text-right">
+                          {actions.length === 0 ? (
+                            <span className="text-sm text-muted-foreground">
+                              {Number(user.status) === UserStatus.Rejected 
+                                ? 'Usuario debe re-registrarse' 
+                                : 'Sin acciones'}
+                            </span>
+                          ) : (
+                            <div className="flex gap-2 justify-end">
+                              {actions.map((action) => (
+                                <Button
+                                  key={action.value}
+                                  size="sm"
+                                  className={action.color}
+                                  onClick={() => handleStatusChange(user.userAddress, action.value)}
+                                  disabled={isPending || isPaused === true}
+                                  aria-label={`${action.label} user ${user.userAddress.slice(0, 6)}...${user.userAddress.slice(-4)}`}
+                                  aria-disabled={isPending || isPaused === true}
+                                >
+                                  {action.label}
+                                </Button>
+                              ))}
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Info del flujo */}
+          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
+            <p className="text-sm text-blue-700 dark:text-blue-300 font-semibold mb-2">📋 Flujo de Estados:</p>
+            <ul className="text-xs text-blue-600 dark:text-blue-400 space-y-1">
+              <li>• <strong>Pending</strong> → Puedes Aprobar o Rechazar</li>
+              <li>• <strong>Approved</strong> → Puedes Cancelar (suspender cuenta)</li>
+              <li>• <strong>Rejected</strong> → Usuario debe hacer nueva solicitud</li>
+              <li>• <strong>Canceled</strong> → Puedes Reactivar a Pending</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+      )}
     </>
   )
 }

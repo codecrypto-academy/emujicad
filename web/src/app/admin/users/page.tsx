@@ -15,6 +15,9 @@ export default function AdminUsersPage() {
   const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
+  
+  // Activar diseño moderno si está habilitado
+  const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
 
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase()
 
@@ -35,6 +38,19 @@ export default function AdminUsersPage() {
 
   // No renderizar nada hasta que se monte en el cliente
   if (!mounted || isLoadingOwner) {
+    if (useModernDesign) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+          <Header />
+          <div className="container mx-auto px-4 py-12">
+            <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8 text-center">
+              <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-xl w-48 mx-auto animate-pulse mb-4"></div>
+              <p className="text-slate-600 dark:text-slate-400">Verificando permisos...</p>
+            </div>
+          </div>
+        </div>
+      )
+    }
     return (
       <div className="container mx-auto py-8">
         <Card>
@@ -51,6 +67,27 @@ export default function AdminUsersPage() {
 
   // Manejo de errores al verificar ownership
   if (ownerError) {
+    if (useModernDesign) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+          <Header />
+          <div className="container mx-auto px-4 py-12">
+            <div className="rounded-2xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur-xl border border-red-200 dark:border-red-800 p-8 text-center animate-in fade-in slide-in-from-bottom-4">
+              <h1 className="text-2xl font-bold mb-4 text-red-600 dark:text-red-400">⚠️ Error</h1>
+              <p className="text-slate-600 dark:text-slate-400 mb-4">
+                Failed to verify contract ownership. Please try again.
+              </p>
+              <p className="text-sm text-red-600 dark:text-red-400 mb-6 font-mono">
+                {ownerError.message}
+              </p>
+              <Link href="/">
+                <Button variant="outline" className="rounded-xl">Volver al inicio</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )
+    }
     return (
       <div className="container mx-auto py-8">
         <Card className="border-red-500/50 bg-red-50 dark:bg-red-900/20">
@@ -73,6 +110,24 @@ export default function AdminUsersPage() {
 
   // Estados de carga
   if (!isConnected) {
+    if (useModernDesign) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+          <Header />
+          <div className="container mx-auto px-4 py-12">
+            <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8 text-center animate-in fade-in slide-in-from-bottom-4">
+              <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-slate-800 to-red-700 dark:from-slate-100 dark:to-red-300 bg-clip-text text-transparent">🔐 Acceso Denegado</h1>
+              <p className="text-slate-600 dark:text-slate-400 mb-6">
+                Debes conectar tu wallet para acceder a esta página.
+              </p>
+              <Link href="/">
+                <Button className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">Volver al inicio</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )
+    }
     return (
       <div className="container mx-auto py-8">
         <Card>
@@ -91,6 +146,32 @@ export default function AdminUsersPage() {
   }
 
   if (!isOwner) {
+    if (useModernDesign) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+          <Header />
+          <div className="container mx-auto px-4 py-12">
+            <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8 text-center animate-in fade-in slide-in-from-bottom-4">
+              <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-slate-800 to-red-700 dark:from-slate-100 dark:to-red-300 bg-clip-text text-transparent">🚫 Acceso Denegado</h1>
+              <p className="text-slate-600 dark:text-slate-400 mb-4">
+                Solo el propietario del contrato puede acceder a esta página.
+              </p>
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 mb-4 space-y-2">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Tu dirección: <code className="bg-white dark:bg-slate-700 px-2 py-1 rounded-lg font-mono text-xs">{address}</code>
+                </p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Owner: <code className="bg-white dark:bg-slate-700 px-2 py-1 rounded-lg font-mono text-xs">{owner}</code>
+                </p>
+              </div>
+              <Link href="/">
+                <Button className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">Volver al inicio</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )
+    }
     return (
       <div className="container mx-auto py-8">
         <Card>
@@ -115,6 +196,32 @@ export default function AdminUsersPage() {
   }
 
   // Si llegamos aquí, el usuario es el owner
+  if (useModernDesign) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+        <Header />
+        
+        <div className="container mx-auto px-4 py-12 max-w-7xl">
+          {/* Título Moderno */}
+          <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-3 flex items-center gap-3">
+              👤 Gestión de Usuarios
+            </h1>
+            <p className="text-lg text-slate-600 dark:text-slate-400">
+              Administración de usuarios y permisos del sistema
+            </p>
+          </div>
+
+          {/* Tabla de gestión */}
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+            <UserManagementTable />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Diseño original
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-6xl flex-col py-8 px-4 md:px-8 bg-white dark:bg-black">
