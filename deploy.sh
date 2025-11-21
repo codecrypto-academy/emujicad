@@ -64,8 +64,10 @@ FRONTEND_PORT=3000
 DEPLOYER_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 DEPLOYER_ADDRESS="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 
-# Archivo de configuración del frontend
+# Archivos de configuración del frontend
 CONFIG_FILE="$WEB_DIR/src/contracts/config.ts"
+ABI_FILE="$WEB_DIR/src/contracts/SupplyChain.json"
+ABI_SOURCE="$SC_DIR/out/SupplyChain.sol/SupplyChain.json"
 
 # ============================================================================
 # FUNCIONES AUXILIARES
@@ -124,24 +126,24 @@ get_pid_by_port() {
     lsof -ti :$port 2>/dev/null | head -n 1 || echo ""
 }
 
-# Función para esperar a que un puerto esté disponible
+# Función para esperar a que un puerto esté en uso (servicio iniciado)
 wait_for_port() {
     local port=$1
     local timeout=${2:-30}
     local elapsed=0
     
-    print_step "Esperando a que el puerto $port esté disponible..."
+    print_step "Esperando a que el puerto $port esté en uso (servicio iniciado)..."
     
     while [ $elapsed -lt $timeout ]; do
         if check_port $port; then
-            print_success "Puerto $port está disponible"
+            print_success "Puerto $port está en uso (servicio iniciado)"
             return 0
         fi
         sleep 1
         elapsed=$((elapsed + 1))
     done
     
-    print_error "Timeout esperando al puerto $port"
+    print_error "Timeout esperando al puerto $port (servicio no inició)"
     return 1
 }
 
@@ -227,9 +229,16 @@ deploy_contract() {
         fi
     fi
     
-    print_step "Desplegando SupplyChain.sol en Anvil..."
-    
+    # Asegurar que el contrato esté compilado antes de desplegar (para tener ABI actualizado)
+    print_step "Compilando contrato para asegurar ABI actualizado..."
     cd "$SC_DIR"
+    if ! forge build --force > /dev/null 2>&1; then
+        print_error "Error al compilar el contrato"
+        return 1
+    fi
+    print_success "Contrato compilado correctamente"
+    
+    print_step "Desplegando SupplyChain.sol en Anvil..."
     
     # Ejecutar script de deployment
     local deploy_output=$(PRIVATE_KEY=$DEPLOYER_PRIVATE_KEY forge script \
@@ -286,6 +295,37 @@ update_frontend_config() {
         return 1
     fi
     
+    # ============================================================
+    # 3.1: Actualizar ABI del contrato
+    # ============================================================
+    print_step "Actualizando ABI del contrato..."
+    
+    if [ ! -f "$ABI_SOURCE" ]; then
+        print_error "ABI fuente no encontrado: $ABI_SOURCE"
+        print_info "Asegúrate de que el contrato esté compilado (forge build)"
+        return 1
+    fi
+    
+    # Hacer backup del ABI existente
+    if [ -f "$ABI_FILE" ]; then
+        cp "$ABI_FILE" "$ABI_FILE.backup"
+        print_info "Backup del ABI creado: $ABI_FILE.backup"
+    fi
+    
+    # Copiar ABI actualizado
+    cp "$ABI_SOURCE" "$ABI_FILE"
+    
+    if [ -f "$ABI_FILE" ]; then
+        print_success "ABI actualizado correctamente"
+        print_info "ABI copiado desde: $ABI_SOURCE"
+    else
+        print_error "No se pudo copiar el ABI"
+        return 1
+    fi
+    
+    # ============================================================
+    # 3.2: Actualizar dirección del contrato
+    # ============================================================
     print_step "Actualizando $CONFIG_FILE con dirección: $contract_address"
     
     # Verificar que el archivo existe
@@ -305,12 +345,18 @@ update_frontend_config() {
     if grep -q "$contract_address" "$CONFIG_FILE"; then
         print_success "Configuración actualizada correctamente"
         print_info "Nueva dirección: $contract_address"
+        print_info "ABI actualizado desde la última compilación"
         return 0
     else
         print_error "No se pudo actualizar la configuración"
-        # Restaurar backup
-        mv "$CONFIG_FILE.backup" "$CONFIG_FILE"
-        print_info "Configuración restaurada desde backup"
+        # Restaurar backups
+        if [ -f "$CONFIG_FILE.backup" ]; then
+            mv "$CONFIG_FILE.backup" "$CONFIG_FILE"
+        fi
+        if [ -f "$ABI_FILE.backup" ]; then
+            mv "$ABI_FILE.backup" "$ABI_FILE"
+        fi
+        print_info "Configuración restaurada desde backups"
         return 1
     fi
 }
@@ -322,9 +368,17 @@ update_frontend_config() {
 start_frontend() {
     print_header "PASO 4: Iniciar Frontend (Next.js)"
     
-    # Verificar si frontend ya está corriendo (buscar proceso npm run dev o next-server)
-    local existing_frontend_pid=$(pgrep -f "next-server" 2>/dev/null || pgrep -f "npm.*run dev" 2>/dev/null | head -n 1)
-    if [ -n "$existing_frontend_pid" ]; then
+    # Verificar si frontend ya está corriendo (buscar por puerto primero, luego por proceso)
+    local existing_frontend_pid=$(get_pid_by_port $FRONTEND_PORT)
+    if [ -z "$existing_frontend_pid" ]; then
+        # Si no hay proceso en el puerto, buscar por nombre
+        existing_frontend_pid=$(pgrep -f "next-server" 2>/dev/null | head -n 1)
+    fi
+    if [ -z "$existing_frontend_pid" ]; then
+        existing_frontend_pid=$(pgrep -f "npm.*run dev" 2>/dev/null | head -n 1)
+    fi
+    
+    if [ -n "$existing_frontend_pid" ] && kill -0 "$existing_frontend_pid" 2>/dev/null; then
         print_warning "Frontend ya está corriendo en puerto $FRONTEND_PORT (PID: $existing_frontend_pid)"
         echo "$existing_frontend_pid" > "$FRONTEND_PID_FILE"
         return 0
@@ -363,62 +417,107 @@ stop_services() {
     
     local stopped_count=0
     
-    # Detener Frontend
+    # Detener Frontend - Buscar todos los procesos relacionados
+    local frontend_pids=""
+    
+    # Buscar por PID file
     if [ -f "$FRONTEND_PID_FILE" ]; then
-        local frontend_pid=$(cat "$FRONTEND_PID_FILE")
-        if kill -0 "$frontend_pid" 2>/dev/null; then
-            print_step "Deteniendo Frontend (PID: $frontend_pid)..."
-            kill "$frontend_pid" 2>/dev/null || true
-            sleep 2
-            
-            # Forzar si sigue corriendo
-            if kill -0 "$frontend_pid" 2>/dev/null; then
-                kill -9 "$frontend_pid" 2>/dev/null || true
-            fi
-            
-            print_success "Frontend detenido"
-            stopped_count=$((stopped_count + 1))
+        local file_pid=$(cat "$FRONTEND_PID_FILE")
+        if kill -0 "$file_pid" 2>/dev/null; then
+            frontend_pids="$frontend_pids $file_pid"
         fi
         rm -f "$FRONTEND_PID_FILE"
-    else
-        # Intentar detener por puerto
-        local frontend_pid=$(get_pid_by_port $FRONTEND_PORT)
-        if [ -n "$frontend_pid" ]; then
-            print_step "Deteniendo Frontend (PID: $frontend_pid)..."
-            kill "$frontend_pid" 2>/dev/null || true
-            sleep 2
-            print_success "Frontend detenido"
-            stopped_count=$((stopped_count + 1))
-        fi
     fi
     
-    # Detener Anvil
-    if [ -f "$ANVIL_PID_FILE" ]; then
-        local anvil_pid=$(cat "$ANVIL_PID_FILE")
-        if kill -0 "$anvil_pid" 2>/dev/null; then
-            print_step "Deteniendo Anvil (PID: $anvil_pid)..."
-            kill "$anvil_pid" 2>/dev/null || true
-            sleep 2
-            
-            # Forzar si sigue corriendo
-            if kill -0 "$anvil_pid" 2>/dev/null; then
-                kill -9 "$anvil_pid" 2>/dev/null || true
+    # Buscar por puerto
+    local port_pid=$(get_pid_by_port $FRONTEND_PORT)
+    if [ -n "$port_pid" ]; then
+        frontend_pids="$frontend_pids $port_pid"
+    fi
+    
+    # Buscar por nombre de proceso
+    local process_pids=$(pgrep -f "next-server" 2>/dev/null || true)
+    if [ -n "$process_pids" ]; then
+        frontend_pids="$frontend_pids $process_pids"
+    fi
+    
+    local npm_pids=$(pgrep -f "npm.*run dev" 2>/dev/null || true)
+    if [ -n "$npm_pids" ]; then
+        frontend_pids="$frontend_pids $npm_pids"
+    fi
+    
+    # Eliminar duplicados y espacios
+    frontend_pids=$(echo $frontend_pids | tr ' ' '\n' | sort -u | tr '\n' ' ')
+    
+    if [ -n "$frontend_pids" ]; then
+        print_step "Deteniendo Frontend (PIDs: $frontend_pids)..."
+        for pid in $frontend_pids; do
+            if kill -0 "$pid" 2>/dev/null; then
+                kill "$pid" 2>/dev/null || true
             fi
-            
-            print_success "Anvil detenido"
-            stopped_count=$((stopped_count + 1))
+        done
+        sleep 2
+        
+        # Forzar si siguen corriendo
+        for pid in $frontend_pids; do
+            if kill -0 "$pid" 2>/dev/null; then
+                kill -9 "$pid" 2>/dev/null || true
+            fi
+        done
+        
+        print_success "Frontend detenido"
+        stopped_count=$((stopped_count + 1))
+    else
+        print_info "Frontend no está corriendo"
+    fi
+    
+    # Detener Anvil - Buscar todos los procesos relacionados
+    local anvil_pids=""
+    
+    # Buscar por PID file
+    if [ -f "$ANVIL_PID_FILE" ]; then
+        local file_pid=$(cat "$ANVIL_PID_FILE")
+        if kill -0 "$file_pid" 2>/dev/null; then
+            anvil_pids="$anvil_pids $file_pid"
         fi
         rm -f "$ANVIL_PID_FILE"
+    fi
+    
+    # Buscar por puerto
+    local port_pid=$(get_pid_by_port $ANVIL_PORT)
+    if [ -n "$port_pid" ]; then
+        anvil_pids="$anvil_pids $port_pid"
+    fi
+    
+    # Buscar por nombre de proceso
+    local process_pids=$(pgrep -f "anvil.*--port $ANVIL_PORT" 2>/dev/null || true)
+    if [ -n "$process_pids" ]; then
+        anvil_pids="$anvil_pids $process_pids"
+    fi
+    
+    # Eliminar duplicados y espacios
+    anvil_pids=$(echo $anvil_pids | tr ' ' '\n' | sort -u | tr '\n' ' ')
+    
+    if [ -n "$anvil_pids" ]; then
+        print_step "Deteniendo Anvil (PIDs: $anvil_pids)..."
+        for pid in $anvil_pids; do
+            if kill -0 "$pid" 2>/dev/null; then
+                kill "$pid" 2>/dev/null || true
+            fi
+        done
+        sleep 2
+        
+        # Forzar si siguen corriendo
+        for pid in $anvil_pids; do
+            if kill -0 "$pid" 2>/dev/null; then
+                kill -9 "$pid" 2>/dev/null || true
+            fi
+        done
+        
+        print_success "Anvil detenido"
+        stopped_count=$((stopped_count + 1))
     else
-        # Intentar detener por puerto
-        local anvil_pid=$(get_pid_by_port $ANVIL_PORT)
-        if [ -n "$anvil_pid" ]; then
-            print_step "Deteniendo Anvil (PID: $anvil_pid)..."
-            kill "$anvil_pid" 2>/dev/null || true
-            sleep 2
-            print_success "Anvil detenido"
-            stopped_count=$((stopped_count + 1))
-        fi
+        print_info "Anvil no está corriendo"
     fi
     
     if [ $stopped_count -eq 0 ]; then

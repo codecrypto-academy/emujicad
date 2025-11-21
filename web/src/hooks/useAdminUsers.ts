@@ -57,11 +57,15 @@ export function useChangeUserStatus() {
   })
 
   const changeStatus = useCallback((userAddress: string, newStatus: UserStatus) => {
+    // Convert UserStatus enum to number (Solidity expects uint8)
+    // UserStatus enum values are already numbers (0-3), but we ensure type safety
+    const statusValue = Number(newStatus) as 0 | 1 | 2 | 3
+    
     writeContract({
       address: SUPPLY_CHAIN_ADDRESS as `0x${string}`,
       abi: SUPPLY_CHAIN_ABI,
       functionName: 'changeStatusUser',
-      args: [userAddress as `0x${string}`, newStatus],
+      args: [userAddress as `0x${string}`, statusValue],
     })
   }, [writeContract])
 

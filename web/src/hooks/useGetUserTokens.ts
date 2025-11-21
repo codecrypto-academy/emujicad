@@ -50,8 +50,8 @@ export function useGetTokenBalance(tokenId?: bigint, userAddress?: `0x${string}`
   return useReadContract({
     address: SUPPLY_CHAIN_ADDRESS,
     abi: SUPPLY_CHAIN_ABI,
-    functionName: 'balanceOf',
-    args: addressToUse && tokenId !== undefined ? [addressToUse, tokenId] : undefined,
+    functionName: 'getTokenBalance',
+    args: addressToUse && tokenId !== undefined ? [tokenId, addressToUse] : undefined,
     query: {
       enabled: !!addressToUse && tokenId !== undefined,
       refetchInterval: 5000,

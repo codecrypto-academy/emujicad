@@ -21,11 +21,15 @@ export function useCreateToken() {
     parentId: bigint,
     parentAmount: bigint
   ) => {
+    // Convert TokenType enum to number (Solidity expects uint8)
+    // TokenType enum values are already numbers (0 or 1), but we ensure type safety
+    const tokenTypeValue = Number(tokenType) as 0 | 1
+    
     writeContract({
       address: SUPPLY_CHAIN_ADDRESS,
       abi: SUPPLY_CHAIN_ABI,
       functionName: 'createToken',
-      args: [name, tokenType, totalSupply, features, parentId, parentAmount],
+      args: [name, tokenTypeValue, totalSupply, features, parentId, parentAmount],
     })
   }
 

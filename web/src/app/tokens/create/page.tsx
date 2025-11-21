@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAccount } from 'wagmi'
 import { Header } from '@/components/Header'
@@ -48,10 +48,22 @@ export default function CreateTokenPage() {
   }, [tokenTypeParam, userInfo])
 
   // Filter tokens for parent selection (only RowMaterial tokens for FinishedProduct)
+  // Also filter out tokens where user has no balance (for better UX)
   const availableParentTokens = useMemo(() => {
     if (tokenType !== TokenType.FinishedProduct) return []
     return tokens.filter(token => Number(token.tokenType) === TokenType.RowMaterial)
   }, [tokens, tokenType])
+
+  // Get balances for all available parent tokens to show in dropdown
+  const parentTokensWithBalance = useMemo(() => {
+    if (tokenType !== TokenType.FinishedProduct || !address) return []
+    
+    return availableParentTokens.map(token => ({
+      ...token,
+      // Note: We could fetch balances here, but it's expensive. 
+      // Instead, we'll show balance after selection and disable if 0
+    }))
+  }, [availableParentTokens, tokenType, address])
 
   // Get balance of selected parent token
   const selectedParentId = parentId ? BigInt(parseInt(parentId, 10)) : undefined
@@ -113,6 +125,30 @@ export default function CreateTokenPage() {
     }
   }, [isSuccess, router])
 
+  // Real-time validation for parent balance
+  useEffect(() => {
+    if (tokenType === TokenType.FinishedProduct && parentId && parentAmount) {
+      const errors: Record<string, string> = { ...formErrors }
+      const amount = parseInt(parentAmount, 10)
+      
+      if (!isNaN(amount) && amount > 0) {
+        if (parentBalance !== undefined) {
+          if (BigInt(amount) > parentBalance) {
+            errors.parentAmount = `Insufficient balance. You have ${parentBalance.toString()} tokens available.`
+          } else {
+            // Clear error if balance is sufficient
+            delete errors.parentAmount
+          }
+        } else if (!isLoadingParentBalance) {
+          // If balance is undefined and not loading, token might not exist
+          errors.parentAmount = 'Unable to verify balance. Please check the parent token selection.'
+        }
+      }
+      
+      setFormErrors(errors)
+    }
+  }, [parentId, parentAmount, parentBalance, isLoadingParentBalance, tokenType])
+
   // Validation
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {}
@@ -141,13 +177,26 @@ export default function CreateTokenPage() {
     if (tokenType === TokenType.FinishedProduct) {
       if (!parentId || parentId === '0') {
         errors.parentId = 'Parent token is required for finished products'
+      } else if (parentBalance !== undefined && parentBalance === BigInt(0)) {
+        errors.parentId = 'You have no balance for the selected token. Please select a different token or receive tokens first.'
       }
       
       const amount = parseInt(parentAmount, 10)
       if (!parentAmount || isNaN(amount) || amount <= 0) {
-        errors.parentAmount = 'Parent amount must be a positive number'
-      } else if (parentBalance !== undefined && BigInt(amount) > parentBalance) {
-        errors.parentAmount = `Insufficient balance. You have ${parentBalance.toString()} tokens available.`
+        if (parentBalance !== undefined && parentBalance === BigInt(0)) {
+          errors.parentAmount = 'You have no balance for this token. You need to receive tokens first!'
+        } else {
+          errors.parentAmount = 'Parent amount must be a positive number'
+        }
+      } else if (parentBalance !== undefined) {
+        if (parentBalance === BigInt(0)) {
+          errors.parentAmount = 'You have no balance for this token. You need to receive tokens first!'
+        } else if (BigInt(amount) > parentBalance) {
+          errors.parentAmount = `Insufficient balance. You have ${parentBalance.toString()} tokens available. Maximum allowed: ${parentBalance.toString()}`
+        }
+      } else if (!isLoadingParentBalance) {
+        // If balance is undefined and not loading, there might be an issue
+        errors.parentAmount = 'Unable to verify balance. Please check the parent token selection.'
       }
     } else {
       // For RowMaterial, parentAmount must be 0
@@ -195,8 +244,38 @@ export default function CreateTokenPage() {
     return null
   }
 
+  // Check if submit button should be enabled
+  // For FinishedProduct: button is enabled ONLY when:
+  //   - Parent token is selected
+  //   - Amount is entered and valid (greater than 0 and <= balance)
+  //   - Balance is available and greater than 0
+  // For RowMaterial: button is enabled when basic fields are filled (name, totalSupply)
+  const canSubmit = tokenType === TokenType.FinishedProduct
+    ? (
+        parentId && 
+        parentId !== '0' &&
+        parentAmount &&
+        !isNaN(parseInt(parentAmount, 10)) &&
+        parentBalance !== undefined &&
+        parentBalance > BigInt(0) &&
+        BigInt(parseInt(parentAmount, 10)) > BigInt(0) &&
+        BigInt(parseInt(parentAmount, 10)) <= parentBalance
+      )
+    : (
+        // For RowMaterial: basic validation (name and totalSupply)
+        name.trim().length >= 2 &&
+        totalSupply &&
+        !isNaN(parseInt(totalSupply, 10)) &&
+        parseInt(totalSupply, 10) > 0
+      )
+
+  // Form fields are disabled only during transaction or if paused
+  // NOT disabled by balance (user should be able to select and see options)
   const isFormDisabled = isPending || isConfirming || isPaused === true
   const isLoading = isPending || isConfirming
+  
+  // Submit button is disabled if form is disabled OR cannot submit (invalid parent/amount)
+  const isSubmitDisabled = isFormDisabled || !canSubmit
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
@@ -358,10 +437,27 @@ export default function CreateTokenPage() {
                         id="parentAmount"
                         type="number"
                         min="1"
+                        max={parentBalance !== undefined ? Number(parentBalance) : undefined}
                         value={parentAmount}
-                        onChange={(e) => setParentAmount(e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          // Si no hay balance, no permitir escribir
+                          if (parentBalance === BigInt(0)) {
+                            return
+                          }
+                          // Si hay balance, validar que no exceda el máximo
+                          if (parentBalance !== undefined && value) {
+                            const numValue = parseInt(value, 10)
+                            if (!isNaN(numValue) && numValue > Number(parentBalance)) {
+                              // Limitar al máximo disponible
+                              setParentAmount(parentBalance.toString())
+                              return
+                            }
+                          }
+                          setParentAmount(value)
+                        }}
                         placeholder="e.g., 100"
-                        disabled={isFormDisabled || isLoadingParentBalance}
+                        disabled={isFormDisabled || isLoadingParentBalance || (parentBalance !== undefined && parentBalance === BigInt(0))}
                         className={formErrors.parentAmount ? 'border-red-500' : ''}
                       />
                       {formErrors.parentAmount && (
@@ -373,19 +469,24 @@ export default function CreateTokenPage() {
                           <span className="text-sm">Loading balance...</span>
                         </div>
                       ) : parentBalance !== undefined ? (
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                          Your available balance: <span className="font-semibold text-slate-700 dark:text-slate-300">{parentBalance.toString()}</span> tokens.
-                          {parentAmount && parseInt(parentAmount, 10) > 0 && (
-                            <span className="ml-2">
+                        <div className="space-y-1">
+                          <p className={`text-sm ${parentBalance === BigInt(0) ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
+                            Your available balance: <span className={`font-semibold ${parentBalance === BigInt(0) ? 'text-red-700 dark:text-red-300' : 'text-slate-700 dark:text-slate-300'}`}>{parentBalance.toString()}</span> tokens.
+                            {parentBalance === BigInt(0) && (
+                              <span className="ml-2 text-red-600 dark:text-red-400">⚠️ You need to receive tokens first!</span>
+                            )}
+                          </p>
+                          {parentAmount && parseInt(parentAmount, 10) > 0 && parentBalance > BigInt(0) && (
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
                               After creation: <span className="font-semibold text-slate-700 dark:text-slate-300">
                                 {parentBalance - BigInt(parseInt(parentAmount, 10) || 0) < BigInt(0) ? '0' : (parentBalance - BigInt(parseInt(parentAmount, 10) || 0)).toString()}
                               </span> tokens remaining.
-                            </span>
+                            </p>
                           )}
-                        </p>
+                        </div>
                       ) : (
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                          Specify how many raw material tokens will be consumed to create this finished product.
+                        <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                          ⚠️ Unable to verify balance. Please check the parent token selection.
                         </p>
                       )}
                     </div>
@@ -419,8 +520,12 @@ export default function CreateTokenPage() {
               <div className="flex gap-4 pt-4">
                 <Button
                   type="submit"
-                  disabled={isFormDisabled}
-                  className="flex-1"
+                  disabled={isSubmitDisabled}
+                  className={`flex-1 ${
+                    isSubmitDisabled && !isLoading
+                      ? 'bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed opacity-60'
+                      : 'bg-black dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-slate-200'
+                  }`}
                 >
                   {isLoading ? (
                     <>
