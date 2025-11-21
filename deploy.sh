@@ -645,6 +645,112 @@ show_metamask_instructions() {
 }
 
 # ============================================================================
+# FUNCIÓN: GESTIÓN SOLO DEL FRONTEND
+# ============================================================================
+
+start_frontend_only() {
+    ensure_logs_dir
+    
+    print_header "🚀 Iniciar Solo Frontend"
+    
+    # Verificar que Anvil esté corriendo
+    if ! check_port $ANVIL_PORT; then
+        print_error "Anvil no está corriendo. Inicia Anvil primero con: ./deploy.sh start"
+        return 1
+    fi
+    
+    # Verificar que el contrato esté desplegado
+    local contract_address_file="$LOGS_DIR/contract_address.txt"
+    if [ ! -f "$contract_address_file" ]; then
+        print_error "Contrato no está desplegado. Ejecuta: ./deploy.sh start"
+        return 1
+    fi
+    
+    # Iniciar frontend
+    if ! start_frontend; then
+        print_error "No se pudo iniciar el frontend"
+        return 1
+    fi
+    
+    print_success "Frontend iniciado correctamente"
+    print_info "URL: http://localhost:$FRONTEND_PORT"
+    print_info "Anvil y contrato siguen corriendo"
+}
+
+stop_frontend_only() {
+    print_header "🛑 Detener Solo Frontend"
+    
+    local stopped=false
+    
+    # Detener Frontend - Buscar todos los procesos relacionados
+    local frontend_pids=""
+    
+    # Buscar por PID file
+    if [ -f "$FRONTEND_PID_FILE" ]; then
+        local file_pid=$(cat "$FRONTEND_PID_FILE")
+        if kill -0 "$file_pid" 2>/dev/null; then
+            frontend_pids="$frontend_pids $file_pid"
+        fi
+        rm -f "$FRONTEND_PID_FILE"
+    fi
+    
+    # Buscar por puerto
+    local port_pid=$(get_pid_by_port $FRONTEND_PORT)
+    if [ -n "$port_pid" ]; then
+        frontend_pids="$frontend_pids $port_pid"
+    fi
+    
+    # Buscar por nombre de proceso
+    local process_pids=$(pgrep -f "next-server" 2>/dev/null || true)
+    if [ -n "$process_pids" ]; then
+        frontend_pids="$frontend_pids $process_pids"
+    fi
+    
+    local npm_pids=$(pgrep -f "npm.*run dev" 2>/dev/null || true)
+    if [ -n "$npm_pids" ]; then
+        frontend_pids="$frontend_pids $npm_pids"
+    fi
+    
+    # Eliminar duplicados y espacios
+    frontend_pids=$(echo $frontend_pids | tr ' ' '\n' | sort -u | tr '\n' ' ')
+    
+    if [ -n "$frontend_pids" ]; then
+        print_step "Deteniendo Frontend (PIDs: $frontend_pids)..."
+        for pid in $frontend_pids; do
+            if kill -0 "$pid" 2>/dev/null; then
+                kill "$pid" 2>/dev/null || true
+            fi
+        done
+        sleep 2
+        
+        # Forzar si siguen corriendo
+        for pid in $frontend_pids; do
+            if kill -0 "$pid" 2>/dev/null; then
+                kill -9 "$pid" 2>/dev/null || true
+            fi
+        done
+        
+        print_success "Frontend detenido"
+        stopped=true
+    else
+        print_info "Frontend no está corriendo"
+    fi
+    
+    if [ "$stopped" = true ]; then
+        print_info "Anvil y contrato siguen corriendo"
+        print_info "Para reiniciar frontend: ./deploy.sh frontend start"
+    fi
+}
+
+restart_frontend_only() {
+    print_header "🔄 Reiniciar Solo Frontend"
+    
+    stop_frontend_only
+    sleep 2
+    start_frontend_only
+}
+
+# ============================================================================
 # FUNCIÓN: START (INICIAR TODO)
 # ============================================================================
 
@@ -719,17 +825,29 @@ EOF
     echo ""
     
     echo -e "${YELLOW}COMANDOS:${NC}"
-    echo -e "  ${GREEN}start${NC}      Inicia todo el stack (Anvil + Deploy + Frontend)"
-    echo -e "  ${GREEN}stop${NC}       Detiene todos los servicios"
-    echo -e "  ${GREEN}restart${NC}    Reinicia todos los servicios"
-    echo -e "  ${GREEN}status${NC}     Muestra el estado de los servicios"
-    echo -e "  ${GREEN}metamask${NC}   Muestra instrucciones para configurar MetaMask"
-    echo -e "  ${GREEN}help${NC}       Muestra esta ayuda"
+    echo -e "  ${GREEN}start${NC}           Inicia todo el stack (Anvil + Deploy + Frontend)"
+    echo -e "  ${GREEN}stop${NC}            Detiene todos los servicios"
+    echo -e "  ${GREEN}restart${NC}         Reinicia todos los servicios"
+    echo -e "  ${GREEN}status${NC}          Muestra el estado de los servicios"
+    echo -e "  ${GREEN}metamask${NC}        Muestra instrucciones para configurar MetaMask"
+    echo ""
+    echo -e "${YELLOW}COMANDOS DE FRONTEND (sin afectar Anvil/Contrato):${NC}"
+    echo -e "  ${GREEN}frontend start${NC}  Inicia solo el frontend (requiere Anvil corriendo)"
+    echo -e "  ${GREEN}frontend stop${NC}   Detiene solo el frontend"
+    echo -e "  ${GREEN}frontend restart${NC} Reinicia solo el frontend"
+    echo ""
+    echo -e "  ${GREEN}help${NC}             Muestra esta ayuda"
     echo ""
     
     echo -e "${YELLOW}EJEMPLOS:${NC}"
     echo "  # Iniciar todo"
     echo "  ./deploy.sh start"
+    echo ""
+    echo "  # Detener solo el frontend (Anvil y contrato siguen corriendo)"
+    echo "  ./deploy.sh frontend stop"
+    echo ""
+    echo "  # Reiniciar solo el frontend después de cambios"
+    echo "  ./deploy.sh frontend restart"
     echo ""
     echo "  # Ver estado"
     echo "  ./deploy.sh status"
@@ -775,6 +893,28 @@ main() {
             stop_services
             sleep 2
             start_all
+            ;;
+        frontend)
+            case "${2:-}" in
+                start)
+                    start_frontend_only
+                    ;;
+                stop)
+                    stop_frontend_only
+                    ;;
+                restart)
+                    restart_frontend_only
+                    ;;
+                *)
+                    print_error "Comando de frontend inválido: ${2:-}"
+                    echo ""
+                    echo "Comandos disponibles:"
+                    echo "  ./deploy.sh frontend start    - Iniciar solo frontend"
+                    echo "  ./deploy.sh frontend stop     - Detener solo frontend"
+                    echo "  ./deploy.sh frontend restart  - Reiniciar solo frontend"
+                    exit 1
+                    ;;
+            esac
             ;;
         status)
             show_status

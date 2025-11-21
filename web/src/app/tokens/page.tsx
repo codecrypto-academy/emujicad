@@ -2,6 +2,7 @@
 
 import { Header } from '@/components/Header'
 import { TokenCard } from '@/components/TokenCard'
+import { TokenCardModern } from '@/components/TokenCardModern'
 import { useGetUserTokensWithData } from '@/hooks/useGetUserTokensWithData'
 import { useIsPaused } from '@/hooks/usePause'
 import { useAuth } from '@/contexts/AuthContext'
@@ -53,6 +54,14 @@ export default function TokensPage() {
   
   // Activar diseño moderno si está habilitado
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
+  
+  // Debug: verificar que la variable se lea (solo en desarrollo)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[TokensPage] NEXT_PUBLIC_MODERN_DESIGN:', process.env.NEXT_PUBLIC_MODERN_DESIGN)
+      console.log('[TokensPage] useModernDesign:', useModernDesign)
+    }
+  }, [useModernDesign])
 
   useEffect(() => {
     setMounted(true)
