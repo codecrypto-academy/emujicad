@@ -50,6 +50,9 @@ export default function TokensPage() {
   
   const [currentPage, setCurrentPage] = useState(1)
   const tokensPerPage = 12
+  
+  // Activar diseño moderno si está habilitado
+  const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
 
   useEffect(() => {
     setMounted(true)
@@ -137,6 +140,294 @@ export default function TokensPage() {
     router.push(`/tokens/${tokenId.toString()}`)
   }
 
+  // Diseño moderno 2025
+  if (useModernDesign) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+        <Header />
+        
+        <div className="container mx-auto px-4 py-12 max-w-7xl">
+          {/* Título moderno con animación */}
+          <div className="mb-12 flex items-start justify-between animate-in fade-in slide-in-from-top-4 duration-700">
+            <div className="space-y-3">
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-slate-900 dark:from-white dark:via-blue-200 dark:to-white bg-clip-text text-transparent mb-2 flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 backdrop-blur-sm border border-blue-200/50 dark:border-blue-500/30">
+                  <Package className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+                </div>
+                My Tokens
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 text-lg font-light">
+                Manage your digital assets in the supply chain
+              </p>
+            </div>
+            {userInfo && 
+             (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
+             Number(userInfo.status) === UserStatus.Approved && (
+              <Link 
+                href={Number(userInfo.role) === UserRole.Producer ? "/tokens/create?type=raw" : "/tokens/create?type=product"}
+                prefetch={true}
+              >
+                <Button 
+                  type="button"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-6 py-6 text-base font-medium"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Create New Token
+                </Button>
+              </Link>
+            )}
+          </div>
+
+          {/* Filtros modernos con glassmorphism */}
+          <Card className="mb-10 border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 rounded-3xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-100 text-xl">
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10">
+                  <Filter className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                Filters
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={`grid grid-cols-1 ${shouldShowTypeFilter ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-6`}>
+                {/* Búsqueda moderna */}
+                <div className="space-y-3">
+                  <label htmlFor="search" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Search by name
+                  </label>
+                  <div className="relative group">
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors" />
+                    <Input
+                      id="search"
+                      type="text"
+                      placeholder="Search tokens..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-12 pr-12 h-14 bg-slate-50/50 dark:bg-slate-900/50 border-2 border-slate-200/50 dark:border-slate-700/50 rounded-2xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-300 text-base"
+                    />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xl font-bold leading-none transition-colors"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Filtro por tipo - Solo Factory */}
+                {shouldShowTypeFilter && (
+                  <div className="space-y-3">
+                    <label htmlFor="filter-type" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                      Filter by type
+                    </label>
+                    <Select value={filterType} onValueChange={(value) => setFilterType(value as typeof filterType)}>
+                      <SelectTrigger 
+                        id="filter-type" 
+                        className="h-14 bg-slate-50/50 dark:bg-slate-900/50 border-2 border-slate-200/50 dark:border-slate-700/50 rounded-2xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-300 text-base"
+                      >
+                        <SelectValue placeholder="All types" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="raw">Raw Material</SelectItem>
+                        <SelectItem value="finished">Finished Product</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+
+              {/* Estadísticas modernas */}
+              <div className="mt-6 flex items-center justify-between pt-6 border-t border-slate-200/50 dark:border-slate-700/50">
+                <div className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  <span className="text-slate-900 dark:text-slate-100 font-bold text-base">{filteredTokens.length}</span> of <span className="text-slate-900 dark:text-slate-100 font-bold">{totalTokens}</span> token{totalTokens !== 1 ? 's' : ''}
+                  {searchQuery && (
+                    <span className="ml-2 text-blue-600 dark:text-blue-400">matching "{searchQuery}"</span>
+                  )}
+                  {shouldShowTypeFilter && filterType !== 'all' && (
+                    <span className="ml-2 text-purple-600 dark:text-purple-400">({filterType === 'raw' ? 'Raw Material' : 'Finished Product'})</span>
+                  )}
+                </div>
+                {shouldShowTypeFilter && (searchQuery || filterType !== 'all') && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setSearchQuery('')
+                      setFilterType('all')
+                    }}
+                    className="rounded-xl border-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+                {!shouldShowTypeFilter && searchQuery && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setSearchQuery('')
+                    }}
+                    className="rounded-xl border-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300"
+                  >
+                    Clear Search
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Loading State Moderno */}
+          {isLoading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Card key={i} className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl overflow-hidden animate-pulse">
+                  <CardHeader className="pb-3">
+                    <Skeleton className="h-6 w-3/4 rounded-xl" />
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Skeleton className="h-4 w-full rounded-lg" />
+                    <Skeleton className="h-4 w-2/3 rounded-lg" />
+                    <Skeleton className="h-4 w-1/2 rounded-lg" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Error State Moderno */}
+          {error && !isLoading && (
+            <Card className="mb-8 border-0 bg-red-50/70 dark:bg-red-900/20 backdrop-blur-xl shadow-xl rounded-3xl border-red-200/50 dark:border-red-800/50">
+              <CardContent className="pt-6 pb-6">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                  <div>
+                    <p className="font-semibold text-red-700 dark:text-red-300">Error loading tokens</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{error.message || 'Unknown error occurred'}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Empty State Moderno */}
+          {!isLoading && !error && filteredTokens.length === 0 && (
+            <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-xl rounded-3xl overflow-hidden">
+              <CardContent className="pt-16 pb-16 text-center">
+                <div className="inline-flex p-4 rounded-3xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 mb-6">
+                  <Package className="h-12 w-12 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">
+                  No tokens found
+                </h3>
+                <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto">
+                  {searchQuery || (shouldShowTypeFilter && filterType !== 'all') ? (
+                    'No tokens match your search criteria. Try adjusting your filters.'
+                  ) : (
+                    "You don't own any tokens yet. Create or receive tokens to see them here."
+                  )}
+                </p>
+                {userInfo && 
+                 (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
+                 Number(userInfo.status) === UserStatus.Approved && (
+                  <Link href={Number(userInfo.role) === UserRole.Producer ? "/tokens/create?type=raw" : "/tokens/create?type=product"}>
+                    <Button className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-8 py-6 text-base font-medium">
+                      {totalTokens === 0 ? 'Create First Token' : 'Create New Token'}
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Grid de Tokens Moderno */}
+          {!isLoading && !error && filteredTokens.length > 0 && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
+                {paginatedTokens.map((token, index) => (
+                  <div
+                    key={token.id.toString()}
+                    className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <TokenCardModern
+                      tokenId={token.tokenId}
+                      showBalance={true}
+                      onClick={() => handleTokenClick(token.tokenId)}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Paginación Moderna */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-3 mt-12">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="rounded-xl border-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 disabled:opacity-50"
+                  >
+                    Previous
+                  </Button>
+                  
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum: number
+                      if (totalPages <= 5) {
+                        pageNum = i + 1
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i
+                      } else {
+                        pageNum = currentPage - 2 + i
+                      }
+
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? 'default' : 'outline'}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`min-w-[44px] rounded-xl border-2 transition-all duration-300 ${
+                            currentPage === pageNum
+                              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25'
+                              : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                          }`}
+                        >
+                          {pageNum}
+                        </Button>
+                      )
+                    })}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="rounded-xl border-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 disabled:opacity-50"
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Diseño original
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <Header />
