@@ -12,10 +12,10 @@
 | Componente | Actual | Máximo | Estado |
 |------------|--------|---------|---------|
 | Smart Contract | 4.0 | 4.0 | ✅ 100% |
-| Frontend | 2.25 | 3.0 | ⚠️ 75% (3/9 páginas, falta +0.75) |
+| Frontend | 2.5 | 3.0 | ⚠️ 83% (5/9 páginas, falta +0.5) |
 | Extras | 0.5 | 1.0 | ⚠️ 50% (deploy script validado) |
 | Video | 0.0 | 1.5 | ❌ 0% |
-| **TOTAL** | **6.75** | **9.5** | **Falta +2.75 pts para 9.5** |
+| **TOTAL** | **7.0** | **9.5** | **Falta +2.5 pts para 9.5** |
 
 **Nota**: La puntuación se ajustó considerando el Dashboard implementado y las features de pausabilidad.
 
@@ -35,7 +35,7 @@
 ✅ Control de pausa por roles (Pauser role)
 ```
 
-### Frontend - Infraestructura (2.25/3.0 puntos - 75%)
+### Frontend - Infraestructura (2.5/3.0 puntos - 83%)
 ```
 ✅ Next.js 16 + TypeScript + Tailwind
 ✅ wagmi 2.12 + viem 2.21 + ethers 6.13
@@ -44,6 +44,8 @@
 ✅ Landing page MEJORADA (web/src/app/page.tsx)
 ✅ Dashboard page COMPLETO (web/src/app/dashboard/page.tsx) - ✅ NUEVO
 ✅ Admin Users page (web/src/app/admin/users/page.tsx)
+✅ Tokens page COMPLETO (web/src/app/tokens/page.tsx) - ✅ Día 5
+✅ Tokens Create page COMPLETO (web/src/app/tokens/create/page.tsx) - ✅ Día 6
 ✅ AuthContext completo (web/src/contexts/AuthContext.tsx) - ✅ NUEVO
 
 ✅ Componentes específicos implementados (4/5):
@@ -119,7 +121,7 @@
 ✅ web/src/app/dashboard/page.tsx          - Dashboard usuario COMPLETO
 ✅ web/src/app/admin/users/page.tsx       - Gestión usuarios COMPLETA
 ✅ web/src/app/tokens/page.tsx             - Lista todos los tokens COMPLETO ⭐ Día 5
-❌ web/src/app/tokens/create/page.tsx     - Crear token
+✅ web/src/app/tokens/create/page.tsx     - Crear token COMPLETO ⭐ Día 6
 ❌ web/src/app/tokens/[id]/page.tsx       - Detalles token
 ❌ web/src/app/tokens/[id]/transfer/page.tsx - Transferir token
 ❌ web/src/app/transfers/page.tsx         - Gestión transferencias
@@ -127,7 +129,7 @@
 ❌ web/src/app/profile/page.tsx            - Perfil usuario
 ```
 
-**Progreso**: 4/9 páginas (44%) ⭐ Día 5
+**Progreso**: 5/9 páginas (56%) ⭐ Día 6
 
 ### 🚨 PRIORIDAD 2: Componentes Específicos (4/5 implementados)
 ```
@@ -189,23 +191,23 @@
 
 ---
 
-### **🗓️ Día 6 - Sábado 22 Nov (Tokens - Crear)**
+### **🗓️ Día 6 - Sábado 22 Nov (Tokens - Crear)** ✅ COMPLETADO
 **Tiempo**: 4-5 horas | **Impacto**: +0.1 puntos
 
 #### Tareas:
 ```typescript
-1. [ ] Crear web/src/app/tokens/create/page.tsx (180 líneas)
-2. [ ] Validaciones en formulario (solo usuarios aprobados)
-3. [ ] Integración con useCreateToken() ✅ ya existe
-4. [ ] Validación de pausa del contrato ✅ ya implementado
-5. [ ] Select para parent token (si aplica)
-6. [ ] Testing manual de crear token
+1. [x] Crear web/src/app/tokens/create/page.tsx (391 líneas) ✅
+2. [x] Validaciones en formulario (solo usuarios aprobados) ✅
+3. [x] Integración con useCreateToken() ✅ ya existe
+4. [x] Validación de pausa del contrato ✅ ya implementado
+5. [x] Select para parent token (si aplica) ✅
+6. [x] Testing manual de crear token ✅
 ```
 
 **Hooks a usar**:
 - ✅ useCreateToken() - ya existe
 - ✅ useIsPaused() - ya existe
-- ✅ useGetUserTokens() - ya existe (para mostrar tokens disponibles como parent)
+- ✅ useGetAllTokens() - ya existe (para mostrar tokens disponibles como parent)
 
 ---
 
@@ -277,25 +279,31 @@ Tareas técnicas:
 
 ## 🎯 PRÓXIMO PASO INMEDIATO
 
-### ➡️ **EMPEZAR: Página Crear Token (Día 6)**
+### ➡️ **EMPEZAR: Página de Transferencias (Día 7)**
 
-**Primer archivo a crear**: `web/src/app/tokens/create/page.tsx`
+**Archivos a crear**:
+1. `web/src/app/transfers/page.tsx` - Página principal de transferencias
+2. `web/src/components/TransferList.tsx` - Componente lista de transferencias
+3. `web/src/hooks/useGetUserTransfers.ts` - Hook para obtener transferencias (NECESARIO)
 
 **Orden de implementación**:
-1. Crear página tokens/create básica (estructura)
-2. Implementar formulario con validaciones
-3. Integrar `useCreateToken()` hook (ya existe ✅)
-4. Agregar validación de pausa del contrato
-5. Select para parent token (si aplica)
+1. Crear hook `useGetUserTransfers(address)` para leer transferencias del contrato
+2. Crear componente `TransferList.tsx` con filtros y acciones
+3. Crear página `transfers/page.tsx` integrando el componente
+4. Agregar filtros: Enviadas/Recibidas/Pending/Accepted/Rejected
+5. Implementar botones Accept/Reject/Cancel (hooks ya existen ✅)
 6. Testing manual con MetaMask
 
 **Estado actual**:
 ```
-✅ useCreateToken hook - Ya disponible
+✅ useTransfer hook - Ya disponible
+✅ useAcceptTransfer hook - Ya disponible
+✅ useRejectTransfer hook - Ya disponible
+✅ useCancelTransfer hook - Ya disponible
 ✅ useIsPaused hook - Ya disponible
-✅ useGetUserTokens hook - Ya disponible (para parent tokens)
-✅ Tokens page (lista) - Ya implementado ✅
-❌ Tokens create page - Por implementar
+❌ useGetUserTransfers hook - NECESARIO crear
+❌ TransferList component - Por implementar
+❌ Transfers page - Por implementar
 ```
 
 **Comando para empezar**:
@@ -305,71 +313,74 @@ npm run dev  # Frontend ya corriendo
 ```
 
 **Hooks ya disponibles**:
-- ✅ `useCreateToken()` - Crear token
+- ✅ `useTransfer()` - Crear transferencia
+- ✅ `useAcceptTransfer()` - Aceptar transferencia
+- ✅ `useRejectTransfer()` - Rechazar transferencia
+- ✅ `useCancelTransfer()` - Cancelar transferencia
 - ✅ `useIsPaused()` - Estado de pausa
-- ✅ `useGetUserTokens(address)` - Tokens de un usuario (para parent token)
-- ✅ `useGetAllTokens()` - Todos los tokens (ya implementado)
+- ❌ `useGetUserTransfers(address)` - **NECESARIO CREAR**
 
 ---
 
 ## 📊 MÉTRICAS DE PROGRESO
 
-### Frontend Progress: 75% → 100%
+### Frontend Progress: 83% → 100%
 ```
-[███████████████████████░░░░░] 75%
+[█████████████████████████░░░] 83%
 
 Completado:
 ├── ✅ Infraestructura (100%)
 ├── ✅ Landing page mejorada (100%)
-├── ✅ Dashboard page (100%) - ✅ NUEVO
-├── ✅ Admin Users page (100%)
-├── ✅ 18 Hooks (78% de los necesarios)
+├── ✅ Dashboard page (100%) - ✅ Día 4
+├── ✅ Admin Users page (100%) - ✅ Día 3
+├── ✅ Tokens page (lista) (100%) - ✅ Día 5
+├── ✅ Tokens Create page (100%) - ✅ Día 6
+├── ✅ 18 Hooks (89% de los necesarios)
 ├── ✅ 10 Componentes UI Shadcn (100%)
 ├── ✅ 4 Componentes específicos (80%)
 │   ├── ConnectWallet
 │   ├── Header
 │   ├── ThemeToggle
-│   └── TokenCard - ✅ NUEVO
+│   └── TokenCard - ✅ Día 4
 ├── ✅ 4 Componentes admin (100%)
 │   ├── UserManagementTable
 │   ├── UserStatsCards
 │   ├── ChangeRoleDialog
-│   └── PauseControl - ✅ NUEVO
+│   └── PauseControl - ✅ Día 4
 └── ✅ 4 Componentes adicionales (100%)
     ├── RegisterForm
-    ├── UserProfileCard - ✅ NUEVO
-    ├── QuickActions - ✅ NUEVO
+    ├── UserProfileCard - ✅ Día 4
+    ├── QuickActions - ✅ Día 4
     └── ChangeRoleDialog
 
 Pendiente:
-├── ❌ 6 Páginas (33% - 3/9 completadas)
-│   ├── ✅ Dashboard
-│   ├── ✅ Admin Users
+├── ❌ 4 Páginas (44% - 5/9 completadas)
+│   ├── ✅ Dashboard - ✅ Día 4
+│   ├── ✅ Admin Users - ✅ Día 3
 │   ├── ✅ Landing
-│   ├── ❌ Tokens (lista)
-│   ├── ❌ Tokens (crear)
+│   ├── ✅ Tokens (lista) - ✅ Día 5
+│   ├── ✅ Tokens (crear) - ✅ Día 6
 │   ├── ❌ Tokens (detalles)
 │   ├── ❌ Tokens (transferir)
 │   ├── ❌ Transfers
 │   └── ❌ Profile
 ├── ❌ 1 Componente específico (20%)
 │   └── TransferList
-└── ❌ 2 Hooks adicionales (22%)
-    ├── useGetAllTokens
+└── ❌ 1 Hook adicional (11%)
     └── useGetUserTransfers
 ```
 
-### Timeline Progress: Día 5/12
+### Timeline Progress: Día 6/12
 ```
-[███████████████░░░░░░░░░░░░] 42%
+[█████████████████░░░░░░░░░░] 50%
 
 ✅ Día 1 - Smart Contract + Frontend base (Lunes 18 Nov)
 ✅ Día 2 - Documentación + ConnectWallet fixes + IA.md actualizado (Martes 19 Nov)
 ✅ Día 3 - Admin Panel + Header + Theme Toggle (Miércoles 20 Nov)
 ✅ Día 4 - Dashboard + TokenCard + PauseControl + AuthContext (Jueves 20 Nov) - ✅ COMPLETADO
 ✅ Día 5 - Tokens (lista) (Viernes 21 Nov) - ✅ COMPLETADO
-→  Día 6 - Tokens (crear) (Sábado 22 Nov) (SIGUIENTE)
-   Día 7 - Transferencias (Domingo 23 Nov)
+✅ Día 6 - Tokens (crear) (Sábado 22 Nov) - ✅ COMPLETADO
+→  Día 7 - Transferencias (Domingo 23 Nov) (SIGUIENTE)
    Día 8 - Páginas adicionales (Lunes 24 Nov)
    Día 9 - Video Demo (Martes 25 Nov)
    Día 10-11 - Buffer/refinamiento
@@ -485,7 +496,25 @@ Video:
 
 ## 📋 CHANGELOG RECIENTE
 
-### Día 5 - Sesión Actual (21 Nov, 2025) ✅ COMPLETADO
+### Día 6 - Sesión Actual (21 Nov, 2025) ✅ COMPLETADO
+```
+✅ Fixed: Parpadeo en Dashboard - Sección "My Tokens" estable durante refetch
+✅ Fixed: Error "Maximum update depth exceeded" en TokenCard (cambiado a useRef)
+✅ Fixed: Error de Hydration en Header (renderizar siempre misma estructura)
+✅ Fixed: Logs verbosos en consola (comentados logs de validación)
+✅ Fixed: Botones de navegación no funcionaban (agregado type="button" y preventDefault)
+✅ Fixed: Botón "My Tokens" redundante en página /tokens (oculto cuando pathname === '/tokens')
+✅ Enhanced: TokenCard usa useRef para datos estables sin loops infinitos
+✅ Enhanced: Dashboard mantiene tokens visibles durante refetch
+✅ Enhanced: Header oculta botones cuando estás en esa página
+
+Progreso:
+- Páginas: 4/9 (44%) → 5/9 (56%)
+- Correcciones: 6 bugs críticos resueltos
+- UX: Interfaz más estable y sin parpadeos
+```
+
+### Día 5 - Sesión Anterior (21 Nov, 2025) ✅ COMPLETADO
 ```
 ✅ Implemented: Página de Tokens completa (web/src/app/tokens/page.tsx)
 ✅ Implemented: Hook useGetAllTokens() con batch reads optimizado
@@ -571,7 +600,7 @@ Issues resueltos en Día 4:
 ✅ Fixed: Table flickering (hash-based refetch control)
 ✅ Fixed: Stats cards vertical alignment y responsive grid
 ✅ Fixed: Header consistency entre páginas (fixed widths)
-✅ Fixed: Doble popup de MetaMask (removed auto-reconnect logic)
+✅ Fixed: Doble popup de MetaMask (removed auto-reconnect logic)image.png
 ✅ Fixed: Hydration errors (mounted state pattern)
 ✅ Enhanced: Landing page reorganizada (branding primero, luego CTA)
 ✅ Enhanced: Modo claro por defecto para todos los usuarios
@@ -583,4 +612,4 @@ Issues resueltos en Día 4:
 ---
 
 **Última modificación**: 21 Nov 2025  
-**Próxima actualización**: Después de completar Tokens Create o Transfers (Día 6-7)
+**Próxima actualización**: Después de completar Transfers (Día 7)

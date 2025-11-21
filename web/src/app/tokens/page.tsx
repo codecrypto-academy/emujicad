@@ -14,9 +14,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { Package, Search, Filter, AlertCircle, Loader2 } from 'lucide-react'
+import { Package, Search, Filter, AlertCircle, Loader2, Plus } from 'lucide-react'
 import { TokenType, UserRole, UserStatus } from '@/contracts/config'
 import Link from 'next/link'
+import { DebugTokens } from './debug-tokens'
 
 export default function TokensPage() {
   const router = useRouter()
@@ -35,9 +36,18 @@ export default function TokensPage() {
     setMounted(true)
   }, [])
 
+  // Función para normalizar strings (remover acentos y convertir a minúsculas)
+  const normalizeString = (str: string): string => {
+    return str
+      .toLowerCase()
+      .normalize('NFD') // Descompone caracteres con acentos
+      .replace(/[\u0300-\u036f]/g, '') // Remueve diacríticos (acentos)
+      .trim()
+  }
+
   // Filtrar tokens por tipo y búsqueda (DEBE estar antes de cualquier return condicional)
   const filteredTokens = useMemo(() => {
-    if (!tokens) return []
+    if (!tokens || tokens.length === 0) return []
 
     return tokens.filter((token) => {
       // Filtro por tipo
@@ -48,10 +58,14 @@ export default function TokensPage() {
         return false
       }
 
-      // Filtro por búsqueda (nombre)
+      // Filtro por búsqueda (nombre) - aplica solo si hay query
       if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase()
-        return token.name.toLowerCase().includes(query)
+        const query = normalizeString(searchQuery)
+        const tokenName = normalizeString(token.name || '')
+        // Búsqueda más flexible: incluye coincidencias parciales y maneja acentos
+        if (!tokenName.includes(query)) {
+          return false
+        }
       }
 
       return true
@@ -98,15 +112,41 @@ export default function TokensPage() {
       <Header />
       
       <div className="container mx-auto px-4 py-8">
+        {/* Debug Info - Solo en desarrollo */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-6">
+            <DebugTokens />
+          </div>
+        )}
+
         {/* Título */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
-            <Package className="h-10 w-10 text-blue-600 dark:text-blue-400" />
-            All Tokens
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            Browse all tokens in the supply chain system
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
+              <Package className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+              All Tokens
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400">
+              Browse all tokens in the supply chain system
+            </p>
+          </div>
+          {/* Botón para crear token - Solo para Producer y Factory aprobados */}
+          {userInfo && 
+           (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
+           Number(userInfo.status) === UserStatus.Approved && (
+            <Link 
+              href={Number(userInfo.role) === UserRole.Producer ? "/tokens/create?type=raw" : "/tokens/create?type=product"}
+              prefetch={true}
+            >
+              <Button 
+                type="button"
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Token
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Filtros y Búsqueda */}
@@ -129,13 +169,49 @@ export default function TokensPage() {
                   <Input
                     id="search"
                     type="text"
-                    placeholder="Search tokens..."
+                    placeholder="Type to search tokens by name (no Enter needed)..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 dark:bg-slate-700 dark:text-slate-100"
-                    aria-label="Search tokens by name"
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value)
+                    }}
+                    onKeyDown={(e) => {
+                      // Permitir Enter para limpiar si está vacío, pero no es necesario para buscar
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                      }
+                    }}
+                    className="pl-10 pr-10 dark:bg-slate-700 dark:text-slate-100"
+                    aria-label="Search tokens by name (searches as you type)"
                   />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xl font-bold leading-none"
+                      aria-label="Clear search"
+                      title="Clear search"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
+                {searchQuery && (
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      🔍 Searching for: &quot;<strong>{searchQuery}</strong>&quot;
+                    </p>
+                    {!isLoading && filteredTokens.length > 0 && (
+                      <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                        ✓ {filteredTokens.length} found
+                      </span>
+                    )}
+                    {!isLoading && filteredTokens.length === 0 && totalTokens > 0 && (
+                      <span className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                        ⚠ No matches
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Filtro por tipo */}
@@ -157,10 +233,28 @@ export default function TokensPage() {
             </div>
 
             {/* Estadísticas de filtros */}
-            <div className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-              Showing {filteredTokens.length} of {totalTokens} tokens
-              {searchQuery && ` matching "${searchQuery}"`}
-              {filterType !== 'all' && ` (${filterType === 'raw' ? 'Raw Material' : 'Finished Product'})`}
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                Showing {filteredTokens.length} of {totalTokens} tokens
+                {searchQuery && ` matching "${searchQuery}"`}
+                {filterType !== 'all' && ` (${filterType === 'raw' ? 'Raw Material' : 'Finished Product'})`}
+              </div>
+              {(searchQuery || filterType !== 'all') && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setSearchQuery('')
+                    setFilterType('all')
+                  }}
+                  className="dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600"
+                >
+                  Clear Filters
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -202,17 +296,37 @@ export default function TokensPage() {
                 No tokens found
               </h3>
               <p className="text-slate-600 dark:text-slate-400 mb-4">
-                {searchQuery || filterType !== 'all'
-                  ? 'Try adjusting your filters or search query'
-                  : 'No tokens have been created yet'}
+                {searchQuery || filterType !== 'all' ? (
+                  <>
+                    No tokens match your search criteria.
+                    {totalTokens > 0 && (
+                      <span className="block mt-2 text-sm">
+                        There are {totalTokens} token{totalTokens !== 1 ? 's' : ''} in the system, but none match &quot;{searchQuery}&quot; 
+                        {filterType !== 'all' && ` with type "${filterType === 'raw' ? 'Raw Material' : 'Finished Product'}"`}.
+                      </span>
+                    )}
+                    {totalTokens > 0 && tokens.length > 0 && (
+                      <details className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                        <summary className="cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">
+                          Available token names: {tokens.map(t => t.name).join(', ')}
+                        </summary>
+                      </details>
+                    )}
+                    <span className="block mt-2 text-sm font-medium">
+                      Try adjusting your filters or search query.
+                    </span>
+                  </>
+                ) : (
+                  'No tokens have been created yet'
+                )}
               </p>
               {/* Solo Producer y Factory aprobados pueden crear tokens (según el contrato) */}
               {userInfo && 
                (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
                Number(userInfo.status) === UserStatus.Approved && (
-                <Link href="/tokens/create">
+                <Link href={Number(userInfo.role) === UserRole.Producer ? "/tokens/create?type=raw" : "/tokens/create?type=product"}>
                   <Button className="mt-2">
-                    Create First Token
+                    {totalTokens === 0 ? 'Create First Token' : 'Create New Token'}
                   </Button>
                 </Link>
               )}

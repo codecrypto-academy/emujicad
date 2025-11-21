@@ -239,11 +239,35 @@ export function validateTokenData(data: unknown): TokenData | null {
  * 
  * @param data - Array/tuple from contract
  * @returns Validated TokenData or null if invalid
+ * 
+ * @dev El contrato devuelve: (id, creator, name, tokenType, totalSupply, features, parentId, dateCreated)
+ *      Orden: [0]id, [1]creator, [2]name, [3]tokenType, [4]totalSupply, [5]features, [6]parentId, [7]dateCreated
  */
 export function validateTokenDataTuple(data: unknown[] | undefined): TokenData | null {
-  if (!Array.isArray(data) || data.length < 8) return null
+  if (!Array.isArray(data) || data.length < 8) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[validateTokenDataTuple] Invalid array:', data?.length, data)
+    }
+    return null
+  }
   
-  const [id, name, tokenType, totalSupply, creator, parentToken, createdAt, features] = data
+  // El contrato devuelve: (id, creator, name, tokenType, totalSupply, features, parentId, dateCreated)
+  const [id, creator, name, tokenType, totalSupply, features, parentId, dateCreated] = data
+  
+  // Solo loggear en caso de error o validación fallida, no en cada validación exitosa
+  // (comentado para reducir ruido en consola)
+  // if (process.env.NODE_ENV === 'development') {
+  //   console.log('[validateTokenDataTuple] Raw data:', {
+  //     id,
+  //     creator,
+  //     name,
+  //     tokenType,
+  //     totalSupply,
+  //     features,
+  //     parentId,
+  //     dateCreated,
+  //   })
+  // }
   
   return validateTokenData({
     id,
@@ -251,8 +275,8 @@ export function validateTokenDataTuple(data: unknown[] | undefined): TokenData |
     tokenType,
     totalSupply,
     creator,
-    parentToken,
-    createdAt,
+    parentToken: parentId,
+    createdAt: dateCreated,
     features,
   })
 }

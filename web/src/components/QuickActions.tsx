@@ -121,8 +121,13 @@ export function QuickActions() {
         )}
         {Number(role) === UserRole.Producer && (
           <Button
+            type="button"
             className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md"
-            onClick={() => router.push('/tokens/create?type=raw')}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              router.push('/tokens/create?type=raw')
+            }}
             disabled={isPaused === true}
             aria-label="Create new raw material token"
             aria-disabled={isPaused === true}
@@ -133,8 +138,13 @@ export function QuickActions() {
         )}
         {Number(role) === UserRole.Factory && (
           <Button
+            type="button"
             className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md"
-            onClick={() => router.push('/tokens/create?type=product')}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              router.push('/tokens/create?type=product')
+            }}
             disabled={isPaused === true}
             aria-label="Create new finished product token"
             aria-disabled={isPaused === true}

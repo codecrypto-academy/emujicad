@@ -12,7 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { validateBigIntArray } from '@/lib/validation';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -27,6 +27,23 @@ export default function DashboardPage() {
   const { isAdmin, isAuthenticated, isLoading, userInfo } = useAuth();
   
   const { data: userTokens, isLoading: isLoadingTokens, error: tokensError } = useGetUserTokens(address);
+  
+  // Memoizar tokens validados para evitar re-renders innecesarios
+  const validTokens = useMemo(() => {
+    return validateBigIntArray(userTokens);
+  }, [userTokens]);
+  
+  // Mantener tokens estables durante refetch para evitar parpadeos
+  const [stableValidTokens, setStableValidTokens] = useState<bigint[] | null>(null);
+  
+  useEffect(() => {
+    if (validTokens && validTokens.length > 0) {
+      setStableValidTokens(validTokens);
+    }
+  }, [validTokens]);
+  
+  // Usar tokens estables si existen, sino usar los actuales
+  const displayTokens = stableValidTokens || validTokens || [];
   // Optimización: usar batch reads en lugar de 3 llamadas separadas
   const { 
     totalTokens, 
@@ -35,6 +52,14 @@ export default function DashboardPage() {
     isLoading: isLoadingStats,
     errors: statsErrors 
   } = useDashboardStats();
+  
+  // Memoizar valores para evitar parpadeos durante refetch
+  const stableTotalTokens = useMemo(() => totalTokens, [totalTokens]);
+  const stableTotalUsers = useMemo(() => totalUsers, [totalUsers]);
+  const stableTotalTransfers = useMemo(() => totalTransfers, [totalTransfers]);
+  
+  // Solo mostrar loading en la primera carga, no durante refetch
+  const isInitialStatsLoading = isLoadingStats && stableTotalTokens === undefined && stableTotalUsers === undefined && stableTotalTransfers === undefined;
   const { data: isPaused } = useIsPaused();
   
   const [mounted, setMounted] = useState(false);
@@ -60,40 +85,35 @@ export default function DashboardPage() {
     }
   }, [mounted, isConnected, isAuthenticated, isLoading, router]);
 
-  // No renderizar nada hasta que esté montado
-  if (!mounted) {
-    return null;
-  }
+  // Estado de carga unificado - evitar múltiples re-renders
+  // Renderizar siempre el mismo contenido en servidor y cliente para evitar hydration errors
+  const isInitialLoading = isLoading || !isConnected;
+  const shouldShowContent = isConnected && !isLoading && isAuthenticated;
 
-  // Si no está conectado, no renderizar nada (redirección en progreso)
-  if (!isConnected) {
-    return null;
-  }
-
-  // Si no está autenticado y ya terminó de cargar, no renderizar nada (redirección en progreso)
-  if (!isLoading && !isAuthenticated) {
-    return null;
-  }
-
-  if (isLoading) {
+  // No renderizar nada hasta que esté montado o mientras carga la autenticación
+  // Pero siempre renderizar la misma estructura para evitar hydration mismatch
+  if (!mounted || isInitialLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Card className="w-96">
-          <CardHeader>
-            <CardTitle>Loading Dashboard...</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Verifying your access permissions...
-            </p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <Header />
+        <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
+          <Card className="w-96">
+            <CardHeader>
+              <CardTitle>Loading Dashboard...</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Verifying your access permissions...
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
-  // Verificación final: solo renderizar si está autenticado
-  if (!isAuthenticated) {
+  // Si no está autenticado después de cargar, no renderizar (redirección en progreso)
+  if (!shouldShowContent) {
     return null;
   }
 
@@ -128,9 +148,9 @@ export default function DashboardPage() {
               <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                 {statsErrors?.totalTokens ? (
                   <span className="text-red-500 text-sm">Error</span>
-                ) : isLoadingStats ? (
+                ) : isInitialStatsLoading ? (
                   <Skeleton className="h-9 w-16" />
-                ) : totalTokens !== undefined ? Number(totalTokens) : '-'}
+                ) : stableTotalTokens !== undefined ? Number(stableTotalTokens) : '-'}
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                 Tokens in the system
@@ -151,9 +171,9 @@ export default function DashboardPage() {
                 <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                   {statsErrors?.totalUsers ? (
                     <span className="text-red-500 text-sm">Error</span>
-                  ) : isLoadingStats ? (
+                  ) : isInitialStatsLoading ? (
                     <Skeleton className="h-9 w-16" />
-                  ) : totalUsers !== undefined ? Number(totalUsers) : '-'}
+                  ) : stableTotalUsers !== undefined ? Number(stableTotalUsers) : '-'}
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                   Registered users
@@ -174,9 +194,9 @@ export default function DashboardPage() {
               <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                 {statsErrors?.totalTransfers ? (
                   <span className="text-red-500 text-sm">Error</span>
-                ) : isLoadingStats ? (
+                ) : isInitialStatsLoading ? (
                   <Skeleton className="h-9 w-16" />
-                ) : totalTransfers !== undefined ? Number(totalTransfers) : '-'}
+                ) : stableTotalTransfers !== undefined ? Number(stableTotalTransfers) : '-'}
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                 Completed transfers
@@ -250,22 +270,7 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {isLoadingTokens ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardHeader>
-                      <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded"></div>
-                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-2/3"></div>
-                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : tokensError ? (
+            {tokensError ? (
               <Card className="border-red-200 dark:border-red-800">
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <AlertCircle className="h-16 w-16 text-red-400 dark:text-red-600 mb-4" />
@@ -283,25 +288,35 @@ export default function DashboardPage() {
                   </Button>
                 </CardContent>
               </Card>
-            ) : (() => {
-              // Validar userTokens antes de usar
-              const validTokens = validateBigIntArray(userTokens)
-              if (validTokens && validTokens.length > 0) {
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {validTokens.slice(0, 6).map((tokenId) => (
-                      <TokenCard 
-                        key={tokenId.toString()}
-                        tokenId={tokenId}
-                        showBalance={true}
-                        onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
-                      />
-                    ))}
-                  </div>
-                )
-              }
-              return null
-            })() || (
+            ) : isLoadingTokens && displayTokens.length === 0 ? (
+              // Solo mostrar loading si no hay datos previos (displayTokens está vacío)
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader>
+                      <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-2/3"></div>
+                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : displayTokens && displayTokens.length > 0 ? (
+              // Mostrar tokens (mantener datos anteriores durante refetch)
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayTokens.slice(0, 6).map((tokenId) => (
+                  <TokenCard 
+                    key={tokenId.toString()}
+                    tokenId={tokenId}
+                    showBalance={true}
+                    onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
+                  />
+                ))}
+              </div>
+            ) : (
               <Card className="border-dashed dark:border-slate-700">
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Package className="h-16 w-16 text-slate-300 dark:text-slate-600 mb-4" />
@@ -329,7 +344,13 @@ export default function DashboardPage() {
                         </Alert>
                       )}
                       <Button
-                        onClick={() => router.push('/tokens/create')}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          const tokenType = Number(userInfo.role) === UserRole.Producer ? 'raw' : 'product'
+                          router.push(`/tokens/create?type=${tokenType}`)
+                        }}
                         disabled={isPaused === true}
                         className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >

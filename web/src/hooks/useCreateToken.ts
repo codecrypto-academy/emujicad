@@ -18,13 +18,14 @@ export function useCreateToken() {
     tokenType: TokenType,
     totalSupply: bigint,
     features: string,
-    parentId: bigint
+    parentId: bigint,
+    parentAmount: bigint
   ) => {
     writeContract({
       address: SUPPLY_CHAIN_ADDRESS,
       abi: SUPPLY_CHAIN_ABI,
       functionName: 'createToken',
-      args: [name, tokenType, totalSupply, features, parentId],
+      args: [name, tokenType, totalSupply, features, parentId, parentAmount],
     })
   }
 

@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,14 +21,44 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
   const { data: rawTokenData, isLoading: isLoadingToken } = useGetToken(tokenId);
   const { data: balance, isLoading: isLoadingBalance } = useGetTokenBalance(tokenId, address);
 
-  // Validación robusta de tokenData
-  const tokenData = rawTokenData
-    ? (Array.isArray(rawTokenData)
-        ? validateTokenDataTuple(rawTokenData) ?? undefined
-        : undefined)
-    : undefined;
+  // Validación robusta de tokenData - memoizar para evitar re-creación en cada render
+  const tokenData = React.useMemo(() => {
+    return rawTokenData
+      ? (Array.isArray(rawTokenData)
+          ? validateTokenDataTuple(rawTokenData) ?? undefined
+          : undefined)
+      : undefined;
+  }, [rawTokenData]);
 
-  if (isLoadingToken || (showBalance && isLoadingBalance) || tokenId === undefined) {
+  // Memoizar tokenData para evitar re-renders durante refetch
+  // Usar useRef para mantener el último valor válido sin causar re-renders
+  const stableTokenDataRef = React.useRef<TokenData | undefined>(tokenData);
+  const stableBalanceRef = React.useRef<bigint | undefined>(balance);
+
+  // Actualizar refs solo cuando hay datos nuevos (comparar por ID para evitar loops)
+  React.useEffect(() => {
+    if (tokenData) {
+      // Solo actualizar si el ID cambió o no hay datos previos
+      if (!stableTokenDataRef.current || tokenData.id !== stableTokenDataRef.current.id) {
+        stableTokenDataRef.current = tokenData;
+      }
+    }
+  }, [tokenData?.id]); // Solo depender del ID, no del objeto completo
+
+  React.useEffect(() => {
+    if (balance !== undefined && balance !== null) {
+      stableBalanceRef.current = balance;
+    }
+  }, [balance]);
+
+  // Usar los refs para display, pero mantener estado para forzar re-render cuando sea necesario
+  const displayTokenData = stableTokenDataRef.current || tokenData;
+  const displayBalance = stableBalanceRef.current !== undefined ? stableBalanceRef.current : balance;
+
+  // Solo mostrar loading en la primera carga, no durante refetch
+  const isInitialLoading = (isLoadingToken && !displayTokenData) || (showBalance && isLoadingBalance && displayBalance === undefined) || tokenId === undefined;
+
+  if (isInitialLoading) {
     return (
       <Card className="hover:shadow-lg transition-shadow duration-300 animate-pulse">
         <CardHeader>
@@ -42,7 +73,7 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
     );
   }
 
-  if (!tokenData) {
+  if (!displayTokenData) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -52,7 +83,7 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
     );
   }
 
-  const { id, name, tokenType, totalSupply, creator, parentToken, createdAt, features } = tokenData;
+  const { id, name, tokenType, totalSupply, creator, parentToken, createdAt, features } = displayTokenData;
   const isRawMaterial = Number(tokenType) === 0;
   const formattedDate = new Date(Number(createdAt) * 1000).toLocaleDateString();
   const formattedCreator = creator.slice(0, 6) + '...' + creator.slice(-4);
@@ -94,10 +125,10 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
           </Badge>
         </div>
 
-        {showBalance && balance !== undefined && balance !== null && (
+        {showBalance && displayBalance !== undefined && displayBalance !== null && (
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">My Balance</span>
-            <span className="font-semibold">{balance.toString()}</span>
+            <span className="font-semibold">{displayBalance.toString()}</span>
           </div>
         )}
 

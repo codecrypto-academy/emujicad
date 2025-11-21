@@ -103,21 +103,34 @@ export function useGetAllTokens() {
   // Process and validate token data
   const tokens = useMemo(() => {
     if (!tokensData || tokensData.length === 0) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useGetAllTokens] No tokensData available');
+      }
       return [];
     }
 
     const validatedTokens: (TokenData & { tokenId: bigint })[] = [];
+    const errors: Array<{ tokenId: number; error: string }> = [];
 
     tokensData.forEach((item, index) => {
+      const tokenId = BigInt(index + 1);
+      
       if (item.error) {
+        // Log errors in development
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`[useGetAllTokens] Error reading token ${tokenId}:`, item.error);
+          errors.push({ tokenId: index + 1, error: item.error.message || 'Unknown error' });
+        }
         // Skip tokens that don't exist (might have been deleted or invalid ID)
         return;
       }
 
-      const tokenId = BigInt(index + 1);
       // Validate that result is an array before passing to validateTokenDataTuple
       const result = item.result
       if (!result || !Array.isArray(result)) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`[useGetAllTokens] Token ${tokenId} result is not an array:`, result);
+        }
         return;
       }
       
@@ -128,8 +141,23 @@ export function useGetAllTokens() {
           ...validated,
           tokenId,
         });
+        // Solo loggear errores, no cada token cargado exitosamente (reduce ruido)
+        // if (process.env.NODE_ENV === 'development') {
+        //   console.log(`[useGetAllTokens] Successfully loaded token ${tokenId}:`, validated.name);
+        // }
+      } else {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`[useGetAllTokens] Token ${tokenId} failed validation:`, result);
+        }
       }
     });
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[useGetAllTokens] Loaded ${validatedTokens.length} tokens, ${errors.length} errors`);
+      if (errors.length > 0) {
+        console.warn('[useGetAllTokens] Errors:', errors);
+      }
+    }
 
     return validatedTokens;
   }, [tokensData]);

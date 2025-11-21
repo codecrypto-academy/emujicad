@@ -46,7 +46,7 @@ contract EdgeCasesTest is Test {
         
         // Crear token
         vm.prank(producerAddress);
-        supplyChain.createToken("Test Token", SupplyChain.TokenType.RowMaterial, 1000, "test", 0);
+        supplyChain.createToken("Test Token", SupplyChain.TokenType.RowMaterial, 1000, "test", 0, 0);
     }
 
     // ============================================================================
@@ -108,7 +108,7 @@ contract EdgeCasesTest is Test {
         
         vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidName.selector));
         vm.prank(producerAddress);
-        supplyChain.createToken("", SupplyChain.TokenType.RowMaterial, 100, "features", 0);
+        supplyChain.createToken("", SupplyChain.TokenType.RowMaterial, 100, "features", 0, 0);
     }
 
     /// @notice Edge Case 6: Token con totalSupply = 0
@@ -118,7 +118,7 @@ contract EdgeCasesTest is Test {
         
         vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidTotalSupply.selector));
         vm.prank(producerAddress);
-        supplyChain.createToken("Test Token", SupplyChain.TokenType.RowMaterial, 0, "features", 0);
+        supplyChain.createToken("Test Token", SupplyChain.TokenType.RowMaterial, 0, "features", 0, 0);
     }
 
     /// @notice Edge Case 7: Token con parentId inexistente
@@ -128,14 +128,14 @@ contract EdgeCasesTest is Test {
         
         vm.expectRevert(abi.encodeWithSelector(SupplyChain.ParentTokenDoesNotExist.selector));
         vm.prank(producerAddress);
-        supplyChain.createToken("Test Token", SupplyChain.TokenType.RowMaterial, 100, "features", 999);
+        supplyChain.createToken("Test Token", SupplyChain.TokenType.RowMaterial, 100, "features", 999, 0);
     }
 
     /// @notice Edge Case 8: Owner intenta crear token
     /// @dev Cubre branch: if (msg.sender == owner) revert Unauthorized();
     function testOwnerCannotCreateToken() public {
         vm.expectRevert(abi.encodeWithSelector(SupplyChain.Unauthorized.selector));
-        supplyChain.createToken("Test Token", SupplyChain.TokenType.RowMaterial, 100, "features", 0);
+        supplyChain.createToken("Test Token", SupplyChain.TokenType.RowMaterial, 100, "features", 0, 0);
     }
 
     // ============================================================================
@@ -184,7 +184,7 @@ contract EdgeCasesTest is Test {
         
         // Crear token
         vm.prank(producerAddress);
-        supplyChain.createToken("Test Token", SupplyChain.TokenType.RowMaterial, 1000, "test features", 0);
+        supplyChain.createToken("Test Token", SupplyChain.TokenType.RowMaterial, 1000, "test features", 0, 0);
     }
 
     /// @notice Test para verificar que los helper functions funcionan
@@ -286,5 +286,170 @@ contract EdgeCasesTest is Test {
         supplyChain.changeStatusUser(producerAddress, SupplyChain.UserStatus.Approved);
         SupplyChain.User memory user = supplyChain.getUserInfo(producerAddress);
         assertEq(uint(user.status), uint(SupplyChain.UserStatus.Approved));
+    }
+
+    // ============================================================================
+    // 🆕 FASE 3: EDGE CASES DE parentAmount (NUEVOS BRANCHES)
+    // ============================================================================
+
+    /// @notice Edge Case 17: FinishedProduct con parentId == 0 debe revertir
+    /// @dev Cubre branch: if (parentId == 0) revert ParentTokenDoesNotExist();
+    function testFinishedProductWithZeroParentId() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.ParentTokenDoesNotExist.selector));
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Product", SupplyChain.TokenType.FinishedProduct, 100, "{}", 0, 50);
+    }
+
+    /// @notice Edge Case 18: FinishedProduct con parentAmount == 0 debe revertir
+    /// @dev Cubre branch: if (parentAmount == 0) revert InvalidAmount();
+    function testFinishedProductWithZeroParentAmount() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        // Crear token padre
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Transferir al factory
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // Intentar crear producto con parentAmount == 0
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidAmount.selector));
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Product", SupplyChain.TokenType.FinishedProduct, 100, "{}", 1, 0);
+    }
+
+    /// @notice Edge Case 19: FinishedProduct con parent token que no es RowMaterial debe revertir
+    /// @dev Cubre branch: if (parentToken.tokenType != TokenType.RowMaterial) revert ParentTokenDoesNotExist();
+    function testFinishedProductWithNonRowMaterialParent() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        // Crear materia prima
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Transferir al factory
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // Factory crea un producto terminado (token 2)
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Product 1", SupplyChain.TokenType.FinishedProduct, 50, "{}", 1, 50);
+        
+        // Transferir producto terminado a otro factory
+        vm.prank(factoryAddress);
+        supplyChain.transfer(factoryAddress, 2, 25);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(2);
+        
+        // Intentar crear producto usando otro producto terminado como parent (debe fallar)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.ParentTokenDoesNotExist.selector));
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Product 2", SupplyChain.TokenType.FinishedProduct, 25, "{}", 2, 25);
+    }
+
+    /// @notice Edge Case 20: FinishedProduct con balance insuficiente debe revertir
+    /// @dev Cubre branch: if (userParentBalance < parentAmount) revert InsufficientBalance(...);
+    function testFinishedProductWithInsufficientBalance() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        // Crear token padre
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Transferir solo 50 unidades al factory
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // Intentar crear producto consumiendo más de lo que tiene (100 > 50)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InsufficientBalance.selector, 50, 100));
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Product", SupplyChain.TokenType.FinishedProduct, 100, "{}", 1, 100);
+    }
+
+    /// @notice Edge Case 21: RowMaterial con parentId != 0 debe revertir
+    /// @dev Cubre branch: if (parentId != 0) revert ParentTokenDoesNotExist();
+    function testRowMaterialWithNonZeroParentId() public {
+        setupApprovedProducer();
+        
+        // Crear un token primero
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material 1", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Intentar crear materia prima con parentId != 0
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.ParentTokenDoesNotExist.selector));
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material 2", SupplyChain.TokenType.RowMaterial, 100, "{}", 1, 0);
+    }
+
+    /// @notice Edge Case 22: RowMaterial con parentAmount != 0 debe revertir
+    /// @dev Cubre branch: if (parentAmount != 0) revert InvalidAmount();
+    function testRowMaterialWithNonZeroParentAmount() public {
+        setupApprovedProducer();
+        
+        // Intentar crear materia prima con parentAmount != 0
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidAmount.selector));
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 50);
+    }
+
+    /// @notice Edge Case 23: Actualización de contador cuando balance llega a 0
+    /// @dev Cubre branch: if (parentToken.balance[msg.sender] == 0 && userTokenCount[msg.sender] > 0)
+    function testUserTokenCountDecrementWhenBalanceReachesZero() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        // Crear token padre
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Transferir exactamente 50 unidades al factory
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // Verificar que factory tiene el token en su lista
+        uint[] memory factoryTokensBefore = supplyChain.getUserTokens(factoryAddress);
+        assertEq(factoryTokensBefore.length, 1, "Factory should have 1 token before");
+        
+        // Crear producto consumiendo todas las 50 unidades (balance llega a 0)
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Product", SupplyChain.TokenType.FinishedProduct, 50, "{}", 1, 50);
+        
+        // Verificar que el contador se decrementó (factory ya no tiene el token 1)
+        uint[] memory factoryTokensAfter = supplyChain.getUserTokens(factoryAddress);
+        assertEq(factoryTokensAfter.length, 1, "Factory should have 1 token after (the new product)");
+        assertEq(factoryTokensAfter[0], 2, "Factory should have token 2 (the new product)");
+        
+        // Verificar que el balance del token 1 es 0
+        assertEq(supplyChain.getTokenBalance(1, factoryAddress), 0, "Factory balance of token 1 should be 0");
     }
 }

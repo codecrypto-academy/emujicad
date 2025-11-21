@@ -66,58 +66,73 @@ contract SupplyChainInteractions is Script {
         console.log("\n=== PHASE 2: TOKEN CREATION ===");
         
         vm.prank(producerAddress);
-        supplyChain.createToken("Raw Cotton", SupplyChain.TokenType.RowMaterial, 1000, "Organic cotton", 0);
+        supplyChain.createToken("Raw Cotton", SupplyChain.TokenType.RowMaterial, 1000, "Organic cotton", 0, 0);
         console.log("Token 1: Raw Cotton created by Producer");
         
+        // Factory needs to receive raw material first before creating finished product
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 500);
         vm.prank(factoryAddress);
-        supplyChain.createToken("Cotton Fabric", SupplyChain.TokenType.FinishedProduct, 500, "Premium fabric", 0);
+        supplyChain.acceptTransfer(1);
+        
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Cotton Fabric", SupplyChain.TokenType.FinishedProduct, 500, "Premium fabric", 1, 500);
         console.log("Token 2: Cotton Fabric created by Factory");
         
         // PHASE 3: TRANSFERS
         console.log("\n=== PHASE 3: TRANSFERS ===");
         
+        // Note: Transfer 1 was already done in PHASE 2 (line 74) and accepted (line 76)
+        // Now Factory has 0 token 1 (consumed to create token 2) and 500 token 2
+        // Producer still has 500 units of token 1 (1000 - 500 transferred)
+        
+        // Producer transfers more raw material to Factory (leave some for Phase 4)
         vm.prank(producerAddress);
-        supplyChain.transfer(factoryAddress, 1, 500);
-        console.log("Transfer 1: Producer -> Factory (500 units)");
+        supplyChain.transfer(factoryAddress, 1, 400);
+        console.log("Transfer 2: Producer -> Factory (400 units of token 1)");
         
         vm.prank(factoryAddress);
-        supplyChain.acceptTransfer(1);
-        console.log("Transfer 1 accepted");
-        
-        vm.prank(factoryAddress);
-        supplyChain.transfer(retailerAddress, 2, 200);
-        console.log("Transfer 2: Factory -> Retailer (200 units)");
-        
-        vm.prank(retailerAddress);
         supplyChain.acceptTransfer(2);
         console.log("Transfer 2 accepted");
         
-        vm.prank(retailerAddress);
-        supplyChain.transfer(consumerAddress, 2, 50);
-        console.log("Transfer 3: Retailer -> Consumer (50 units)");
+        // Factory transfers finished product to Retailer
+        vm.prank(factoryAddress);
+        supplyChain.transfer(retailerAddress, 2, 200);
+        console.log("Transfer 3: Factory -> Retailer (200 units of token 2)");
         
-        vm.prank(consumerAddress);
+        vm.prank(retailerAddress);
         supplyChain.acceptTransfer(3);
         console.log("Transfer 3 accepted");
+        
+        // Retailer transfers to Consumer
+        vm.prank(retailerAddress);
+        supplyChain.transfer(consumerAddress, 2, 50);
+        console.log("Transfer 4: Retailer -> Consumer (50 units of token 2)");
+        
+        vm.prank(consumerAddress);
+        supplyChain.acceptTransfer(4);
+        console.log("Transfer 4 accepted");
         
         // PHASE 4: REJECTION & CANCELLATION
         console.log("\n=== PHASE 4: REJECTION & CANCELLATION ===");
         
+        // Producer has 100 units left (1000 - 500 - 400 = 100)
         vm.prank(producerAddress);
         supplyChain.transfer(factoryAddress, 1, 100);
-        console.log("Transfer 4 initiated (will be rejected)");
+        console.log("Transfer 5 initiated (will be rejected)");
         
         vm.prank(factoryAddress);
-        supplyChain.rejectTransfer(4);
-        console.log("Transfer 4 rejected");
+        supplyChain.rejectTransfer(5);
+        console.log("Transfer 5 rejected");
         
+        // After rejection, Producer has 100 units back
         vm.prank(producerAddress);
         supplyChain.transfer(factoryAddress, 1, 50);
-        console.log("Transfer 5 initiated (will be cancelled)");
+        console.log("Transfer 6 initiated (will be cancelled)");
         
         vm.prank(producerAddress);
-        supplyChain.cancelTransfer(5);
-        console.log("Transfer 5 cancelled");
+        supplyChain.cancelTransfer(6);
+        console.log("Transfer 6 cancelled");
         
         // FINAL STATUS
         console.log("\n=== FINAL STATUS ===");

@@ -636,15 +636,43 @@ contract SupplyChain  is ReentrancyGuard {
      * @param totalSupply Cantidad total disponible para el token. Debe ser mayor que cero.
      * @param features Características adicionales en string JSON.
      * @param parentId ID del token padre. 0 si es materia prima, distinto de 0 para producto terminado.
-     * @dev Lanza error si el padre no existe o si las validaciones fallan.
+     * @param parentAmount Cantidad de tokens de materia prima a consumir. Solo aplica para FinishedProduct. Debe ser mayor que 0 y menor o igual al balance del usuario.
+     * @dev Lanza error si el padre no existe, si el usuario no tiene balance suficiente, o si las validaciones fallan.
+     * @dev Para FinishedProduct: valida que el parentId sea RowMaterial, que el usuario tenga balance suficiente, y descuenta los tokens de materia prima.
      * @dev Incrementa contador de tokens y actualiza balance inicial del creador.
-    */
-    function createToken(string memory name, TokenType tokenType, uint totalSupply, string memory features, uint parentId) external onlyTokenCreators whenNotPaused {
+     */
+    function createToken(string memory name, TokenType tokenType, uint totalSupply, string memory features, uint parentId, uint parentAmount) external onlyTokenCreators whenNotPaused {
         if (bytes(name).length == 0) revert InvalidName();
         if (totalSupply == 0) revert InvalidTotalSupply();
 
-        if (parentId != 0 && tokens[parentId].id == 0) {
-                revert ParentTokenDoesNotExist();
+        // Validación para productos terminados: deben tener un parentId válido
+        if (tokenType == TokenType.FinishedProduct) {
+            if (parentId == 0) revert ParentTokenDoesNotExist();
+            if (parentAmount == 0) revert InvalidAmount();
+            
+            Token storage parentToken = tokens[parentId];
+            if (parentToken.id == 0) revert ParentTokenDoesNotExist();
+            
+            // Validar que el parent token sea de tipo RowMaterial
+            if (parentToken.tokenType != TokenType.RowMaterial) revert ParentTokenDoesNotExist();
+            
+            // Validar que el usuario tenga balance suficiente del token padre
+            uint256 userParentBalance = parentToken.balance[msg.sender];
+            if (userParentBalance < parentAmount) {
+                revert InsufficientBalance(userParentBalance, parentAmount);
+            }
+            
+            // Descontar tokens de materia prima del balance del usuario
+            parentToken.balance[msg.sender] = userParentBalance - parentAmount;
+            
+            // Actualizar contador de tokens del usuario si ya no tiene balance del parent token
+            if (parentToken.balance[msg.sender] == 0 && userTokenCount[msg.sender] > 0) {
+                userTokenCount[msg.sender]--;
+            }
+        } else {
+            // Para materia prima, parentId debe ser 0 y parentAmount debe ser 0
+            if (parentId != 0) revert ParentTokenDoesNotExist();
+            if (parentAmount != 0) revert InvalidAmount();
         }
 
         Token storage newToken = tokens[nextTokenId];
