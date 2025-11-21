@@ -2,7 +2,7 @@
 
 import { Header } from '@/components/Header'
 import { TokenCard } from '@/components/TokenCard'
-import { useGetAllTokens } from '@/hooks/useGetUserTokens'
+import { useGetUserTokensWithData } from '@/hooks/useGetUserTokensWithData'
 import { useIsPaused } from '@/hooks/usePause'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAccount } from 'wagmi'
@@ -23,12 +23,31 @@ export default function TokensPage() {
   const router = useRouter()
   const { address, isConnected } = useAccount()
   const { isAuthenticated, isLoading: isLoadingAuth, userInfo } = useAuth()
-  const { tokens, isLoading, error, totalTokens } = useGetAllTokens()
+  const { tokens, isLoading, error, totalTokens } = useGetUserTokensWithData(address)
   const { data: isPaused } = useIsPaused()
   
   const [mounted, setMounted] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [filterType, setFilterType] = useState<'all' | 'raw' | 'finished'>('all')
+  
+  // Determinar el rol del usuario y configurar filtros según el rol
+  const userRole = userInfo ? Number(userInfo.role) : null
+  const isProducer = userRole === UserRole.Producer
+  const isFactory = userRole === UserRole.Factory
+  const isRetailer = userRole === UserRole.Retailer
+  const isConsumer = userRole === UserRole.Consumer
+  
+  // Producer: solo puede tener materia prima, no necesita filtro
+  // Factory: puede tener ambos tipos, necesita filtro
+  // Retailer/Consumer: solo productos terminados, no necesitan filtro
+  const shouldShowTypeFilter = isFactory
+  
+  // Inicializar filtro según el rol
+  const [filterType, setFilterType] = useState<'all' | 'raw' | 'finished'>(() => {
+    if (isProducer) return 'raw' // Producer solo ve materia prima
+    if (isRetailer || isConsumer) return 'finished' // Retailer/Consumer solo ven productos terminados
+    return 'all' // Factory ve todos por defecto
+  })
+  
   const [currentPage, setCurrentPage] = useState(1)
   const tokensPerPage = 12
 
@@ -50,12 +69,23 @@ export default function TokensPage() {
     if (!tokens || tokens.length === 0) return []
 
     return tokens.filter((token) => {
-      // Filtro por tipo
-      if (filterType === 'raw' && Number(token.tokenType) !== TokenType.RowMaterial) {
+      // Filtro por tipo según rol
+      // Producer: solo materia prima (ya está filtrado por el estado inicial, pero por seguridad)
+      if (isProducer && Number(token.tokenType) !== TokenType.RowMaterial) {
         return false
       }
-      if (filterType === 'finished' && Number(token.tokenType) !== TokenType.FinishedProduct) {
+      // Retailer/Consumer: solo productos terminados
+      if ((isRetailer || isConsumer) && Number(token.tokenType) !== TokenType.FinishedProduct) {
         return false
+      }
+      // Factory: aplicar filtro seleccionado
+      if (isFactory) {
+        if (filterType === 'raw' && Number(token.tokenType) !== TokenType.RowMaterial) {
+          return false
+        }
+        if (filterType === 'finished' && Number(token.tokenType) !== TokenType.FinishedProduct) {
+          return false
+        }
       }
 
       // Filtro por búsqueda (nombre) - aplica solo si hay query
@@ -70,7 +100,7 @@ export default function TokensPage() {
 
       return true
     })
-  }, [tokens, filterType, searchQuery])
+  }, [tokens, filterType, searchQuery, isProducer, isFactory, isRetailer, isConsumer])
 
   // Paginación (DEBE estar antes de cualquier return condicional)
   const totalPages = Math.ceil(filteredTokens.length / tokensPerPage)
@@ -112,8 +142,8 @@ export default function TokensPage() {
       <Header />
       
       <div className="container mx-auto px-4 py-8">
-        {/* Debug Info - Solo en desarrollo */}
-        {process.env.NODE_ENV === 'development' && (
+        {/* Debug Info - Solo si está explícitamente habilitado */}
+        {process.env.NEXT_PUBLIC_DEBUG_TOKENS === 'true' && (
           <div className="mb-6">
             <DebugTokens />
           </div>
@@ -124,10 +154,10 @@ export default function TokensPage() {
           <div>
             <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
               <Package className="h-10 w-10 text-blue-600 dark:text-blue-400" />
-              All Tokens
+              My Tokens
             </h1>
             <p className="text-slate-600 dark:text-slate-400">
-              Browse all tokens in the supply chain system
+              View and manage your tokens in the supply chain
             </p>
           </div>
           {/* Botón para crear token - Solo para Producer y Factory aprobados */}
@@ -158,7 +188,7 @@ export default function TokensPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={`grid grid-cols-1 ${shouldShowTypeFilter ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-4`}>
               {/* Búsqueda por nombre */}
               <div className="space-y-2">
                 <label htmlFor="search" className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -214,32 +244,37 @@ export default function TokensPage() {
                 )}
               </div>
 
-              {/* Filtro por tipo */}
-              <div className="space-y-2">
-                <label htmlFor="filter-type" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Filter by type
-                </label>
-                <Select value={filterType} onValueChange={(value) => setFilterType(value as typeof filterType)}>
-                  <SelectTrigger id="filter-type" className="dark:bg-slate-700 dark:text-slate-100" aria-label="Filter tokens by type">
-                    <SelectValue placeholder="All types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="raw">Raw Material</SelectItem>
-                    <SelectItem value="finished">Finished Product</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Filtro por tipo - Solo visible para Factory */}
+              {shouldShowTypeFilter && (
+                <div className="space-y-2">
+                  <label htmlFor="filter-type" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Filter by type
+                  </label>
+                  <Select value={filterType} onValueChange={(value) => setFilterType(value as typeof filterType)}>
+                    <SelectTrigger id="filter-type" className="dark:bg-slate-700 dark:text-slate-100" aria-label="Filter tokens by type">
+                      <SelectValue placeholder="All types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="raw">Raw Material</SelectItem>
+                      <SelectItem value="finished">Finished Product</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             {/* Estadísticas de filtros */}
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm text-slate-600 dark:text-slate-400">
-                Showing {filteredTokens.length} of {totalTokens} tokens
+                Showing {filteredTokens.length} of {totalTokens} token{totalTokens !== 1 ? 's' : ''} you own
                 {searchQuery && ` matching "${searchQuery}"`}
-                {filterType !== 'all' && ` (${filterType === 'raw' ? 'Raw Material' : 'Finished Product'})`}
+                {shouldShowTypeFilter && filterType !== 'all' && ` (${filterType === 'raw' ? 'Raw Material' : 'Finished Product'})`}
+                {!shouldShowTypeFilter && isProducer && ' (Raw Material)'}
+                {!shouldShowTypeFilter && (isRetailer || isConsumer) && ' (Finished Product)'}
               </div>
-              {(searchQuery || filterType !== 'all') && (
+              {/* Botón Clear Filters - Solo para Factory cuando hay filtros activos */}
+              {shouldShowTypeFilter && (searchQuery || filterType !== 'all') && (
                 <Button
                   type="button"
                   variant="outline"
@@ -253,6 +288,22 @@ export default function TokensPage() {
                   className="dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600"
                 >
                   Clear Filters
+                </Button>
+              )}
+              {/* Botón Clear Filters - Solo búsqueda para otros roles */}
+              {!shouldShowTypeFilter && searchQuery && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setSearchQuery('')
+                  }}
+                  className="dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600"
+                >
+                  Clear Search
                 </Button>
               )}
             </div>
@@ -301,14 +352,14 @@ export default function TokensPage() {
                     No tokens match your search criteria.
                     {totalTokens > 0 && (
                       <span className="block mt-2 text-sm">
-                        There are {totalTokens} token{totalTokens !== 1 ? 's' : ''} in the system, but none match &quot;{searchQuery}&quot; 
+                        You own {totalTokens} token{totalTokens !== 1 ? 's' : ''}, but none match &quot;{searchQuery}&quot; 
                         {filterType !== 'all' && ` with type "${filterType === 'raw' ? 'Raw Material' : 'Finished Product'}"`}.
                       </span>
                     )}
                     {totalTokens > 0 && tokens.length > 0 && (
                       <details className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                         <summary className="cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">
-                          Available token names: {tokens.map(t => t.name).join(', ')}
+                          Your token names: {tokens.map(t => t.name).join(', ')}
                         </summary>
                       </details>
                     )}
@@ -317,7 +368,7 @@ export default function TokensPage() {
                     </span>
                   </>
                 ) : (
-                  'No tokens have been created yet'
+                  'You don\'t own any tokens yet. Create or receive tokens to see them here.'
                 )}
               </p>
               {/* Solo Producer y Factory aprobados pueden crear tokens (según el contrato) */}
@@ -342,7 +393,7 @@ export default function TokensPage() {
                 <TokenCard
                   key={token.id.toString()}
                   tokenId={token.tokenId}
-                  showBalance={false}
+                  showBalance={true}
                   onClick={() => handleTokenClick(token.tokenId)}
                 />
               ))}

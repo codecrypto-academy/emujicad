@@ -6,6 +6,7 @@ import { TokenCard } from '@/components/TokenCard';
 import { QuickActions } from '@/components/QuickActions';
 import { PauseControl } from '@/components/admin/PauseControl';
 import { useGetUserTokens } from '@/hooks/useGetUserTokens';
+import { useUserTokenStats } from '@/hooks/useUserTokenStats';
 import { useDashboardStats } from '@/hooks/useContractReads';
 import { useIsPaused } from '@/hooks/usePause';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,7 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Shield, Package, Users, ArrowRightLeft, AlertCircle, Pause } from 'lucide-react';
+import { Shield, Package, Users, ArrowRightLeft, AlertCircle, Pause, Table2 } from 'lucide-react';
 import Link from 'next/link';
 import { UserRole, UserStatus } from '@/contracts/config';
 
@@ -244,17 +245,22 @@ export default function DashboardPage() {
 
         {/* Contenido para usuarios regulares */}
         {!isAdmin && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            {/* Perfil del Usuario */}
-            <div className="lg:col-span-1">
-              <UserProfileCard />
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              {/* Perfil del Usuario */}
+              <div className="lg:col-span-1">
+                <UserProfileCard />
+              </div>
+
+              {/* Acciones Rápidas */}
+              <div className="lg:col-span-2">
+                <QuickActions />
+              </div>
             </div>
 
-            {/* Acciones Rápidas */}
-            <div className="lg:col-span-2">
-              <QuickActions />
-            </div>
-          </div>
+            {/* Tabla de Tokens por Tipo */}
+            <TokenTypeStatsTable />
+          </>
         )}
 
         {/* Mis Tokens */}
@@ -384,5 +390,119 @@ export default function DashboardPage() {
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Component to display token statistics grouped by type in a table
+ */
+function TokenTypeStatsTable() {
+  const { address } = useAccount();
+  const { rowMaterial, finishedProduct, isLoading, error } = useUserTokenStats(address);
+
+  // Only show rows that have tokens
+  const hasRowMaterial = rowMaterial.tokenCount > 0 || rowMaterial.totalBalance > BigInt(0);
+  const hasFinishedProduct = finishedProduct.tokenCount > 0 || finishedProduct.totalBalance > BigInt(0);
+  const hasAnyTokens = hasRowMaterial || hasFinishedProduct;
+
+  if (error) {
+    return (
+      <Card className="mb-8 border-red-200 dark:border-red-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-300">
+            <AlertCircle className="h-5 w-5" />
+            Error Loading Token Statistics
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-red-600 dark:text-red-400">
+            {error.message || 'Failed to load token statistics. Please try again.'}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="mb-8 border-slate-200 dark:border-slate-700">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
+          <Table2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          My Tokens by Type
+        </CardTitle>
+        <CardDescription className="text-slate-600 dark:text-slate-400">
+          Overview of your tokens grouped by type
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-3">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : !hasAnyTokens ? (
+          <div className="text-center py-8 text-slate-600 dark:text-slate-400">
+            <Package className="h-12 w-12 mx-auto mb-3 text-slate-300 dark:text-slate-600" />
+            <p>No tokens yet. Create your first token to see statistics here.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-slate-700">
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">
+                    Token Type
+                  </th>
+                  <th className="text-right py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">
+                    Total Balance
+                  </th>
+                  <th className="text-right py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">
+                    Token Count
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {hasRowMaterial && (
+                  <tr className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <span className="font-medium text-slate-800 dark:text-slate-200">
+                          {rowMaterial.tokenTypeName}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-right font-semibold text-slate-700 dark:text-slate-300">
+                      {rowMaterial.totalBalance.toString()}
+                    </td>
+                    <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-400">
+                      {rowMaterial.tokenCount}
+                    </td>
+                  </tr>
+                )}
+                {hasFinishedProduct && (
+                  <tr className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span className="font-medium text-slate-800 dark:text-slate-200">
+                          {finishedProduct.tokenTypeName}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-right font-semibold text-slate-700 dark:text-slate-300">
+                      {finishedProduct.totalBalance.toString()}
+                    </td>
+                    <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-400">
+                      {finishedProduct.tokenCount}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
