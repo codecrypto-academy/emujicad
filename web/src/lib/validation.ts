@@ -53,6 +53,9 @@ function isValidAddress(value: unknown): value is string {
 export function validateUserInfo(data: unknown): UserInfo | null {
   // Check if data exists and is an object
   if (!data || typeof data !== 'object') {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[validateUserInfo] Data is not an object:', typeof data, data)
+    }
     return null
   }
 
@@ -61,31 +64,40 @@ export function validateUserInfo(data: unknown): UserInfo | null {
   // Validate id (must be bigint or convertible to bigint)
   const id = toBigInt(obj.id)
   if (id === null || id < 0n) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[validateUserInfo] Invalid id:', obj.id, 'converted:', id)
+    }
     return null
   }
 
   // Validate userAddress (must be valid Ethereum address)
   if (!isValidAddress(obj.userAddress)) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[validateUserInfo] Invalid userAddress:', obj.userAddress)
+    }
     return null
   }
 
   // Validate role (must be bigint or convertible, and between 0-3)
   const role = toBigInt(obj.role)
   if (role === null || role < 0n || role > 3n) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[validateUserInfo] Invalid role:', obj.role, 'converted:', role)
+    }
     return null
   }
 
   // Validate status (must be bigint or convertible, and between 0-3)
   const status = toBigInt(obj.status)
   if (status === null || status < 0n || status > 3n) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[validateUserInfo] Invalid status:', obj.status, 'converted:', status)
+    }
     return null
   }
 
-  // Validate registrationDate (must be bigint or convertible, and non-negative)
-  const registrationDate = toBigInt(obj.registrationDate)
-  if (registrationDate === null || registrationDate < 0n) {
-    return null
-  }
+  // NOTE: registrationDate is NOT part of the contract's User struct
+  // The contract only returns: id, userAddress, role, status
 
   // All validations passed, return validated UserInfo
   return {
@@ -93,7 +105,6 @@ export function validateUserInfo(data: unknown): UserInfo | null {
     userAddress: obj.userAddress,
     role,
     status,
-    registrationDate,
   }
 }
 
@@ -105,22 +116,54 @@ export function validateUserInfo(data: unknown): UserInfo | null {
  */
 export function validateUserInfoTuple(data: unknown): UserInfo | null {
   // Check if it's an array (tuple from contract)
-  if (!Array.isArray(data) || data.length < 5) {
+  if (!Array.isArray(data)) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[validateUserInfoTuple] Data is not an array:', typeof data, data)
+    }
+    return null
+  }
+  
+  // The contract struct User has 4 fields: id, userAddress, role, status
+  // NOTE: registrationDate is NOT part of the contract struct
+  if (data.length < 4) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[validateUserInfoTuple] Array length < 4:', data.length, data)
+    }
     return null
   }
 
   // Try to construct UserInfo from tuple
   try {
-    const [id, userAddress, role, status, registrationDate] = data
+    // Contract returns: [id, userAddress, role, status]
+    const [id, userAddress, role, status] = data
 
-    return validateUserInfo({
+    const validated = validateUserInfo({
       id,
       userAddress,
       role,
       status,
-      registrationDate,
     })
-  } catch {
+    
+    if (!validated && process.env.NODE_ENV === 'development') {
+      console.warn('[validateUserInfoTuple] Validation failed for tuple:', {
+        id,
+        userAddress,
+        role,
+        status,
+        types: {
+          id: typeof id,
+          userAddress: typeof userAddress,
+          role: typeof role,
+          status: typeof status,
+        }
+      })
+    }
+    
+    return validated
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[validateUserInfoTuple] Exception during validation:', error, data)
+    }
     return null
   }
 }

@@ -118,7 +118,7 @@
 ✅ web/src/app/page.tsx                    - Landing con MetaMask + Stats
 ✅ web/src/app/dashboard/page.tsx          - Dashboard usuario COMPLETO
 ✅ web/src/app/admin/users/page.tsx       - Gestión usuarios COMPLETA
-❌ web/src/app/tokens/page.tsx             - Lista todos los tokens
+✅ web/src/app/tokens/page.tsx             - Lista todos los tokens COMPLETO ⭐ Día 5
 ❌ web/src/app/tokens/create/page.tsx     - Crear token
 ❌ web/src/app/tokens/[id]/page.tsx       - Detalles token
 ❌ web/src/app/tokens/[id]/transfer/page.tsx - Transferir token
@@ -127,7 +127,7 @@
 ❌ web/src/app/profile/page.tsx            - Perfil usuario
 ```
 
-**Progreso**: 3/9 páginas (33%)
+**Progreso**: 4/9 páginas (44%) ⭐ Día 5
 
 ### 🚨 PRIORIDAD 2: Componentes Específicos (4/5 implementados)
 ```
@@ -150,11 +150,11 @@
 ✅ useGetAllUsers()                        - IMPLEMENTADO (admin)
 ✅ useChangeUserStatus()                   - IMPLEMENTADO (aprobar/rechazar usuarios)
 ✅ useContractOwner()                      - IMPLEMENTADO (verificar admin)
-❌ useGetAllTokens()                       - Todos los tokens del sistema
+✅ useGetAllTokens()                       - IMPLEMENTADO (todos los tokens) ⭐ Día 5
 ❌ useGetUserTransfers(address)            - Transferencias de un usuario
 ```
 
-**Progreso**: 7/9 hooks necesarios (78%)
+**Progreso**: 8/9 hooks necesarios (89%) ⭐ Día 5
 
 ### 🚨 PRIORIDAD 4: Video Demo (Falta +1.5 puntos)
 **Tiempo estimado**: 3-4 horas
@@ -169,17 +169,17 @@
 
 ## 📅 ROADMAP DETALLADO (5 días para 9.5/10)
 
-### **🗓️ Día 5 - Sábado 22 Nov (Tokens - Lista)** ⬅️ SIGUIENTE
+### **🗓️ Día 5 - Viernes 21 Nov (Tokens - Lista)** ✅ COMPLETADO
 **Tiempo**: 4-5 horas | **Impacto**: +0.1 puntos
 
 #### Tareas:
 ```typescript
-1. [ ] Crear web/src/app/tokens/page.tsx (150 líneas)
-2. [ ] Implementar hook useGetAllTokens() (necesario)
-3. [ ] Integrar TokenCard.tsx (ya existe ✅)
-4. [ ] Agregar filtros por tipo (Raw Material / Finished Product)
-5. [ ] Agregar búsqueda por nombre
-6. [ ] Paginación básica
+1. [x] Crear web/src/app/tokens/page.tsx (300+ líneas) ✅
+2. [x] Implementar hook useGetAllTokens() ✅
+3. [x] Integrar TokenCard.tsx ✅
+4. [x] Agregar filtros por tipo (Raw Material / Finished Product) ✅
+5. [x] Agregar búsqueda por nombre ✅
+6. [x] Paginación básica ✅
 ```
 
 **Hooks a usar**:
@@ -189,7 +189,7 @@
 
 ---
 
-### **🗓️ Día 6 - Domingo 23 Nov (Tokens - Crear)**
+### **🗓️ Día 6 - Sábado 22 Nov (Tokens - Crear)**
 **Tiempo**: 4-5 horas | **Impacto**: +0.1 puntos
 
 #### Tareas:
@@ -209,7 +209,7 @@
 
 ---
 
-### **🗓️ Día 7 - Lunes 24 Nov (Transferencias)**
+### **🗓️ Día 7 - Domingo 23 Nov (Transferencias)**
 **Tiempo**: 6-8 horas | **Impacto**: +0.2 puntos
 
 #### Tareas:
@@ -232,7 +232,7 @@
 
 ---
 
-### **🗓️ Día 8 - Martes 25 Nov (Páginas Adicionales)**
+### **🗓️ Día 8 - Lunes 24 Nov (Páginas Adicionales)**
 **Tiempo**: 4-6 horas | **Impacto**: +0.1 puntos
 
 #### Tareas:
@@ -245,7 +245,7 @@
 
 ---
 
-### **🗓️ Día 9 - Miércoles 26 Nov (Video Demo)**
+### **🗓️ Día 9 - Martes 25 Nov (Video Demo)**
 **Tiempo**: 3-4 horas | **Impacto**: +1.5 puntos
 
 #### Script del video (5 minutos):
@@ -277,25 +277,25 @@ Tareas técnicas:
 
 ## 🎯 PRÓXIMO PASO INMEDIATO
 
-### ➡️ **EMPEZAR: Página de Tokens (Día 5)**
+### ➡️ **EMPEZAR: Página Crear Token (Día 6)**
 
-**Primer archivo a crear**: `web/src/app/tokens/page.tsx`
+**Primer archivo a crear**: `web/src/app/tokens/create/page.tsx`
 
 **Orden de implementación**:
-1. Crear página tokens básica (estructura)
-2. Implementar hook `useGetAllTokens()`
-3. Integrar `TokenCard.tsx` (ya existe ✅)
-4. Agregar filtros y búsqueda
-5. Testing manual con MetaMask
+1. Crear página tokens/create básica (estructura)
+2. Implementar formulario con validaciones
+3. Integrar `useCreateToken()` hook (ya existe ✅)
+4. Agregar validación de pausa del contrato
+5. Select para parent token (si aplica)
+6. Testing manual con MetaMask
 
 **Estado actual**:
 ```
-✅ TokenCard component - Ya implementado
-✅ useGetToken hook - Ya disponible
-✅ useGetTokenBalance hook - Ya disponible
-✅ Dashboard page - Ya implementado
-❌ useGetAllTokens hook - NECESARIO
-❌ Tokens page - Por implementar
+✅ useCreateToken hook - Ya disponible
+✅ useIsPaused hook - Ya disponible
+✅ useGetUserTokens hook - Ya disponible (para parent tokens)
+✅ Tokens page (lista) - Ya implementado ✅
+❌ Tokens create page - Por implementar
 ```
 
 **Comando para empezar**:
@@ -305,11 +305,10 @@ npm run dev  # Frontend ya corriendo
 ```
 
 **Hooks ya disponibles**:
-- ✅ `useGetUserTokens(address)` - Tokens de un usuario
-- ✅ `useGetToken(tokenId)` - Token por ID
-- ✅ `useGetTokenBalance(tokenId, address)` - Balance de token
+- ✅ `useCreateToken()` - Crear token
 - ✅ `useIsPaused()` - Estado de pausa
-- ❌ `useGetAllTokens()` - NECESARIO para lista completa
+- ✅ `useGetUserTokens(address)` - Tokens de un usuario (para parent token)
+- ✅ `useGetAllTokens()` - Todos los tokens (ya implementado)
 
 ---
 
@@ -360,20 +359,21 @@ Pendiente:
     └── useGetUserTransfers
 ```
 
-### Timeline Progress: Día 4/12
+### Timeline Progress: Día 5/12
 ```
-[███████████░░░░░░░░░░░░░░░░] 33%
+[███████████████░░░░░░░░░░░░] 42%
 
-✅ Día 1 - Smart Contract + Frontend base
-✅ Día 2 - Documentación + ConnectWallet fixes + IA.md actualizado
-✅ Día 3 - Admin Panel + Header + Theme Toggle
-✅ Día 4 - Dashboard + TokenCard + PauseControl + AuthContext - ✅ COMPLETADO
-→  Día 5 - Tokens (lista) (SIGUIENTE)
-   Día 6 - Tokens (crear)
-   Día 7 - Transferencias
-   Día 8 - Video
-   Día 9-11 - Buffer/refinamiento
-   Día 12 - Entrega final
+✅ Día 1 - Smart Contract + Frontend base (Lunes 18 Nov)
+✅ Día 2 - Documentación + ConnectWallet fixes + IA.md actualizado (Martes 19 Nov)
+✅ Día 3 - Admin Panel + Header + Theme Toggle (Miércoles 20 Nov)
+✅ Día 4 - Dashboard + TokenCard + PauseControl + AuthContext (Jueves 20 Nov) - ✅ COMPLETADO
+✅ Día 5 - Tokens (lista) (Viernes 21 Nov) - ✅ COMPLETADO
+→  Día 6 - Tokens (crear) (Sábado 22 Nov) (SIGUIENTE)
+   Día 7 - Transferencias (Domingo 23 Nov)
+   Día 8 - Páginas adicionales (Lunes 24 Nov)
+   Día 9 - Video Demo (Martes 25 Nov)
+   Día 10-11 - Buffer/refinamiento
+   Día 12 - Entrega final (28 Nov)
 ```
 
 ---
@@ -485,7 +485,33 @@ Video:
 
 ## 📋 CHANGELOG RECIENTE
 
-### Día 4 - Sesión Actual (21 Nov, 2025)
+### Día 5 - Sesión Actual (21 Nov, 2025) ✅ COMPLETADO
+```
+✅ Implemented: Página de Tokens completa (web/src/app/tokens/page.tsx)
+✅ Implemented: Hook useGetAllTokens() con batch reads optimizado
+✅ Implemented: Filtros por tipo de token (Raw Material / Finished Product)
+✅ Implemented: Búsqueda en tiempo real por nombre
+✅ Implemented: Paginación (12 tokens por página)
+✅ Enhanced: TokenCard integrado en página de tokens
+✅ Enhanced: Loading states con skeletons
+✅ Enhanced: Error handling completo
+✅ Enhanced: Empty states informativos
+✅ Enhanced: Accesibilidad (ARIA labels)
+✅ Enhanced: Dark mode support completo
+✅ Enhanced: Responsive design (mobile, tablet, desktop)
+
+Features implementados en Día 5:
+- Página completa de lista de tokens con filtros y búsqueda
+- Hook optimizado con batch reads para mejor performance
+- Paginación funcional
+- Navegación a detalles de token (onClick)
+
+Progreso:
+- Páginas: 3/9 (33%) → 4/9 (44%)
+- Hooks: 7/9 (78%) → 8/9 (89%)
+```
+
+### Día 4 - Sesión Anterior (20 Nov, 2025)
 ```
 ✅ Implemented: Dashboard page completo (web/src/app/dashboard/page.tsx)
 ✅ Implemented: TokenCard component (web/src/components/TokenCard.tsx)
@@ -557,4 +583,4 @@ Issues resueltos en Día 4:
 ---
 
 **Última modificación**: 21 Nov 2025  
-**Próxima actualización**: Después de completar Tokens o Transfers (Día 5-6)
+**Próxima actualización**: Después de completar Tokens Create o Transfers (Día 6-7)

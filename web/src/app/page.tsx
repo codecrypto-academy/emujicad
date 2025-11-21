@@ -32,6 +32,20 @@ export default function Home() {
         ? validateUserInfoTuple(rawUserInfo)
         : validateUserInfo(rawUserInfo))
     : undefined
+
+  // Debug logging en desarrollo
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && address) {
+      console.log('[page.tsx] User Info Debug:', {
+        address,
+        rawUserInfo,
+        userInfo,
+        userInfoError: userInfoError?.message,
+        isLoadingUser,
+        isValidated: !!userInfo,
+      })
+    }
+  }, [address, rawUserInfo, userInfo, userInfoError, isLoadingUser])
   
   // Evitar hydration mismatch
   const [mounted, setMounted] = useState(false)
@@ -150,15 +164,31 @@ export default function Home() {
           </div>
         )}
 
-        {/* Error Messages */}
-        {(ownerError || userInfoError) && (
+        {/* Error Messages - Solo mostrar errores reales, no "UserDoesNotExist" que es esperado */}
+        {ownerError && (
           <Card className="border-red-500/50 bg-red-50 dark:bg-red-900/20">
             <CardHeader>
               <CardTitle className="text-red-600 dark:text-red-400">⚠️ Error Loading Data</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-red-700 dark:text-red-300">
-                {ownerError?.message || userInfoError?.message || 'Failed to load user information. Please try again.'}
+                {ownerError?.message || 'Failed to load contract information. Please try again.'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+        {/* userInfoError solo se muestra si NO es "UserDoesNotExist" (usuario no registrado es esperado) */}
+        {userInfoError && 
+         userInfoError.message && 
+         !userInfoError.message.includes('UserDoesNotExist') && 
+         !userInfoError.message.includes('User Does Not Exist') && (
+          <Card className="border-red-500/50 bg-red-50 dark:bg-red-900/20">
+            <CardHeader>
+              <CardTitle className="text-red-600 dark:text-red-400">⚠️ Error Loading Data</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-red-700 dark:text-red-300">
+                {userInfoError.message || 'Failed to load user information. Please try again.'}
               </p>
             </CardContent>
           </Card>
@@ -167,8 +197,19 @@ export default function Home() {
         {/* User Status and Registration Section */}
         {isConnected && !isAdmin && (
           <>
-            {/* User not registered */}
-            {!userInfo || userInfo.id === BigInt(0) ? (
+            {/* Loading state */}
+            {isLoadingUser && (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-center text-muted-foreground">Loading user information...</p>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* User not registered - solo mostrar si NO está cargando, NO hay error (o error es UserDoesNotExist), y NO hay userInfo válido */}
+            {!isLoadingUser && 
+             (!userInfoError || userInfoError.message?.includes('UserDoesNotExist') || userInfoError.message?.includes('User Does Not Exist')) &&
+             (!userInfo || (userInfo.id !== undefined && userInfo.id === BigInt(0))) && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                 <Card className="border-blue-500/50 transition-all duration-300 hover:shadow-lg">
                   <CardHeader>
@@ -178,11 +219,14 @@ export default function Home() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <RegisterForm />
+                    <RegisterForm onRegistrationSuccess={() => refetchUserInfo()} />
                   </CardContent>
                 </Card>
               </div>
-            ) : (
+            )}
+            
+            {/* User registered - mostrar estado */}
+            {!isLoadingUser && userInfo && userInfo.id !== undefined && userInfo.id !== BigInt(0) && (
               <>
                 {/* User Pending */}
                 {Number(userInfo.status) === UserStatus.Pending && (

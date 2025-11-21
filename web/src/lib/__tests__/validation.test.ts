@@ -15,7 +15,6 @@ describe('validation', () => {
         userAddress: '0x1234567890123456789012345678901234567890',
         role: BigInt(0),
         status: BigInt(1),
-        registrationDate: BigInt(1234567890),
       }
       
       const result = validateUserInfo(userInfo)
@@ -28,7 +27,6 @@ describe('validation', () => {
         userAddress: 'invalid-address',
         role: BigInt(0),
         status: BigInt(1),
-        registrationDate: BigInt(1234567890),
       }
       
       const result = validateUserInfo(userInfo)
@@ -41,7 +39,6 @@ describe('validation', () => {
         userAddress: '0x1234567890123456789012345678901234567890',
         role: BigInt(999), // Invalid role
         status: BigInt(1),
-        registrationDate: BigInt(1234567890),
       }
       
       const result = validateUserInfo(userInfo)
@@ -51,17 +48,20 @@ describe('validation', () => {
 
   describe('validateUserInfoTuple', () => {
     it('validates correct tuple', () => {
+      // Contract struct User has 4 fields: id, userAddress, role, status
       const tuple = [
         BigInt(1),
         '0x1234567890123456789012345678901234567890',
         BigInt(0),
         BigInt(1),
-        BigInt(1234567890),
       ]
       
       const result = validateUserInfoTuple(tuple)
       expect(result).not.toBeNull()
       expect(result?.id).toBe(BigInt(1))
+      expect(result?.userAddress).toBe('0x1234567890123456789012345678901234567890')
+      expect(result?.role).toBe(BigInt(0))
+      expect(result?.status).toBe(BigInt(1))
     })
 
     it('returns null for invalid tuple length', () => {

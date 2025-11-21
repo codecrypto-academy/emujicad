@@ -22,8 +22,9 @@ export function Header() {
   const { disconnect } = useDisconnect()
   const pathname = usePathname()
   const { owner } = useContractOwner()
-  const { data: rawUserInfo } = useUserInfo(address)
+  const { data: rawUserInfo, isLoading: isLoadingUserInfo, refetch: refetchUserInfo } = useUserInfo(address)
   const { data: isPaused } = useIsPaused()
+  const [mounted, setMounted] = useState(false)
   
   // Validación robusta de userInfo
   const userInfo = rawUserInfo
@@ -31,11 +32,18 @@ export function Header() {
         ? validateUserInfoTuple(rawUserInfo)
         : validateUserInfo(rawUserInfo))
     : undefined
-  const [mounted, setMounted] = useState(false)
 
+  // Inicializar mounted
   useEffect(() => {
     setMounted(true)
   }, [])
+  
+  // Refetch automático cuando cambia la dirección o cuando el componente se monta
+  useEffect(() => {
+    if (address && mounted) {
+      refetchUserInfo()
+    }
+  }, [address, mounted, refetchUserInfo])
 
   const isAdmin = address && owner && address.toLowerCase() === owner.toLowerCase()
 
@@ -169,6 +177,10 @@ export function Header() {
                 <span className="mr-1">👑</span>
                 Administrator
               </Badge>
+            ) : isLoadingUserInfo && mounted ? (
+              <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">
+                ⏳ Loading...
+              </Badge>
             ) : userInfo && mounted ? (
               <>
                 <Badge variant="outline">
@@ -199,7 +211,7 @@ export function Header() {
                   </Badge>
                 )}
               </>
-            ) : mounted ? (
+            ) : mounted && !isLoadingUserInfo ? (
               <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">
                 👤 Not Registered
               </Badge>

@@ -19,6 +19,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Shield, Package, Users, ArrowRightLeft, AlertCircle, Pause } from 'lucide-react';
 import Link from 'next/link';
+import { UserRole, UserStatus } from '@/contracts/config';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -308,23 +309,34 @@ export default function DashboardPage() {
                     No tokens yet
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400 text-center mb-4">
-                    Create your first token to start tracking products
+                    {userInfo && 
+                     (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
+                     Number(userInfo.status) === UserStatus.Approved
+                      ? 'Create your first token to start tracking products'
+                      : 'No tokens available yet'}
                   </p>
-                  {isPaused === true && (
-                    <Alert className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 w-full max-w-md">
-                      <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                      <AlertDescription className="text-yellow-700 dark:text-yellow-300 text-sm">
-                        <strong>⚠️ Contrato Pausado:</strong> No puedes crear tokens mientras el contrato esté pausado.
-                      </AlertDescription>
-                    </Alert>
+                  {/* Solo Producer y Factory aprobados pueden crear tokens (según el contrato) */}
+                  {userInfo && 
+                   (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
+                   Number(userInfo.status) === UserStatus.Approved && (
+                    <>
+                      {isPaused === true && (
+                        <Alert className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 w-full max-w-md">
+                          <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                          <AlertDescription className="text-yellow-700 dark:text-yellow-300 text-sm">
+                            <strong>⚠️ Contrato Pausado:</strong> No puedes crear tokens mientras el contrato esté pausado.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                      <Button
+                        onClick={() => router.push('/tokens/create')}
+                        disabled={isPaused === true}
+                        className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Create Token
+                      </Button>
+                    </>
                   )}
-                  <Button
-                    onClick={() => router.push('/tokens/create')}
-                    disabled={isPaused === true}
-                    className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Create Token
-                  </Button>
                 </CardContent>
               </Card>
             )}

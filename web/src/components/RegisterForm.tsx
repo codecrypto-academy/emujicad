@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -13,11 +14,34 @@ import { Pause, AlertTriangle } from 'lucide-react'
 
 type RoleType = 'Producer' | 'Factory' | 'Retailer' | 'Consumer' | ''
 
-export function RegisterForm() {
+interface RegisterFormProps {
+  onRegistrationSuccess?: () => void
+}
+
+export function RegisterForm({ onRegistrationSuccess }: RegisterFormProps = {}) {
   const [selectedRole, setSelectedRole] = useState<RoleType>('')
   const { address } = useAccount()
   const { data: isPaused } = useIsPaused()
-  const { requestRole, isPending, isConfirming, isSuccess, error, hash } = useRequestRole()
+  const { requestRole, isPending: isTransactionPending, isConfirming, isSuccess, error, hash } = useRequestRole()
+  
+  // Refetch user info cuando el registro es exitoso
+  React.useEffect(() => {
+    if (isSuccess && onRegistrationSuccess) {
+      // Refetch inmediatamente y luego de nuevo después de un delay
+      // Esto asegura que la blockchain se haya actualizado
+      onRegistrationSuccess()
+      const timer1 = setTimeout(() => {
+        onRegistrationSuccess()
+      }, 1000) // 1 segundo
+      const timer2 = setTimeout(() => {
+        onRegistrationSuccess()
+      }, 3000) // 3 segundos
+      return () => {
+        clearTimeout(timer1)
+        clearTimeout(timer2)
+      }
+    }
+  }, [isSuccess, onRegistrationSuccess])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -130,20 +154,59 @@ export function RegisterForm() {
               <div className="p-3 bg-red-50 border border-red-200 rounded-md">
                 <p className="text-sm text-red-700 font-semibold mb-1">❌ Registration Failed</p>
                 <p className="text-xs text-red-600">
-                  {error.message?.includes('User rejected') || error.message?.includes('User denied')
-                    ? 'Transaction cancelled by user in MetaMask'
-                    : error.message?.includes('InvalidAddress')
-                    ? 'The contract owner cannot register as a user. Administrators have full access by default.'
-                    : error.message?.includes('ExistingUserWithApprovedRole')
-                    ? 'This address is already registered and approved'
-                    : error.message?.includes('UserWithExistingRole')
-                    ? 'You already have this role assigned'
-                    : error.message?.includes('InvalidRole')
-                    ? 'Invalid role selected'
-                    : error.message?.includes('execution reverted')
-                    ? 'Transaction rejected by the contract. Please check the requirements.'
-                    : error.message || 'An unexpected error occurred during registration'}
+                  {(() => {
+                    const errorMsg = error.message || String(error) || ''
+                    const errorStr = errorMsg.toLowerCase()
+                    
+                    // Usuario canceló en MetaMask
+                    if (errorStr.includes('user rejected') || errorStr.includes('user denied') || errorStr.includes('rejected') || errorStr.includes('cancelled')) {
+                      return 'Transaction cancelled by user in MetaMask'
+                    }
+                    
+                    // Errores del contrato
+                    if (errorStr.includes('invalidaddress')) {
+                      return 'The contract owner cannot register as a user. Administrators have full access by default.'
+                    }
+                    
+                    if (errorStr.includes('existinguserwithapprovedrole')) {
+                      return 'This address is already registered and approved. You cannot request a new role.'
+                    }
+                    
+                    if (errorStr.includes('userwithexistingrole')) {
+                      return `You already have the role "${selectedRole}" assigned. You cannot request the same role again.`
+                    }
+                    
+                    if (errorStr.includes('invalidrole')) {
+                      return 'Invalid role selected. Please choose a valid role.'
+                    }
+                    
+                    if (errorStr.includes('contractpaused')) {
+                      return 'The contract is currently paused. Please wait for the administrator to resume it.'
+                    }
+                    
+                    // Error genérico de ejecución revertida
+                    if (errorStr.includes('execution reverted') || errorStr.includes('reverted')) {
+                      return 'Transaction rejected by the contract. This may happen if you already have this role or if the contract is paused.'
+                    }
+                    
+                    // Error de dropped/rejected de MetaMask
+                    if (errorStr.includes('dropped') || errorStr.includes('rejected')) {
+                      return 'Transaction was dropped or rejected. This may happen if you already have this role pending approval, if you are already approved, or if the contract is paused.'
+                    }
+                    
+                    // Mostrar el mensaje completo para debugging
+                    return errorMsg || 'An unexpected error occurred during registration'
+                  })()}
                 </p>
+                {/* Mostrar detalles del error en desarrollo */}
+                {process.env.NODE_ENV === 'development' && (
+                  <details className="mt-2">
+                    <summary className="text-xs text-red-500 cursor-pointer">Error details (dev only)</summary>
+                    <pre className="text-xs mt-1 p-2 bg-red-100 rounded overflow-auto max-h-32">
+                      {JSON.stringify(error, null, 2)}
+                    </pre>
+                  </details>
+                )}
               </div>
             )}
 
@@ -151,9 +214,9 @@ export function RegisterForm() {
             <Button 
               type="submit" 
               className="w-full"
-              disabled={!selectedRole || isPending || isConfirming}
+              disabled={!selectedRole || isTransactionPending || isConfirming}
             >
-              {isPending && !hash ? 'Waiting for signature...' : hash && isConfirming ? 'Confirming transaction...' : 'Submit Registration'}
+              {isTransactionPending && !hash ? 'Waiting for signature...' : hash && isConfirming ? 'Confirming transaction...' : 'Submit Registration'}
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">

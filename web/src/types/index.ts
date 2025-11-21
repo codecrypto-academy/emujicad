@@ -8,15 +8,16 @@
 /**
  * UserInfo type - matches the structure returned by getUserInfo contract function
  * 
- * The contract returns a tuple: (uint256 id, address userAddress, uint8 role, uint8 status, uint256 registrationDate)
+ * The contract returns a struct User with: (uint256 id, address userAddress, UserRole role, UserStatus status)
  * Which is decoded by wagmi into this structure.
+ * 
+ * NOTE: The contract struct User does NOT include registrationDate, only these 4 fields.
  */
 export type UserInfo = {
   id: bigint
   userAddress: string
   role: bigint
   status: bigint
-  registrationDate: bigint
 }
 
 /**
