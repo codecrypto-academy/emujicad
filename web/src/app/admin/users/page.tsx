@@ -6,13 +6,13 @@ import { useRouter } from 'next/navigation'
 import { useContractOwner } from '@/hooks/useContractOwner'
 import { Header } from '@/components/Header'
 import { UserManagementTable } from '@/components/admin/UserManagementTable'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 export default function AdminUsersPage() {
   const { address, isConnected } = useAccount()
-  const { owner, isLoading: isLoadingOwner } = useContractOwner()
+  const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
 
@@ -38,8 +38,33 @@ export default function AdminUsersPage() {
     return (
       <div className="container mx-auto py-8">
         <Card>
+          <CardHeader>
+            <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-48 mx-auto animate-pulse"></div>
+          </CardHeader>
           <CardContent className="pt-6 text-center">
             <p className="text-muted-foreground">Verificando permisos...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Manejo de errores al verificar ownership
+  if (ownerError) {
+    return (
+      <div className="container mx-auto py-8">
+        <Card className="border-red-500/50 bg-red-50 dark:bg-red-900/20">
+          <CardContent className="pt-6 text-center">
+            <h1 className="text-2xl font-bold mb-4 text-red-600 dark:text-red-400">⚠️ Error</h1>
+            <p className="text-muted-foreground mb-4">
+              Failed to verify contract ownership. Please try again.
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              {ownerError.message}
+            </p>
+            <Link href="/">
+              <Button variant="outline">Volver al inicio</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useReadContract } from 'wagmi'
+import { useReadContract, useReadContracts } from 'wagmi'
 import { SUPPLY_CHAIN_ADDRESS, SUPPLY_CHAIN_ABI } from '@/contracts/config'
 
 /**
@@ -96,4 +96,74 @@ export function useTotalTransfers() {
     abi: SUPPLY_CHAIN_ABI,
     functionName: 'getTotalTransfers',
   })
+}
+
+/**
+ * Hook optimizado para obtener todas las estadísticas del dashboard en una sola llamada batch
+ * 
+ * Esto reduce el número de llamadas RPC de 3 a 1, mejorando significativamente el performance.
+ * 
+ * @returns Objeto con totalTokens, totalUsers, totalTransfers y estados de carga/error
+ * 
+ * @example
+ * ```tsx
+ * const { totalTokens, totalUsers, totalTransfers, isLoading, error } = useDashboardStats()
+ * ```
+ */
+export function useDashboardStats() {
+  const { data, isLoading, error } = useReadContracts({
+    contracts: [
+      {
+        address: SUPPLY_CHAIN_ADDRESS,
+        abi: SUPPLY_CHAIN_ABI,
+        functionName: 'getTotalTokens',
+      },
+      {
+        address: SUPPLY_CHAIN_ADDRESS,
+        abi: SUPPLY_CHAIN_ABI,
+        functionName: 'getTotalUsers',
+      },
+      {
+        address: SUPPLY_CHAIN_ADDRESS,
+        abi: SUPPLY_CHAIN_ABI,
+        functionName: 'getTotalTransfers',
+      },
+    ],
+    query: {
+      refetchInterval: 5000, // Refetch cada 5 segundos
+    },
+  })
+
+  // Extraer datos de forma segura
+  const totalTokens = data?.[0]?.result as bigint | undefined
+  const totalUsers = data?.[1]?.result as bigint | undefined
+  const totalTransfers = data?.[2]?.result as bigint | undefined
+
+  // Determinar si hay errores individuales
+  const errors = data?.map((item, index) => {
+    if (item.error) {
+      return {
+        index,
+        functionName: ['getTotalTokens', 'getTotalUsers', 'getTotalTransfers'][index],
+        error: item.error,
+      }
+    }
+    return null
+  }).filter(Boolean)
+
+  const hasErrors = errors && errors.length > 0
+
+  return {
+    totalTokens,
+    totalUsers,
+    totalTransfers,
+    isLoading,
+    error: error || (hasErrors ? errors : null),
+    // Errores individuales para manejo granular
+    errors: {
+      totalTokens: data?.[0]?.error || null,
+      totalUsers: data?.[1]?.error || null,
+      totalTransfers: data?.[2]?.error || null,
+    },
+  }
 }

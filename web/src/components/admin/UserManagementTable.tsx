@@ -268,7 +268,7 @@ export function UserManagementTable() {
       </CardHeader>
       <CardContent>
         {/* Mensajes de estado */}
-        {isPaused && (
+        {isPaused === true && (
           <Alert className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
             <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
             <AlertDescription className="text-yellow-700 dark:text-yellow-300">
@@ -325,7 +325,7 @@ export function UserManagementTable() {
                   const actions = getAvailableActions(user)
                   
                   return (
-                    <TableRow key={user.id.toString()}>
+                    <TableRow key={user.id.toString()} className="transition-all duration-200 hover:bg-accent/50 animate-in fade-in slide-in-from-left-2">
                       <TableCell className="font-medium">{user.id.toString()}</TableCell>
                       <TableCell className="font-mono text-sm">
                         {user.userAddress.slice(0, 6)}...{user.userAddress.slice(-4)}
@@ -352,7 +352,9 @@ export function UserManagementTable() {
                                 size="sm"
                                 className={action.color}
                                 onClick={() => handleStatusChange(user.userAddress, action.value)}
-                                disabled={isPending || isPaused}
+                                disabled={isPending || isPaused === true}
+                                aria-label={`${action.label} user ${user.userAddress.slice(0, 6)}...${user.userAddress.slice(-4)}`}
+                                aria-disabled={isPending || isPaused === true}
                               >
                                 {action.label}
                               </Button>

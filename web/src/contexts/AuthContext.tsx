@@ -4,14 +4,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { useAccount } from 'wagmi';
 import { useUserInfo, useIsAdmin, useUserIdByAddress } from '@/hooks/useContractReads';
 import { UserStatus } from '@/contracts/config';
-
-type UserInfo = {
-  id: bigint;
-  userAddress: string;
-  role: bigint;
-  status: bigint;
-  registrationDate: bigint;
-};
+import { validateUserInfo, validateUserInfoTuple } from '@/lib/validation';
+import type { UserInfo } from '@/types';
 
 type AuthContextType = {
   isAdmin: boolean;
@@ -111,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Ya sabemos que no es admin
       if (!isLoadingUserId) {
         // Si userId es 0 o undefined, el usuario no está registrado
-        if (userId === undefined || userId === 0n) {
+        if (userId === undefined || userId === BigInt(0)) {
           console.log('AuthContext: Usuario no registrado (userId = 0), marcando como no autenticado');
           setAuthState({
             isAdmin: false,
@@ -146,10 +140,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     console.log('AuthContext: Carga completa, procesando datos...');
-    const userInfo = rawUserInfo as UserInfo | null;
+    
+    // Validación robusta de userInfo
+    const userInfo = rawUserInfo
+      ? (Array.isArray(rawUserInfo)
+          ? validateUserInfoTuple(rawUserInfo)
+          : validateUserInfo(rawUserInfo))
+      : null;
     
     // Si no hay userInfo pero userId existe, algo está mal - tratar como no autenticado
-    if (!userInfo && userId && userId > 0n) {
+    if (!userInfo && userId && typeof userId === 'bigint' && userId > BigInt(0)) {
       console.log('AuthContext: userId existe pero userInfo es null, marcando como no autenticado');
       setAuthState({
         isAdmin: false,

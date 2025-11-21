@@ -7,19 +7,19 @@ import { useUserInfo } from '@/hooks/useContractReads';
 import { useAccount } from 'wagmi';
 import { Skeleton } from '@/components/ui/skeleton';
 import { User, Shield, CheckCircle, Clock, XCircle, Ban } from 'lucide-react';
-
-type UserInfo = {
-  id: bigint
-  userAddress: string
-  role: bigint
-  status: bigint
-  registrationDate: bigint
-}
+import { validateUserInfo, validateUserInfoTuple } from '@/lib/validation';
+import type { UserInfo } from '@/types';
 
 export function UserProfileCard() {
   const { address, isConnected } = useAccount();
   const { data: rawUserInfo, isLoading } = useUserInfo(address);
-  const userInfo = rawUserInfo as UserInfo | undefined;
+  
+  // Validación robusta de userInfo
+  const userInfo = rawUserInfo
+    ? (Array.isArray(rawUserInfo)
+        ? validateUserInfoTuple(rawUserInfo)
+        : validateUserInfo(rawUserInfo))
+    : undefined;
 
   if (!isConnected || !address) {
     return (
@@ -57,9 +57,9 @@ export function UserProfileCard() {
     );
   }
 
-  if (!userInfo || userInfo.id === 0n) {
+  if (!userInfo || userInfo.id === BigInt(0)) {
     return (
-      <Card className="border-yellow-500/50">
+      <Card className="border-yellow-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-left-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
@@ -102,10 +102,10 @@ export function UserProfileCard() {
   const status = Number(userInfo.status);
 
   return (
-    <Card>
+    <Card className="transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-left-4">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5" />
+          <User className="h-5 w-5 transition-transform duration-200 hover:scale-110" />
           User Profile
         </CardTitle>
       </CardHeader>

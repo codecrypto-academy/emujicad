@@ -64,11 +64,16 @@ export function RegisterForm() {
             </AlertDescription>
           </Alert>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" aria-label="User registration form">
             {/* Dirección del usuario */}
             <div className="space-y-2">
               <Label htmlFor="address">Your Address</Label>
-              <div className="p-2 bg-gray-100 rounded text-sm font-mono break-all">
+              <div 
+                className="p-2 bg-gray-100 rounded text-sm font-mono break-all"
+                role="textbox"
+                aria-label="Your wallet address"
+                aria-readonly="true"
+              >
                 {address}
               </div>
             </div>
@@ -79,8 +84,9 @@ export function RegisterForm() {
               <Select 
                 value={selectedRole} 
                 onValueChange={(value) => setSelectedRole(value as RoleType)}
+                aria-required="true"
               >
-                <SelectTrigger id="role">
+                <SelectTrigger id="role" aria-label="Select your role in the supply chain">
                   <SelectValue placeholder="Choose a role..." />
                 </SelectTrigger>
                 <SelectContent>

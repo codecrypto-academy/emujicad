@@ -142,6 +142,7 @@ export function ConnectWallet() {
             disconnect()
           }} 
           variant="outline"
+          aria-label="Disconnect wallet"
         >
           Desconectar
         </Button>
@@ -154,13 +155,13 @@ export function ConnectWallet() {
     return (
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogTrigger asChild>
-          <Button variant="default">
+          <Button variant="default" aria-label="Open wallet connection dialog">
             Conectar Wallet
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" aria-labelledby="connect-wallet-title">
           <DialogHeader>
-            <DialogTitle>Conectar tu Wallet</DialogTitle>
+            <DialogTitle id="connect-wallet-title">Conectar tu Wallet</DialogTitle>
             <DialogDescription>
               Selecciona una wallet para conectarte a la aplicación
             </DialogDescription>
@@ -192,6 +193,8 @@ export function ConnectWallet() {
                   variant="outline"
                   className="w-full justify-start h-auto py-3 px-4"
                   disabled={isConnecting || isPending}
+                  aria-label={`Connect with ${displayName} wallet`}
+                  aria-disabled={isConnecting || isPending}
                 >
                   <div className="flex items-center gap-3">
                     <div className="text-2xl">{icon}</div>

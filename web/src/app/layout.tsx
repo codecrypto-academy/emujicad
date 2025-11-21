@@ -5,7 +5,7 @@ import { WagmiProvider } from 'wagmi'
 import { config } from '@/lib/wagmi-config'
 import { Web3Provider } from '@/contexts/Web3Context'
 import { AuthProvider } from '@/contexts/AuthContext'
-import type { Metadata } from "next";
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -43,7 +43,9 @@ export default function RootLayout({
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <Web3Provider>
-                {children}
+                <ErrorBoundary>
+                  {children}
+                </ErrorBoundary>
               </Web3Provider>
             </AuthProvider>
           </QueryClientProvider>

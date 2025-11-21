@@ -6,15 +6,17 @@ import { TokenCard } from '@/components/TokenCard';
 import { QuickActions } from '@/components/QuickActions';
 import { PauseControl } from '@/components/admin/PauseControl';
 import { useGetUserTokens } from '@/hooks/useGetUserTokens';
-import { useTotalTokens, useTotalUsers, useTotalTransfers } from '@/hooks/useContractReads';
+import { useDashboardStats } from '@/hooks/useContractReads';
 import { useIsPaused } from '@/hooks/usePause';
 import { useAuth } from '@/contexts/AuthContext';
+import { validateBigIntArray } from '@/lib/validation';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Shield, Package, Users, ArrowRightLeft, AlertCircle, Pause } from 'lucide-react';
 import Link from 'next/link';
 
@@ -23,10 +25,15 @@ export default function DashboardPage() {
   const { address, isConnected } = useAccount();
   const { isAdmin, isAuthenticated, isLoading, userInfo } = useAuth();
   
-  const { data: userTokens, isLoading: isLoadingTokens } = useGetUserTokens(address);
-  const { data: totalTokens } = useTotalTokens();
-  const { data: totalUsers } = useTotalUsers();
-  const { data: totalTransfers } = useTotalTransfers();
+  const { data: userTokens, isLoading: isLoadingTokens, error: tokensError } = useGetUserTokens(address);
+  // Optimización: usar batch reads en lugar de 3 llamadas separadas
+  const { 
+    totalTokens, 
+    totalUsers, 
+    totalTransfers, 
+    isLoading: isLoadingStats,
+    errors: statsErrors 
+  } = useDashboardStats();
   const { data: isPaused } = useIsPaused();
   
   const [mounted, setMounted] = useState(false);
@@ -109,7 +116,7 @@ export default function DashboardPage() {
         {/* Estadísticas Principales */}
         <div className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mb-8`}>
           {/* Total Tokens */}
-          <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-800">
+          <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Total Tokens
@@ -118,7 +125,11 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                {totalTokens !== undefined ? Number(totalTokens) : '-'}
+                {statsErrors?.totalTokens ? (
+                  <span className="text-red-500 text-sm">Error</span>
+                ) : isLoadingStats ? (
+                  <Skeleton className="h-9 w-16" />
+                ) : totalTokens !== undefined ? Number(totalTokens) : '-'}
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                 Tokens in the system
@@ -128,7 +139,7 @@ export default function DashboardPage() {
 
           {/* Total Users - Solo visible para administrador */}
           {isAdmin && (
-            <Card className="border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-slate-800">
+            <Card className="border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 delay-100">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   Total Users
@@ -137,7 +148,11 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                  {totalUsers !== undefined ? Number(totalUsers) : '-'}
+                  {statsErrors?.totalUsers ? (
+                    <span className="text-red-500 text-sm">Error</span>
+                  ) : isLoadingStats ? (
+                    <Skeleton className="h-9 w-16" />
+                  ) : totalUsers !== undefined ? Number(totalUsers) : '-'}
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                   Registered users
@@ -147,7 +162,7 @@ export default function DashboardPage() {
           )}
 
           {/* Total Transfers */}
-          <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-slate-800">
+          <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-right-4 delay-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Total Transfers
@@ -156,7 +171,11 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {totalTransfers !== undefined ? Number(totalTransfers) : '-'}
+                {statsErrors?.totalTransfers ? (
+                  <span className="text-red-500 text-sm">Error</span>
+                ) : isLoadingStats ? (
+                  <Skeleton className="h-9 w-16" />
+                ) : totalTransfers !== undefined ? Number(totalTransfers) : '-'}
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                 Completed transfers
@@ -186,6 +205,7 @@ export default function DashboardPage() {
                   <Link 
                     href="/admin/users"
                     className="flex-1 p-4 bg-white dark:bg-slate-800 rounded-lg border-2 border-amber-200 dark:border-amber-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-md transition-all cursor-pointer group"
+                    aria-label="Navigate to user management page"
                   >
                     <div className="flex items-center gap-3">
                       <Users className="h-8 w-8 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
@@ -230,19 +250,57 @@ export default function DashboardPage() {
             </div>
 
             {isLoadingTokens ? (
-              <div className="text-center py-12">
-                <p className="text-slate-600 dark:text-slate-400">Loading your tokens...</p>
-              </div>
-            ) : userTokens && userTokens.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {userTokens.slice(0, 6).map((token) => (
-                  <TokenCard 
-                    key={token.id}
-                    token={token}
-                  />
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader>
+                      <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-2/3"></div>
+                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-            ) : (
+            ) : tokensError ? (
+              <Card className="border-red-200 dark:border-red-800">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <AlertCircle className="h-16 w-16 text-red-400 dark:text-red-600 mb-4" />
+                  <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
+                    Error Loading Tokens
+                  </h3>
+                  <p className="text-red-600 dark:text-red-400 text-center mb-4">
+                    {tokensError.message || 'Failed to load your tokens. Please try again.'}
+                  </p>
+                  <Button
+                    onClick={() => window.location.reload()}
+                    variant="outline"
+                  >
+                    Retry
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (() => {
+              // Validar userTokens antes de usar
+              const validTokens = validateBigIntArray(userTokens)
+              if (validTokens && validTokens.length > 0) {
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {validTokens.slice(0, 6).map((tokenId) => (
+                      <TokenCard 
+                        key={tokenId.toString()}
+                        tokenId={tokenId}
+                        showBalance={true}
+                        onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
+                      />
+                    ))}
+                  </div>
+                )
+              }
+              return null
+            })() || (
               <Card className="border-dashed dark:border-slate-700">
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Package className="h-16 w-16 text-slate-300 dark:text-slate-600 mb-4" />
@@ -252,7 +310,7 @@ export default function DashboardPage() {
                   <p className="text-slate-600 dark:text-slate-400 text-center mb-4">
                     Create your first token to start tracking products
                   </p>
-                  {isPaused && (
+                  {isPaused === true && (
                     <Alert className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 w-full max-w-md">
                       <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                       <AlertDescription className="text-yellow-700 dark:text-yellow-300 text-sm">
@@ -262,7 +320,7 @@ export default function DashboardPage() {
                   )}
                   <Button
                     onClick={() => router.push('/tokens/create')}
-                    disabled={isPaused}
+                    disabled={isPaused === true}
                     className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Create Token

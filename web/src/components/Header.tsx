@@ -14,13 +14,8 @@ import { UserStatus } from '@/contracts/config'
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from './ThemeToggle'
 import { Pause, AlertTriangle } from 'lucide-react'
-
-type UserInfo = {
-  id: bigint
-  userAddress: string
-  role: bigint
-  status: bigint
-}
+import { validateUserInfo, validateUserInfoTuple } from '@/lib/validation'
+import type { UserInfo } from '@/types'
 
 export function Header() {
   const { address, isConnected } = useAccount()
@@ -29,7 +24,13 @@ export function Header() {
   const { owner } = useContractOwner()
   const { data: rawUserInfo } = useUserInfo(address)
   const { data: isPaused } = useIsPaused()
-  const userInfo = rawUserInfo as UserInfo | undefined
+  
+  // Validación robusta de userInfo
+  const userInfo = rawUserInfo
+    ? (Array.isArray(rawUserInfo)
+        ? validateUserInfoTuple(rawUserInfo)
+        : validateUserInfo(rawUserInfo))
+    : undefined
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -66,7 +67,7 @@ export function Header() {
   const isOnAdminPage = pathname === '/admin/users'
 
   return (
-    <Card className="mb-6 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+    <Card className="mb-6 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 transition-all duration-300 animate-in fade-in slide-in-from-top-2">
       <div className="p-6">
         <div className="flex flex-col gap-4">
           {/* Row 1: Title and Actions */}
@@ -89,14 +90,24 @@ export function Header() {
               <div className="w-36">
                 {isAdmin && !isOnAdminPage && (
                   <Link href="/admin/users">
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      aria-label="Navigate to user management page"
+                    >
                       👥 Manage Users
                     </Button>
                   </Link>
                 )}
                 {isOnAdminPage && (
                   <Link href="/">
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      aria-label="Navigate to home page"
+                    >
                       ← Home
                     </Button>
                   </Link>
@@ -113,6 +124,7 @@ export function Header() {
                 variant="destructive" 
                 size="sm"
                 className="w-24"
+                aria-label="Disconnect wallet"
                 onClick={() => {
                   // Guardar la preferencia del tema actual para este usuario antes de desconectar
                   if (address) {
@@ -133,7 +145,7 @@ export function Header() {
           {/* Row 2: User Info */}
           <div className="flex flex-col gap-2">
             {/* Contract Paused Alert */}
-            {isPaused && (
+            {isPaused === true && (
               <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 py-2">
                 <Pause className="h-4 w-4 text-red-600 dark:text-red-400" />
                 <AlertDescription className="text-red-700 dark:text-red-300 text-sm">

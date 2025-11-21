@@ -80,8 +80,10 @@ export function ThemeToggle() {
       className="w-10 h-10 p-0"
       onClick={toggleTheme}
       title={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
+      aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+      aria-pressed={theme === 'dark'}
     >
-      <span className="text-lg">{theme === 'light' ? '🌙' : '☀️'}</span>
+      <span className="text-lg" aria-hidden="true">{theme === 'light' ? '🌙' : '☀️'}</span>
     </Button>
   )
 }

@@ -10,12 +10,21 @@ import { useAccount } from 'wagmi';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { Plus, List, ArrowLeftRight, User, Pause } from 'lucide-react';
+import { validateUserInfo, validateUserInfoTuple } from '@/lib/validation';
+import type { UserInfo } from '@/types';
 
 export function QuickActions() {
   const router = useRouter();
   const { address, isConnected } = useAccount();
-  const { data: userInfo, isLoading } = useUserInfo(address);
+  const { data: rawUserInfo, isLoading } = useUserInfo(address);
   const { data: isPaused } = useIsPaused();
+  
+  // Validación robusta de userInfo
+  const userInfo = rawUserInfo
+    ? (Array.isArray(rawUserInfo)
+        ? validateUserInfoTuple(rawUserInfo)
+        : validateUserInfo(rawUserInfo))
+    : undefined;
 
   if (!isConnected || !address) {
     return (
@@ -47,7 +56,7 @@ export function QuickActions() {
     );
   }
 
-  if (!userInfo || userInfo[0] === 0n) {
+  if (!userInfo || userInfo.id === BigInt(0)) {
     return (
       <Card>
         <CardHeader>
@@ -70,8 +79,8 @@ export function QuickActions() {
     );
   }
 
-  const role = userInfo[2];
-  const status = userInfo[3];
+  const role = userInfo.role;
+  const status = Number(userInfo.status);
 
   if (status !== UserStatus.Approved) {
     return (
@@ -102,7 +111,7 @@ export function QuickActions() {
         <CardTitle>Quick Actions</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        {isPaused && (
+        {isPaused === true && (
           <Alert className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
             <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
             <AlertDescription className="text-yellow-700 dark:text-yellow-300 text-sm">
@@ -110,41 +119,48 @@ export function QuickActions() {
             </AlertDescription>
           </Alert>
         )}
-        {role === UserRole.Producer && (
+        {Number(role) === UserRole.Producer && (
           <Button
-            className="w-full"
+            className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md"
             onClick={() => router.push('/tokens/create?type=raw')}
-            disabled={isPaused}
+            disabled={isPaused === true}
+            aria-label="Create new raw material token"
+            aria-disabled={isPaused === true}
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:rotate-90" />
             Create Raw Material
           </Button>
         )}
-        {role === UserRole.Factory && (
+        {Number(role) === UserRole.Factory && (
           <Button
-            className="w-full"
+            className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md"
             onClick={() => router.push('/tokens/create?type=product')}
-            disabled={isPaused}
+            disabled={isPaused === true}
+            aria-label="Create new finished product token"
+            aria-disabled={isPaused === true}
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:rotate-90" />
             Create Product
           </Button>
         )}
         <Button
-          className="w-full"
+          className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md"
           variant="outline"
           onClick={() => router.push('/tokens')}
+          aria-label="View all my tokens"
         >
-          <List className="h-4 w-4 mr-2" />
+          <List className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:scale-110" />
           My Tokens
         </Button>
         <Button
-          className="w-full"
+          className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md"
           variant="outline"
           onClick={() => router.push('/transfers')}
-          disabled={isPaused}
+          disabled={isPaused === true}
+          aria-label="View all transfers"
+          aria-disabled={isPaused === true}
         >
-          <ArrowLeftRight className="h-4 w-4 mr-2" />
+          <ArrowLeftRight className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:rotate-180" />
           Transfers
         </Button>
       </CardContent>

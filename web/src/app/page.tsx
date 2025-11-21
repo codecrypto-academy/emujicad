@@ -14,24 +14,24 @@ import { UserStatus } from '@/contracts/config'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-
-// Tipo para la información del usuario retornada por getUserInfo
-type UserInfo = {
-  id: bigint
-  userAddress: string
-  role: bigint
-  status: bigint
-  registrationDate: bigint
-}
+import { validateUserInfo, validateUserInfoTuple } from '@/lib/validation'
+import type { UserInfo } from '@/types'
 
 export default function Home() {
   const router = useRouter()
   const { address, isConnected } = useAccount()
   
   // Detección de roles
-  const { owner, isLoading: isLoadingOwner } = useContractOwner()
-  const { data: rawUserInfo, isLoading: isLoadingUser, refetch: refetchUserInfo } = useUserInfo(address)
-  const userInfo = rawUserInfo as UserInfo | undefined
+  const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner()
+  const { data: rawUserInfo, isLoading: isLoadingUser, error: userInfoError, refetch: refetchUserInfo } = useUserInfo(address)
+  
+  // Validación robusta de userInfo
+  // Try tuple format first (array from contract), then object format
+  const userInfo = rawUserInfo 
+    ? (Array.isArray(rawUserInfo) 
+        ? validateUserInfoTuple(rawUserInfo)
+        : validateUserInfo(rawUserInfo))
+    : undefined
   
   // Evitar hydration mismatch
   const [mounted, setMounted] = useState(false)
@@ -117,7 +117,7 @@ export default function Home() {
       [UserStatus.Pending]: { label: 'Pending', variant: 'secondary' as const },
       [UserStatus.Approved]: { label: 'Approved', variant: 'default' as const },
       [UserStatus.Rejected]: { label: 'Rejected', variant: 'destructive' as const },
-      [UserStatus.Suspended]: { label: 'Suspended', variant: 'outline' as const },
+      [UserStatus.Canceled]: { label: 'Canceled', variant: 'outline' as const },
     }
     return statusConfig[status as UserStatus] || { label: 'Unknown', variant: 'outline' as const }
   }
@@ -150,13 +150,27 @@ export default function Home() {
           </div>
         )}
 
+        {/* Error Messages */}
+        {(ownerError || userInfoError) && (
+          <Card className="border-red-500/50 bg-red-50 dark:bg-red-900/20">
+            <CardHeader>
+              <CardTitle className="text-red-600 dark:text-red-400">⚠️ Error Loading Data</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-red-700 dark:text-red-300">
+                {ownerError?.message || userInfoError?.message || 'Failed to load user information. Please try again.'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* User Status and Registration Section */}
         {isConnected && !isAdmin && (
           <>
             {/* User not registered */}
-            {!userInfo || userInfo.id === 0n ? (
-              <div className="space-y-6">
-                <Card className="border-blue-500/50">
+            {!userInfo || userInfo.id === BigInt(0) ? (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                <Card className="border-blue-500/50 transition-all duration-300 hover:shadow-lg">
                   <CardHeader>
                     <CardTitle>Welcome! 👋</CardTitle>
                     <CardDescription>
@@ -172,7 +186,7 @@ export default function Home() {
               <>
                 {/* User Pending */}
                 {Number(userInfo.status) === UserStatus.Pending && (
-                  <Card className="border-yellow-500/50">
+                  <Card className="border-yellow-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-bottom-4">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         ⏳ Approval Pending

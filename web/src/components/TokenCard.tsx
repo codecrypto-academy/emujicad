@@ -6,6 +6,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useGetToken, useGetTokenBalance } from '@/hooks/useGetUserTokens';
 import { useAccount } from 'wagmi';
 import { Package, Factory, User, Calendar } from 'lucide-react';
+import { validateTokenDataTuple } from '@/lib/validation';
+import type { TokenData } from '@/types';
 
 interface TokenCardProps {
   tokenId?: bigint;
@@ -15,12 +17,19 @@ interface TokenCardProps {
 
 export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardProps) {
   const { address } = useAccount();
-  const { data: tokenData, isLoading: isLoadingToken } = useGetToken(tokenId);
+  const { data: rawTokenData, isLoading: isLoadingToken } = useGetToken(tokenId);
   const { data: balance, isLoading: isLoadingBalance } = useGetTokenBalance(tokenId, address);
+
+  // Validación robusta de tokenData
+  const tokenData = rawTokenData
+    ? (Array.isArray(rawTokenData)
+        ? validateTokenDataTuple(rawTokenData) ?? undefined
+        : undefined)
+    : undefined;
 
   if (isLoadingToken || (showBalance && isLoadingBalance) || tokenId === undefined) {
     return (
-      <Card className="hover:shadow-lg transition-shadow">
+      <Card className="hover:shadow-lg transition-shadow duration-300 animate-pulse">
         <CardHeader>
           <Skeleton className="h-6 w-3/4" />
         </CardHeader>
@@ -43,15 +52,24 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
     );
   }
 
-  const [id, name, tokenType, totalSupply, creator, parentToken, createdAt, features] = tokenData;
-  const isRawMaterial = tokenType === 0;
+  const { id, name, tokenType, totalSupply, creator, parentToken, createdAt, features } = tokenData;
+  const isRawMaterial = Number(tokenType) === 0;
   const formattedDate = new Date(Number(createdAt) * 1000).toLocaleDateString();
   const formattedCreator = creator.slice(0, 6) + '...' + creator.slice(-4);
 
   return (
     <Card
-      className="hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer"
+      className="hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out cursor-pointer animate-in fade-in slide-in-from-bottom-4"
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-label={`Token ${name}, ID ${id.toString()}`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick?.()
+        }
+      }}
     >
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
@@ -76,7 +94,7 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
           </Badge>
         </div>
 
-        {showBalance && balance !== undefined && (
+        {showBalance && balance !== undefined && balance !== null && (
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">My Balance</span>
             <span className="font-semibold">{balance.toString()}</span>
@@ -96,7 +114,7 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
           <span className="font-mono text-xs">{formattedCreator}</span>
         </div>
 
-        {parentToken !== 0n && (
+               {parentToken !== BigInt(0) && (
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Parent Token</span>
             <Badge variant="outline">#{parentToken.toString()}</Badge>

@@ -70,7 +70,7 @@ export function PauseControl() {
 
   return (
     <>
-      <Card className={paused ? 'border-red-500 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : 'border-green-500 dark:border-green-700 bg-green-50 dark:bg-green-900/20'}>
+      <Card className={`${paused ? 'border-red-500 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : 'border-green-500 dark:border-green-700 bg-green-50 dark:bg-green-900/20'} transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-bottom-4`}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {paused ? (
@@ -111,6 +111,8 @@ export function PauseControl() {
                 onClick={handleUnpauseClick}
                 disabled={isUnpausing || isConfirmingUnpause}
                 className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 text-white"
+                aria-label="Unpause the smart contract"
+                aria-disabled={isUnpausing || isConfirmingUnpause}
               >
                 {isUnpausing || isConfirmingUnpause ? (
                   <>
@@ -148,6 +150,8 @@ export function PauseControl() {
                 disabled={isPausing || isConfirmingPause}
                 variant="destructive"
                 className="w-full"
+                aria-label="Pause the smart contract"
+                aria-disabled={isPausing || isConfirmingPause}
               >
                 {isPausing || isConfirmingPause ? (
                   <>
