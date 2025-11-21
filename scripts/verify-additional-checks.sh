@@ -241,11 +241,11 @@ else
     warn "README.md no encontrado"
 fi
 
-# Verificar documentación de frontend
-if [ -f "web/README_FE.md" ]; then
-    check "README_FE.md existe"
+# Verificar documentación de frontend (single source of truth: docs/fe/SETUP.md)
+if [ -f "docs/fe/SETUP.md" ]; then
+    check "docs/fe/SETUP.md existe (fuente única de verdad)"
 else
-    warn "README_FE.md no encontrado"
+    warn "docs/fe/SETUP.md no encontrado"
 fi
 
 # Verificar documentación de hooks

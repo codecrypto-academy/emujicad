@@ -6,7 +6,7 @@
 
 ## 📦 Hooks Implementados (18 totales)
 
-### Archivo: `useContractReads.ts` (5 hooks de lectura)
+### Archivo: `useContractReads.ts` (6 hooks de lectura - incluye optimización batch)
 
 #### 1. **useUserInfo(address)**
 Obtiene información completa de un usuario.
@@ -84,11 +84,56 @@ function Component() {
 }
 ```
 
+#### 6. **useDashboardStats()** ⚡ **OPTIMIZADO - NUEVO**
+Hook optimizado para obtener todas las estadísticas del dashboard en una sola llamada batch.
+
+**Ventajas**:
+- ✅ Reduce llamadas RPC de 3 a 1 (66% reducción)
+- ✅ Datos del mismo bloque (consistencia)
+- ✅ Mejor manejo de errores granular
+
+```typescript
+import { useDashboardStats } from '@/hooks/useContractReads'
+
+function Dashboard() {
+  const { 
+    totalTokens, 
+    totalUsers, 
+    totalTransfers, 
+    isLoading,
+    errors 
+  } = useDashboardStats()
+  
+  // Todos los datos en una sola llamada batch
+  // errors = { totalTokens: Error | null, totalUsers: Error | null, ... }
+}
+```
+
+**Retorna**:
+```typescript
+{
+  totalTokens: bigint | undefined
+  totalUsers: bigint | undefined
+  totalTransfers: bigint | undefined
+  isLoading: boolean
+  error: Error | null
+  errors: {
+    totalTokens: Error | null
+    totalUsers: Error | null
+    totalTransfers: Error | null
+  }
+}
+```
+
+**Uso recomendado**: Usar este hook en lugar de `useTotalTokens()`, `useTotalUsers()`, `useTotalTransfers()` individuales para mejor performance.
+
+> **Ver detalles**: [PERFORMANCE_OPTIMIZATION.md](../reports/PERFORMANCE_OPTIMIZATION.md)
+
 ---
 
 ### Archivo: `useRequestRole.ts` (1 hook de escritura)
 
-#### 6. **useRequestRole()**
+#### 7. **useRequestRole()**
 Hook para solicitar un rol de usuario.
 
 ```typescript
@@ -128,7 +173,7 @@ function RegisterForm() {
 
 ### Archivo: `useCreateToken.ts` (1 hook de escritura)
 
-#### 7. **useCreateToken()**
+#### 8. **useCreateToken()**
 Hook para crear un nuevo token.
 
 ```typescript
@@ -168,7 +213,7 @@ function CreateTokenForm() {
 
 ### Archivo: `useTransfer.ts` (4 hooks de escritura)
 
-#### 8. **useTransfer()**
+#### 9. **useTransfer()**
 Hook para iniciar una transferencia de tokens.
 
 ```typescript
@@ -197,7 +242,7 @@ function TransferForm() {
 - El sender debe tener balance suficiente
 - Ambos usuarios deben estar aprobados
 
-#### 9. **useAcceptTransfer()**
+#### 10. **useAcceptTransfer()**
 Hook para que el receptor acepte una transferencia.
 
 ```typescript
@@ -217,7 +262,7 @@ function TransferCard({ transferId }: { transferId: bigint }) {
 }
 ```
 
-#### 10. **useRejectTransfer()**
+#### 11. **useRejectTransfer()**
 Hook para que el receptor rechace una transferencia.
 
 ```typescript
@@ -237,7 +282,7 @@ function TransferCard({ transferId }: { transferId: bigint }) {
 }
 ```
 
-#### 11. **useCancelTransfer()**
+#### 12. **useCancelTransfer()**
 Hook para que el sender cancele una transferencia pendiente.
 
 ```typescript
@@ -261,7 +306,7 @@ function MyTransfers({ transferId }: { transferId: bigint }) {
 
 ### Archivo: `useGetUserTokens.ts` ✨ NUEVO (Día 4 - 3 hooks)
 
-#### 12. **useGetUserTokens(address?)**
+#### 13. **useGetUserTokens(address?)**
 Hook para obtener todos los token IDs que posee un usuario.
 
 ```typescript
@@ -289,7 +334,7 @@ function MyTokens() {
 - Si no se pasa `address`, usa la address conectada automáticamente
 - Retorna `undefined` si no hay address
 
-#### 13. **useGetToken(tokenId?)**
+#### 14. **useGetToken(tokenId?)**
 Hook para obtener información detallada de un token específico.
 
 ```typescript
@@ -325,7 +370,7 @@ function TokenDetails({ tokenId }: { tokenId: bigint }) {
 ]
 ```
 
-#### 14. **useGetTokenBalance(tokenId?, address?)**
+#### 15. **useGetTokenBalance(tokenId?, address?)**
 Hook para obtener el balance de un token específico para un usuario.
 
 ```typescript
@@ -356,7 +401,7 @@ function TokenBalance({ tokenId }: { tokenId: bigint }) {
 
 ### Archivo: `usePause.ts` ✨ NUEVO (Día 4 - 3 hooks)
 
-#### 15. **useIsPaused()**
+#### 16. **useIsPaused()**
 Hook para leer el estado de pausa del contrato.
 
 ```typescript
@@ -382,7 +427,7 @@ function Component() {
 - Auto-refresh cada 5 segundos
 - Útil para deshabilitar UI cuando el contrato está pausado
 
-#### 16. **usePause()**
+#### 17. **usePause()**
 Hook para pausar el contrato (solo admin).
 
 ```typescript
@@ -414,7 +459,7 @@ function PauseButton() {
 }
 ```
 
-#### 17. **useUnpause()**
+#### 18. **useUnpause()**
 Hook para reanudar el contrato (solo admin).
 
 ```typescript
@@ -450,7 +495,7 @@ function UnpauseButton() {
 
 ### Archivo: `useContractReads.ts` ✨ ACTUALIZADO (Día 4)
 
-#### 18. **useUserIdByAddress(address?)** ✨ NUEVO
+#### 19. **useUserIdByAddress(address?)** ✨ NUEVO
 Hook para obtener rápidamente el User ID de una address (optimización para AuthContext).
 
 ```typescript
@@ -642,7 +687,7 @@ function AdminPanel() {
 - Parsea respuesta (4 campos × 64 hex cada uno)
 - Refetch inteligente con hash tracking
 
-#### 14. **useChangeUserStatus()**
+#### 22. **useChangeUserStatus()**
 Hook para cambiar el estado de un usuario (aprobar, rechazar, cancelar).
 
 ```typescript
@@ -692,7 +737,7 @@ function UserActions({ userAddress }) {
 
 ### Archivo: `useContractOwner.ts` ✨ NUEVO (1 hook)
 
-#### 15. **useContractOwner()**
+#### 20. **useContractOwner()**
 Hook para verificar si el usuario conectado es el owner del contrato.
 
 ```typescript
@@ -736,9 +781,15 @@ function AdminRoute() {
 | useContractOwner.ts | 1 | Lectura | ✅ |
 | useGetUserTokens.ts | 3 | Lectura | ✅ Día 4 |
 | usePause.ts | 3 | Lectura + Escritura | ✅ Día 4 |
-| **TOTAL** | **21** | **12 lectura + 9 escritura** | **100%** |
+| **TOTAL** | **22** | **13 lectura + 9 escritura** | **100%** |
 
-**Nota**: Algunos hooks se documentan juntos (ej: useGetUserTokens incluye 3 hooks), por lo que el total documentado es 18 hooks únicos.
+**Nota**: 
+- `useContractReads.ts` incluye 6 hooks (5 individuales + 1 optimizado batch)
+- `useGetUserTokens.ts` incluye 3 hooks
+- `usePause.ts` incluye 3 hooks
+- `useTransfer.ts` incluye 4 hooks
+- `useAdminUsers.ts` incluye 2 hooks
+- Total documentado: 22 hooks únicos (18 hooks principales + 4 hooks adicionales de admin)
 
 ---
 

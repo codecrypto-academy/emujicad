@@ -1,8 +1,11 @@
 # 🧪 Guía de Pruebas - Sincronización Multi-Pestaña
 
+> ⚠️ **ESTADO ACTUAL**: Solo sincronización de desconexiones implementada  
+> **Última actualización**: Día 2 - Feature completa POSTPONED
+
 ## 📋 Objetivo
 
-Verificar que la sesión de MetaMask se sincroniza correctamente entre todas las pestañas abiertas de la aplicación.
+Verificar que la **sincronización de desconexiones** funciona correctamente entre pestañas. La reconexión automática está POSTPONED (ver `docs/reports/IA.md` - Error 12).
 
 ## ✅ Prerrequisitos
 
@@ -30,16 +33,21 @@ Verificar que la sesión de MetaMask se sincroniza correctamente entre todas las
 
 ### Test 2: Nueva Pestaña con Sesión Activa
 
+> ⚠️ **NOTA**: La reconexión automática está POSTPONED. Este test describe el comportamiento esperado si se implementara en el futuro.
+
 **Pasos:**
 1. Con la sesión activa en Pestaña A
 2. Abre una nueva pestaña (Pestaña B) en la misma URL
 3. Observa el comportamiento
 
-**Resultado esperado:**
-- ✅ Pestaña B muestra la cuenta conectada automáticamente
-- ✅ NO solicita nueva conexión a MetaMask
-- ✅ Ambas pestañas muestran la misma cuenta
-- ✅ Logs en consola: `🔄 Restored session from localStorage: 0x...`
+**Resultado esperado (si estuviera implementado):**
+- ⏸️ Pestaña B mostraría la cuenta conectada automáticamente
+- ⏸️ NO solicitaría nueva conexión a MetaMask
+- ⏸️ Ambas pestañas mostrarían la misma cuenta
+
+**Resultado actual (POSTPONED):**
+- ✅ Pestaña B muestra "Conectar Wallet" (reconexión automática no implementada)
+- ✅ El usuario debe conectar manualmente en cada pestaña nueva
 
 ---
 
@@ -60,14 +68,21 @@ Verificar que la sesión de MetaMask se sincroniza correctamente entre todas las
 
 ### Test 4: Reconexión desde Pestaña B
 
+> ⚠️ **NOTA**: La reconexión automática está POSTPONED. Este test describe el comportamiento esperado si se implementara en el futuro.
+
 **Pasos:**
 1. Con ambas pestañas desconectadas
 2. En Pestaña B, haz clic en "Conectar Wallet" y conecta
 3. Observa Pestaña A
 
-**Resultado esperado:**
+**Resultado esperado (si estuviera implementado):**
+- ⏸️ Pestaña B mostraría la cuenta conectada
+- ⏸️ Pestaña A se conectaría automáticamente (sin recargar)
+
+**Resultado actual (POSTPONED):**
 - ✅ Pestaña B muestra la cuenta conectada
-- ✅ Pestaña A se conecta automáticamente (sin recargar)
+- ✅ Pestaña A permanece desconectada (reconexión automática no implementada)
+- ✅ El usuario debe conectar manualmente en cada pestaña
 - ✅ Ambas pestañas muestran la misma cuenta
 - ✅ Logs en consola de Pestaña A: `🔗 New connection detected in another tab, syncing...`
 

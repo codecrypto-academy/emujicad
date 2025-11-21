@@ -1,12 +1,15 @@
 # Sincronización de Sesión Multi-Pestaña
 
+> ⚠️ **ESTADO ACTUAL**: Implementación parcial (solo sincronización de desconexiones)  
+> **Última actualización**: Día 2 - Feature completa POSTPONED por problemas de race conditions
+
 ## 📋 Descripción
 
-El sistema implementa sincronización automática de la sesión de MetaMask entre todas las pestañas abiertas de la aplicación. Esto garantiza que:
+El sistema implementa sincronización **parcial** de la sesión de MetaMask entre pestañas. Actualmente solo sincroniza **desconexiones**:
 
-- **Una sola conexión activa**: Todas las pestañas comparten la misma cuenta conectada
-- **Sincronización en tiempo real**: Los cambios en una pestaña se reflejan inmediatamente en las demás
-- **Seguridad mejorada**: Evita múltiples conexiones simultáneas a diferentes cuentas
+- ✅ **Sincronización de desconexiones**: Si un usuario se desconecta en una pestaña, todas las demás se desconectan automáticamente
+- ⏸️ **Reconexión automática**: POSTPONED (causaba race conditions y bugs)
+- ⏸️ **Sincronización de conexiones**: POSTPONED (requiere más diseño y testing)
 
 ## 🔧 Implementación
 
@@ -159,12 +162,22 @@ El componente `Web3Provider` implementa 5 efectos principales:
 4. **Detección de cambio de cuenta (pestaña actual)**: Actualiza localStorage
 5. **Listener de eventos de MetaMask**: Responde a cambios en la wallet
 
-## 🚀 Próximas Mejoras
+## ⚠️ Estado de la Implementación
 
-- [ ] Soporte para múltiples wallets (WalletConnect, Coinbase Wallet)
-- [ ] Sincronización de estado de usuario (rol, status)
-- [ ] Caché de datos del usuario entre pestañas
-- [ ] Notificaciones visuales de cambios en otras pestañas
+**Implementado (Día 2 - Versión Simplificada)**:
+- ✅ Sincronización de desconexiones entre pestañas
+- ✅ Persistencia de última dirección conectada en localStorage
+- ✅ Detección de cambios de cuenta en MetaMask
+
+**POSTPONED (Día 2 - Error 12)**:
+- ⏸️ Reconexión automática cuando otra pestaña se conecta (causaba race conditions)
+- ⏸️ Sincronización completa de estado entre pestañas
+- ⏸️ Soporte para múltiples wallets (WalletConnect, Coinbase Wallet)
+- ⏸️ Sincronización de estado de usuario (rol, status)
+- ⏸️ Caché de datos del usuario entre pestañas
+- ⏸️ Notificaciones visuales de cambios en otras pestañas
+
+**Razón del POSTPONED**: La implementación completa causó múltiples bugs y estados inconsistentes. Se decidió priorizar estabilidad sobre features avanzadas. Ver `docs/reports/IA.md` - Error 12 para más detalles.
 
 ## 📚 Referencias
 

@@ -94,7 +94,7 @@ Verifica que:
 ### 8. ✅ Documentación
 Verifica que existan:
 - `README.md`
-- `README_FE.md`
+- `docs/fe/SETUP.md` (fuente única de verdad para setup frontend)
 - `docs/fe/HOOKS.md`
 - `docs/fe/COMPONENTS.md`
 

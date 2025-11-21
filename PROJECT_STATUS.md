@@ -12,10 +12,10 @@
 | Componente | Actual | Máximo | Estado |
 |------------|--------|---------|---------|
 | Smart Contract | 4.0 | 4.0 | ✅ 100% |
-| Frontend | 2.8 | 3.0 | ⚠️ 93% (falta +0.2) |
+| Frontend | 2.25 | 3.0 | ⚠️ 75% (3/9 páginas, falta +0.75) |
 | Extras | 0.5 | 1.0 | ⚠️ 50% (deploy script validado) |
 | Video | 0.0 | 1.5 | ❌ 0% |
-| **TOTAL** | **7.3** | **9.5** | **Falta +2.2 pts para 9.5** |
+| **TOTAL** | **6.75** | **9.5** | **Falta +2.75 pts para 9.5** |
 
 **Nota**: La puntuación se ajustó considerando el Dashboard implementado y las features de pausabilidad.
 
@@ -35,7 +35,7 @@
 ✅ Control de pausa por roles (Pauser role)
 ```
 
-### Frontend - Infraestructura (2.8/3.0 puntos - 93%)
+### Frontend - Infraestructura (2.25/3.0 puntos - 75%)
 ```
 ✅ Next.js 16 + TypeScript + Tailwind
 ✅ wagmi 2.12 + viem 2.21 + ethers 6.13
@@ -169,7 +169,7 @@
 
 ## 📅 ROADMAP DETALLADO (5 días para 9.5/10)
 
-### **🗓️ Día 4 - Jueves 21 Nov (Tokens - Lista)**
+### **🗓️ Día 5 - Sábado 22 Nov (Tokens - Lista)** ⬅️ SIGUIENTE
 **Tiempo**: 4-5 horas | **Impacto**: +0.1 puntos
 
 #### Tareas:
@@ -189,7 +189,7 @@
 
 ---
 
-### **🗓️ Día 5 - Viernes 22 Nov (Tokens - Crear)**
+### **🗓️ Día 6 - Domingo 23 Nov (Tokens - Crear)**
 **Tiempo**: 4-5 horas | **Impacto**: +0.1 puntos
 
 #### Tareas:
@@ -209,7 +209,7 @@
 
 ---
 
-### **🗓️ Día 6 - Sábado 23 Nov (Transferencias)**
+### **🗓️ Día 7 - Lunes 24 Nov (Transferencias)**
 **Tiempo**: 6-8 horas | **Impacto**: +0.2 puntos
 
 #### Tareas:
@@ -232,7 +232,7 @@
 
 ---
 
-### **🗓️ Día 7 - Domingo 24 Nov (Páginas Adicionales)**
+### **🗓️ Día 8 - Martes 25 Nov (Páginas Adicionales)**
 **Tiempo**: 4-6 horas | **Impacto**: +0.1 puntos
 
 #### Tareas:
@@ -245,7 +245,7 @@
 
 ---
 
-### **🗓️ Día 8 - Lunes 25 Nov (Video Demo)**
+### **🗓️ Día 9 - Miércoles 26 Nov (Video Demo)**
 **Tiempo**: 3-4 horas | **Impacto**: +1.5 puntos
 
 #### Script del video (5 minutos):
@@ -277,7 +277,7 @@ Tareas técnicas:
 
 ## 🎯 PRÓXIMO PASO INMEDIATO
 
-### ➡️ **EMPEZAR: Página de Tokens (Día 4)**
+### ➡️ **EMPEZAR: Página de Tokens (Día 5)**
 
 **Primer archivo a crear**: `web/src/app/tokens/page.tsx`
 

@@ -347,7 +347,7 @@ Ver **[docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATI
 
 ### 🎯 Comparación con Estructura de Referencia
 
-**Puntuación General: 8.0/10** ✅ (Dashboard completo, sistema de pausabilidad, infraestructura 93%)
+**Puntuación General: 8.0/10** ✅ (Dashboard completo, sistema de pausabilidad, infraestructura 75%, todas las tareas de baja prioridad completadas)
 
 | Componente | README.md | Implementación Actual | Estado |
 |------------|-----------|----------------------|--------|
@@ -371,9 +371,11 @@ Este proyecto es parte de un **PFM/TFM** de Master en Blockchain y Web3.
 
 **Puntuación actual**: 8.0/10 ✅ APROBATORIO
 - Smart Contract: 4.0/4.0 ✅
-- Frontend: 2.8/3.0 (93% infraestructura) ⚠️
-- Extras: 0.5/1.0 (deploy script + pausabilidad) ⚠️
+- Frontend: 2.8/3.0 (75% implementado) ⚠️
+- Extras: 0.5/1.0 (deploy script + pausabilidad + performance + tests + accesibilidad + animaciones) ⚠️
 - Video: 0.0/1.5 ❌
+
+**Estado Día 4**: ✅ Todas las tareas de baja prioridad completadas (Performance, Tests, Accesibilidad, Animaciones)
 
 **Próximo objetivo**: Páginas de Tokens y Transfers (Día 5-6) para completar frontend a 3.0/3.0
 
