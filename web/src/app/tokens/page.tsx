@@ -6,6 +6,7 @@ import { TokenCardModern } from '@/components/TokenCardModern'
 import { useGetUserTokensWithData } from '@/hooks/useGetUserTokensWithData'
 import { useIsPaused } from '@/hooks/usePause'
 import { useAuth } from '@/contexts/AuthContext'
+import { useContractOwner } from '@/hooks/useContractOwner'
 import { useAccount } from 'wagmi'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useMemo } from 'react'
@@ -23,12 +24,19 @@ import { DebugTokens } from './debug-tokens'
 export default function TokensPage() {
   const router = useRouter()
   const { address, isConnected } = useAccount()
-  const { isAuthenticated, isLoading: isLoadingAuth, userInfo } = useAuth()
+  const { isAuthenticated, isLoading: isLoadingAuth, userInfo, isAdmin: isAdminFromAuth } = useAuth()
+  const { owner, isLoading: isLoadingOwner } = useContractOwner()
   const { tokens, isLoading, error, totalTokens } = useGetUserTokensWithData(address)
   const { data: isPaused } = useIsPaused()
   
+  // Verificación directa de admin (más rápida que esperar por AuthContext)
+  const isAdminDirect = address && owner && address.toLowerCase() === owner.toLowerCase()
+  const isAdmin = isAdminDirect || isAdminFromAuth
+  const isLoadingAdminCheck = isLoadingOwner || isLoadingAuth
+  
   const [mounted, setMounted] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [shouldBlockRender, setShouldBlockRender] = useState(true)
   
   // Determinar el rol del usuario y configurar filtros según el rol
   const userRole = userInfo ? Number(userInfo.role) : null
@@ -125,23 +133,42 @@ export default function TokensPage() {
     setCurrentPage(1)
   }, [filterType, searchQuery])
 
-  // Redirigir si no está autenticado (después de todos los hooks)
+  // Redirigir si no está autenticado o si es Administrador (después de todos los hooks)
   useEffect(() => {
-    if (!mounted) return
+    if (!mounted || isLoadingAdminCheck) return
     
     if (!isConnected) {
       router.replace('/')
       return
     }
     
-    if (!isLoadingAuth && !isAuthenticated) {
+    // Administrador (owner del contrato) no maneja tokens, redirigir al dashboard
+    // Verificar esto PRIMERO para evitar cualquier renderizado
+    if (isAdmin) {
+      router.replace('/dashboard')
+      return
+    }
+    
+    if (!isAuthenticated) {
       router.replace('/')
       return
     }
-  }, [mounted, isConnected, isAuthenticated, isLoadingAuth, router])
+  }, [mounted, isConnected, isAuthenticated, isLoadingAdminCheck, isAdmin, router])
 
   // Early return DESPUÉS de todos los hooks
-  if (!mounted || !isConnected || (!isLoadingAuth && !isAuthenticated)) {
+  // NO renderizar NADA hasta que sepamos si es admin o no (evitar cualquier flash)
+  if (!mounted || !isConnected || isLoadingAdminCheck) {
+    return null
+  }
+  
+  // Si es Administrador, NO renderizar nada (redirección en progreso)
+  // Esta verificación debe ser ANTES de cualquier otro renderizado
+  if (isAdmin) {
+    return null
+  }
+  
+  // Si no está autenticado, no renderizar contenido (redirección en progreso)
+  if (!isAuthenticated) {
     return null
   }
 

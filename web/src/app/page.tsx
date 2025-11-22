@@ -100,12 +100,8 @@ export default function Home() {
     }
   }, [mounted, isConnected, isAdmin, isApproved, isLoadingOwner, isLoadingUser, address])
 
-  // Redirigir usuarios autorizados al dashboard
-  useEffect(() => {
-    if (mounted && isConnected && (isAdmin || isApproved)) {
-      router.push('/dashboard')
-    }
-  }, [mounted, isConnected, isAdmin, isApproved, router])
+  // La redirección ahora se maneja en AuthRedirect component
+  // No necesitamos redirigir aquí para evitar duplicación
   
   // Helpers para UI
   const getRoleName = (roleNumber: number): string => {

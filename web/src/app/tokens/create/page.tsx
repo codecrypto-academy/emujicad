@@ -70,10 +70,16 @@ export default function CreateTokenPage() {
 
   // Get balance of selected parent token
   const selectedParentId = parentId ? BigInt(parseInt(parentId, 10)) : undefined
-  const { data: parentBalance, isLoading: isLoadingParentBalance } = useGetTokenBalance(
+  const { data: parentBalanceRaw, isLoading: isLoadingParentBalance } = useGetTokenBalance(
     selectedParentId,
     address
   )
+  
+  // Normalize parentBalance: ensure it's bigint | undefined (never null)
+  const parentBalance: bigint | undefined = 
+    parentBalanceRaw !== null && parentBalanceRaw !== undefined && typeof parentBalanceRaw === 'bigint'
+      ? parentBalanceRaw
+      : undefined
 
   // Mounted state to avoid hydration issues
   const [mounted, setMounted] = useState(false)
@@ -135,7 +141,7 @@ export default function CreateTokenPage() {
       const amount = parseInt(parentAmount, 10)
       
       if (!isNaN(amount) && amount > 0) {
-        if (parentBalance !== undefined) {
+        if (parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint') {
           if (BigInt(amount) > parentBalance) {
             errors.parentAmount = `Insufficient balance. You have ${parentBalance.toString()} tokens available.`
           } else {
@@ -186,16 +192,16 @@ export default function CreateTokenPage() {
       
       const amount = parseInt(parentAmount, 10)
       if (!parentAmount || isNaN(amount) || amount <= 0) {
-        if (parentBalance !== undefined && parentBalance === BigInt(0)) {
+        if (parentBalance !== undefined && typeof parentBalance === 'bigint' && parentBalance === BigInt(0)) {
           errors.parentAmount = 'You have no balance for this token. You need to receive tokens first!'
         } else {
           errors.parentAmount = 'Parent amount must be a positive number'
         }
-      } else if (parentBalance !== undefined) {
+      } else if (parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint') {
         if (parentBalance === BigInt(0)) {
           errors.parentAmount = 'You have no balance for this token. You need to receive tokens first!'
         } else if (BigInt(amount) > parentBalance) {
-          errors.parentAmount = `Insufficient balance. You have ${parentBalance.toString()} tokens available. Maximum allowed: ${parentBalance.toString()}`
+          errors.parentAmount = `Insufficient balance. You have ${parentBalance !== null && typeof parentBalance === 'bigint' ? parentBalance.toString() : '0'} tokens available. Maximum allowed: ${parentBalance !== null && typeof parentBalance === 'bigint' ? parentBalance.toString() : '0'}`
         }
       } else if (!isLoadingParentBalance) {
         // If balance is undefined and not loading, there might be an issue
@@ -260,6 +266,8 @@ export default function CreateTokenPage() {
         parentAmount &&
         !isNaN(parseInt(parentAmount, 10)) &&
         parentBalance !== undefined &&
+        parentBalance !== null &&
+        typeof parentBalance === 'bigint' &&
         parentBalance > BigInt(0) &&
         BigInt(parseInt(parentAmount, 10)) > BigInt(0) &&
         BigInt(parseInt(parentAmount, 10)) <= parentBalance
@@ -440,22 +448,22 @@ export default function CreateTokenPage() {
                           id="parentAmount"
                           type="number"
                           min="1"
-                          max={parentBalance !== undefined ? Number(parentBalance) : undefined}
+                          max={parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint' ? Number(parentBalance) : undefined}
                           value={parentAmount}
                           onChange={(e) => {
                             const value = e.target.value
-                            if (parentBalance === BigInt(0)) return
-                            if (parentBalance !== undefined && value) {
+                            if (parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint' && parentBalance === BigInt(0)) return
+                            if (parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint' && value) {
                               const numValue = parseInt(value, 10)
                               if (!isNaN(numValue) && numValue > Number(parentBalance)) {
-                                setParentAmount(parentBalance.toString())
+                                setParentAmount(parentBalance !== null && typeof parentBalance === 'bigint' ? parentBalance.toString() : '0')
                                 return
                               }
                             }
                             setParentAmount(value)
                           }}
                           placeholder="e.g., 100"
-                          disabled={isFormDisabled || isLoadingParentBalance || (parentBalance !== undefined && parentBalance === BigInt(0))}
+                          disabled={isFormDisabled || isLoadingParentBalance || (parentBalance !== undefined && typeof parentBalance === 'bigint' && parentBalance === BigInt(0))}
                           className={`rounded-xl border-2 transition-all ${formErrors.parentAmount ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400'}`}
                         />
                         {formErrors.parentAmount && (
@@ -466,18 +474,20 @@ export default function CreateTokenPage() {
                             <Loader2 className="h-4 w-4 animate-spin" />
                             <span className="text-sm">Loading balance...</span>
                           </div>
-                        ) : parentBalance !== undefined ? (
+                        ) : parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint' ? (
                           <div className="space-y-1 p-3 rounded-xl bg-slate-50/80 dark:bg-slate-800/50">
                             <p className={`text-sm ${parentBalance === BigInt(0) ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
-                              Your available balance: <span className={`font-semibold ${parentBalance === BigInt(0) ? 'text-red-700 dark:text-red-300' : 'text-slate-700 dark:text-slate-300'}`}>{parentBalance.toString()}</span> tokens.
+                              Your available balance: <span className={`font-semibold ${parentBalance === BigInt(0) ? 'text-red-700 dark:text-red-300' : 'text-slate-700 dark:text-slate-300'}`}>{parentBalance !== null && typeof parentBalance === 'bigint' ? parentBalance.toString() : '0'}</span> tokens.
                               {parentBalance === BigInt(0) && (
                                 <span className="ml-2 text-red-600 dark:text-red-400">⚠️ You need to receive tokens first!</span>
                               )}
                             </p>
-                            {parentAmount && parseInt(parentAmount, 10) > 0 && parentBalance > BigInt(0) && (
+                            {parentAmount && parseInt(parentAmount, 10) > 0 && parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint' && parentBalance > BigInt(0) && (
                               <p className="text-sm text-slate-500 dark:text-slate-400">
                                 After creation: <span className="font-semibold text-slate-700 dark:text-slate-300">
-                                  {parentBalance - BigInt(parseInt(parentAmount, 10) || 0) < BigInt(0) ? '0' : (parentBalance - BigInt(parseInt(parentAmount, 10) || 0)).toString()}
+                                  {parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint' 
+                                  ? (parentBalance - BigInt(parseInt(parentAmount, 10) || 0) < BigInt(0) ? '0' : (parentBalance - BigInt(parseInt(parentAmount, 10) || 0)).toString())
+                                  : '0'}
                                 </span> tokens remaining.
                               </p>
                             )}
@@ -726,11 +736,11 @@ export default function CreateTokenPage() {
                         onChange={(e) => {
                           const value = e.target.value
                           // Si no hay balance, no permitir escribir
-                          if (parentBalance === BigInt(0)) {
+                          if (parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint' && parentBalance === BigInt(0)) {
                             return
                           }
                           // Si hay balance, validar que no exceda el máximo
-                          if (parentBalance !== undefined && value) {
+                          if (parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint' && value) {
                             const numValue = parseInt(value, 10)
                             if (!isNaN(numValue) && numValue > Number(parentBalance)) {
                               // Limitar al máximo disponible
@@ -752,7 +762,7 @@ export default function CreateTokenPage() {
                           <Loader2 className="h-4 w-4 animate-spin" />
                           <span className="text-sm">Loading balance...</span>
                         </div>
-                      ) : parentBalance !== undefined ? (
+                      ) : parentBalance !== undefined && typeof parentBalance === 'bigint' ? (
                         <div className="space-y-1">
                           <p className={`text-sm ${parentBalance === BigInt(0) ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
                             Your available balance: <span className={`font-semibold ${parentBalance === BigInt(0) ? 'text-red-700 dark:text-red-300' : 'text-slate-700 dark:text-slate-300'}`}>{parentBalance.toString()}</span> tokens.
@@ -763,7 +773,9 @@ export default function CreateTokenPage() {
                           {parentAmount && parseInt(parentAmount, 10) > 0 && parentBalance > BigInt(0) && (
                             <p className="text-sm text-slate-500 dark:text-slate-400">
                               After creation: <span className="font-semibold text-slate-700 dark:text-slate-300">
-                                {parentBalance - BigInt(parseInt(parentAmount, 10) || 0) < BigInt(0) ? '0' : (parentBalance - BigInt(parseInt(parentAmount, 10) || 0)).toString()}
+                                {parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint' 
+                                  ? (parentBalance - BigInt(parseInt(parentAmount, 10) || 0) < BigInt(0) ? '0' : (parentBalance - BigInt(parseInt(parentAmount, 10) || 0)).toString())
+                                  : '0'}
                               </span> tokens remaining.
                             </p>
                           )}

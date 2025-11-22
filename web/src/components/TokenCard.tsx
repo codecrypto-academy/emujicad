@@ -33,7 +33,9 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
   // Memoizar tokenData para evitar re-renders durante refetch
   // Usar useRef para mantener el último valor válido sin causar re-renders
   const stableTokenDataRef = React.useRef<TokenData | undefined>(tokenData);
-  const stableBalanceRef = React.useRef<bigint | undefined>(balance);
+  const stableBalanceRef = React.useRef<bigint | undefined>(
+    balance !== null && balance !== undefined && typeof balance === 'bigint' ? balance : undefined
+  );
 
   // Actualizar refs solo cuando hay datos nuevos (comparar por ID para evitar loops)
   React.useEffect(() => {
@@ -46,7 +48,7 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
   }, [tokenData?.id]); // Solo depender del ID, no del objeto completo
 
   React.useEffect(() => {
-    if (balance !== undefined && balance !== null) {
+    if (balance !== undefined && balance !== null && typeof balance === 'bigint') {
       stableBalanceRef.current = balance;
     }
   }, [balance]);

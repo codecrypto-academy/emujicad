@@ -26,7 +26,7 @@ export function DebugTokens() {
   })
 
   // Crear array de contratos para leer todos los tokens
-  const contracts = totalTokens && totalTokens > 0n
+  const contracts = totalTokens !== undefined && totalTokens !== null && typeof totalTokens === 'bigint' && totalTokens > 0n
     ? Array.from({ length: Number(totalTokens) }, (_, i) => ({
         address: SUPPLY_CHAIN_ADDRESS,
         abi: SUPPLY_CHAIN_ABI,

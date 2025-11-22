@@ -30,7 +30,9 @@ export function TokenCardModern({ tokenId, showBalance = false, onClick }: Token
   }, [rawTokenData])
 
   const stableTokenDataRef = React.useRef<TokenData | undefined>(tokenData)
-  const stableBalanceRef = React.useRef<bigint | undefined>(balance)
+  const stableBalanceRef = React.useRef<bigint | undefined>(
+    balance !== null && balance !== undefined && typeof balance === 'bigint' ? balance : undefined
+  )
 
   React.useEffect(() => {
     if (tokenData) {
@@ -41,7 +43,7 @@ export function TokenCardModern({ tokenId, showBalance = false, onClick }: Token
   }, [tokenData?.id])
 
   React.useEffect(() => {
-    if (balance !== undefined && balance !== null) {
+    if (balance !== undefined && balance !== null && typeof balance === 'bigint') {
       stableBalanceRef.current = balance
     }
   }, [balance])
@@ -138,7 +140,7 @@ export function TokenCardModern({ tokenId, showBalance = false, onClick }: Token
             <div className="flex items-baseline gap-2">
               <span className="text-sm font-medium text-slate-600 dark:text-slate-400">My Balance</span>
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-                {displayBalance.toString()}
+                {displayBalance !== null && displayBalance !== undefined && typeof displayBalance === 'bigint' ? displayBalance.toString() : '0'}
               </span>
             </div>
           </div>
