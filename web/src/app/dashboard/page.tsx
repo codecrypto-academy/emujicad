@@ -30,15 +30,42 @@ export default function DashboardPage() {
   // Activar diseño moderno si está habilitado
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
   
-  const { data: userTokens, isLoading: isLoadingTokens, error: tokensError } = useGetUserTokens(address);
+  // CRÍTICO: TODOS los hooks deben estar ANTES de cualquier return condicional
+  // Esto previene el error "Rendered more hooks than during the previous render"
+  // ORDEN FIJO: useState, useEffect, hooks de datos, useMemo
+  
+  const [mounted, setMounted] = useState(false);
+  const [stableValidTokens, setStableValidTokens] = useState<bigint[] | null>(null);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  // Hooks de datos - se ejecutan siempre, pero se deshabilitan si no está autenticado
+  // Usar isAuthenticated para habilitar/deshabilitar consultas
+  const shouldFetchData = isConnected && !isLoading && isAuthenticated;
+  
+  const { data: userTokens, isLoading: isLoadingTokens, error: tokensError } = useGetUserTokens(
+    shouldFetchData ? address : undefined
+  );
+  
+  // Optimización: usar batch reads en lugar de 3 llamadas separadas
+  // CRÍTICO: Deshabilitar si no está autenticado para evitar consultas innecesarias
+  const { 
+    totalTokens, 
+    totalUsers, 
+    totalTransfers, 
+    isLoading: isLoadingStats,
+    errors: statsErrors 
+  } = useDashboardStats(shouldFetchData);
+  
+  // CRÍTICO: Deshabilitar si no está autenticado para evitar consultas innecesarias
+  const { data: isPaused } = useIsPaused(shouldFetchData);
   
   // Memoizar tokens validados para evitar re-renders innecesarios
   const validTokens = useMemo(() => {
     return validateBigIntArray(userTokens);
   }, [userTokens]);
-  
-  // Mantener tokens estables durante refetch para evitar parpadeos
-  const [stableValidTokens, setStableValidTokens] = useState<bigint[] | null>(null);
   
   useEffect(() => {
     if (validTokens && validTokens.length > 0) {
@@ -48,14 +75,6 @@ export default function DashboardPage() {
   
   // Usar tokens estables si existen, sino usar los actuales
   const displayTokens = stableValidTokens || validTokens || [];
-  // Optimización: usar batch reads en lugar de 3 llamadas separadas
-  const { 
-    totalTokens, 
-    totalUsers, 
-    totalTransfers, 
-    isLoading: isLoadingStats,
-    errors: statsErrors 
-  } = useDashboardStats();
   
   // Memoizar valores para evitar parpadeos durante refetch
   const stableTotalTokens = useMemo(() => totalTokens, [totalTokens]);
@@ -64,15 +83,9 @@ export default function DashboardPage() {
   
   // Solo mostrar loading en la primera carga, no durante refetch
   const isInitialStatsLoading = isLoadingStats && stableTotalTokens === undefined && stableTotalUsers === undefined && stableTotalTransfers === undefined;
-  const { data: isPaused } = useIsPaused();
-  
-  const [mounted, setMounted] = useState(false);
-  
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
-  // Redirigir inmediatamente si no está autenticado (sin esperar a que termine de cargar)
+  // CRÍTICO: Redirigir INMEDIATAMENTE si no está conectado o no está autenticado
+  // NO esperar a que termine de cargar - redirigir tan pronto como sepamos que no está autorizado
   useEffect(() => {
     if (!mounted) return;
     
@@ -82,21 +95,28 @@ export default function DashboardPage() {
       return;
     }
     
-    // Si ya terminó de cargar y no está autenticado, redirigir inmediatamente
+    // Si ya terminó de cargar y no está autenticado, redirigir INMEDIATAMENTE
+    // No esperar más - si isLoading es false y isAuthenticated es false, redirigir
     if (!isLoading && !isAuthenticated) {
       router.replace('/');
       return;
     }
   }, [mounted, isConnected, isAuthenticated, isLoading, router]);
 
-  // Estado de carga unificado - evitar múltiples re-renders
-  // Renderizar siempre el mismo contenido en servidor y cliente para evitar hydration errors
-  const isInitialLoading = isLoading || !isConnected;
-  const shouldShowContent = isConnected && !isLoading && isAuthenticated;
-
-  // No renderizar nada hasta que esté montado o mientras carga la autenticación
-  // Pero siempre renderizar la misma estructura para evitar hydration mismatch
-  if (!mounted || isInitialLoading) {
+  // CRÍTICO: Early return DESPUÉS de todos los hooks
+  // Esto previene cualquier renderizado innecesario
+  if (!mounted || !isConnected) {
+    return null
+  }
+  
+  // CRÍTICO: Si ya terminó de cargar y no está autenticado, redirigir INMEDIATAMENTE
+  // No esperar más - mostrar null mientras se redirige
+  if (!isLoading && !isAuthenticated) {
+    return null // Redirección en progreso
+  }
+  
+  // Si aún está cargando, mostrar loading (pero solo si realmente está cargando)
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <Header />
@@ -114,11 +134,6 @@ export default function DashboardPage() {
         </div>
       </div>
     );
-  }
-
-  // Si no está autenticado después de cargar, no renderizar (redirección en progreso)
-  if (!shouldShowContent) {
-    return null;
   }
 
   // Diseño moderno 2025

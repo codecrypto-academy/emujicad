@@ -20,10 +20,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { address, isConnected } = useAccount();
   
-  // Consultar datos - usar useUserIdByAddress para detectar rápidamente si el usuario existe
+  // PASO 1: Verificar si es admin PRIMERO (esto es lo más importante)
   const { data: isAdminData, isLoading: isLoadingAdmin, error: adminError } = useIsAdmin(address);
-  const { data: userId, isLoading: isLoadingUserId } = useUserIdByAddress(address);
-  const { data: rawUserInfo, isLoading: isLoadingUser, error: userInfoError } = useUserInfo(address);
+  
+  // PASO 2: Solo si NO es admin, verificar registro
+  // Estas consultas solo se ejecutan si sabemos que NO es admin
+  const shouldCheckRegistration = isConnected && !isLoadingAdmin && isAdminData === false;
+  const { data: userId, isLoading: isLoadingUserId } = useUserIdByAddress(
+    shouldCheckRegistration ? address : undefined
+  );
+  const { data: rawUserInfo, isLoading: isLoadingUser, error: userInfoError } = useUserInfo(
+    shouldCheckRegistration ? address : undefined
+  );
   
   const [authState, setAuthState] = useState<AuthContextType>({
     isAdmin: false,
@@ -59,19 +67,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Si el usuario es admin, no necesitamos esperar por useUserInfo
-    // El admin puede no estar registrado como usuario en el contrato
+    // ============================================
+    // LÓGICA 1: Si es admin → NO verificar registro
+    // ============================================
     const isAdmin = isAdminData === true;
     
     if (isAdmin) {
-      // Admin: autenticado inmediatamente, no esperamos por userInfo
+      // Admin: autenticado inmediatamente, NO verificamos registro
       if (isLoadingAdmin) {
         console.log('AuthContext: Esperando confirmación de admin...');
         setAuthState(prev => ({ ...prev, isLoading: true }));
         return;
       }
 
-      console.log('AuthContext: Usuario es admin, autenticando directamente');
+      console.log('AuthContext: Usuario es admin, autenticando directamente (sin verificar registro)');
       
       // Restaurar preferencia de tema del usuario específico si existe
       if (address) {
@@ -84,7 +93,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             document.documentElement.classList.remove('dark')
           }
         } else {
-          // Si no hay preferencia, usar claro por defecto
           document.documentElement.classList.remove('dark')
         }
       }
@@ -93,53 +101,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin: true,
         isApproved: false, // Admin no necesita aprobación
         isAuthenticated: true,
-        userInfo: null, // Admin puede no tener userInfo
+        userInfo: null, // Admin no tiene userInfo (no está registrado como usuario)
         isLoading: false,
       });
       return;
     }
 
-    // Usuario no admin: optimización para detectar rápidamente usuarios no registrados
-    // Si ya sabemos que no es admin y el userId es 0 o hay error, el usuario no existe
-    if (!isLoadingAdmin && isAdminData === false) {
-      // Ya sabemos que no es admin
-      if (!isLoadingUserId) {
-        // Si userId es 0 o undefined, el usuario no está registrado
-        if (userId === undefined || userId === BigInt(0)) {
-          console.log('AuthContext: Usuario no registrado (userId = 0), marcando como no autenticado');
-          setAuthState({
-            isAdmin: false,
-            isApproved: false,
-            isAuthenticated: false,
-            userInfo: null,
-            isLoading: false,
-          });
-          return;
-        }
-      }
-      
-      // Si hay error en useUserInfo, el usuario no existe
-      if (userInfoError) {
-        console.log('AuthContext: Error al obtener userInfo (usuario no existe), marcando como no autenticado');
-        setAuthState({
-          isAdmin: false,
-          isApproved: false,
-          isAuthenticated: false,
-          userInfo: null,
-          isLoading: false,
-        });
-        return;
-      }
+    // ============================================
+    // LÓGICA 2: Si NO es admin → verificar registro
+    // ============================================
+    // Solo llegamos aquí si sabemos que NO es admin
+    
+    // CRÍTICO: Si userId ya está disponible y es 0, el usuario NO está registrado
+    // NO esperar a que terminen todas las consultas - determinar inmediatamente
+    if (userId !== undefined && userId === BigInt(0)) {
+      console.log('AuthContext: Usuario no registrado (userId = 0) - determinando inmediatamente');
+      setAuthState({
+        isAdmin: false,
+        isApproved: false,
+        isAuthenticated: false,
+        userInfo: null,
+        isLoading: false,
+      });
+      return;
     }
-
-    // Esperar por las consultas si aún están cargando
+    
+    // CRÍTICO: Si hay error en useUserInfo, el usuario no existe
+    // NO esperar más - determinar inmediatamente
+    if (userInfoError) {
+      console.log('AuthContext: Error al obtener userInfo (usuario no existe) - determinando inmediatamente');
+      setAuthState({
+        isAdmin: false,
+        isApproved: false,
+        isAuthenticated: false,
+        userInfo: null,
+        isLoading: false,
+      });
+      return;
+    }
+    
+    // Esperar por las consultas de registro si aún están cargando
+    // Solo si NO sabemos aún si el usuario está registrado
     if (isLoadingAdmin || isLoadingUserId || isLoadingUser) {
-      console.log('AuthContext: Aún cargando...', { isLoadingAdmin, isLoadingUserId, isLoadingUser });
+      console.log('AuthContext: Verificando registro...', { isLoadingAdmin, isLoadingUserId, isLoadingUser });
       setAuthState(prev => ({ ...prev, isLoading: true }));
       return;
     }
 
-    console.log('AuthContext: Carga completa, procesando datos...');
+    // Si userId es undefined después de que terminaron las consultas, el usuario NO está registrado
+    if (userId === undefined || userId === BigInt(0)) {
+      console.log('AuthContext: Usuario no registrado (userId = 0 o undefined después de consultas)');
+      setAuthState({
+        isAdmin: false,
+        isApproved: false,
+        isAuthenticated: false,
+        userInfo: null,
+        isLoading: false,
+      });
+      return;
+    }
+
+    console.log('AuthContext: Carga completa, procesando datos de usuario registrado...');
     
     // Validación robusta de userInfo
     const userInfo = rawUserInfo
@@ -161,8 +183,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     
-    const isApproved = userInfo ? Number(userInfo.status) === UserStatus.Approved : false;
-    const isAuthenticated = isApproved;
+    // ============================================
+    // LÓGICA 3: Usuario registrado → verificar estatus
+    // ============================================
+    // userInfo contiene: id, userAddress, role, status
+    // El status puede ser: Pending, Approved, Rejected, Canceled
+    const userStatus = userInfo ? Number(userInfo.status) : null;
+    const isApproved = userStatus === UserStatus.Approved;
+    const isAuthenticated = isApproved; // Solo aprobados están autenticados
+    
+    // IMPORTANTE: Incluir userInfo incluso si no está aprobado
+    // para que las páginas puedan mostrar el estatus (Pending, Rejected, Canceled)
 
     // Si el usuario está aprobado, restaurar su preferencia de tema específica
     if (isApproved && address) {
@@ -180,18 +211,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    console.log('AuthContext: Resultado final:', {
+    const userStatusName = userStatus !== null ? UserStatus[userStatus] : 'Unknown';
+    console.log('AuthContext: Resultado final (usuario registrado):', {
       isAdmin: false,
       isApproved,
       isAuthenticated,
-      userInfo
+      userStatus: userStatusName, // Pending, Approved, Rejected, o Canceled
+      userInfo // Incluido siempre para mostrar estatus
     });
 
+    // Incluir userInfo incluso si no está aprobado para mostrar estatus (Pending, Rejected, Canceled)
     setAuthState({
       isAdmin: false,
       isApproved,
       isAuthenticated,
-      userInfo,
+      userInfo, // Siempre incluido para que las páginas puedan mostrar el estatus
       isLoading: false,
     });
   }, [isConnected, isAdminData, userId, rawUserInfo, isLoadingAdmin, isLoadingUserId, isLoadingUser, address, adminError, userInfoError]);

@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { useUserInfo } from '@/hooks/useContractReads'
-import { useContractOwner } from '@/hooks/useContractOwner'
+import { useAuth } from '@/contexts/AuthContext'
 import { useIsPaused } from '@/hooks/usePause'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -14,38 +13,19 @@ import { UserStatus } from '@/contracts/config'
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from './ThemeToggle'
 import { Pause, AlertTriangle } from 'lucide-react'
-import { validateUserInfo, validateUserInfoTuple } from '@/lib/validation'
-import type { UserInfo } from '@/types'
 
 export function Header() {
   const { address, isConnected } = useAccount()
   const { disconnect } = useDisconnect()
   const pathname = usePathname()
-  const { owner } = useContractOwner()
-  const { data: rawUserInfo, isLoading: isLoadingUserInfo, refetch: refetchUserInfo } = useUserInfo(address)
+  const { isAdmin, isAuthenticated, isLoading, userInfo } = useAuth()
   const { data: isPaused } = useIsPaused()
   const [mounted, setMounted] = useState(false)
-  
-  // Validación robusta de userInfo
-  const userInfo = rawUserInfo
-    ? (Array.isArray(rawUserInfo)
-        ? validateUserInfoTuple(rawUserInfo)
-        : validateUserInfo(rawUserInfo))
-    : undefined
 
   // Inicializar mounted
   useEffect(() => {
     setMounted(true)
   }, [])
-  
-  // Refetch automático cuando cambia la dirección o cuando el componente se monta
-  useEffect(() => {
-    if (address && mounted) {
-      refetchUserInfo()
-    }
-  }, [address, mounted, refetchUserInfo])
-
-  const isAdmin = address && owner && address.toLowerCase() === owner.toLowerCase()
 
   // Helpers para roles
   const getRoleName = (role: bigint): string => {
@@ -184,10 +164,18 @@ export function Header() {
                     <span className="mr-1">👑</span>
                     Administrator
                   </Badge>
-                ) : isLoadingUserInfo ? (
-                  <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">
-                    ⏳ Loading...
-                  </Badge>
+                ) : isLoading ? (
+                  // CRÍTICO: Solo mostrar Loading si realmente está cargando
+                  // Si ya sabemos que NO está autenticado (!isAuthenticated), mostrar "Not Registered" inmediatamente
+                  !isAuthenticated ? (
+                    <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">
+                      👤 Not Registered
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">
+                      ⏳ Loading...
+                    </Badge>
+                  )
                 ) : userInfo ? (
                   <>
                     <Badge variant="outline">
@@ -218,11 +206,13 @@ export function Header() {
                       </Badge>
                     )}
                   </>
-                ) : !isLoadingUserInfo ? (
+                ) : (
+                  // CRÍTICO: Si NO está cargando Y NO está autenticado, mostrar "Not Registered" INMEDIATAMENTE
+                  // No esperar más - si isLoading es false y isAuthenticated es false, el usuario NO está registrado
                   <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">
                     👤 Not Registered
                   </Badge>
-                ) : null}
+                )}
               </div>
             )}
 

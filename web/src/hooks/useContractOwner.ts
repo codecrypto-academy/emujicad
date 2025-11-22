@@ -25,11 +25,14 @@ import { SUPPLY_CHAIN_ADDRESS, SUPPLY_CHAIN_ABI } from '@/contracts/config'
  * }
  * ```
  */
-export function useContractOwner() {
+export function useContractOwner(enabled: boolean = true) {
   const { data: owner, isLoading, error } = useReadContract({
     address: SUPPLY_CHAIN_ADDRESS,
     abi: SUPPLY_CHAIN_ABI,
     functionName: 'owner',
+    query: {
+      enabled,
+    },
   })
 
   return {

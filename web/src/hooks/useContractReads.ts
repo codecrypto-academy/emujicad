@@ -110,7 +110,7 @@ export function useTotalTransfers() {
  * const { totalTokens, totalUsers, totalTransfers, isLoading, error } = useDashboardStats()
  * ```
  */
-export function useDashboardStats() {
+export function useDashboardStats(enabled: boolean = true) {
   const { data, isLoading, error } = useReadContracts({
     contracts: [
       {
@@ -130,7 +130,8 @@ export function useDashboardStats() {
       },
     ],
     query: {
-      refetchInterval: 5000, // Refetch cada 5 segundos
+      enabled,
+      refetchInterval: enabled ? 5000 : false, // Refetch cada 5 segundos solo si está habilitado
     },
   })
 

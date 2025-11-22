@@ -6,13 +6,14 @@ import { SUPPLY_CHAIN_ADDRESS, SUPPLY_CHAIN_ABI } from '@/contracts/config'
 /**
  * Hook para leer el estado de pausa del contrato
  */
-export function useIsPaused() {
+export function useIsPaused(enabled: boolean = true) {
   return useReadContract({
     address: SUPPLY_CHAIN_ADDRESS,
     abi: SUPPLY_CHAIN_ABI,
     functionName: 'isPaused',
     query: {
-      refetchInterval: 5000, // Refrescar cada 5 segundos
+      enabled,
+      refetchInterval: enabled ? 5000 : false, // Refrescar cada 5 segundos solo si está habilitado
     },
   })
 }

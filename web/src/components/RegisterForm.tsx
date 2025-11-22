@@ -10,19 +10,26 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useRequestRole } from '@/hooks/useRequestRole'
 import { useIsPaused } from '@/hooks/usePause'
 import { useAccount } from 'wagmi'
-import { Pause, AlertTriangle } from 'lucide-react'
+import { Pause, AlertTriangle, Ban } from 'lucide-react'
+import { UserStatus } from '@/contracts/config'
+import type { UserInfo } from '@/types'
 
 type RoleType = 'Producer' | 'Factory' | 'Retailer' | 'Consumer' | ''
 
 interface RegisterFormProps {
   onRegistrationSuccess?: () => void
+  userInfo?: UserInfo | null
 }
 
-export function RegisterForm({ onRegistrationSuccess }: RegisterFormProps = {}) {
+export function RegisterForm({ onRegistrationSuccess, userInfo }: RegisterFormProps = {}) {
   const [selectedRole, setSelectedRole] = useState<RoleType>('')
   const { address } = useAccount()
   const { data: isPaused } = useIsPaused()
   const { requestRole, isPending: isTransactionPending, isConfirming, isSuccess, error, hash } = useRequestRole()
+  
+  // CRÍTICO: Si el usuario está cancelado, NO puede solicitar un nuevo rol
+  // Solo el administrador puede cambiar el estado de Canceled a Pending
+  const isCanceled = userInfo && Number(userInfo.status) === UserStatus.Canceled
   
   // Refetch user info cuando el registro es exitoso
   React.useEffect(() => {
@@ -46,7 +53,7 @@ export function RegisterForm({ onRegistrationSuccess }: RegisterFormProps = {}) 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!selectedRole) return
+    if (!selectedRole || isCanceled) return // Prevenir submit si está cancelado
     
     requestRole(selectedRole)
   }
@@ -79,7 +86,16 @@ export function RegisterForm({ onRegistrationSuccess }: RegisterFormProps = {}) 
         <CardDescription>Choose your role in the supply chain</CardDescription>
       </CardHeader>
       <CardContent>
-        {isPaused ? (
+        {isCanceled ? (
+          <Alert className="bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800">
+            <Ban className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+            <AlertDescription className="text-slate-700 dark:text-slate-300">
+              <strong>🚫 Registration Canceled:</strong> Your previous registration was canceled. 
+              Only the administrator can change your status from Canceled to Pending. 
+              Please contact the administrator for more information.
+            </AlertDescription>
+          </Alert>
+        ) : isPaused ? (
           <Alert className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
             <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
             <AlertDescription className="text-yellow-700 dark:text-yellow-300">
@@ -109,6 +125,7 @@ export function RegisterForm({ onRegistrationSuccess }: RegisterFormProps = {}) 
                 value={selectedRole} 
                 onValueChange={(value) => setSelectedRole(value as RoleType)}
                 aria-required="true"
+                disabled={isCanceled}
               >
                 <SelectTrigger id="role" aria-label="Select your role in the supply chain">
                   <SelectValue placeholder="Choose a role..." />
@@ -151,16 +168,40 @@ export function RegisterForm({ onRegistrationSuccess }: RegisterFormProps = {}) 
 
             {/* Error Message */}
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-sm text-red-700 font-semibold mb-1">❌ Registration Failed</p>
-                <p className="text-xs text-red-600">
+              <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+                <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <AlertDescription className="text-red-700 dark:text-red-300">
                   {(() => {
+                    // Detectar error de cancelación de MetaMask de forma más robusta
+                    const errorAny = error as any
+                    const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                    const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
                     const errorMsg = error.message || String(error) || ''
                     const errorStr = errorMsg.toLowerCase()
+                    const errorNameStr = errorName.toLowerCase()
                     
-                    // Usuario canceló en MetaMask
-                    if (errorStr.includes('user rejected') || errorStr.includes('user denied') || errorStr.includes('rejected') || errorStr.includes('cancelled')) {
-                      return 'Transaction cancelled by user in MetaMask'
+                    // Usuario canceló en MetaMask (código 4001 o UserRejectedRequestError)
+                    const isUserCancelled = 
+                      errorCode === 4001 ||
+                      errorNameStr.includes('userrejected') ||
+                      errorStr.includes('user rejected') ||
+                      errorStr.includes('user denied') ||
+                      errorStr.includes('user cancelled') ||
+                      errorStr.includes('transaction cancelled') ||
+                      errorStr.includes('cancelled by user')
+                    
+                    if (isUserCancelled) {
+                      return (
+                        <div>
+                          <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                          <p className="text-sm mb-2">
+                            You cancelled the transaction in MetaMask. No changes were made.
+                          </p>
+                          <p className="text-sm">
+                            You can try again by clicking "Submit Registration" below.
+                          </p>
+                        </div>
+                      )
                     }
                     
                     // Errores del contrato
@@ -189,32 +230,62 @@ export function RegisterForm({ onRegistrationSuccess }: RegisterFormProps = {}) 
                       return 'Transaction rejected by the contract. This may happen if you already have this role or if the contract is paused.'
                     }
                     
-                    // Error de dropped/rejected de MetaMask
-                    if (errorStr.includes('dropped') || errorStr.includes('rejected')) {
+                    // Error de dropped/rejected de MetaMask (pero no cancelación)
+                    if (errorStr.includes('dropped') || (errorStr.includes('rejected') && !isUserCancelled)) {
                       return 'Transaction was dropped or rejected. This may happen if you already have this role pending approval, if you are already approved, or if the contract is paused.'
                     }
                     
-                    // Mostrar el mensaje completo para debugging
-                    return errorMsg || 'An unexpected error occurred during registration'
+                    // Mostrar el mensaje completo solo en desarrollo
+                    if (process.env.NODE_ENV === 'development') {
+                      return errorMsg || 'An unexpected error occurred during registration'
+                    }
+                    
+                    // En producción, mostrar mensaje genérico
+                    return 'An error occurred during registration. Please try again or contact support if the problem persists.'
                   })()}
-                </p>
-                {/* Mostrar detalles del error en desarrollo */}
-                {process.env.NODE_ENV === 'development' && (
-                  <details className="mt-2">
-                    <summary className="text-xs text-red-500 cursor-pointer">Error details (dev only)</summary>
-                    <pre className="text-xs mt-1 p-2 bg-red-100 rounded overflow-auto max-h-32">
-                      {JSON.stringify(error, null, 2)}
-                    </pre>
-                  </details>
-                )}
-              </div>
+                </AlertDescription>
+                {/* Mostrar detalles del error SOLO en desarrollo y SOLO si no es cancelación de usuario */}
+                {process.env.NODE_ENV === 'development' && (() => {
+                  const errorAny = error as any
+                  const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                  const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                  const errorMsg = error.message || String(error) || ''
+                  const errorStr = errorMsg.toLowerCase()
+                  const errorNameStr = errorName.toLowerCase()
+                  
+                  const isUserCancelled = 
+                    errorCode === 4001 ||
+                    errorNameStr.includes('userrejected') ||
+                    errorStr.includes('user rejected') ||
+                    errorStr.includes('user denied') ||
+                    errorStr.includes('user cancelled') ||
+                    errorStr.includes('transaction cancelled') ||
+                    errorStr.includes('cancelled by user')
+                  
+                  // No mostrar detalles técnicos si el usuario canceló
+                  if (isUserCancelled) {
+                    return null
+                  }
+                  
+                  return (
+                    <details className="mt-2">
+                      <summary className="text-xs text-red-500 cursor-pointer hover:text-red-700">
+                        ▼ Error details (dev only)
+                      </summary>
+                      <pre className="text-xs mt-1 p-2 bg-red-100 dark:bg-red-900/30 rounded overflow-auto max-h-32">
+                        {JSON.stringify(error, null, 2)}
+                      </pre>
+                    </details>
+                  )
+                })()}
+              </Alert>
             )}
 
             {/* Botón de envío */}
             <Button 
               type="submit" 
               className="w-full"
-              disabled={!selectedRole || isTransactionPending || isConfirming}
+              disabled={isCanceled || !selectedRole || isTransactionPending || isConfirming}
             >
               {isTransactionPending && !hash ? 'Waiting for signature...' : hash && isConfirming ? 'Confirming transaction...' : 'Submit Registration'}
             </Button>

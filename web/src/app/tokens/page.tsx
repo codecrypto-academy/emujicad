@@ -25,18 +25,36 @@ export default function TokensPage() {
   const router = useRouter()
   const { address, isConnected } = useAccount()
   const { isAuthenticated, isLoading: isLoadingAuth, userInfo, isAdmin: isAdminFromAuth } = useAuth()
-  const { owner, isLoading: isLoadingOwner } = useContractOwner()
-  const { tokens, isLoading, error, totalTokens } = useGetUserTokensWithData(address)
-  const { data: isPaused } = useIsPaused()
+  
+  // CRÍTICO: TODOS los hooks deben estar ANTES de cualquier return condicional
+  // Esto previene el error "Rendered more hooks than during the previous render"
+  // ORDEN FIJO: useState, hooks de datos, useEffect, useMemo
+  
+  // 1. TODOS los useState juntos (DEBEN estar todos juntos al principio)
+  const [mounted, setMounted] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  // Inicializar filtro con valor por defecto (sin depender de variables que pueden cambiar)
+  const [filterType, setFilterType] = useState<'all' | 'raw' | 'finished'>('all')
+  const tokensPerPage = 12
+  
+  // Activar diseño moderno si está habilitado
+  const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
+  
+  // 2. Hooks de datos - se ejecutan siempre, pero se deshabilitan si no está autenticado
+  // Usar isAuthenticated para habilitar/deshabilitar consultas
+  const shouldFetchData = isConnected && !isLoadingAuth && isAuthenticated
+  
+  const { owner, isLoading: isLoadingOwner } = useContractOwner(shouldFetchData)
+  const { tokens, isLoading, error, totalTokens } = useGetUserTokensWithData(
+    shouldFetchData ? address : undefined
+  )
+  const { data: isPaused } = useIsPaused(shouldFetchData)
   
   // Verificación directa de admin (más rápida que esperar por AuthContext)
   const isAdminDirect = address && owner && address.toLowerCase() === owner.toLowerCase()
   const isAdmin = isAdminDirect || isAdminFromAuth
   const isLoadingAdminCheck = isLoadingOwner || isLoadingAuth
-  
-  const [mounted, setMounted] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [shouldBlockRender, setShouldBlockRender] = useState(true)
   
   // Determinar el rol del usuario y configurar filtros según el rol
   const userRole = userInfo ? Number(userInfo.role) : null
@@ -50,18 +68,56 @@ export default function TokensPage() {
   // Retailer/Consumer: solo productos terminados, no necesitan filtro
   const shouldShowTypeFilter = isFactory
   
-  // Inicializar filtro según el rol
-  const [filterType, setFilterType] = useState<'all' | 'raw' | 'finished'>(() => {
-    if (isProducer) return 'raw' // Producer solo ve materia prima
-    if (isRetailer || isConsumer) return 'finished' // Retailer/Consumer solo ven productos terminados
-    return 'all' // Factory ve todos por defecto
-  })
+  // 3. TODOS los useEffect juntos (DEBEN estar todos juntos, antes de cualquier return)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // CRÍTICO: Redirigir INMEDIATAMENTE si no está conectado o no está autenticado
+  // NO esperar a que termine de cargar - redirigir tan pronto como sepamos que no está autorizado
+  useEffect(() => {
+    if (!mounted) return
+    
+    // Si no está conectado, redirigir inmediatamente
+    if (!isConnected) {
+      router.replace('/')
+      return
+    }
+    
+    // Si ya terminó de cargar y no está autenticado, redirigir INMEDIATAMENTE
+    // No esperar más - si isLoadingAuth es false y isAuthenticated es false, redirigir
+    if (!isLoadingAuth && !isAuthenticated) {
+      router.replace('/')
+      return
+    }
+  }, [mounted, isConnected, isAuthenticated, isLoadingAuth, router])
   
-  const [currentPage, setCurrentPage] = useState(1)
-  const tokensPerPage = 12
+  // Redirigir si es Administrador (después de verificar autenticación)
+  useEffect(() => {
+    if (!mounted || isLoadingAdminCheck) return
+    
+    // Administrador (owner del contrato) no maneja tokens, redirigir al dashboard
+    if (isAdmin) {
+      router.replace('/dashboard')
+      return
+    }
+  }, [mounted, isLoadingAdminCheck, isAdmin, router])
   
-  // Activar diseño moderno si está habilitado
-  const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
+  // Inicializar filtro según el rol (usar useEffect en lugar de función inicializadora)
+  useEffect(() => {
+    if (isProducer) {
+      setFilterType('raw')
+    } else if (isRetailer || isConsumer) {
+      setFilterType('finished')
+    } else if (isFactory) {
+      setFilterType('all')
+    }
+  }, [isProducer, isFactory, isRetailer, isConsumer])
+  
+  // Resetear página cuando cambian los filtros
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filterType, searchQuery])
   
   // Debug: verificar que la variable se lea (solo en desarrollo)
   useEffect(() => {
@@ -71,10 +127,7 @@ export default function TokensPage() {
     }
   }, [useModernDesign])
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
+  // 4. TODOS los useMemo juntos (DEBEN estar ANTES de cualquier return condicional)
   // Función para normalizar strings (remover acentos y convertir a minúsculas)
   const normalizeString = (str: string): string => {
     return str
@@ -84,7 +137,7 @@ export default function TokensPage() {
       .trim()
   }
 
-  // Filtrar tokens por tipo y búsqueda (DEBE estar antes de cualquier return condicional)
+  // Filtrar tokens por tipo y búsqueda
   const filteredTokens = useMemo(() => {
     if (!tokens || tokens.length === 0) return []
 
@@ -122,53 +175,31 @@ export default function TokensPage() {
     })
   }, [tokens, filterType, searchQuery, isProducer, isFactory, isRetailer, isConsumer])
 
-  // Paginación (DEBE estar antes de cualquier return condicional)
+  // Paginación
   const totalPages = Math.ceil(filteredTokens.length / tokensPerPage)
   const startIndex = (currentPage - 1) * tokensPerPage
   const endIndex = startIndex + tokensPerPage
   const paginatedTokens = filteredTokens.slice(startIndex, endIndex)
 
-  // Resetear página cuando cambian los filtros
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [filterType, searchQuery])
-
-  // Redirigir si no está autenticado o si es Administrador (después de todos los hooks)
-  useEffect(() => {
-    if (!mounted || isLoadingAdminCheck) return
-    
-    if (!isConnected) {
-      router.replace('/')
-      return
-    }
-    
-    // Administrador (owner del contrato) no maneja tokens, redirigir al dashboard
-    // Verificar esto PRIMERO para evitar cualquier renderizado
-    if (isAdmin) {
-      router.replace('/dashboard')
-      return
-    }
-    
-    if (!isAuthenticated) {
-      router.replace('/')
-      return
-    }
-  }, [mounted, isConnected, isAuthenticated, isLoadingAdminCheck, isAdmin, router])
-
-  // Early return DESPUÉS de todos los hooks
-  // NO renderizar NADA hasta que sepamos si es admin o no (evitar cualquier flash)
-  if (!mounted || !isConnected || isLoadingAdminCheck) {
+  // CRÍTICO: Early return DESPUÉS de TODOS los hooks (useState, hooks de datos, useEffect, useMemo)
+  // Esto previene cualquier renderizado innecesario
+  if (!mounted || !isConnected) {
     return null
   }
   
+  // CRÍTICO: Si ya terminó de cargar y no está autenticado, redirigir INMEDIATAMENTE
+  // No esperar más - mostrar null mientras se redirige
+  if (!isLoadingAuth && !isAuthenticated) {
+    return null // Redirección en progreso
+  }
+  
+  // Si aún está cargando, mostrar null (no hacer consultas todavía)
+  if (isLoadingAuth) {
+    return null
+  }
+
   // Si es Administrador, NO renderizar nada (redirección en progreso)
-  // Esta verificación debe ser ANTES de cualquier otro renderizado
   if (isAdmin) {
-    return null
-  }
-  
-  // Si no está autenticado, no renderizar contenido (redirección en progreso)
-  if (!isAuthenticated) {
     return null
   }
 

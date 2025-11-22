@@ -8,11 +8,17 @@ import { useAuth } from '@/contexts/AuthContext'
 /**
  * Componente que maneja redirecciones automáticas basadas en el estado de autenticación
  * 
- * Lógica:
- * 1. Si es admin → redirigir a /dashboard (admin dashboard)
- * 2. Si es usuario aprobado → redirigir a /dashboard (user dashboard)
- * 3. Si no está registrado → permanecer en / (mostrar formulario de registro)
- * 4. Si está registrado pero no aprobado → permanecer en / (mostrar estado pendiente)
+ * Lógica según requerimientos:
+ * 1. Al conectar → verificar admin inmediatamente
+ *    - Si es admin → redirigir a /dashboard (admin dashboard)
+ * 2. Si no es admin → verificar registro inmediatamente
+ *    - Si está registrado → verificar rol y estatus
+ *      - Si está aprobado → redirigir a /dashboard (user dashboard)
+ *      - Si no está aprobado → permanecer en / (mostrar estado pendiente)
+ *    - Si no está registrado → permanecer en / (mostrar formulario de registro)
+ * 
+ * La información se recolecta UNA SOLA VEZ en AuthContext y persiste durante toda la sesión.
+ * Se actualiza automáticamente cuando cambia el usuario o se desconecta.
  * 
  * Este componente debe estar en el layout para que funcione en todas las páginas
  */
@@ -20,30 +26,33 @@ export function AuthRedirect() {
   const router = useRouter()
   const pathname = usePathname()
   const { isConnected } = useAccount()
-  const { isAdmin, isAuthenticated, isLoading } = useAuth()
+  const { isAdmin, isAuthenticated, isLoading, userInfo } = useAuth()
 
   useEffect(() => {
-    // No hacer nada si aún está cargando
-    if (isLoading) return
-
     // No hacer nada si no está conectado
     if (!isConnected) return
 
-    // Si es admin, redirigir a dashboard (excepto si ya está ahí o en admin pages)
-    if (isAdmin) {
+    // ============================================
+    // LÓGICA 1: Si es admin → redirigir a dashboard
+    // ============================================
+    // Verificar admin INMEDIATAMENTE si ya terminó de cargar
+    if (!isLoading && isAdmin) {
       // Permitir acceso a páginas de admin
       if (pathname?.startsWith('/admin')) {
         return
       }
-      // Si está en otra página, redirigir a dashboard
+      // Si está en otra página (incluyendo home), redirigir a dashboard
       if (pathname !== '/dashboard') {
         router.replace('/dashboard')
       }
       return
     }
 
-    // Si es usuario aprobado, redirigir a dashboard desde home
-    if (isAuthenticated) {
+    // ============================================
+    // LÓGICA 2: Si es usuario aprobado → permitir acceso
+    // ============================================
+    // Verificar autenticación INMEDIATAMENTE si ya terminó de cargar
+    if (!isLoading && isAuthenticated) {
       // Si está en home, redirigir a dashboard
       if (pathname === '/') {
         router.replace('/dashboard')
@@ -52,15 +61,20 @@ export function AuthRedirect() {
       return
     }
 
-    // Si no está autenticado (no registrado o no aprobado)
-    // Solo redirigir a home si está en una página protegida
-    if (!isAuthenticated) {
+    // ============================================
+    // LÓGICA 3: Si no está autenticado (no registrado o no aprobado)
+    // ============================================
+    // CRÍTICO: Redirigir INMEDIATAMENTE si ya terminó de cargar y no está autenticado
+    // NO esperar más - si isLoading es false y isAuthenticated es false, redirigir
+    if (!isLoading && !isAuthenticated) {
       const protectedPaths = ['/dashboard', '/tokens', '/transfers', '/profile']
       if (pathname && protectedPaths.some(path => pathname.startsWith(path))) {
         router.replace('/')
       }
+      // Si está en home, permanecer ahí (mostrar registro o estado pendiente)
+      return
     }
-  }, [isLoading, isConnected, isAdmin, isAuthenticated, pathname, router])
+  }, [isLoading, isConnected, isAdmin, isAuthenticated, pathname, router, userInfo])
 
   // Este componente no renderiza nada
   return null
