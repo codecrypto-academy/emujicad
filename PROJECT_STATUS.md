@@ -7,7 +7,7 @@
 
 ## 🎯 ESTADO ACTUAL (Snapshot)
 
-### Puntuación Académica: **8.0/10** ✅ APROBATORIO
+### Puntuación Académica: **7.0/9.5** ✅ APROBATORIO
 
 | Componente | Actual | Máximo | Estado |
 |------------|--------|---------|---------|
@@ -25,9 +25,9 @@
 
 ### Smart Contract (4.0/4.0 puntos)
 ```
-✅ SupplyChain.sol - 943 líneas
-✅ 73 tests (55 core + 18 edge cases) - 100% pasando
-✅ Coverage: 83.33% lines, 61.22% branches
+✅ SupplyChain.sol - 970 líneas
+✅ 80 tests (55 core + 18 edge cases + 7 nuevos) - 100% pasando
+✅ Coverage: 83.33% lines, 64.41% branches
 ✅ Deployed en Anvil (ChainID 31337)
 ✅ Scripts deployment automatizados
 ✅ Documentación completa (18 archivos en docs/sc/)
@@ -41,32 +41,35 @@
 ✅ wagmi 2.12 + viem 2.21 + ethers 6.13
 ✅ RainbowKit + MetaMask configurado
 ✅ Layout con providers (web/src/app/layout.tsx)
-✅ Landing page MEJORADA (web/src/app/page.tsx)
-✅ Dashboard page COMPLETO (web/src/app/dashboard/page.tsx) - ✅ NUEVO
-✅ Admin Users page (web/src/app/admin/users/page.tsx)
-✅ Tokens page COMPLETO (web/src/app/tokens/page.tsx) - ✅ Día 5
-✅ Tokens Create page COMPLETO (web/src/app/tokens/create/page.tsx) - ✅ Día 6
+✅ Landing page MEJORADA (web/src/app/page.tsx) - ✅ Diseño Moderno 2025
+✅ Dashboard page COMPLETO (web/src/app/dashboard/page.tsx) - ✅ Diseño Moderno 2025
+✅ Admin Users page (web/src/app/admin/users/page.tsx) - ✅ Diseño Moderno 2025
+✅ Tokens page COMPLETO (web/src/app/tokens/page.tsx) - ✅ Día 5 + Diseño Moderno 2025
+✅ Tokens Create page COMPLETO (web/src/app/tokens/create/page.tsx) - ✅ Día 6 + Diseño Moderno 2025
 ✅ AuthContext completo (web/src/contexts/AuthContext.tsx) - ✅ NUEVO
 
-✅ Componentes específicos implementados (4/5):
+✅ Componentes específicos implementados (5/6):
     - ConnectWallet.tsx (conexión wallet)
     - Header.tsx (navegación + branding + info usuario + pausa badge)
     - ThemeToggle.tsx (modo claro/oscuro con persistencia por usuario)
     - TokenCard.tsx (tarjeta de token con detalles) - ✅ NUEVO
+    - TokenCardModern.tsx (tarjeta moderna 2025 con glassmorphism) - ✅ Día 6
 
-✅ 10 componentes Shadcn UI instalados:
+✅ 11 componentes Shadcn UI instalados:
     - badge, button, card, input, label
-    - select, alert, table, dialog, skeleton
+    - select, alert, table, dialog, skeleton, textarea
 
-✅ 18 hooks personalizados (8 archivos):
+✅ 18+ hooks personalizados (10 archivos):
     - useContractReads.ts (5 hooks lectura)
     - useRequestRole.ts (1 hook escritura)
     - useCreateToken.ts (1 hook escritura)
     - useTransfer.ts (4 hooks escritura)
     - useContractOwner.ts (1 hook lectura)
     - useAdminUsers.ts (2 hooks: getAllUsers + changeUserStatus)
-    - useGetUserTokens.ts (3 hooks: getUserTokens, getToken, getTokenBalance) - ✅ NUEVO
+    - useGetUserTokens.ts (4 hooks: getUserTokens, getToken, getTokenBalance, useGetAllTokens) - ✅ NUEVO
     - usePause.ts (3 hooks: isPaused, pause, unpause) - ✅ NUEVO
+    - useUserTokenStats.ts (1 hook: estadísticas por tipo) - ✅ NUEVO
+    - useGetUserTokensWithData.ts (1 hook: tokens con datos completos) - ✅ NUEVO
 
 ✅ Componentes admin implementados:
     - UserManagementTable.tsx (tabla + filtros + acciones + pausa)
@@ -90,10 +93,17 @@
     - Prevención de flash de contenido (hydration)
     - Doble conexión MetaMask arreglada
     - Sistema de pausabilidad completo:
-      - PauseControl para admin
+      - PauseControl para admin (con diseño moderno)
       - Badge de "Contract Pausado" en Header
       - Deshabilitación de funciones cuando está pausado
       - Mensajes informativos en todos los componentes afectados
+    - Diseño Moderno 2025 ⭐ NUEVO:
+      - Glassmorphism (backdrop-blur-xl)
+      - Gradientes azul-púrpura
+      - Animaciones suaves
+      - Bordes redondeados modernos
+      - Controlado por NEXT_PUBLIC_MODERN_DESIGN
+      - Aplicado a 5 páginas principales
 ```
 
 ### Documentación (100%)
@@ -131,16 +141,17 @@
 
 **Progreso**: 5/9 páginas (56%) ⭐ Día 6
 
-### 🚨 PRIORIDAD 2: Componentes Específicos (4/5 implementados)
+### 🚨 PRIORIDAD 2: Componentes Específicos (5/6 implementados)
 ```
 ✅ ConnectWallet.tsx                       - IMPLEMENTADO
 ✅ Header.tsx                              - IMPLEMENTADO (navegación + branding + theme toggle + pausa)
 ✅ ThemeToggle.tsx                         - IMPLEMENTADO (modo claro/oscuro con persistencia)
 ✅ TokenCard.tsx                           - IMPLEMENTADO (tarjeta de token completa)
+✅ TokenCardModern.tsx                     - IMPLEMENTADO (diseño moderno 2025) ⭐ Día 6
 ❌ TransferList.tsx                        - Lista transferencias
 ```
 
-**Progreso**: 4/5 componentes (80%)
+**Progreso**: 5/6 componentes (83%)
 
 ### 🚨 PRIORIDAD 3: Hooks Adicionales (6/8 implementados)
 **Necesarios para las páginas**:
@@ -191,8 +202,8 @@
 
 ---
 
-### **🗓️ Día 6 - Sábado 22 Nov (Tokens - Crear)** ✅ COMPLETADO
-**Tiempo**: 4-5 horas | **Impacto**: +0.1 puntos
+### **🗓️ Día 6 - Viernes 21 Nov (Tokens - Crear + Diseño Moderno)** ✅ COMPLETADO
+**Tiempo**: 6-8 horas | **Impacto**: +0.1 puntos + UX mejorado
 
 #### Tareas:
 ```typescript
@@ -202,6 +213,10 @@
 4. [x] Validación de pausa del contrato ✅ ya implementado
 5. [x] Select para parent token (si aplica) ✅
 6. [x] Testing manual de crear token ✅
+7. [x] Implementar diseño moderno 2025 en todas las páginas ✅
+8. [x] Crear TokenCardModern.tsx con glassmorphism ✅
+9. [x] Aplicar diseño moderno a PauseControl ✅
+10. [x] Actualizar todas las páginas con diseño moderno ✅
 ```
 
 **Hooks a usar**:
@@ -211,7 +226,7 @@
 
 ---
 
-### **🗓️ Día 7 - Domingo 23 Nov (Transferencias)**
+### **🗓️ Día 7 - Sábado 22 Nov (Transferencias)**
 **Tiempo**: 6-8 horas | **Impacto**: +0.2 puntos
 
 #### Tareas:
@@ -234,7 +249,7 @@
 
 ---
 
-### **🗓️ Día 8 - Lunes 24 Nov (Páginas Adicionales)**
+### **🗓️ Día 8 - Domingo 23 Nov (Páginas Adicionales)**
 **Tiempo**: 4-6 horas | **Impacto**: +0.1 puntos
 
 #### Tareas:
@@ -247,7 +262,7 @@
 
 ---
 
-### **🗓️ Día 9 - Martes 25 Nov (Video Demo)**
+### **🗓️ Día 9 - Lunes 24 Nov (Video Demo)**
 **Tiempo**: 3-4 horas | **Impacto**: +1.5 puntos
 
 #### Script del video (5 minutos):
@@ -336,12 +351,13 @@ Completado:
 ├── ✅ Tokens page (lista) (100%) - ✅ Día 5
 ├── ✅ Tokens Create page (100%) - ✅ Día 6
 ├── ✅ 18 Hooks (89% de los necesarios)
-├── ✅ 10 Componentes UI Shadcn (100%)
-├── ✅ 4 Componentes específicos (80%)
+├── ✅ 11 Componentes UI Shadcn (100%)
+├── ✅ 5 Componentes específicos (83%)
 │   ├── ConnectWallet
 │   ├── Header
 │   ├── ThemeToggle
-│   └── TokenCard - ✅ Día 4
+│   ├── TokenCard - ✅ Día 4
+│   └── TokenCardModern - ✅ Día 6
 ├── ✅ 4 Componentes admin (100%)
 │   ├── UserManagementTable
 │   ├── UserStatsCards
@@ -379,10 +395,10 @@ Pendiente:
 ✅ Día 3 - Admin Panel + Header + Theme Toggle (Miércoles 20 Nov)
 ✅ Día 4 - Dashboard + TokenCard + PauseControl + AuthContext (Jueves 20 Nov) - ✅ COMPLETADO
 ✅ Día 5 - Tokens (lista) (Viernes 21 Nov) - ✅ COMPLETADO
-✅ Día 6 - Tokens (crear) (Sábado 22 Nov) - ✅ COMPLETADO
-→  Día 7 - Transferencias (Domingo 23 Nov) (SIGUIENTE)
-   Día 8 - Páginas adicionales (Lunes 24 Nov)
-   Día 9 - Video Demo (Martes 25 Nov)
+✅ Día 6 - Tokens (crear) + Diseño Moderno (Viernes 21 Nov) - ✅ COMPLETADO
+→  Día 7 - Transferencias (Sábado 22 Nov) (SIGUIENTE)
+   Día 8 - Páginas adicionales (Domingo 23 Nov)
+   Día 9 - Video Demo (Lunes 24 Nov)
    Día 10-11 - Buffer/refinamiento
    Día 12 - Entrega final (28 Nov)
 ```
@@ -395,7 +411,7 @@ Pendiente:
 ```bash
 # Smart Contract
 cd sc/
-forge test                    # 73 tests deben pasar
+forge test                    # 80 tests deben pasar
 forge coverage --match-path "test/*"  # Verificar coverage
 
 # Frontend
@@ -451,7 +467,7 @@ ls -la src/app/               # Ver páginas implementadas
 ```
 Smart Contract:
 [x] Implementado y funcional
-[x] 73 tests pasando 100%
+[x] 80 tests pasando 100%
 [x] Coverage > 80%
 [x] Desplegado en Anvil
 [x] Documentado
@@ -464,8 +480,8 @@ Frontend:
 [x] Landing page
 [x] Dashboard - ✅ COMPLETADO
 [x] Admin Users - ✅ COMPLETADO
-[ ] Tokens (lista)
-[ ] Tokens (crear)
+[x] Tokens (lista) - ✅ COMPLETADO ⭐ Día 5
+[x] Tokens (crear) - ✅ COMPLETADO ⭐ Día 6
 [ ] Tokens (detalles)
 [ ] Tokens (transferir)
 [ ] Transferencias
@@ -504,14 +520,20 @@ Video:
 ✅ Fixed: Logs verbosos en consola (comentados logs de validación)
 ✅ Fixed: Botones de navegación no funcionaban (agregado type="button" y preventDefault)
 ✅ Fixed: Botón "My Tokens" redundante en página /tokens (oculto cuando pathname === '/tokens')
+✅ Fixed: Error de sintaxis JSX en UserManagementTable (código duplicado eliminado)
 ✅ Enhanced: TokenCard usa useRef para datos estables sin loops infinitos
 ✅ Enhanced: Dashboard mantiene tokens visibles durante refetch
 ✅ Enhanced: Header oculta botones cuando estás en esa página
+✅ Implemented: Diseño Moderno 2025 aplicado a todas las páginas principales ⭐ NUEVO
+✅ Implemented: TokenCardModern.tsx con glassmorphism y gradientes ⭐ NUEVO
+✅ Implemented: PauseControl con diseño moderno ⭐ NUEVO
+✅ Enhanced: Todas las páginas con glassmorphism, gradientes y animaciones ⭐ NUEVO
 
 Progreso:
 - Páginas: 4/9 (44%) → 5/9 (56%)
-- Correcciones: 6 bugs críticos resueltos
-- UX: Interfaz más estable y sin parpadeos
+- Correcciones: 7 bugs críticos resueltos
+- UX: Interfaz más estable, sin parpadeos, diseño moderno 2025 aplicado
+- Componentes: TokenCardModern agregado, diseño moderno en 5 páginas
 ```
 
 ### Día 5 - Sesión Anterior (21 Nov, 2025) ✅ COMPLETADO

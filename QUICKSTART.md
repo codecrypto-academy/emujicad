@@ -6,25 +6,25 @@
 
 ## 📊 Estado de Implementación del Frontend
 
-### 📄 Páginas Implementadas (3 de 9)
+### 📄 Páginas Implementadas (5 de 9)
 
 ```
 web/src/app/
-├── page.tsx                    ✅ IMPLEMENTADO - Landing con MetaMask + Stats
-├── dashboard/page.tsx          ✅ IMPLEMENTADO - Panel principal por rol COMPLETO
+├── page.tsx                    ✅ IMPLEMENTADO - Landing con MetaMask + Stats (Diseño Moderno 2025)
+├── dashboard/page.tsx          ✅ IMPLEMENTADO - Panel principal por rol COMPLETO (Diseño Moderno 2025)
 ├── tokens/
-│   ├── page.tsx               ❌ PENDIENTE - Lista de tokens usuario
-│   ├── create/page.tsx        ❌ PENDIENTE - Formulario crear token
+│   ├── page.tsx               ✅ IMPLEMENTADO - Lista de tokens usuario (Diseño Moderno 2025) ⭐ Día 5
+│   ├── create/page.tsx        ✅ IMPLEMENTADO - Formulario crear token (Diseño Moderno 2025) ⭐ Día 6
 │   ├── [id]/page.tsx          ❌ PENDIENTE - Detalles token
 │   └── [id]/transfer/page.tsx ❌ PENDIENTE - Transferir token
 ├── transfers/page.tsx         ❌ PENDIENTE - Gestión transferencias
 ├── admin/
 │   ├── page.tsx               ❌ PENDIENTE - Panel admin principal
-│   └── users/page.tsx         ✅ IMPLEMENTADO - Gestión completa de usuarios
+│   └── users/page.tsx         ✅ IMPLEMENTADO - Gestión completa de usuarios (Diseño Moderno 2025)
 └── profile/page.tsx           ❌ PENDIENTE - Perfil usuario
 ```
 
-**Progreso**: 3/9 páginas (33%)
+**Progreso**: 5/9 páginas (56%) ⭐ Día 6
 
 ### 🧩 Componentes Específicos (4 de 5 implementados)
 
@@ -34,10 +34,11 @@ web/src/components/
 ├── Header.tsx                 ✅ IMPLEMENTADO - Navegación + branding + pausa badge
 ├── ThemeToggle.tsx            ✅ IMPLEMENTADO - Modo claro/oscuro con persistencia
 ├── TokenCard.tsx              ✅ IMPLEMENTADO - Tarjeta de token completa
+├── TokenCardModern.tsx        ✅ IMPLEMENTADO - Tarjeta moderna 2025 (glassmorphism) ⭐ NUEVO
 └── TransferList.tsx           ❌ PENDIENTE - Lista transferencias
 ```
 
-**Progreso**: 4/5 componentes específicos (80%)
+**Progreso**: 5/6 componentes específicos (83%) - Incluye diseño moderno
 
 ### 🎨 Componentes Adicionales Implementados
 
@@ -53,8 +54,24 @@ web/src/components/
     └── PauseControl.tsx         ✅ Control de pausa del contrato
 ```
 
-**Total componentes personalizados**: 11 implementados
-**Componentes Shadcn UI**: 10 componentes (button, card, input, label, select, table, badge, dialog, alert, skeleton)
+**Total componentes personalizados**: 12 implementados (incluye TokenCardModern)
+**Componentes Shadcn UI**: 10 componentes (button, card, input, label, select, table, badge, dialog, alert, skeleton, textarea)
+
+### 🎨 Diseño Moderno 2025 ⭐ NUEVO
+**Características implementadas**:
+- Glassmorphism (efectos de vidrio con `backdrop-blur-xl`)
+- Gradientes azul-púrpura en títulos y botones
+- Animaciones suaves y efectos hover
+- Bordes redondeados (`rounded-2xl`, `rounded-3xl`)
+- Sombras modernas (`shadow-lg`, `shadow-2xl`)
+- Controlado por variable de entorno: `NEXT_PUBLIC_MODERN_DESIGN=true`
+
+**Páginas con diseño moderno**:
+- ✅ Landing (`/`)
+- ✅ Dashboard (`/dashboard`)
+- ✅ Tokens (`/tokens`)
+- ✅ Crear Token (`/tokens/create`)
+- ✅ Admin Users (`/admin/users`)
 
 ### 🪝 Hooks Personalizados (18 implementados)
 
@@ -134,8 +151,8 @@ chmod +x deploy.sh
 - **Solidity** 0.8.30
 - **Foundry** (Forge + Anvil)
 - **OpenZeppelin** Contracts
-- **934 líneas** de código
-- **73 tests** (83.33% coverage)
+- **971 líneas** de código
+- **80 tests** (83.33% lines, 64.41% branches)
 
 ### Frontend
 - **Next.js** 16.0.1
@@ -343,19 +360,19 @@ Ver **[docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATI
 
 ## 📊 Estado Actual del Proyecto
 
-**Día 4 Completado** - 21 de Noviembre 2025
+**Día 6 Completado** - 21 de Noviembre 2025
 
 ### 🎯 Comparación con Estructura de Referencia
 
-**Puntuación General: 8.0/10** ✅ (Dashboard completo, sistema de pausabilidad, infraestructura 75%, todas las tareas de baja prioridad completadas)
+**Puntuación General: 7.0/9.5** ✅ (Dashboard completo, sistema de pausabilidad, infraestructura 83%, 5/9 páginas implementadas)
 
 | Componente | README.md | Implementación Actual | Estado |
 |------------|-----------|----------------------|--------|
 | **Infraestructura** | ✅ | ✅ **Superior** (wagmi + viem) | 10/10 |
-| **Hooks personalizados** | ✅ | ✅ **15 hooks** (+3 admin) | 10/10 |
-| **Componentes UI** | ✅ | ✅ **16 componentes** (9 Shadcn + 7 custom) | 10/10 |
-| **Páginas** | ✅ 7 requeridas | ⚠️ **2 de 7** (landing + admin/users) | 3/10 |
-| **Componentes específicos** | ✅ 5 requeridos | ⚠️ **3 de 5** (+RegisterForm, +4 admin) | 6/10 |
+| **Hooks personalizados** | ✅ | ✅ **18 hooks** (5 lectura + 10 escritura + 3 admin) | 10/10 |
+| **Componentes UI** | ✅ | ✅ **22 componentes** (10 Shadcn + 12 custom) | 10/10 |
+| **Páginas** | ✅ 7 requeridas | ⚠️ **5 de 9** (landing + dashboard + admin/users + tokens + create) | 5.5/10 |
+| **Componentes específicos** | ✅ 5 requeridos | ⚠️ **5 de 6** (+TokenCardModern, +RegisterForm, +4 admin) | 8/10 |
 
 ### ✅ Smart Contract (Backend Blockchain):
 
@@ -369,15 +386,15 @@ Este proyecto es parte de un **PFM/TFM** de Master en Blockchain y Web3.
 **Días restantes**: 8 días  
 **Estado**: Día 3 completado (Admin Panel funcional)
 
-**Puntuación actual**: 8.0/10 ✅ APROBATORIO
+**Puntuación actual**: 7.0/9.5 ✅ APROBATORIO
 - Smart Contract: 4.0/4.0 ✅
-- Frontend: 2.8/3.0 (75% implementado) ⚠️
-- Extras: 0.5/1.0 (deploy script + pausabilidad + performance + tests + accesibilidad + animaciones) ⚠️
+- Frontend: 2.5/3.0 (83% implementado - 5/9 páginas) ⚠️
+- Extras: 0.5/1.0 (deploy script + pausabilidad + performance + tests + accesibilidad + animaciones + diseño moderno) ⚠️
 - Video: 0.0/1.5 ❌
 
-**Estado Día 4**: ✅ Todas las tareas de baja prioridad completadas (Performance, Tests, Accesibilidad, Animaciones)
+**Estado Día 6**: ✅ Páginas de Tokens completadas (lista + crear), diseño moderno 2025 aplicado
 
-**Próximo objetivo**: Páginas de Tokens y Transfers (Día 5-6) para completar frontend a 3.0/3.0
+**Próximo objetivo**: Página de Transferencias (Día 7) para completar frontend a 3.0/3.0
 
 Ver **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** para roadmap detallado y próximos pasos.
 
@@ -438,8 +455,9 @@ Ver **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** para roadmap detallado y próxi
 ---
 
 **Creado**: 18 de Noviembre, 2025  
-**Versión**: 1.0.0  
-**Estado**: ✅ Día 1 completado - Listo para desarrollo
+**Última actualización**: 21 de Noviembre, 2025  
+**Versión**: 1.2.0  
+**Estado**: ✅ Día 6 completado - Diseño moderno 2025 aplicado, 5/9 páginas implementadas
 
 ---
 

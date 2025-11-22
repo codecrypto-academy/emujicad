@@ -898,7 +898,8 @@ web/
 - **Archivos modificados**: 2 archivos (layout, page)
 - **Líneas de código**: ~500 líneas de código productivo
 - **Hooks implementados**: 18 hooks (5 lectura + 13 escritura)
-- **Componentes UI**: 21 componentes (10 Shadcn + 11 custom)
+- **Componentes UI**: 22 componentes (10 Shadcn + 12 custom, incluye TokenCardModern)
+- **Diseño Moderno 2025**: Aplicado a 5 páginas principales (glassmorphism, gradientes, animaciones)
 - **Tiempo de setup**: ~1 hora (Día 1)
 - **Estado actual**: Dashboard completo, Admin panel completo, Sistema de pausabilidad completo (Día 4)
 
@@ -1383,9 +1384,11 @@ forge script script/Deploy.s.sol:DeploySupplyChain --rpc-url http://localhost:85
 ## 👨‍💻 Autor
 
 Proyecto académico PFM/TFM - Supply Chain Tracker  
-**Smart Contract**: SupplyChain.sol (934 lines, 73 tests passing, 83.33% coverage)  
+**Smart Contract**: SupplyChain.sol (971 lines, 80 tests passing, 83.33% lines, 64.41% branches)  
 **Blockchain**: Ethereum Local (Anvil)  
-**Fecha límite**: 28 de noviembre, 2025
+**Frontend**: 5/9 páginas implementadas (56%) | Diseño Moderno 2025 aplicado  
+**Fecha límite**: 28 de noviembre, 2025  
+**Última actualización**: 21 de Noviembre, 2025 - Día 6
 
 ---
 

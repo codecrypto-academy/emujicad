@@ -43,16 +43,16 @@ Supply Chain Tracker es una DApp descentralizada para gestionar cadenas de sumin
 
 ### **Métricas del Proyecto**:
 
-- **Smart Contract**: 934 líneas de código
-- **Tests**: 73 tests (100% passing)
-- **Coverage**: 83.33% líneas, 80.09% statements, 61.22% branches
-- **Frontend**: ~3,500+ líneas de código productivo
+- **Smart Contract**: 971 líneas de código
+- **Tests**: 80 tests (100% passing)
+- **Coverage**: 83.33% líneas, 80.09% statements, 64.41% branches
+- **Frontend**: ~4,000+ líneas de código productivo
 - **Hooks**: 18 hooks personalizados (incluye useDashboardStats optimizado)
-- **Componentes**: 21 componentes (11 personalizados + 10 Shadcn UI)
-- **Páginas**: 3 de 9 implementadas (33%)
+- **Componentes**: 22 componentes (12 personalizados + 10 Shadcn UI, incluye TokenCardModern)
+- **Páginas**: 5 de 9 implementadas (56%) - Todas con Diseño Moderno 2025
 - **Tests Frontend**: 17 tests (14 unitarios + 3 E2E) pasando
-- **Tiempo de desarrollo**: ~35 horas (Días 1-4)
-- **Estado**: 8.0/10 ✅ APROBATORIO (75% Frontend)
+- **Tiempo de desarrollo**: ~45 horas (Días 1-6)
+- **Estado**: 7.0/9.5 ✅ APROBATORIO (83% Frontend)
 
 ---
 
@@ -800,8 +800,11 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - [x] Dashboard completo con perfil, tokens y acciones ⭐ Día 4
 - [x] Sistema de pausabilidad completo integrado ⭐ Día 4
 - [x] AuthContext optimizado para redirecciones rápidas ⭐ Día 4
+- [x] Página de Tokens (lista) con filtros y búsqueda ⭐ Día 5
+- [x] Página de Crear Token con validaciones ⭐ Día 6
+- [x] Diseño Moderno 2025 aplicado a 5 páginas ⭐ Día 6
 
-### **✅ Día 4 (21 Nov)**: Dashboard y Optimizaciones ✅ COMPLETADO
+### **✅ Día 4 (20 Nov)**: Dashboard y Optimizaciones ✅ COMPLETADO
 
 - [x] Dashboard completo con UserProfileCard, QuickActions, TokenCard
 - [x] Sistema de pausabilidad completo (PauseControl, validaciones)
@@ -811,6 +814,24 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - [x] Tests implementados (Vitest + Playwright, 17 tests pasando)
 - [x] Accesibilidad (ARIA labels, WCAG AA)
 - [x] Animaciones (transiciones suaves, hover effects)
+
+### **✅ Día 5 (21 Nov)**: Tokens - Lista ✅ COMPLETADO
+
+- [x] Página `/tokens` completa con filtros y búsqueda
+- [x] Hook `useGetAllTokens()` optimizado con batch reads
+- [x] Filtros por tipo de token (condicionales por rol)
+- [x] Búsqueda en tiempo real con normalización de acentos
+- [x] Paginación (12 tokens por página)
+- [x] Diseño Moderno 2025 aplicado
+
+### **✅ Día 6 (21 Nov)**: Tokens - Crear + Diseño Moderno ✅ COMPLETADO
+
+- [x] Página `/tokens/create` completa con validaciones
+- [x] Validación en tiempo real de balance de parent token
+- [x] Restricciones de input basadas en balance disponible
+- [x] Diseño Moderno 2025 aplicado a todas las páginas principales
+- [x] TokenCardModern.tsx creado (glassmorphism, gradientes)
+- [x] PauseControl actualizado con diseño moderno
 
 ### **🔄 Pendiente (Días 5-7 - 22-24 Nov 2025)**:
 - [x] Página `/dashboard`
@@ -822,33 +843,41 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - [x] Estadísticas (solo admin ve "Total Users")
 - [x] Redirección inmediata para usuarios no autenticados
 
-#### **Día 5 (22 Nov)**: Gestión de Tokens - Lista
-- [ ] Página `/tokens`
-- [ ] Tabla de todos los tokens
-- [ ] Hook `useGetAllTokens()` necesario
-- [ ] Filtros por tipo (RowMaterial/FinishedProduct)
-- [ ] Búsqueda por nombre
-- [ ] Ordenamiento por columnas
-- [ ] Paginación
+#### **Día 5 (21 Nov)**: Gestión de Tokens - Lista ✅ COMPLETADO
+- [x] Página `/tokens` ✅
+- [x] Tabla de todos los tokens ✅
+- [x] Hook `useGetAllTokens()` implementado ✅
+- [x] Filtros por tipo (RowMaterial/FinishedProduct) ✅
+- [x] Búsqueda por nombre (con normalización de acentos) ✅
+- [x] Paginación (12 tokens por página) ✅
+- [x] Diseño Moderno 2025 aplicado ✅
 
-#### **Día 5-6 (22-23 Nov)**: Crear Token
-- [ ] Página `/tokens/create`
-- [ ] Formulario con validaciones
-- [ ] Select para tipo de token
-- [ ] Input para supply con validación
-- [ ] Textarea para features (JSON)
-- [ ] Select para parent token (si aplica)
-- [ ] Loading states durante creación
-- [ ] Alert de éxito/error
+#### **Día 6 (21 Nov)**: Crear Token ✅ COMPLETADO
+- [x] Página `/tokens/create` ✅
+- [x] Formulario con validaciones ✅
+- [x] Select para tipo de token ✅
+- [x] Input para supply con validación ✅
+- [x] Textarea para features (JSON) ✅
+- [x] Select para parent token (si aplica) ✅
+- [x] Validación en tiempo real de balance de parent token ✅
+- [x] Loading states durante creación ✅
+- [x] Alert de éxito/error ✅
+- [x] Diseño Moderno 2025 aplicado ✅
 
-#### **Día 5 (22 Nov)**: Detalles de Token
+#### **Día 6 (21 Nov)**: Diseño Moderno 2025 ✅ COMPLETADO
+- [x] TokenCardModern.tsx creado (glassmorphism) ✅
+- [x] Diseño moderno aplicado a 5 páginas principales ✅
+- [x] PauseControl con diseño moderno ✅
+- [x] Variable de entorno NEXT_PUBLIC_MODERN_DESIGN ✅
+
+#### **Pendiente**: Detalles de Token
 - [ ] Página `/tokens/[id]`
 - [ ] Información completa del token
 - [ ] Historial de transferencias
 - [ ] Botón para transferir (si aplica)
 - [ ] Gráfico de supply chain
 
-#### **Día 6 (23 Nov)**: Transferencias
+#### **Día 7 (22 Nov)**: Transferencias
 - [ ] Página `/transfers`
 - [ ] Tabla de transferencias
 - [ ] Filtros: Enviadas/Recibidas/Pending/etc.
@@ -909,21 +938,21 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 ## 📊 Métricas del Proyecto
 
 ### **Smart Contract**:
-- **Líneas de código**: 934
-- **Tests**: 73 (100% passing)
-- **Coverage**: 83.33% lines
+- **Líneas de código**: 971
+- **Tests**: 80 (100% passing)
+- **Coverage**: 83.33% lines, 64.41% branches
 - **Funciones**: 42
 - **Eventos**: 6
 - **Modificadores**: 2
 
 ### **Frontend**:
-- **Líneas de código**: ~1200+
-- **Archivos creados**: 21
-- **Archivos modificados**: 5
-- **Hooks**: 15 (5 lectura + 7 escritura core + 3 admin)
-- **Componentes**: 16 (9 Shadcn + 7 personalizados)
-- **Páginas**: 2 (landing + admin/users)
-- **Features**: Theme toggle, Multi-tab sync, Admin panel completo
+- **Líneas de código**: ~4,000+
+- **Archivos creados**: 25+
+- **Archivos modificados**: 10+
+- **Hooks**: 18 (5 lectura + 10 escritura + 3 admin)
+- **Componentes**: 22 (10 Shadcn + 12 personalizados, incluye TokenCardModern)
+- **Páginas**: 5 de 9 (56%) - Todas con Diseño Moderno 2025
+- **Features**: Theme toggle, Multi-tab sync, Admin panel completo, Diseño Moderno 2025
 
 ### **Tiempo de Desarrollo**:
 - **Smart Contract**: ~6 horas (Día 1)
@@ -933,7 +962,9 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - **Admin Panel**: ~6 horas (Día 2-3)
 - **UI/UX Refinements**: ~4 horas (Día 3)
 - **Dashboard y Optimizaciones**: ~8 horas (Día 4)
-- **Total Días 1-4**: ~28 horas
+- **Tokens (Lista + Crear)**: ~8 horas (Día 5-6)
+- **Diseño Moderno 2025**: ~4 horas (Día 6)
+- **Total Días 1-6**: ~40 horas
 
 ---
 
@@ -985,4 +1016,4 @@ Este proyecto es parte de un trabajo académico y se proporciona con fines educa
 
 ---
 
-**Última actualización**: 18 de Noviembre, 2025
+**Última actualización**: 21 de Noviembre, 2025 - Día 6

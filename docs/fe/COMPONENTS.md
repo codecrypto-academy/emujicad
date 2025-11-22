@@ -6,7 +6,7 @@
 
 ## 📦 Componentes Implementados
 
-### ✅ Componentes Personalizados (11 totales)
+### ✅ Componentes Personalizados (12 totales)
 
 #### **1. ConnectWallet.tsx**
 **Ubicación**: `web/src/components/ConnectWallet.tsx`
@@ -284,7 +284,46 @@ import { TokenCard } from '@/components/TokenCard'
 
 ---
 
-#### **9. UserProfileCard.tsx** ✨ NUEVO (Día 4)
+#### **9. TokenCardModern.tsx** ✨ NUEVO (Día 6)
+**Ubicación**: `web/src/components/TokenCardModern.tsx`  
+**Líneas**: ~180
+
+Versión moderna del TokenCard con diseño 2025 (glassmorphism, gradientes, animaciones).
+
+**Características**:
+- Glassmorphism con `backdrop-blur-xl` y bordes semitransparentes
+- Gradientes azul-púrpura en títulos y elementos
+- Animaciones suaves y efectos hover mejorados
+- Bordes redondeados (`rounded-2xl`, `rounded-3xl`)
+- Sombras modernas (`shadow-lg`, `shadow-2xl`)
+- Misma funcionalidad que TokenCard (balance, onClick, etc.)
+- Diseño minimalista y elegante
+
+**Props**: Mismas que `TokenCard.tsx`
+```tsx
+interface TokenCardModernProps {
+  tokenId?: bigint
+  showBalance?: boolean
+  onClick?: () => void
+}
+```
+
+**Uso**:
+```tsx
+import { TokenCardModern } from '@/components/TokenCardModern'
+
+<TokenCardModern 
+  tokenId={1n} 
+  showBalance={true}
+  onClick={() => router.push(`/tokens/${1}`)} 
+/>
+```
+
+**Activación**: Se usa automáticamente cuando `NEXT_PUBLIC_MODERN_DESIGN=true` en páginas que lo soportan.
+
+---
+
+#### **10. UserProfileCard.tsx** ✨ NUEVO (Día 4)
 **Ubicación**: `web/src/components/UserProfileCard.tsx`  
 **Líneas**: 170
 
@@ -580,6 +619,7 @@ web/src/components/
 ├── RegisterForm.tsx           ✅ IMPLEMENTADO (Día 4: validación pausa)
 ├── ChangeRoleDialog.tsx       ✅ IMPLEMENTADO (Día 4: validación pausa)
 ├── TokenCard.tsx              ✅ IMPLEMENTADO (Día 4)
+├── TokenCardModern.tsx         ✅ IMPLEMENTADO (Día 6 - Diseño Moderno 2025)
 ├── UserProfileCard.tsx        ✅ IMPLEMENTADO (Día 4)
 ├── QuickActions.tsx            ✅ IMPLEMENTADO (Día 4)
 ├── admin/
@@ -618,6 +658,7 @@ Este componente se usará en la página `/transfers` que falta por implementar.
 
 ### Componentes Nuevos:
 - ✅ **TokenCard.tsx** - Tarjeta reutilizable para tokens
+- ✅ **TokenCardModern.tsx** - Versión moderna 2025 con glassmorphism (Día 6)
 - ✅ **UserProfileCard.tsx** - Perfil de usuario
 - ✅ **QuickActions.tsx** - Acciones rápidas con validación de pausa
 - ✅ **PauseControl.tsx** - Control de pausa para admin
