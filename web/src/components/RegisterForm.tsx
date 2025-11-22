@@ -29,7 +29,7 @@ export function RegisterForm({ onRegistrationSuccess, userInfo }: RegisterFormPr
   
   // CRÍTICO: Si el usuario está cancelado, NO puede solicitar un nuevo rol
   // Solo el administrador puede cambiar el estado de Canceled a Pending
-  const isCanceled = userInfo && Number(userInfo.status) === UserStatus.Canceled
+  const isCanceled = Boolean(userInfo && Number(userInfo.status) === UserStatus.Canceled)
   
   // Refetch user info cuando el registro es exitoso
   React.useEffect(() => {
