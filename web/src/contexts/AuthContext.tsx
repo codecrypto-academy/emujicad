@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { useAccount } from 'wagmi';
 import { useUserInfo, useIsAdmin, useUserIdByAddress } from '@/hooks/useContractReads';
 import { UserStatus } from '@/contracts/config';
@@ -13,6 +13,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   userInfo: UserInfo | null;
   isLoading: boolean;
+  refetchUserData: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,24 +22,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { address, isConnected } = useAccount();
   
   // PASO 1: Verificar si es admin PRIMERO (esto es lo más importante)
-  const { data: isAdminData, isLoading: isLoadingAdmin, error: adminError } = useIsAdmin(address);
+  const { data: isAdminData, isLoading: isLoadingAdmin, error: adminError, refetch: refetchAdmin } = useIsAdmin(address);
   
   // PASO 2: Solo si NO es admin, verificar registro
   // Estas consultas solo se ejecutan si sabemos que NO es admin
   const shouldCheckRegistration = isConnected && !isLoadingAdmin && isAdminData === false;
-  const { data: userId, isLoading: isLoadingUserId } = useUserIdByAddress(
+  const { data: userId, isLoading: isLoadingUserId, refetch: refetchUserId } = useUserIdByAddress(
     shouldCheckRegistration ? address : undefined
   );
-  const { data: rawUserInfo, isLoading: isLoadingUser, error: userInfoError } = useUserInfo(
+  const { data: rawUserInfo, isLoading: isLoadingUser, error: userInfoError, refetch: refetchUserInfo } = useUserInfo(
     shouldCheckRegistration ? address : undefined
   );
   
+  // Función para refrescar todos los datos del usuario
+  // Usar useCallback para evitar recreaciones innecesarias
+  const refetchUserData = useCallback(() => {
+    console.log('AuthContext: Refetching user data...');
+    // Refrescar todas las consultas relacionadas con el usuario
+    refetchAdmin();
+    if (shouldCheckRegistration) {
+      refetchUserId();
+      refetchUserInfo();
+    }
+  }, [refetchAdmin, refetchUserId, refetchUserInfo, shouldCheckRegistration]);
+
   const [authState, setAuthState] = useState<AuthContextType>({
     isAdmin: false,
     isApproved: false,
     isAuthenticated: false,
     userInfo: null,
     isLoading: true,
+    refetchUserData,
   });
 
   useEffect(() => {
@@ -63,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: false,
         userInfo: null,
         isLoading: false,
+        refetchUserData,
       });
       return;
     }
@@ -103,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: true,
         userInfo: null, // Admin no tiene userInfo (no está registrado como usuario)
         isLoading: false,
+        refetchUserData,
       });
       return;
     }
@@ -122,6 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: false,
         userInfo: null,
         isLoading: false,
+        refetchUserData,
       });
       return;
     }
@@ -136,6 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: false,
         userInfo: null,
         isLoading: false,
+        refetchUserData,
       });
       return;
     }
@@ -157,6 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: false,
         userInfo: null,
         isLoading: false,
+        refetchUserData,
       });
       return;
     }
@@ -179,6 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: false,
         userInfo: null,
         isLoading: false,
+        refetchUserData,
       });
       return;
     }
@@ -227,8 +247,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated,
       userInfo, // Siempre incluido para que las páginas puedan mostrar el estatus
       isLoading: false,
+      refetchUserData,
     });
-  }, [isConnected, isAdminData, userId, rawUserInfo, isLoadingAdmin, isLoadingUserId, isLoadingUser, address, adminError, userInfoError]);
+  }, [isConnected, isAdminData, userId, rawUserInfo, isLoadingAdmin, isLoadingUserId, isLoadingUser, address, adminError, userInfoError, refetchUserData]);
 
   console.log('AuthContext: Estado actual:', authState);
 
@@ -250,6 +271,7 @@ export function useAuth() {
       isAuthenticated: false,
       userInfo: null,
       isLoading: true,
+      refetchUserData: () => {}, // Función vacía por defecto
     };
   }
   return context;

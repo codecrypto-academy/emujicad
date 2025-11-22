@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation'
 export default function Home() {
   const router = useRouter()
   const { address, isConnected } = useAccount()
-  const { isAdmin, isAuthenticated, isLoading, userInfo } = useAuth()
+  const { isAdmin, isAuthenticated, isLoading, userInfo, refetchUserData } = useAuth()
   
   // Activar diseño moderno si está habilitado
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
@@ -177,7 +177,7 @@ export default function Home() {
                           You will be able to access the system once approved.
                         </p>
                         <div className="pt-4 border-t border-yellow-200 dark:border-yellow-800">
-                          <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} />
+                          <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} onSuccess={refetchUserData} />
                         </div>
                       </div>
                     </div>
@@ -196,7 +196,7 @@ export default function Home() {
                           You can request a different role or contact the administrator for more information.
                         </p>
                         <div className="pt-4 border-t border-red-200 dark:border-red-800">
-                          <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} />
+                          <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} onSuccess={refetchUserData} />
                         </div>
                       </div>
                     </div>
@@ -328,7 +328,7 @@ export default function Home() {
                         You will be able to access the system once approved.
                       </p>
                       <div className="pt-4 border-t">
-                        <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} />
+                        <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} onSuccess={refetchUserData} />
                       </div>
                     </CardContent>
                   </Card>
@@ -350,7 +350,7 @@ export default function Home() {
                         You can request a different role or contact the administrator for more information.
                       </p>
                       <div className="pt-4 border-t">
-                        <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} />
+                        <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} onSuccess={refetchUserData} />
                       </div>
                     </CardContent>
                   </Card>

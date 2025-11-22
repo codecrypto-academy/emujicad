@@ -49,14 +49,36 @@ function DialogFormContent({ currentRole, userStatus, onSuccess, onClose }: { cu
     }
   }
 
-  // Detectar cuando el cambio es exitoso y cerrar
+  // Detectar cuando el cambio es exitoso y refrescar datos
   useEffect(() => {
-    if (isSuccess) {
-      const timer = setTimeout(() => {
+    if (isSuccess && onSuccess) {
+      console.log('ChangeRoleDialog: Transacción exitosa, refrescando datos del usuario...')
+      
+      // Refrescar inmediatamente
+      onSuccess()
+      
+      // Refrescar después de 1 segundo (para asegurar que la blockchain se haya actualizado)
+      const timer1 = setTimeout(() => {
+        console.log('ChangeRoleDialog: Refrescando datos después de 1 segundo...')
+        onSuccess()
+      }, 1000)
+      
+      // Refrescar después de 3 segundos (para asegurar que los datos estén completamente actualizados)
+      const timer2 = setTimeout(() => {
+        console.log('ChangeRoleDialog: Refrescando datos después de 3 segundos...')
+        onSuccess()
+      }, 3000)
+      
+      // Cerrar el diálogo después de 2 segundos
+      const timer3 = setTimeout(() => {
         onClose()
-        onSuccess?.()
       }, 2000)
-      return () => clearTimeout(timer)
+      
+      return () => {
+        clearTimeout(timer1)
+        clearTimeout(timer2)
+        clearTimeout(timer3)
+      }
     }
   }, [isSuccess, onClose, onSuccess])
 
