@@ -237,7 +237,7 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
   //   - Roles permitidos: Producer, Factory, Retailer (modifier: onlyTransfersAllowed)
   //   - Condición: Solo transferencias ENVIADAS (transfer.from === msg.sender)
   //   - Status: Solo PENDING
-  
+
   const canAccept = (transfer: TransferData): boolean => {
     if (!addressToUse) return false
     // Solo el DESTINATARIO puede aceptar transferencias RECIBIDAS en estado PENDING
@@ -305,12 +305,12 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
         
         {/* Ocultar "Sent" para Consumer (siempre será 0) */}
         {!isConsumer && (
-          <Card className={cardClass}>
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold">{stats.sent}</div>
-              <p className="text-xs text-muted-foreground">Sent</p>
-            </CardContent>
-          </Card>
+        <Card className={cardClass}>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">{stats.sent}</div>
+            <p className="text-xs text-muted-foreground">Sent</p>
+          </CardContent>
+        </Card>
         )}
         
         <Card className={cardClass}>
@@ -338,19 +338,19 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
           <div className={`grid gap-4 ${isConsumer ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
             {/* Ocultar filtro Direction para Consumer (todas son "received") */}
             {!isConsumer && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Direction</label>
-                <Select value={filterDirection} onValueChange={(value) => setFilterDirection(value as FilterDirection)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="sent">Sent</SelectItem>
-                    <SelectItem value="received">Received</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Direction</label>
+              <Select value={filterDirection} onValueChange={(value) => setFilterDirection(value as FilterDirection)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
+                  <SelectItem value="received">Received</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             )}
             
             <div className="space-y-2">

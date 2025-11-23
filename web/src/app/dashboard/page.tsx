@@ -145,14 +145,14 @@ export default function DashboardPage() {
           {/* Título Moderno */}
           <div className="mb-10 flex items-start justify-between animate-in fade-in slide-in-from-top-4 duration-700">
             <div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-3">
-                {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
-              </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-400">
-                {isAdmin 
-                  ? 'Manage the entire supply chain system' 
-                  : 'Track your tokens and supply chain activities'}
-              </p>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-3">
+              {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
+            </h1>
+            <p className="text-lg text-slate-600 dark:text-slate-400">
+              {isAdmin 
+                ? 'Manage the entire supply chain system' 
+                : 'Track your tokens and supply chain activities'}
+            </p>
             </div>
             <Link href="/profile">
               <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-6 py-6">
@@ -402,14 +402,14 @@ export default function DashboardPage() {
         {/* Título */}
         <div className="mb-8 flex items-start justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2">
-              {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400">
-              {isAdmin 
-                ? 'Manage the entire supply chain system' 
-                : 'Track your tokens and supply chain activities'}
-            </p>
+          <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+            {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400">
+            {isAdmin 
+              ? 'Manage the entire supply chain system' 
+              : 'Track your tokens and supply chain activities'}
+          </p>
           </div>
           <Link href="/profile">
             <Button size="default" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-6 py-5">

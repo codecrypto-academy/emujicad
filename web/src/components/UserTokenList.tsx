@@ -24,7 +24,7 @@ export function UserTokenList() {
   const cardClass = useModernDesign 
     ? "border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-2xl" 
     : ""
-  
+
   // ℹ️ TODOS los roles pueden ver sus tokens (Producer, Factory, Retailer, Consumer)
   // El Consumer puede ver sus tokens pero no puede crear transferencias
 
