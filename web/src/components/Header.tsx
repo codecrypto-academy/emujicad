@@ -80,7 +80,8 @@ export function Header() {
             <div className="flex items-center gap-2 justify-end">
               {/* Button container with fixed width to prevent layout shift */}
               <div className="w-36">
-                {mounted && isAdmin && !isOnAdminPage && (
+                {/* Mostrar "Manage Users" solo cuando NO está en dashboard ni en admin page */}
+                {mounted && isAdmin && !isOnAdminPage && pathname !== '/dashboard' && (
                   <Link href="/admin/users">
                     <Button 
                       variant="outline" 
@@ -241,7 +242,7 @@ export function Header() {
                     </Button>
                   </Link>
                 )}
-                {pathname !== '/profile' && (
+                {pathname !== '/profile' && pathname !== '/dashboard' && (
                   <Link href="/profile">
                     <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
                       Profile
@@ -261,7 +262,7 @@ export function Header() {
                     </Button>
                   </Link>
                 )}
-                {pathname !== '/profile' && (
+                {pathname !== '/profile' && pathname !== '/dashboard' && (
                   <Link href="/profile">
                     <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
                       Profile

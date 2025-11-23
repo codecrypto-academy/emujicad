@@ -155,7 +155,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <Link href="/profile">
-              <Button size="lg" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
+              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-6 py-6">
                 <User className="h-5 w-5 mr-2" />
                 View Profile
               </Button>
@@ -412,7 +412,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <Link href="/profile">
-            <Button size="default" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
+            <Button size="default" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-6 py-5">
               <User className="h-4 w-4 mr-2" />
               View Profile
             </Button>
