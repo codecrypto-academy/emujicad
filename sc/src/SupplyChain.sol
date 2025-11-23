@@ -640,7 +640,7 @@ contract SupplyChain  is ReentrancyGuard {
      * @dev Lanza error si el padre no existe, si el usuario no tiene balance suficiente, o si las validaciones fallan.
      * @dev Para FinishedProduct: valida que el parentId sea RowMaterial, que el usuario tenga balance suficiente, y descuenta los tokens de materia prima.
      * @dev Incrementa contador de tokens y actualiza balance inicial del creador.
-     */
+    */
     function createToken(string memory name, TokenType tokenType, uint totalSupply, string memory features, uint parentId, uint parentAmount) external onlyTokenCreators whenNotPaused {
         if (bytes(name).length == 0) revert InvalidName();
         if (totalSupply == 0) revert InvalidTotalSupply();

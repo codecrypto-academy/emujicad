@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refetchUserInfo();
     }
   }, [refetchAdmin, refetchUserId, refetchUserInfo, shouldCheckRegistration]);
-
+  
   const [authState, setAuthState] = useState<AuthContextType>({
     isAdmin: false,
     isApproved: false,
@@ -157,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       return;
     }
-    
+
     // Esperar por las consultas de registro si aún están cargando
     // Solo si NO sabemos aún si el usuario está registrado
     if (isLoadingAdmin || isLoadingUserId || isLoadingUser) {

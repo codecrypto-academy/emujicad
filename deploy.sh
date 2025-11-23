@@ -351,7 +351,7 @@ update_frontend_config() {
         print_error "No se pudo actualizar la configuración"
         # Restaurar backups
         if [ -f "$CONFIG_FILE.backup" ]; then
-            mv "$CONFIG_FILE.backup" "$CONFIG_FILE"
+        mv "$CONFIG_FILE.backup" "$CONFIG_FILE"
         fi
         if [ -f "$ABI_FILE.backup" ]; then
             mv "$ABI_FILE.backup" "$ABI_FILE"
@@ -456,17 +456,17 @@ stop_services() {
                 kill "$pid" 2>/dev/null || true
             fi
         done
-        sleep 2
-        
+            sleep 2
+            
         # Forzar si siguen corriendo
         for pid in $frontend_pids; do
             if kill -0 "$pid" 2>/dev/null; then
                 kill -9 "$pid" 2>/dev/null || true
             fi
         done
-        
-        print_success "Frontend detenido"
-        stopped_count=$((stopped_count + 1))
+            
+            print_success "Frontend detenido"
+            stopped_count=$((stopped_count + 1))
     else
         print_info "Frontend no está corriendo"
     fi
@@ -505,17 +505,17 @@ stop_services() {
                 kill "$pid" 2>/dev/null || true
             fi
         done
-        sleep 2
-        
+            sleep 2
+            
         # Forzar si siguen corriendo
         for pid in $anvil_pids; do
             if kill -0 "$pid" 2>/dev/null; then
                 kill -9 "$pid" 2>/dev/null || true
             fi
         done
-        
-        print_success "Anvil detenido"
-        stopped_count=$((stopped_count + 1))
+            
+            print_success "Anvil detenido"
+            stopped_count=$((stopped_count + 1))
     else
         print_info "Anvil no está corriendo"
     fi

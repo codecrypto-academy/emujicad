@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAccount } from 'wagmi'
 import { Header } from '@/components/Header'
@@ -19,7 +19,7 @@ import { TokenType, UserRole, UserStatus } from '@/contracts/config'
 import { ArrowLeft, Loader2, AlertTriangle, Pause, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 
-export default function CreateTokenPage() {
+function CreateTokenPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { address, isConnected } = useAccount()
@@ -858,3 +858,10 @@ export default function CreateTokenPage() {
   )
 }
 
+export default function CreateTokenPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Loading...</div>}>
+      <CreateTokenPageContent />
+    </Suspense>
+  )
+}
