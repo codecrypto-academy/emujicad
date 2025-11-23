@@ -51,6 +51,21 @@ export function TokenCardModern({ tokenId, showBalance = false, onClick }: Token
 
   const displayTokenData = stableTokenDataRef.current || tokenData
   const displayBalance = stableBalanceRef.current !== undefined ? stableBalanceRef.current : balance
+  
+  // Obtener datos del token padre si existe (después de que displayTokenData esté definido)
+  const parentTokenId = React.useMemo(() => {
+    if (!displayTokenData?.parentToken) return undefined;
+    return displayTokenData.parentToken !== BigInt(0) ? displayTokenData.parentToken : undefined;
+  }, [displayTokenData?.parentToken]);
+  
+  const { data: rawParentTokenData, isLoading: isLoadingParentToken } = useGetToken(parentTokenId);
+  const parentTokenData = React.useMemo(() => {
+    return rawParentTokenData
+      ? (Array.isArray(rawParentTokenData)
+          ? validateTokenDataTuple(rawParentTokenData) ?? undefined
+          : undefined)
+      : undefined;
+  }, [rawParentTokenData]);
 
   const isInitialLoading = (isLoadingToken && !displayTokenData) || (showBalance && isLoadingBalance && displayBalance === undefined) || tokenId === undefined
 
@@ -159,6 +174,21 @@ export function TokenCardModern({ tokenId, showBalance = false, onClick }: Token
             <AddressDisplay address={displayTokenData.creator || 'N/A'} className="text-xs" />
           </div>
 
+          {/* Parent Token solo para Finished Product (no para Raw Material) */}
+          {!isRowMaterial && displayTokenData.parentToken && displayTokenData.parentToken !== BigInt(0) && (
+            <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700/50">
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Parent Token</span>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">#{displayTokenData.parentToken.toString()}</Badge>
+                {isLoadingParentToken ? (
+                  <span className="text-xs text-slate-500 dark:text-slate-400">Loading...</span>
+                ) : parentTokenData?.name ? (
+                  <span className="text-xs text-slate-500 dark:text-slate-400">({parentTokenData.name})</span>
+                ) : null}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-slate-400" />
@@ -168,6 +198,16 @@ export function TokenCardModern({ tokenId, showBalance = false, onClick }: Token
               {formattedDate}
             </span>
           </div>
+
+          {/* Features - Solo mostrar si hay features */}
+          {displayTokenData.features && displayTokenData.features.length > 0 && displayTokenData.features !== '{}' && (
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-700/50">
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400 block mb-2">Features</span>
+              <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 break-words">
+                {displayTokenData.features}
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -57,6 +57,21 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
   // Usar los refs para display, pero mantener estado para forzar re-render cuando sea necesario
   const displayTokenData = stableTokenDataRef.current || tokenData;
   const displayBalance = stableBalanceRef.current !== undefined ? stableBalanceRef.current : balance;
+  
+  // Obtener datos del token padre si existe
+  const parentTokenId = React.useMemo(() => {
+    if (!displayTokenData?.parentToken) return undefined;
+    return displayTokenData.parentToken !== BigInt(0) ? displayTokenData.parentToken : undefined;
+  }, [displayTokenData?.parentToken]);
+  
+  const { data: rawParentTokenData, isLoading: isLoadingParentToken } = useGetToken(parentTokenId);
+  const parentTokenData = React.useMemo(() => {
+    return rawParentTokenData
+      ? (Array.isArray(rawParentTokenData)
+          ? validateTokenDataTuple(rawParentTokenData) ?? undefined
+          : undefined)
+      : undefined;
+  }, [rawParentTokenData]);
 
   // Solo mostrar loading en la primera carga, no durante refetch
   const isInitialLoading = (isLoadingToken && !displayTokenData) || (showBalance && isLoadingBalance && displayBalance === undefined) || tokenId === undefined;
@@ -147,10 +162,18 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
           <AddressDisplay address={creator} className="text-xs" />
         </div>
 
-               {parentToken !== BigInt(0) && (
+               {/* Parent Token solo para Finished Product (no para Raw Material) */}
+               {!isRawMaterial && parentToken !== BigInt(0) && (
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Parent Token</span>
-            <Badge variant="outline">#{parentToken.toString()}</Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">#{parentToken.toString()}</Badge>
+              {isLoadingParentToken ? (
+                <span className="text-xs text-muted-foreground">Loading...</span>
+              ) : parentTokenData?.name ? (
+                <span className="text-xs text-muted-foreground">({parentTokenData.name})</span>
+              ) : null}
+            </div>
           </div>
         )}
 

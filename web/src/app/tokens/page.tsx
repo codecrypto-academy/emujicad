@@ -746,14 +746,23 @@ export default function TokensPage() {
         {/* Grid de Tokens */}
         {!isLoading && !error && filteredTokens.length > 0 && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
               {paginatedTokens.map((token) => (
-                <TokenCard
-                  key={token.id.toString()}
-                  tokenId={token.tokenId}
-                  showBalance={true}
-                  onClick={() => handleTokenClick(token.tokenId)}
-                />
+                useModernDesign ? (
+                  <TokenCardModern
+                    key={token.id.toString()}
+                    tokenId={token.tokenId}
+                    showBalance={true}
+                    onClick={() => handleTokenClick(token.tokenId)}
+                  />
+                ) : (
+                  <TokenCard
+                    key={token.id.toString()}
+                    tokenId={token.tokenId}
+                    showBalance={true}
+                    onClick={() => handleTokenClick(token.tokenId)}
+                  />
+                )
               ))}
             </div>
 

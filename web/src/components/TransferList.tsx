@@ -32,7 +32,7 @@ import { TransferStatus } from '@/contracts/config'
 import { ArrowRightLeft, CheckCircle2, XCircle, Ban, Clock, Pause, Loader2 } from 'lucide-react'
 import { AddressDisplay } from '@/components/AddressDisplay'
 
-type FilterDirection = 'all' | 'sent' | 'received' | string // string para direcciones específicas de recipients
+type FilterAddress = 'all' | string // string para direcciones específicas
 type FilterStatus = 'all' | 'pending' | 'accepted' | 'rejected' | 'cancelled'
 
 interface TransferListProps {
@@ -49,7 +49,8 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
   const { data: isPaused } = useIsPaused()
   const { userInfo } = useAuth()
   
-  const [filterDirection, setFilterDirection] = useState<FilterDirection>('all')
+  const [filterFrom, setFilterFrom] = useState<FilterAddress>('all')
+  const [filterTo, setFilterTo] = useState<FilterAddress>('all')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
   const [lastSuccessHash, setLastSuccessHash] = useState<string | null>(null)
   
@@ -111,16 +112,14 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
     return map
   }, [tokensData, uniqueTokenIds])
 
-  // Obtener direcciones únicas de Recipients (para Producer: Factory, para Factory: Retailer, etc.)
-  // Mantener las direcciones originales tal cual vienen del contrato
-  const uniqueRecipientAddresses = useMemo(() => {
+  // Obtener direcciones únicas de "To" (destinatarios) - para Producer, Factory, Retailer
+  const uniqueToAddresses = useMemo(() => {
     if (!transfers || transfers.length === 0 || !addressToUse) return []
     
     const recipients = new Map<string, string>() // Map<lowercase, original>
     transfers.forEach((transfer) => {
       // Solo incluir transferencias enviadas por el usuario actual
       if (transfer.from.toLowerCase() === addressToUse.toLowerCase()) {
-        // Usar lowercase como key para evitar duplicados, pero mantener el valor original
         const lowerKey = transfer.to.toLowerCase()
         if (!recipients.has(lowerKey)) {
           recipients.set(lowerKey, transfer.to) // Guardar dirección original
@@ -131,11 +130,23 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
     return Array.from(recipients.values()).sort()
   }, [transfers, addressToUse])
 
-  // Helper para obtener la dirección original desde una dirección (puede estar en cualquier case)
-  const getOriginalAddress = (addr: string): string | undefined => {
-    if (!addr || addr === 'all' || addr === 'sent' || addr === 'received') return undefined
-    return uniqueRecipientAddresses.find(originalAddr => originalAddr.toLowerCase() === addr.toLowerCase())
-  }
+  // Obtener direcciones únicas de "From" (remitentes) - para Factory, Retailer, Consumer
+  const uniqueFromAddresses = useMemo(() => {
+    if (!transfers || transfers.length === 0 || !addressToUse) return []
+    
+    const senders = new Map<string, string>() // Map<lowercase, original>
+    transfers.forEach((transfer) => {
+      // Solo incluir transferencias recibidas por el usuario actual
+      if (transfer.to.toLowerCase() === addressToUse.toLowerCase()) {
+        const lowerKey = transfer.from.toLowerCase()
+        if (!senders.has(lowerKey)) {
+          senders.set(lowerKey, transfer.from) // Guardar dirección original
+        }
+      }
+    })
+    
+    return Array.from(senders.values()).sort()
+  }, [transfers, addressToUse])
 
   // Refetch cuando la transacción sea exitosa (accept, reject, cancel)
   useEffect(() => {
@@ -182,18 +193,17 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
     if (!addressToUse) return []
     
     return transferList.filter((transfer: TransferData) => {
-      // Filtro por dirección de Recipient (para Producer, Factory, Retailer)
-      if (filterDirection !== 'all') {
-        // Si es una dirección específica (no 'sent' ni 'received'), filtrar por esa dirección
-        if (filterDirection !== 'sent' && filterDirection !== 'received') {
-          // Es una dirección específica de Recipient
-          if (transfer.to.toLowerCase() !== filterDirection.toLowerCase()) {
-            return false
-          }
-          // También debe ser una transferencia enviada por el usuario
-          if (transfer.from.toLowerCase() !== addressToUse.toLowerCase()) {
-            return false
-          }
+      // Filtro por dirección "From" (remitente)
+      if (filterFrom !== 'all') {
+        if (transfer.from.toLowerCase() !== filterFrom.toLowerCase()) {
+          return false
+        }
+      }
+
+      // Filtro por dirección "To" (destinatario)
+      if (filterTo !== 'all') {
+        if (transfer.to.toLowerCase() !== filterTo.toLowerCase()) {
+          return false
         }
       }
 
@@ -222,13 +232,13 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
     if (isProducer) return filterTransfers(sentTransfers)
     if (isFactory || isRetailer) return filterTransfers(sentTransfers)
     return []
-  }, [sentTransfers, filterDirection, filterStatus, addressToUse, isProducer, isFactory, isRetailer])
+  }, [sentTransfers, filterFrom, filterTo, filterStatus, addressToUse, isProducer, isFactory, isRetailer])
 
   const filteredReceivedTransfers = useMemo(() => {
     if (isConsumer) return filterTransfers(receivedTransfers)
     if (isFactory || isRetailer) return filterTransfers(receivedTransfers)
     return []
-  }, [receivedTransfers, filterDirection, filterStatus, addressToUse, isConsumer, isFactory, isRetailer])
+  }, [receivedTransfers, filterFrom, filterTo, filterStatus, addressToUse, isConsumer, isFactory, isRetailer])
 
   // Para Producer y Consumer: usar lista única
   const filteredTransfers = useMemo<TransferData[]>(() => {
@@ -391,41 +401,68 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Consumer solo necesita filtro de Status (todas sus transferencias son "received") */}
-          <div className={`grid gap-4 ${isConsumer ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
-            {/* Ocultar filtro Recipient para Consumer (todas son "received") */}
-            {canSendTransfers && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Recipient</label>
-              <Select value={filterDirection} onValueChange={(value) => setFilterDirection(value as FilterDirection)}>
-                <SelectTrigger>
-                  <SelectValue>
-                    {filterDirection === 'all' 
-                      ? 'All' 
-                      : filterDirection === 'sent' || filterDirection === 'received'
-                      ? filterDirection.charAt(0).toUpperCase() + filterDirection.slice(1)
-                      : (() => {
-                          const originalAddr = getOriginalAddress(filterDirection)
-                          return originalAddr ? formatAddress(originalAddr) : 'All'
-                        })()}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  {uniqueRecipientAddresses.length > 0 ? (
-                    uniqueRecipientAddresses.map((recipientAddr) => (
-                      <SelectItem key={recipientAddr} value={recipientAddr}>
-                        {formatAddress(recipientAddr)}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="all" disabled>No recipients yet</SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className={`grid gap-4 ${
+            (isProducer && !isFactory && !isRetailer) || isConsumer 
+              ? 'grid-cols-1 md:grid-cols-2' 
+              : 'grid-cols-1 md:grid-cols-3'
+          }`}>
+            {/* Filtro "From" - Para Factory, Retailer y Consumer */}
+            {(isFactory || isRetailer || isConsumer) && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">From</label>
+                <Select value={filterFrom} onValueChange={(value) => setFilterFrom(value as FilterAddress)}>
+                  <SelectTrigger>
+                    <SelectValue>
+                      {filterFrom === 'all' 
+                        ? 'All' 
+                        : formatAddress(filterFrom)}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    {uniqueFromAddresses.length > 0 ? (
+                      uniqueFromAddresses.map((fromAddr) => (
+                        <SelectItem key={fromAddr} value={fromAddr}>
+                          {formatAddress(fromAddr)}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="all" disabled>No senders yet</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Filtro "To" - Para Producer, Factory y Retailer */}
+            {(isProducer || isFactory || isRetailer) && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">To</label>
+                <Select value={filterTo} onValueChange={(value) => setFilterTo(value as FilterAddress)}>
+                  <SelectTrigger>
+                    <SelectValue>
+                      {filterTo === 'all' 
+                        ? 'All' 
+                        : formatAddress(filterTo)}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    {uniqueToAddresses.length > 0 ? (
+                      uniqueToAddresses.map((toAddr) => (
+                        <SelectItem key={toAddr} value={toAddr}>
+                          {formatAddress(toAddr)}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="all" disabled>No recipients yet</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
             )}
             
+            {/* Filtro Status - Para todos */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Status</label>
               <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value as FilterStatus)}>
@@ -672,7 +709,7 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
               <div className="text-center py-12">
                 <ArrowRightLeft className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">No transfers found</p>
-                {(filterDirection !== 'all' || filterStatus !== 'all') && (
+                {(filterFrom !== 'all' || filterTo !== 'all' || filterStatus !== 'all') && (
                   <p className="text-sm text-muted-foreground mt-2">
                     Try adjusting your filters
                   </p>

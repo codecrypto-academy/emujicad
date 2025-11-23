@@ -3,6 +3,7 @@
 import { Header } from '@/components/Header';
 import { UserProfileCard } from '@/components/UserProfileCard';
 import { TokenCard } from '@/components/TokenCard';
+import { TokenCardModern } from '@/components/TokenCardModern';
 import { PauseControl } from '@/components/admin/PauseControl';
 import { useGetUserTokens } from '@/hooks/useGetUserTokens';
 import { useUserTokenStats } from '@/hooks/useUserTokenStats';
@@ -612,11 +613,19 @@ export default function DashboardPage() {
                       className="animate-in fade-in slide-in-from-bottom-4 duration-700"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <TokenCard 
-                        tokenId={tokenId}
-                        showBalance={true}
-                        onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
-                      />
+                      {useModernDesign ? (
+                        <TokenCardModern 
+                          tokenId={tokenId}
+                          showBalance={true}
+                          onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
+                        />
+                      ) : (
+                        <TokenCard 
+                          tokenId={tokenId}
+                          showBalance={true}
+                          onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
+                        />
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1057,12 +1066,21 @@ export default function DashboardPage() {
               // Mostrar tokens (mantener datos anteriores durante refetch)
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {displayTokens.slice(0, 6).map((tokenId) => (
-                  <TokenCard 
-                    key={tokenId.toString()}
-                    tokenId={tokenId}
-                    showBalance={true}
-                    onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
-                  />
+                  useModernDesign ? (
+                    <TokenCardModern 
+                      key={tokenId.toString()}
+                      tokenId={tokenId}
+                      showBalance={true}
+                      onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
+                    />
+                  ) : (
+                    <TokenCard 
+                      key={tokenId.toString()}
+                      tokenId={tokenId}
+                      showBalance={true}
+                      onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
+                    />
+                  )
                 ))}
               </div>
             ) : (
