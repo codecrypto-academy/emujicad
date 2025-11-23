@@ -1,12 +1,13 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { useAccount } from 'wagmi'
+import { useAccount, useReadContracts } from 'wagmi'
 import { useGetUserTransfers, type TransferData } from '@/hooks/useGetUserTransfers'
 import { useTransfer } from '@/hooks/useTransfer'
 import { useIsPaused } from '@/hooks/usePause'
 import { useAuth } from '@/contexts/AuthContext'
-import { UserRole } from '@/contracts/config'
+import { UserRole, SUPPLY_CHAIN_ADDRESS, SUPPLY_CHAIN_ABI } from '@/contracts/config'
+import { validateTokenDataTuple } from '@/lib/validation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,7 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { TransferStatus } from '@/contracts/config'
 import { ArrowRightLeft, CheckCircle2, XCircle, Ban, Clock, Pause, Loader2 } from 'lucide-react'
 
-type FilterDirection = 'all' | 'sent' | 'received'
+type FilterDirection = 'all' | 'sent' | 'received' | string // string para direcciones específicas de recipients
 type FilterStatus = 'all' | 'pending' | 'accepted' | 'rejected' | 'cancelled'
 
 interface TransferListProps {
@@ -41,7 +42,7 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
   const { address: connectedAddress } = useAccount()
   const addressToUse: `0x${string}` | undefined = userAddress || connectedAddress
   
-  const { transfers, isLoading, error, totalTransfers } = useGetUserTransfers(addressToUse)
+  const { transfers, isLoading, error, totalTransfers, refetch: refetchTransfers } = useGetUserTransfers(addressToUse)
   const transferError: Error | null = error as Error | null
   const { acceptTransfer, rejectTransfer, cancelTransfer, isPending, isConfirming, isSuccess, error: actionError, hash } = useTransfer()
   const { data: isPaused } = useIsPaused()
@@ -54,20 +55,115 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
   // Activar diseño moderno si está habilitado
   const useModernDesign: boolean = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
   
-  // Detectar si el usuario es Consumer para simplificar la UI
+  // Detectar roles del usuario para simplificar la UI
   const isConsumer = userInfo && userInfo.role === BigInt(UserRole.Consumer)
+  const isProducer = userInfo && userInfo.role === BigInt(UserRole.Producer)
+  const isFactory = userInfo && userInfo.role === BigInt(UserRole.Factory)
+  const isRetailer = userInfo && userInfo.role === BigInt(UserRole.Retailer)
+  // Roles que pueden enviar transferencias (Producer, Factory, Retailer)
+  const canSendTransfers = isProducer || isFactory || isRetailer
+  // Roles que pueden recibir transferencias (Factory, Retailer, Consumer)
+  const canReceiveTransfers = isFactory || isRetailer || isConsumer
+  
+  // Obtener tokenIds únicos de las transferencias
+  const uniqueTokenIds = useMemo(() => {
+    if (!transfers || transfers.length === 0) return []
+    const ids = new Set<bigint>()
+    transfers.forEach(t => ids.add(t.tokenId))
+    return Array.from(ids)
+  }, [transfers])
+  
+  // Crear contratos para batch read de tokens
+  const tokenContracts = useMemo(() => {
+    if (uniqueTokenIds.length === 0) return []
+    return uniqueTokenIds.map(tokenId => ({
+      address: SUPPLY_CHAIN_ADDRESS,
+      abi: SUPPLY_CHAIN_ABI,
+      functionName: 'getToken' as const,
+      args: [tokenId],
+    }))
+  }, [uniqueTokenIds])
+  
+  // Batch read de tokens
+  const { data: tokensData, isLoading: isLoadingTokens } = useReadContracts({
+    contracts: tokenContracts as any,
+    query: {
+      enabled: tokenContracts.length > 0,
+      refetchInterval: 5000,
+    },
+  })
+  
+  // Crear mapa tokenId -> nombre
+  const tokenNamesMap = useMemo(() => {
+    const map = new Map<bigint, string>()
+    if (!tokensData || tokensData.length === 0) return map
+    
+    tokensData.forEach((result, index) => {
+      if (result.error || !result.result) return
+      
+      const tokenData = validateTokenDataTuple(result.result as any)
+      if (tokenData && uniqueTokenIds[index]) {
+        map.set(uniqueTokenIds[index], tokenData.name)
+      }
+    })
+    
+    return map
+  }, [tokensData, uniqueTokenIds])
 
-  // Refetch cuando la transacción sea exitosa
+  // Obtener direcciones únicas de Recipients (para Producer: Factory, para Factory: Retailer, etc.)
+  // Mantener las direcciones originales tal cual vienen del contrato
+  const uniqueRecipientAddresses = useMemo(() => {
+    if (!transfers || transfers.length === 0 || !addressToUse) return []
+    
+    const recipients = new Map<string, string>() // Map<lowercase, original>
+    transfers.forEach((transfer) => {
+      // Solo incluir transferencias enviadas por el usuario actual
+      if (transfer.from.toLowerCase() === addressToUse.toLowerCase()) {
+        // Usar lowercase como key para evitar duplicados, pero mantener el valor original
+        const lowerKey = transfer.to.toLowerCase()
+        if (!recipients.has(lowerKey)) {
+          recipients.set(lowerKey, transfer.to) // Guardar dirección original
+        }
+      }
+    })
+    
+    return Array.from(recipients.values()).sort()
+  }, [transfers, addressToUse])
+
+  // Helper para obtener la dirección original desde una dirección (puede estar en cualquier case)
+  const getOriginalAddress = (addr: string): string | undefined => {
+    if (!addr || addr === 'all' || addr === 'sent' || addr === 'received') return undefined
+    return uniqueRecipientAddresses.find(originalAddr => originalAddr.toLowerCase() === addr.toLowerCase())
+  }
+
+  // Refetch cuando la transacción sea exitosa (accept, reject, cancel)
   useEffect(() => {
     if (isSuccess && hash && hash !== lastSuccessHash) {
       const timer = setTimeout(() => {
-        console.log('✅ Transacción exitosa, recargando transferencias...')
+        console.log('✅ Transacción exitosa (accept/reject/cancel), recargando transferencias...')
         setLastSuccessHash(hash)
-        // El hook useGetUserTransfers ya tiene refetchInterval, se actualizará automáticamente
+        refetchTransfers()
       }, 2000)
       return () => clearTimeout(timer)
     }
-  }, [isSuccess, hash, lastSuccessHash])
+  }, [isSuccess, hash, lastSuccessHash, refetchTransfers])
+  
+  // Escuchar evento cuando se crea una nueva transferencia
+  useEffect(() => {
+    const handleTransferCreated = (event: Event) => {
+      const customEvent = event as CustomEvent<{ hash: string }>
+      console.log('✅ Nueva transferencia creada, recargando transferencias...', customEvent.detail)
+      // Refetch inmediato después de crear transferencia
+      setTimeout(() => {
+        refetchTransfers()
+      }, 2000) // Esperar 2 segundos para que la transacción se confirme en blockchain
+    }
+    
+    window.addEventListener('transferCreated', handleTransferCreated)
+    return () => {
+      window.removeEventListener('transferCreated', handleTransferCreated)
+    }
+  }, [refetchTransfers])
 
   // Filtrar transferencias
   const filteredTransfers = useMemo<TransferData[]>(() => {
@@ -76,12 +172,27 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
     if (!addressToUse) return []
     
     return transfers.filter((transfer: TransferData) => {
-      // Filtro por dirección (enviadas/recibidas)
-      if (filterDirection === 'sent' && transfer.from.toLowerCase() !== addressToUse.toLowerCase()) {
-        return false
-      }
-      if (filterDirection === 'received' && transfer.to.toLowerCase() !== addressToUse.toLowerCase()) {
-        return false
+      // Filtro por dirección de Recipient (para Producer, Factory, Retailer)
+      if (filterDirection !== 'all') {
+        // Si es una dirección específica (no 'sent' ni 'received'), filtrar por esa dirección
+        if (filterDirection !== 'sent' && filterDirection !== 'received') {
+          // Es una dirección específica de Recipient
+          if (transfer.to.toLowerCase() !== filterDirection.toLowerCase()) {
+            return false
+          }
+          // También debe ser una transferencia enviada por el usuario
+          if (transfer.from.toLowerCase() !== addressToUse.toLowerCase()) {
+            return false
+          }
+        } else {
+          // Mantener compatibilidad con 'sent' y 'received' por si acaso
+          if (filterDirection === 'sent' && transfer.from.toLowerCase() !== addressToUse.toLowerCase()) {
+            return false
+          }
+          if (filterDirection === 'received' && transfer.to.toLowerCase() !== addressToUse.toLowerCase()) {
+            return false
+          }
+        }
       }
 
       // Filtro por estado
@@ -101,52 +212,6 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
       return true
     })
   }, [transfers, filterDirection, filterStatus, addressToUse])
-
-  // Calcular estadísticas
-  type StatsType = {
-    total: number
-    sent: number
-    received: number
-    pending: number
-    accepted: number
-    rejected: number
-    cancelled: number
-  }
-  const stats: StatsType = useMemo<StatsType>(() => {
-    if (!transfers || transfers.length === 0) {
-      return {
-        total: 0,
-        sent: 0,
-        received: 0,
-        pending: 0,
-        accepted: 0,
-        rejected: 0,
-        cancelled: 0,
-      }
-    }
-
-    if (!addressToUse) {
-      return {
-        total: 0,
-        sent: 0,
-        received: 0,
-        pending: 0,
-        accepted: 0,
-        rejected: 0,
-        cancelled: 0,
-      }
-    }
-    
-    return {
-      total: transfers.length,
-      sent: transfers.filter(t => t.from.toLowerCase() === addressToUse.toLowerCase()).length,
-      received: transfers.filter(t => t.to.toLowerCase() === addressToUse.toLowerCase()).length,
-      pending: transfers.filter(t => t.status === TransferStatus.Pending).length,
-      accepted: transfers.filter(t => t.status === TransferStatus.Accepted).length,
-      rejected: transfers.filter(t => t.status === TransferStatus.Rejected).length,
-      cancelled: transfers.filter(t => t.status === TransferStatus.Cancelled).length,
-    }
-  }, [transfers, addressToUse])
 
   // Helpers para UI
   const getStatusBadge = (status: TransferStatus): React.ReactElement => {
@@ -294,39 +359,6 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
 
   return (
     <div className="space-y-6">
-      {/* Estadísticas - Simplificadas para Consumer */}
-      <div className={`grid gap-4 ${isConsumer ? 'grid-cols-3' : 'grid-cols-2 md:grid-cols-4'}`}>
-        <Card className={cardClass}>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">Total Transfers</p>
-          </CardContent>
-        </Card>
-        
-        {/* Ocultar "Sent" para Consumer (siempre será 0) */}
-        {!isConsumer && (
-        <Card className={cardClass}>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.sent}</div>
-            <p className="text-xs text-muted-foreground">Sent</p>
-          </CardContent>
-        </Card>
-        )}
-        
-        <Card className={cardClass}>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.received}</div>
-            <p className="text-xs text-muted-foreground">Received</p>
-          </CardContent>
-        </Card>
-        <Card className={cardClass}>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.pending}</div>
-            <p className="text-xs text-muted-foreground">Pending</p>
-          </CardContent>
-        </Card>
-      </div>
-
       <Card className={cardClass}>
         <CardHeader>
           <CardTitle>
@@ -336,18 +368,34 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
         <CardContent>
           {/* Consumer solo necesita filtro de Status (todas sus transferencias son "received") */}
           <div className={`grid gap-4 ${isConsumer ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
-            {/* Ocultar filtro Direction para Consumer (todas son "received") */}
-            {!isConsumer && (
+            {/* Ocultar filtro Recipient para Consumer (todas son "received") */}
+            {canSendTransfers && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Direction</label>
+              <label className="text-sm font-medium">Recipient</label>
               <Select value={filterDirection} onValueChange={(value) => setFilterDirection(value as FilterDirection)}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>
+                    {filterDirection === 'all' 
+                      ? 'All' 
+                      : filterDirection === 'sent' || filterDirection === 'received'
+                      ? filterDirection.charAt(0).toUpperCase() + filterDirection.slice(1)
+                      : (() => {
+                          const originalAddr = getOriginalAddress(filterDirection)
+                          return originalAddr ? formatAddress(originalAddr) : 'All'
+                        })()}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="sent">Sent</SelectItem>
-                  <SelectItem value="received">Received</SelectItem>
+                  {uniqueRecipientAddresses.length > 0 ? (
+                    uniqueRecipientAddresses.map((recipientAddr) => (
+                      <SelectItem key={recipientAddr} value={recipientAddr}>
+                        {formatAddress(recipientAddr)}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="all" disabled>No recipients yet</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -386,8 +434,64 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
       {/* Error de acción */}
       {actionError && (
         <Alert variant="destructive">
+          <XCircle className="h-4 w-4" />
           <AlertDescription>
-            Error: {actionError.message || 'Unknown error occurred'}
+            {(() => {
+              const errorMessage = actionError.message || String(actionError) || 'Unknown error occurred'
+              
+              // Detectar si el usuario rechazó la transacción en MetaMask
+              if (errorMessage.includes('User rejected') || 
+                  errorMessage.includes('User denied') || 
+                  errorMessage.includes('user rejected') ||
+                  errorMessage.includes('denied transaction')) {
+                return (
+                  <div>
+                    <strong>Transaction Cancelled</strong>
+                    <p className="mt-1 text-sm">
+                      You cancelled the transaction in MetaMask. No changes were made to the transfer.
+                    </p>
+                  </div>
+                )
+              }
+              
+              // Otros errores - mostrar mensaje más amigable
+              if (errorMessage.includes('insufficient funds') || errorMessage.includes('insufficient balance')) {
+                return (
+                  <div>
+                    <strong>Insufficient Balance</strong>
+                    <p className="mt-1 text-sm">
+                      You don't have enough tokens to complete this action.
+                    </p>
+                  </div>
+                )
+              }
+              
+              if (errorMessage.includes('paused') || errorMessage.includes('Paused')) {
+                return (
+                  <div>
+                    <strong>Contract Paused</strong>
+                    <p className="mt-1 text-sm">
+                      The contract is currently paused. Please try again later.
+                    </p>
+                  </div>
+                )
+              }
+              
+              // Error genérico pero más amigable
+              return (
+                <div>
+                  <strong>Transaction Failed</strong>
+                  <p className="mt-1 text-sm">
+                    The transaction could not be completed. Please check your connection and try again.
+                  </p>
+                  {process.env.NODE_ENV === 'development' && (
+                    <p className="mt-2 text-xs opacity-75 font-mono">
+                      {errorMessage}
+                    </p>
+                  )}
+                </div>
+              )
+            })()}
           </AlertDescription>
         </Alert>
       )}
@@ -426,10 +530,11 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
                     <TableHead>From</TableHead>
                     <TableHead>To</TableHead>
                     <TableHead>Token ID</TableHead>
+                    <TableHead>Token Name</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -449,6 +554,7 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
                       formatAddress={formatAddress}
                       formatDate={formatDate}
                       getStatusBadge={getStatusBadge}
+                      tokenName={tokenNamesMap.get(transfer.tokenId)}
                     />
                   ))}
                 </TableBody>
@@ -476,6 +582,7 @@ interface TransferRowProps {
   formatAddress: (addr: string) => string
   formatDate: (timestamp: bigint) => string
   getStatusBadge: (status: TransferStatus) => React.ReactElement
+  tokenName?: string
 }
 
 function TransferRow({
@@ -492,6 +599,7 @@ function TransferRow({
   formatAddress,
   formatDate,
   getStatusBadge,
+  tokenName,
 }: TransferRowProps): React.ReactElement {
   const isSent = transfer.from.toLowerCase() === addressToUse?.toLowerCase()
   
@@ -501,6 +609,9 @@ function TransferRow({
       <TableCell className="font-mono text-sm">{formatAddress(transfer.from)}</TableCell>
       <TableCell className="font-mono text-sm">{formatAddress(transfer.to)}</TableCell>
       <TableCell className="font-mono text-sm">#{transfer.tokenId.toString()}</TableCell>
+      <TableCell className="text-sm">
+        {tokenName || <span className="text-muted-foreground">Loading...</span>}
+      </TableCell>
       <TableCell className="font-semibold">{transfer.amount.toString()}</TableCell>
       <TableCell>{getStatusBadge(transfer.status)}</TableCell>
       <TableCell className="text-sm text-muted-foreground">{formatDate(transfer.dateCreated)}</TableCell>
@@ -538,14 +649,17 @@ function TransferRow({
           {canCancel && (
             <Button
               size="sm"
-              variant="outline"
               onClick={() => onCancel(transfer.id)}
               disabled={isPending || isConfirming}
+              className="bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white"
             >
               {isPending || isConfirming ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  Cancelando...
+                </>
               ) : (
-                <Ban className="h-4 w-4" />
+                '🚫 Cancelar'
               )}
             </Button>
           )}

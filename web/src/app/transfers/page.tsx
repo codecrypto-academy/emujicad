@@ -3,7 +3,6 @@
 import { Header } from '@/components/Header'
 import { TransferList } from '@/components/TransferList'
 import { CreateTransferForm } from '@/components/CreateTransferForm'
-import { UserTokenList } from '@/components/UserTokenList'
 import { useAuth } from '@/contexts/AuthContext'
 import { useContractOwner } from '@/hooks/useContractOwner'
 import { useAccount } from 'wagmi'
@@ -88,8 +87,8 @@ export default function TransfersPage() {
   }
 
   // Detectar si es Consumer para layout especial
-  const { userInfo: authUserInfo } = useAuth()
-  const isConsumerRole = authUserInfo && authUserInfo.role === BigInt(3) // Consumer = 3
+  // ⚠️ IMPORTANTE: Usar userInfo de la línea 19, NO llamar useAuth() de nuevo aquí
+  const isConsumerRole = userInfo && userInfo.role === BigInt(3) // Consumer = 3
   
   // Diseño moderno 2025
   if (useModernDesign) {
@@ -118,9 +117,6 @@ export default function TransfersPage() {
           {/* Consumer solo ve la lista de transferencias, sin formulario */}
           {!isConsumerRole && <CreateTransferForm />}
           
-          {/* Todos los roles ven sus tokens en la misma posición (consistencia) */}
-          <UserTokenList />
-          
           <TransferList />
         </div>
       </div>
@@ -148,9 +144,6 @@ export default function TransfersPage() {
 
           {/* Consumer solo ve la lista de transferencias, sin formulario */}
           {!isConsumerRole && <CreateTransferForm />}
-          
-          {/* Todos los roles ven sus tokens en la misma posición (consistencia) */}
-          <UserTokenList />
           
           <TransferList />
       </div>

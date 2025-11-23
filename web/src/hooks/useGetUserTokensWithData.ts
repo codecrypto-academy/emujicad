@@ -78,7 +78,7 @@ export function useGetUserTokensWithData(userAddress?: `0x${string}`) {
       return [];
     }
 
-    const validatedTokens: (TokenData & { tokenId: bigint })[] = [];
+    const validatedTokens: (TokenData & { tokenId: bigint; balance: bigint })[] = [];
     const errors: Array<{ tokenId: number; error: string }> = [];
 
     // Process results: each token has 2 results (token data, balance)
@@ -122,6 +122,7 @@ export function useGetUserTokensWithData(userAddress?: `0x${string}`) {
         validatedTokens.push({
           ...tokenData,
           tokenId,
+          balance, // Include balance in the token data
         });
       }
     });

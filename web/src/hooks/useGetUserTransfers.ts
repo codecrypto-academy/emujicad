@@ -37,7 +37,7 @@ export function useGetUserTransfers(userAddress?: `0x${string}`) {
   const addressToUse = userAddress || connectedAddress
 
   // Paso 1: Obtener los IDs de transferencias del usuario
-  const { data: transferIds, isLoading: isLoadingIds, error: idsError } = useReadContract({
+  const { data: transferIds, isLoading: isLoadingIds, error: idsError, refetch: refetchIds } = useReadContract({
     address: SUPPLY_CHAIN_ADDRESS,
     abi: SUPPLY_CHAIN_ABI,
     functionName: 'getUserTransfers',
@@ -68,7 +68,7 @@ export function useGetUserTransfers(userAddress?: `0x${string}`) {
   }, [validTransferIds])
 
   // Paso 3: Batch read de todas las transferencias
-  const { data: transfersData, isLoading: isLoadingTransfers, error: transfersError } = useReadContracts({
+  const { data: transfersData, isLoading: isLoadingTransfers, error: transfersError, refetch: refetchTransfers } = useReadContracts({
     contracts: contracts as any,
     query: {
       enabled: contracts.length > 0,
@@ -92,22 +92,105 @@ export function useGetUserTransfers(userAddress?: `0x${string}`) {
         continue
       }
 
-      // El resultado de leer un struct es una tupla (array)
-      const transferTuple = transferResult.result as readonly [bigint, string, string, bigint, bigint, bigint, number] | undefined
+      // Wagmi decodifica los structs como objetos con propiedades nombradas, no como arrays
+      const transferData = transferResult.result as {
+        id?: bigint
+        from?: string
+        to?: string
+        tokenId?: bigint
+        dateCreated?: bigint
+        amount?: bigint
+        status?: number | bigint
+      } | undefined
 
-      // Validar que la tupla tiene el formato esperado
-      if (transferTuple && Array.isArray(transferTuple) && transferTuple.length === 7) {
-        processedTransfers.push({
-          id: transferTuple[0],
-          from: transferTuple[1],
-          to: transferTuple[2],
-          tokenId: transferTuple[3],
-          amount: transferTuple[4],
-          dateCreated: transferTuple[5],
-          status: transferTuple[6] as TransferStatus,
-        })
+      // También puede venir como array en algunos casos
+      const transferArray = Array.isArray(transferResult.result) 
+        ? transferResult.result as readonly [bigint, string, string, bigint, bigint, bigint, number]
+        : null
+
+      // Intentar decodificar como objeto primero (formato más común en wagmi)
+      if (transferData && typeof transferData === 'object' && !Array.isArray(transferData)) {
+        const id = transferData.id
+        const from = transferData.from
+        const to = transferData.to
+        const tokenId = transferData.tokenId
+        const dateCreated = transferData.dateCreated
+        const amount = transferData.amount
+        const statusValue = transferData.status !== undefined ? Number(transferData.status) : undefined
+
+        if (id !== undefined && from !== undefined && to !== undefined && 
+            tokenId !== undefined && dateCreated !== undefined && 
+            amount !== undefined && statusValue !== undefined) {
+          
+          // Validar que el status esté en el rango válido (0-3)
+          if (statusValue >= 0 && statusValue <= 3) {
+            const status = statusValue as TransferStatus
+            
+            processedTransfers.push({
+              id,
+              from,
+              to,
+              tokenId,
+              dateCreated,
+              amount,
+              status,
+            })
+            
+            console.log(`[useGetUserTransfers] ✅ Transfer ${validTransferIds[i]} decoded (object):`, {
+              id: id.toString(),
+              from,
+              to,
+              tokenId: tokenId.toString(),
+              amount: amount.toString(),
+              dateCreated: dateCreated.toString(),
+              status: statusValue,
+              statusName: ['Pending', 'Accepted', 'Rejected', 'Cancelled'][statusValue] || 'Unknown'
+            })
+          } else {
+            console.warn(`[useGetUserTransfers] ⚠️ Status inválido para transferencia ${validTransferIds[i]}:`, statusValue)
+          }
+        } else {
+          console.warn(`[useGetUserTransfers] ⚠️ Datos incompletos (objeto) para transferencia ${validTransferIds[i]}:`, transferData)
+        }
+      }
+      // Si no es objeto, intentar como array (formato tupla)
+      else if (transferArray && Array.isArray(transferArray) && transferArray.length === 7) {
+        const statusValue = Number(transferArray[6])
+        const status = statusValue as TransferStatus
+        
+        // Validar que el status esté en el rango válido (0-3)
+        if (statusValue >= 0 && statusValue <= 3) {
+          // Orden según struct Transfer: id, from, to, tokenId, dateCreated, amount, status
+          processedTransfers.push({
+            id: transferArray[0],
+            from: transferArray[1],
+            to: transferArray[2],
+            tokenId: transferArray[3],
+            dateCreated: transferArray[4],
+            amount: transferArray[5],
+            status,
+          })
+          
+          console.log(`[useGetUserTransfers] ✅ Transfer ${validTransferIds[i]} decoded (array):`, {
+            id: transferArray[0].toString(),
+            from: transferArray[1],
+            to: transferArray[2],
+            tokenId: transferArray[3].toString(),
+            amount: transferArray[5].toString(),
+            dateCreated: transferArray[4].toString(),
+            status: statusValue,
+            statusName: ['Pending', 'Accepted', 'Rejected', 'Cancelled'][statusValue] || 'Unknown'
+          })
+        } else {
+          console.warn(`[useGetUserTransfers] ⚠️ Status inválido para transferencia ${validTransferIds[i]}:`, statusValue)
+        }
       } else {
-        console.warn(`[useGetUserTransfers] Datos incompletos o con formato incorrecto para transferencia ${validTransferIds[i]}:`, transferResult.result)
+        console.warn(`[useGetUserTransfers] ⚠️ Formato desconocido para transferencia ${validTransferIds[i]}:`, {
+          result: transferResult.result,
+          type: typeof transferResult.result,
+          isArray: Array.isArray(transferResult.result),
+          keys: transferResult.result && typeof transferResult.result === 'object' ? Object.keys(transferResult.result) : 'N/A'
+        })
       }
     }
 
@@ -122,11 +205,28 @@ export function useGetUserTransfers(userAddress?: `0x${string}`) {
   const isLoading = isLoadingIds || isLoadingTransfers
   const error: Error | null = idsError || transfersError || null
 
+  // Función para forzar refetch de todas las transferencias
+  const refetch = async () => {
+    console.log('[useGetUserTransfers] 🔄 Forcing refetch...')
+    try {
+      const idsResult = await refetchIds()
+      console.log('[useGetUserTransfers] ✅ Refetched IDs:', idsResult)
+      // Esperar un poco para que los nuevos IDs estén disponibles antes de refetch de transfers
+      setTimeout(async () => {
+        const transfersResult = await refetchTransfers()
+        console.log('[useGetUserTransfers] ✅ Refetched transfers:', transfersResult)
+      }, 1000) // Aumentar a 1 segundo para dar más tiempo
+    } catch (error) {
+      console.error('[useGetUserTransfers] ❌ Error during refetch:', error)
+    }
+  }
+
   return {
     transfers,
     isLoading,
     error,
     totalTransfers: transfers.length,
+    refetch,
   }
 }
 
