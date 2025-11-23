@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useUsersByRole } from '@/hooks/useUsersByRole'
 import { useGetUserTokensWithData } from '@/hooks/useGetUserTokensWithData'
 import { useAccount } from 'wagmi'
-import { UserRole } from '@/contracts/config'
+import { UserRole, TokenType } from '@/contracts/config'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -60,7 +60,29 @@ export function CreateTransferForm() {
   }, [availableUsers, isLoadingUsers, usersError, userInfo, targetRole])
   
   // Obtener tokens del usuario con balance > 0
-  const { tokens: availableTokens, isLoading: isLoadingTokens } = useGetUserTokensWithData(address)
+  const { tokens: allUserTokens, isLoading: isLoadingTokens } = useGetUserTokensWithData(address)
+  
+  // Filtrar tokens según el rol del usuario:
+  // - Producer: Solo puede transferir Raw Material (materia prima)
+  // - Factory: Solo puede transferir Finished Product (producto terminado)
+  // - Retailer: Puede transferir Finished Product (producto terminado)
+  const availableTokens = useMemo(() => {
+    if (!allUserTokens || allUserTokens.length === 0 || !userInfo) return []
+    
+    const userRoleNum = Number(userInfo.role)
+    
+    // Producer solo puede transferir Raw Material
+    if (userRoleNum === UserRole.Producer) {
+      return allUserTokens.filter(token => Number(token.tokenType) === TokenType.RowMaterial)
+    }
+    
+    // Factory y Retailer solo pueden transferir Finished Product
+    if (userRoleNum === UserRole.Factory || userRoleNum === UserRole.Retailer) {
+      return allUserTokens.filter(token => Number(token.tokenType) === TokenType.FinishedProduct)
+    }
+    
+    return []
+  }, [allUserTokens, userInfo])
   
   // ⚠️ VALIDACIÓN CRÍTICA: Solo Producer, Factory y Retailer pueden ENVIAR transferencias
   // Esto debe estar alineado con el contrato inteligente (modifier onlyTransfersAllowed)

@@ -620,29 +620,28 @@ function TransferRow({
           {canAccept && (
             <Button
               size="sm"
-              variant="default"
               onClick={() => onAccept(transfer.id)}
               disabled={isPending || isConfirming}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 text-white"
             >
               {isPending || isConfirming ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <CheckCircle2 className="h-4 w-4" />
+                '✅ Aceptar'
               )}
             </Button>
           )}
           {canReject && (
             <Button
               size="sm"
-              variant="destructive"
               onClick={() => onReject(transfer.id)}
               disabled={isPending || isConfirming}
+              className="bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-600 text-white"
             >
               {isPending || isConfirming ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <XCircle className="h-4 w-4" />
+                '❌ Rechazar'
               )}
             </Button>
           )}

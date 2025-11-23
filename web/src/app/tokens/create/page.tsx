@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useCreateToken } from '@/hooks/useCreateToken'
 import { useGetAllTokens, useGetTokenBalance } from '@/hooks/useGetUserTokens'
+import { useGetUserTokensWithData } from '@/hooks/useGetUserTokensWithData'
 import { useIsPaused } from '@/hooks/usePause'
 import { useAuth } from '@/contexts/AuthContext'
 import { TokenType, UserRole, UserStatus } from '@/contracts/config'
@@ -27,6 +28,9 @@ function CreateTokenPageContent() {
   const { data: isPaused } = useIsPaused()
   const { tokens, isLoading: isLoadingTokens } = useGetAllTokens()
   const { createToken, isPending, isConfirming, isSuccess, error, hash } = useCreateToken()
+  
+  // Obtener tokens de materia prima que el usuario posee (con balance > 0)
+  const { tokens: userRawMaterialTokens, isLoading: isLoadingUserTokens } = useGetUserTokensWithData(address)
   
   // Activar diseño moderno si está habilitado
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
@@ -50,12 +54,12 @@ function CreateTokenPageContent() {
     return TokenType.RowMaterial
   }, [tokenTypeParam, userInfo])
 
-  // Filter tokens for parent selection (only RowMaterial tokens for FinishedProduct)
-  // Also filter out tokens where user has no balance (for better UX)
+  // Filter tokens for parent selection (only RowMaterial tokens that the user owns with balance > 0)
   const availableParentTokens = useMemo(() => {
     if (tokenType !== TokenType.FinishedProduct) return []
-    return tokens.filter(token => Number(token.tokenType) === TokenType.RowMaterial)
-  }, [tokens, tokenType])
+    // Solo mostrar tokens de materia prima que el usuario posee (con balance > 0)
+    return userRawMaterialTokens.filter(token => Number(token.tokenType) === TokenType.RowMaterial)
+  }, [userRawMaterialTokens, tokenType])
 
   // Get balances for all available parent tokens to show in dropdown
   const parentTokensWithBalance = useMemo(() => {
@@ -366,45 +370,22 @@ function CreateTokenPageContent() {
                   )}
                 </div>
 
-                {/* Total Supply */}
-                <div className="space-y-2">
-                  <Label htmlFor="totalSupply" className="text-slate-700 dark:text-slate-300 font-medium">
-                    Total Supply <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="totalSupply"
-                    type="number"
-                    min="1"
-                    value={totalSupply}
-                    onChange={(e) => setTotalSupply(e.target.value)}
-                    placeholder="e.g., 1000"
-                    disabled={isFormDisabled}
-                    className={`rounded-xl border-2 transition-all ${formErrors.totalSupply ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400'}`}
-                  />
-                  {formErrors.totalSupply && (
-                    <p className="text-sm text-red-500">{formErrors.totalSupply}</p>
-                  )}
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    The total amount of tokens to create. Must be greater than 0.
-                  </p>
-                </div>
-
-                {/* Parent Token (only for FinishedProduct) */}
+                {/* Parent Token (only for FinishedProduct) - MOVED BEFORE Total Supply */}
                 {tokenType === TokenType.FinishedProduct && (
                   <>
                     <div className="space-y-2">
                       <Label htmlFor="parentId" className="text-slate-700 dark:text-slate-300 font-medium">
                         Parent Token (Raw Material) <span className="text-red-500">*</span>
                       </Label>
-                      {isLoadingTokens ? (
+                      {isLoadingUserTokens ? (
                         <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          <span className="text-sm">Loading available tokens...</span>
+                          <span className="text-sm">Loading your tokens...</span>
                         </div>
                       ) : availableParentTokens.length === 0 ? (
                         <div className="p-4 rounded-xl bg-yellow-50/80 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800">
                           <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                            No raw material tokens available. You need to create a raw material token first.
+                            No raw material tokens available. You need to receive raw material tokens first (balance &gt; 0 required).
                           </p>
                         </div>
                       ) : (
@@ -418,12 +399,12 @@ function CreateTokenPageContent() {
                             disabled={isFormDisabled}
                           >
                             <SelectTrigger className={`rounded-xl border-2 transition-all ${formErrors.parentId ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'}`}>
-                              <SelectValue placeholder="Select a raw material token" />
+                              <SelectValue placeholder="Select a raw material token you own" />
                             </SelectTrigger>
                             <SelectContent className="rounded-xl">
                               {availableParentTokens.map((token) => (
                                 <SelectItem key={token.tokenId.toString()} value={token.tokenId.toString()}>
-                                  {token.name} (ID: {token.tokenId.toString()})
+                                  {token.name} (Balance: {token.balance?.toString() || '0'})
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -432,13 +413,13 @@ function CreateTokenPageContent() {
                             <p className="text-sm text-red-500">{formErrors.parentId}</p>
                           )}
                           <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Select the raw material token that will be used to create this finished product.
+                            Select the raw material token you own that will be consumed to create this finished product.
                           </p>
                         </>
                       )}
                     </div>
 
-                    {/* Parent Amount */}
+                    {/* Parent Amount - Amount of Raw Material to Consume */}
                     {parentId && parentId !== '0' && (
                       <div className="space-y-2">
                         <Label htmlFor="parentAmount" className="text-slate-700 dark:text-slate-300 font-medium">
@@ -501,6 +482,52 @@ function CreateTokenPageContent() {
                     )}
                   </>
                 )}
+
+                {/* Total Supply - MOVED AFTER Parent Token */}
+                <div className="space-y-2">
+                  <Label htmlFor="totalSupply" className="text-slate-700 dark:text-slate-300 font-medium">
+                    Total Supply <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="totalSupply"
+                    type="number"
+                    min="1"
+                    value={totalSupply}
+                    onChange={(e) => setTotalSupply(e.target.value)}
+                    placeholder="e.g., 1000"
+                    disabled={isFormDisabled}
+                    className={`rounded-xl border-2 transition-all ${formErrors.totalSupply ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400'}`}
+                  />
+                  {formErrors.totalSupply && (
+                    <p className="text-sm text-red-500">{formErrors.totalSupply}</p>
+                  )}
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    The total amount of finished product tokens to create. Must be greater than 0.
+                  </p>
+                </div>
+
+              {/* Total Supply - MOVED AFTER Parent Token */}
+              <div className="space-y-2">
+                <Label htmlFor="totalSupply">
+                  Total Supply <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="totalSupply"
+                  type="number"
+                  min="1"
+                  value={totalSupply}
+                  onChange={(e) => setTotalSupply(e.target.value)}
+                  placeholder="e.g., 1000"
+                  disabled={isFormDisabled}
+                  className={formErrors.totalSupply ? 'border-red-500' : ''}
+                />
+                {formErrors.totalSupply && (
+                  <p className="text-sm text-red-500">{formErrors.totalSupply}</p>
+                )}
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  The total amount of finished product tokens to create. Must be greater than 0.
+                </p>
+              </div>
 
                 {/* Features */}
                 <div className="space-y-2">
@@ -649,45 +676,22 @@ function CreateTokenPageContent() {
                 )}
               </div>
 
-              {/* Total Supply */}
-              <div className="space-y-2">
-                <Label htmlFor="totalSupply">
-                  Total Supply <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="totalSupply"
-                  type="number"
-                  min="1"
-                  value={totalSupply}
-                  onChange={(e) => setTotalSupply(e.target.value)}
-                  placeholder="e.g., 1000"
-                  disabled={isFormDisabled}
-                  className={formErrors.totalSupply ? 'border-red-500' : ''}
-                />
-                {formErrors.totalSupply && (
-                  <p className="text-sm text-red-500">{formErrors.totalSupply}</p>
-                )}
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  The total amount of tokens to create. Must be greater than 0.
-                </p>
-              </div>
-
-              {/* Parent Token (only for FinishedProduct) */}
+              {/* Parent Token (only for FinishedProduct) - MOVED BEFORE Total Supply */}
               {tokenType === TokenType.FinishedProduct && (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="parentId">
                       Parent Token (Raw Material) <span className="text-red-500">*</span>
                     </Label>
-                    {isLoadingTokens ? (
+                    {isLoadingUserTokens ? (
                       <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-sm">Loading available tokens...</span>
+                        <span className="text-sm">Loading your tokens...</span>
                       </div>
                     ) : availableParentTokens.length === 0 ? (
                       <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                         <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                          No raw material tokens available. You need to create a raw material token first.
+                          No raw material tokens available. You need to receive raw material tokens first (balance &gt; 0 required).
                         </p>
                       </div>
                     ) : (
@@ -701,12 +705,12 @@ function CreateTokenPageContent() {
                           disabled={isFormDisabled}
                         >
                           <SelectTrigger className={formErrors.parentId ? 'border-red-500' : ''}>
-                            <SelectValue placeholder="Select a raw material token" />
+                            <SelectValue placeholder="Select a raw material token you own" />
                           </SelectTrigger>
                           <SelectContent>
                             {availableParentTokens.map((token) => (
                               <SelectItem key={token.tokenId.toString()} value={token.tokenId.toString()}>
-                                {token.name} (ID: {token.tokenId.toString()})
+                                {token.name} (Balance: {token.balance?.toString() || '0'})
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -715,18 +719,21 @@ function CreateTokenPageContent() {
                           <p className="text-sm text-red-500">{formErrors.parentId}</p>
                         )}
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                          Select the raw material token that will be used to create this finished product.
+                          Select the raw material token you own that will be consumed to create this finished product.
                         </p>
                       </>
                     )}
                   </div>
 
-                  {/* Parent Amount (only for FinishedProduct) */}
+                  {/* Parent Amount - Amount of Raw Material to Consume */}
                   {parentId && parentId !== '0' && (
                     <div className="space-y-2">
                       <Label htmlFor="parentAmount">
                         Amount of Raw Material to Consume <span className="text-red-500">*</span>
                       </Label>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Specify how much of the selected raw material will be consumed to create the total supply of finished product tokens.
+                      </p>
                       <Input
                         id="parentAmount"
                         type="number"

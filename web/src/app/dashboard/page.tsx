@@ -213,21 +213,29 @@ export default function DashboardPage() {
               <div className="relative p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                    Total Tokens
+                    {isAdmin ? 'Total Tokens' : 'My Tokens'}
                   </h3>
                   <div className="p-2 rounded-xl bg-blue-500/10 dark:bg-blue-400/20">
                     <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
                 <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent mb-2">
-                  {statsErrors?.totalTokens ? (
-                    <span className="text-red-500 text-sm">Error</span>
-                  ) : isInitialStatsLoading ? (
-                    <Skeleton className="h-10 w-20" />
-                  ) : stableTotalTokens !== undefined ? Number(stableTotalTokens) : '-'}
+                  {isAdmin ? (
+                    // Admin: Total del sistema
+                    statsErrors?.totalTokens ? (
+                      <span className="text-red-500 text-sm">Error</span>
+                    ) : isInitialStatsLoading ? (
+                      <Skeleton className="h-10 w-20" />
+                    ) : stableTotalTokens !== undefined ? Number(stableTotalTokens) : '-'
+                  ) : (
+                    // Usuario: Total de sus tokens
+                    isLoadingTokens ? (
+                      <Skeleton className="h-10 w-20" />
+                    ) : displayTokens.length
+                  )}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Tokens in the system
+                  {isAdmin ? 'Tokens in the system' : 'Tokens you own'}
                 </p>
               </div>
             </div>
@@ -265,21 +273,29 @@ export default function DashboardPage() {
               <div className="relative p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                    Total Transfers
+                    {isAdmin ? 'Total Transfers' : 'My Transfers'}
                   </h3>
                   <div className="p-2 rounded-xl bg-purple-500/10 dark:bg-purple-400/20">
                     <ArrowRightLeft className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   </div>
                 </div>
                 <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 dark:from-purple-400 dark:to-purple-300 bg-clip-text text-transparent mb-2">
-                  {statsErrors?.totalTransfers ? (
-                    <span className="text-red-500 text-sm">Error</span>
-                  ) : isInitialStatsLoading ? (
-                    <Skeleton className="h-10 w-20" />
-                  ) : stableTotalTransfers !== undefined ? Number(stableTotalTransfers) : '-'}
+                  {isAdmin ? (
+                    // Admin: Total del sistema
+                    statsErrors?.totalTransfers ? (
+                      <span className="text-red-500 text-sm">Error</span>
+                    ) : isInitialStatsLoading ? (
+                      <Skeleton className="h-10 w-20" />
+                    ) : stableTotalTransfers !== undefined ? Number(stableTotalTransfers) : '-'
+                  ) : (
+                    // Usuario: Total de sus transferencias
+                    isLoadingTransfers ? (
+                      <Skeleton className="h-10 w-20" />
+                    ) : transferStats.total
+                  )}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Completed transfers
+                  {isAdmin ? 'Completed transfers' : 'Your transfers'}
                 </p>
               </div>
             </div>
@@ -375,7 +391,10 @@ export default function DashboardPage() {
           {/* Contenido para usuarios regulares */}
           {!isAdmin && (
             <>
-              <TokenTypeStatsTable />
+              {/* TokenTypeStatsTable solo tiene sentido para Factory (puede tener ambos tipos de tokens) */}
+              {userInfo && Number(userInfo.role) === UserRole.Factory && (
+                <TokenTypeStatsTable />
+              )}
             </>
           )}
 
@@ -523,20 +542,28 @@ export default function DashboardPage() {
           <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Total Tokens
+                {isAdmin ? 'Total Tokens' : 'My Tokens'}
               </CardTitle>
               <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                {statsErrors?.totalTokens ? (
-                  <span className="text-red-500 text-sm">Error</span>
-                ) : isInitialStatsLoading ? (
-                  <Skeleton className="h-9 w-16" />
-                ) : stableTotalTokens !== undefined ? Number(stableTotalTokens) : '-'}
+                {isAdmin ? (
+                  // Admin: Total del sistema
+                  statsErrors?.totalTokens ? (
+                    <span className="text-red-500 text-sm">Error</span>
+                  ) : isInitialStatsLoading ? (
+                    <Skeleton className="h-9 w-16" />
+                  ) : stableTotalTokens !== undefined ? Number(stableTotalTokens) : '-'
+                ) : (
+                  // Usuario: Total de sus tokens
+                  isLoadingTokens ? (
+                    <Skeleton className="h-9 w-16" />
+                  ) : displayTokens.length
+                )}
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                Tokens in the system
+                {isAdmin ? 'Tokens in the system' : 'Tokens you own'}
               </p>
             </CardContent>
           </Card>
@@ -569,20 +596,28 @@ export default function DashboardPage() {
           <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-right-4 delay-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Total Transfers
+                {isAdmin ? 'Total Transfers' : 'My Transfers'}
               </CardTitle>
               <ArrowRightLeft className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {statsErrors?.totalTransfers ? (
-                  <span className="text-red-500 text-sm">Error</span>
-                ) : isInitialStatsLoading ? (
-                  <Skeleton className="h-9 w-16" />
-                ) : stableTotalTransfers !== undefined ? Number(stableTotalTransfers) : '-'}
+                {isAdmin ? (
+                  // Admin: Total del sistema
+                  statsErrors?.totalTransfers ? (
+                    <span className="text-red-500 text-sm">Error</span>
+                  ) : isInitialStatsLoading ? (
+                    <Skeleton className="h-9 w-16" />
+                  ) : stableTotalTransfers !== undefined ? Number(stableTotalTransfers) : '-'
+                ) : (
+                  // Usuario: Total de sus transferencias
+                  isLoadingTransfers ? (
+                    <Skeleton className="h-9 w-16" />
+                  ) : transferStats.total
+                )}
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                Completed transfers
+                {isAdmin ? 'Completed transfers' : 'Your transfers'}
               </p>
             </CardContent>
           </Card>
@@ -681,8 +716,10 @@ export default function DashboardPage() {
         {/* Contenido para usuarios regulares */}
         {!isAdmin && (
           <>
-            {/* Tabla de Tokens por Tipo */}
-            <TokenTypeStatsTable />
+            {/* TokenTypeStatsTable solo tiene sentido para Factory (puede tener ambos tipos de tokens) */}
+            {userInfo && Number(userInfo.role) === UserRole.Factory && (
+              <TokenTypeStatsTable />
+            )}
           </>
         )}
 

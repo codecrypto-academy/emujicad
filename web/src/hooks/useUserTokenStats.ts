@@ -1,8 +1,6 @@
 import { useMemo } from 'react';
-import { useGetUserTokens, useGetToken, useGetTokenBalance } from './useGetUserTokens';
-import { useAccount } from 'wagmi';
+import { useGetUserTokensWithData } from './useGetUserTokensWithData';
 import { TokenType } from '@/contracts/config';
-import { validateBigIntArray } from '@/lib/validation';
 
 export interface TokenTypeStats {
   tokenType: TokenType;
@@ -17,50 +15,11 @@ export interface TokenTypeStats {
  * Returns aggregated data: total balance and count per token type
  */
 export function useUserTokenStats(userAddress?: `0x${string}`) {
-  const { address: connectedAddress } = useAccount();
-  const addressToUse = userAddress || connectedAddress;
-
-  // Get all token IDs owned by the user
-  const { data: userTokens, isLoading: isLoadingTokens, error: tokensError } = useGetUserTokens(addressToUse);
-  
-  const validTokenIds = useMemo(() => {
-    return validateBigIntArray(userTokens) || [];
-  }, [userTokens]);
-
-  // For each token, we need to get its type and balance
-  // We'll use batch reads for efficiency
-  const tokenQueries = useMemo(() => {
-    if (!validTokenIds || validTokenIds.length === 0) return [];
-    
-    return validTokenIds.map(tokenId => ({
-      tokenId,
-      // We'll fetch token data and balance separately
-    }));
-  }, [validTokenIds]);
+  // Get all tokens owned by the user with their data and balances
+  const { tokens, isLoading, error } = useGetUserTokensWithData(userAddress);
 
   // Aggregate stats by token type
   const stats = useMemo(() => {
-    if (!validTokenIds || validTokenIds.length === 0) {
-      return {
-        rowMaterial: {
-          tokenType: TokenType.RowMaterial,
-          tokenTypeName: 'Raw Material',
-          totalBalance: BigInt(0),
-          tokenCount: 0,
-          tokenIds: [],
-        } as TokenTypeStats,
-        finishedProduct: {
-          tokenType: TokenType.FinishedProduct,
-          tokenTypeName: 'Finished Product',
-          totalBalance: BigInt(0),
-          tokenCount: 0,
-          tokenIds: [],
-        } as TokenTypeStats,
-        isLoading: false,
-        error: null,
-      };
-    }
-
     // Initialize stats
     const rowMaterial: TokenTypeStats = {
       tokenType: TokenType.RowMaterial,
@@ -78,22 +37,40 @@ export function useUserTokenStats(userAddress?: `0x${string}`) {
       tokenIds: [],
     };
 
-    // We'll need to fetch token data and balances
-    // For now, return structure - actual data will be fetched in component
+    // If no tokens, return empty stats
+    if (!tokens || tokens.length === 0) {
+      return {
+        rowMaterial,
+        finishedProduct,
+        isLoading,
+        error,
+      };
+    }
+
+    // Aggregate tokens by type
+    tokens.forEach((token) => {
+      const tokenType = Number(token.tokenType);
+      const balance = token.balance || BigInt(0);
+
+      if (tokenType === TokenType.RowMaterial) {
+        rowMaterial.totalBalance += balance;
+        rowMaterial.tokenCount += 1;
+        rowMaterial.tokenIds.push(token.tokenId);
+      } else if (tokenType === TokenType.FinishedProduct) {
+        finishedProduct.totalBalance += balance;
+        finishedProduct.tokenCount += 1;
+        finishedProduct.tokenIds.push(token.tokenId);
+      }
+    });
+
     return {
       rowMaterial,
       finishedProduct,
-      tokenIds: validTokenIds,
-      isLoading: false,
-      error: null,
+      isLoading,
+      error,
     };
-  }, [validTokenIds]);
+  }, [tokens, isLoading, error]);
 
-  return {
-    ...stats,
-    isLoading: isLoadingTokens,
-    error: tokensError,
-    tokenIds: validTokenIds,
-  };
+  return stats;
 }
 
