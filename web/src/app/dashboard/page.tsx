@@ -68,9 +68,20 @@ export default function DashboardPage() {
     shouldFetchData ? address : undefined
   );
   
-  // Calcular estadísticas de transferencias
-  const transferStats = useMemo(() => {
-    if (!transfers || transfers.length === 0) {
+  // Separar transferencias en enviadas y recibidas
+  const sentTransfers = useMemo(() => {
+    if (!transfers || transfers.length === 0 || !address) return []
+    return transfers.filter(t => t.from.toLowerCase() === address.toLowerCase())
+  }, [transfers, address])
+
+  const receivedTransfers = useMemo(() => {
+    if (!transfers || transfers.length === 0 || !address) return []
+    return transfers.filter(t => t.to.toLowerCase() === address.toLowerCase())
+  }, [transfers, address])
+
+  // Calcular estadísticas de transferencias enviadas
+  const sentStats = useMemo(() => {
+    if (!sentTransfers || sentTransfers.length === 0) {
       return {
         total: 0,
         pending: 0,
@@ -81,13 +92,63 @@ export default function DashboardPage() {
     }
     
     return {
-      total: transfers.length,
-      pending: transfers.filter(t => Number(t.status) === TransferStatus.Pending).length,
-      accepted: transfers.filter(t => Number(t.status) === TransferStatus.Accepted).length,
-      rejected: transfers.filter(t => Number(t.status) === TransferStatus.Rejected).length,
-      cancelled: transfers.filter(t => Number(t.status) === TransferStatus.Cancelled).length,
+      total: sentTransfers.length,
+      pending: sentTransfers.filter(t => Number(t.status) === TransferStatus.Pending).length,
+      accepted: sentTransfers.filter(t => Number(t.status) === TransferStatus.Accepted).length,
+      rejected: sentTransfers.filter(t => Number(t.status) === TransferStatus.Rejected).length,
+      cancelled: sentTransfers.filter(t => Number(t.status) === TransferStatus.Cancelled).length,
     }
-  }, [transfers]);
+  }, [sentTransfers]);
+
+  // Calcular estadísticas de transferencias recibidas
+  const receivedStats = useMemo(() => {
+    if (!receivedTransfers || receivedTransfers.length === 0) {
+      return {
+        total: 0,
+        pending: 0,
+        accepted: 0,
+        rejected: 0,
+        cancelled: 0,
+      }
+    }
+    
+    return {
+      total: receivedTransfers.length,
+      pending: receivedTransfers.filter(t => Number(t.status) === TransferStatus.Pending).length,
+      accepted: receivedTransfers.filter(t => Number(t.status) === TransferStatus.Accepted).length,
+      rejected: receivedTransfers.filter(t => Number(t.status) === TransferStatus.Rejected).length,
+      cancelled: receivedTransfers.filter(t => Number(t.status) === TransferStatus.Cancelled).length,
+    }
+  }, [receivedTransfers]);
+
+  // Detectar roles del usuario
+  const isProducer = userInfo && userInfo.role === BigInt(UserRole.Producer)
+  const isConsumer = userInfo && userInfo.role === BigInt(UserRole.Consumer)
+  const isFactory = userInfo && userInfo.role === BigInt(UserRole.Factory)
+  const isRetailer = userInfo && userInfo.role === BigInt(UserRole.Retailer)
+
+  // Para Producer: solo usar sentStats
+  // Para Consumer: solo usar receivedStats
+  // Para Factory y Retailer: usar ambas
+  const transferStats = useMemo(() => {
+    if (!userInfo) return { total: 0, pending: 0, accepted: 0, rejected: 0, cancelled: 0 }
+    const roleNum = Number(userInfo.role)
+    
+    if (roleNum === 0) { // Producer
+      return sentStats
+    }
+    if (roleNum === 3) { // Consumer
+      return receivedStats
+    }
+    // Factory y Retailer: combinar ambas
+    return {
+      total: sentStats.total + receivedStats.total,
+      pending: sentStats.pending + receivedStats.pending,
+      accepted: sentStats.accepted + receivedStats.accepted,
+      rejected: sentStats.rejected + receivedStats.rejected,
+      cancelled: sentStats.cancelled + receivedStats.cancelled,
+    }
+  }, [sentStats, receivedStats, userInfo]);
   
   // Escuchar evento cuando se crea una nueva transferencia
   useEffect(() => {
@@ -307,52 +368,163 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
                 Transfer Statistics
               </h2>
-              <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
-                <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
-                  <div className="relative p-6">
-                    <div className="text-4xl font-bold bg-gradient-to-r from-slate-600 to-slate-800 dark:from-slate-300 dark:to-slate-100 bg-clip-text text-transparent mb-2">
-                      {isLoadingTransfers ? '...' : transferStats.total}
+              
+              {/* Para Factory y Retailer: Separar en Enviadas y Recibidas */}
+              {(userInfo && (Number(userInfo.role) === UserRole.Factory || Number(userInfo.role) === UserRole.Retailer)) ? (
+                <>
+                  {/* Estadísticas de Transferencias Enviadas */}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Sent Transfers</h3>
+                    <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                      <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                        <div className="relative p-6">
+                          <div className="text-4xl font-bold bg-gradient-to-r from-slate-600 to-slate-800 dark:from-slate-300 dark:to-slate-100 bg-clip-text text-transparent mb-2">
+                            {isLoadingTransfers ? '...' : sentStats.total}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Sent</p>
+                        </div>
+                      </div>
+                      
+                      <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                        <div className="relative p-6">
+                          <div className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 dark:from-yellow-400 dark:to-yellow-300 bg-clip-text text-transparent mb-2">
+                            {isLoadingTransfers ? '...' : sentStats.pending}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Pending</p>
+                        </div>
+                      </div>
+                      
+                      <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-green-200/50 dark:border-green-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                        <div className="relative p-6">
+                          <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
+                            {isLoadingTransfers ? '...' : sentStats.accepted}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Accepted</p>
+                        </div>
+                      </div>
+                      
+                      <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-red-200/50 dark:border-red-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                        <div className="relative p-6">
+                          <div className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300 bg-clip-text text-transparent mb-2">
+                            {isLoadingTransfers ? '...' : sentStats.rejected}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Rejected</p>
+                        </div>
+                      </div>
+                      
+                      <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                        <div className="relative p-6">
+                          <div className="text-4xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent mb-2">
+                            {isLoadingTransfers ? '...' : sentStats.cancelled}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Cancelled</p>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Transfers</p>
+                  </div>
+
+                  {/* Estadísticas de Transferencias Recibidas */}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Received Transfers</h3>
+                    <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                      <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                        <div className="relative p-6">
+                          <div className="text-4xl font-bold bg-gradient-to-r from-slate-600 to-slate-800 dark:from-slate-300 dark:to-slate-100 bg-clip-text text-transparent mb-2">
+                            {isLoadingTransfers ? '...' : receivedStats.total}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Received</p>
+                        </div>
+                      </div>
+                      
+                      <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                        <div className="relative p-6">
+                          <div className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 dark:from-yellow-400 dark:to-yellow-300 bg-clip-text text-transparent mb-2">
+                            {isLoadingTransfers ? '...' : receivedStats.pending}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Pending</p>
+                        </div>
+                      </div>
+                      
+                      <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-green-200/50 dark:border-green-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                        <div className="relative p-6">
+                          <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
+                            {isLoadingTransfers ? '...' : receivedStats.accepted}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Accepted</p>
+                        </div>
+                      </div>
+                      
+                      <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-red-200/50 dark:border-red-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                        <div className="relative p-6">
+                          <div className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300 bg-clip-text text-transparent mb-2">
+                            {isLoadingTransfers ? '...' : receivedStats.rejected}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Rejected</p>
+                        </div>
+                      </div>
+                      
+                      <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                        <div className="relative p-6">
+                          <div className="text-4xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent mb-2">
+                            {isLoadingTransfers ? '...' : receivedStats.cancelled}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Cancelled</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* Para Producer y Consumer: una sola sección */
+                <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                  <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                    <div className="relative p-6">
+                      <div className="text-4xl font-bold bg-gradient-to-r from-slate-600 to-slate-800 dark:from-slate-300 dark:to-slate-100 bg-clip-text text-transparent mb-2">
+                        {isLoadingTransfers ? '...' : transferStats.total}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                        {isProducer ? 'Total Sent' : 'Total Received'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                    <div className="relative p-6">
+                      <div className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 dark:from-yellow-400 dark:to-yellow-300 bg-clip-text text-transparent mb-2">
+                        {isLoadingTransfers ? '...' : transferStats.pending}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Pending</p>
+                    </div>
+                  </div>
+                  
+                  <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-green-200/50 dark:border-green-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                    <div className="relative p-6">
+                      <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
+                        {isLoadingTransfers ? '...' : transferStats.accepted}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Accepted</p>
+                    </div>
+                  </div>
+                  
+                  <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-red-200/50 dark:border-red-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                    <div className="relative p-6">
+                      <div className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300 bg-clip-text text-transparent mb-2">
+                        {isLoadingTransfers ? '...' : transferStats.rejected}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Rejected</p>
+                    </div>
+                  </div>
+                  
+                  <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                    <div className="relative p-6">
+                      <div className="text-4xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent mb-2">
+                        {isLoadingTransfers ? '...' : transferStats.cancelled}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Cancelled</p>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
-                  <div className="relative p-6">
-                    <div className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 dark:from-yellow-400 dark:to-yellow-300 bg-clip-text text-transparent mb-2">
-                      {isLoadingTransfers ? '...' : transferStats.pending}
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Pending</p>
-                  </div>
-                </div>
-                
-                <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-green-200/50 dark:border-green-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
-                  <div className="relative p-6">
-                    <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
-                      {isLoadingTransfers ? '...' : transferStats.accepted}
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Accepted</p>
-                  </div>
-                </div>
-                
-                <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-red-200/50 dark:border-red-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
-                  <div className="relative p-6">
-                    <div className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300 bg-clip-text text-transparent mb-2">
-                      {isLoadingTransfers ? '...' : transferStats.rejected}
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Rejected</p>
-                  </div>
-                </div>
-                
-                <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
-                  <div className="relative p-6">
-                    <div className="text-4xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent mb-2">
-                      {isLoadingTransfers ? '...' : transferStats.cancelled}
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Cancelled</p>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -627,52 +799,163 @@ export default function DashboardPage() {
         {!isAdmin && (
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">Transfer Statistics</h2>
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
-              <Card className="border-slate-200 dark:border-slate-700">
-                <CardContent className="pt-6">
-                  <div className="text-3xl font-bold text-slate-700 dark:text-slate-300">
-                    {isLoadingTransfers ? '...' : transferStats.total}
+            
+            {/* Para Factory y Retailer: Separar en Enviadas y Recibidas */}
+            {(userInfo && (Number(userInfo.role) === UserRole.Factory || Number(userInfo.role) === UserRole.Retailer)) ? (
+              <>
+                {/* Estadísticas de Transferencias Enviadas */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-3">Sent Transfers</h3>
+                  <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                    <Card className="border-slate-200 dark:border-slate-700">
+                      <CardContent className="pt-6">
+                        <div className="text-3xl font-bold text-slate-700 dark:text-slate-300">
+                          {isLoadingTransfers ? '...' : sentStats.total}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Sent</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="border-yellow-200 dark:border-yellow-800">
+                      <CardContent className="pt-6">
+                        <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                          {isLoadingTransfers ? '...' : sentStats.pending}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Pending</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="border-green-200 dark:border-green-800">
+                      <CardContent className="pt-6">
+                        <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                          {isLoadingTransfers ? '...' : sentStats.accepted}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Accepted</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardContent className="pt-6">
+                        <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+                          {isLoadingTransfers ? '...' : sentStats.rejected}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Rejected</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardContent className="pt-6">
+                        <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
+                          {isLoadingTransfers ? '...' : sentStats.cancelled}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Cancelled</p>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Transfers</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-yellow-200 dark:border-yellow-800">
-                <CardContent className="pt-6">
-                  <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                    {isLoadingTransfers ? '...' : transferStats.pending}
+                </div>
+
+                {/* Estadísticas de Transferencias Recibidas */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-3">Received Transfers</h3>
+                  <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                    <Card className="border-slate-200 dark:border-slate-700">
+                      <CardContent className="pt-6">
+                        <div className="text-3xl font-bold text-slate-700 dark:text-slate-300">
+                          {isLoadingTransfers ? '...' : receivedStats.total}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Received</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="border-yellow-200 dark:border-yellow-800">
+                      <CardContent className="pt-6">
+                        <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                          {isLoadingTransfers ? '...' : receivedStats.pending}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Pending</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="border-green-200 dark:border-green-800">
+                      <CardContent className="pt-6">
+                        <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                          {isLoadingTransfers ? '...' : receivedStats.accepted}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Accepted</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardContent className="pt-6">
+                        <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+                          {isLoadingTransfers ? '...' : receivedStats.rejected}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Rejected</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardContent className="pt-6">
+                        <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
+                          {isLoadingTransfers ? '...' : receivedStats.cancelled}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Cancelled</p>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Pending</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-green-200 dark:border-green-800">
-                <CardContent className="pt-6">
-                  <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                    {isLoadingTransfers ? '...' : transferStats.accepted}
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Accepted</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-red-200 dark:border-red-800">
-                <CardContent className="pt-6">
-                  <div className="text-3xl font-bold text-red-600 dark:text-red-400">
-                    {isLoadingTransfers ? '...' : transferStats.rejected}
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Rejected</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardContent className="pt-6">
-                  <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
-                    {isLoadingTransfers ? '...' : transferStats.cancelled}
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Cancelled</p>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </>
+            ) : (
+              /* Para Producer y Consumer: una sola sección */
+              <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                <Card className="border-slate-200 dark:border-slate-700">
+                  <CardContent className="pt-6">
+                    <div className="text-3xl font-bold text-slate-700 dark:text-slate-300">
+                      {isLoadingTransfers ? '...' : transferStats.total}
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                      {userInfo && Number(userInfo.role) === UserRole.Producer ? 'Total Sent' : 'Total Received'}
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-yellow-200 dark:border-yellow-800">
+                  <CardContent className="pt-6">
+                    <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                      {isLoadingTransfers ? '...' : transferStats.pending}
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Pending</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-green-200 dark:border-green-800">
+                  <CardContent className="pt-6">
+                    <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                      {isLoadingTransfers ? '...' : transferStats.accepted}
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Accepted</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-red-200 dark:border-red-800">
+                  <CardContent className="pt-6">
+                    <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+                      {isLoadingTransfers ? '...' : transferStats.rejected}
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Rejected</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="pt-6">
+                    <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
+                      {isLoadingTransfers ? '...' : transferStats.cancelled}
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Cancelled</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </div>
         )}
 

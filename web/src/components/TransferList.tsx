@@ -165,13 +165,22 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
     }
   }, [refetchTransfers])
 
-  // Filtrar transferencias
-  const filteredTransfers = useMemo<TransferData[]>(() => {
-    if (!transfers || transfers.length === 0) return []
+  // Separar transferencias en enviadas y recibidas
+  const sentTransfers = useMemo<TransferData[]>(() => {
+    if (!transfers || transfers.length === 0 || !addressToUse) return []
+    return transfers.filter(t => t.from.toLowerCase() === addressToUse.toLowerCase())
+  }, [transfers, addressToUse])
 
+  const receivedTransfers = useMemo<TransferData[]>(() => {
+    if (!transfers || transfers.length === 0 || !addressToUse) return []
+    return transfers.filter(t => t.to.toLowerCase() === addressToUse.toLowerCase())
+  }, [transfers, addressToUse])
+
+  // Filtrar transferencias según filtros aplicados
+  const filterTransfers = (transferList: TransferData[]): TransferData[] => {
     if (!addressToUse) return []
     
-    return transfers.filter((transfer: TransferData) => {
+    return transferList.filter((transfer: TransferData) => {
       // Filtro por dirección de Recipient (para Producer, Factory, Retailer)
       if (filterDirection !== 'all') {
         // Si es una dirección específica (no 'sent' ni 'received'), filtrar por esa dirección
@@ -182,14 +191,6 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
           }
           // También debe ser una transferencia enviada por el usuario
           if (transfer.from.toLowerCase() !== addressToUse.toLowerCase()) {
-            return false
-          }
-        } else {
-          // Mantener compatibilidad con 'sent' y 'received' por si acaso
-          if (filterDirection === 'sent' && transfer.from.toLowerCase() !== addressToUse.toLowerCase()) {
-            return false
-          }
-          if (filterDirection === 'received' && transfer.to.toLowerCase() !== addressToUse.toLowerCase()) {
             return false
           }
         }
@@ -211,7 +212,30 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
 
       return true
     })
-  }, [transfers, filterDirection, filterStatus, addressToUse])
+  }
+
+  // Para Producer: solo mostrar enviadas
+  // Para Consumer: solo mostrar recibidas
+  // Para Factory y Retailer: mostrar ambas separadas
+  const filteredSentTransfers = useMemo(() => {
+    if (isProducer) return filterTransfers(sentTransfers)
+    if (isFactory || isRetailer) return filterTransfers(sentTransfers)
+    return []
+  }, [sentTransfers, filterDirection, filterStatus, addressToUse, isProducer, isFactory, isRetailer])
+
+  const filteredReceivedTransfers = useMemo(() => {
+    if (isConsumer) return filterTransfers(receivedTransfers)
+    if (isFactory || isRetailer) return filterTransfers(receivedTransfers)
+    return []
+  }, [receivedTransfers, filterDirection, filterStatus, addressToUse, isConsumer, isFactory, isRetailer])
+
+  // Para Producer y Consumer: usar lista única
+  const filteredTransfers = useMemo<TransferData[]>(() => {
+    if (isProducer) return filteredSentTransfers
+    if (isConsumer) return filteredReceivedTransfers
+    // Para Factory y Retailer, se mostrarán separadas
+    return []
+  }, [filteredSentTransfers, filteredReceivedTransfers, isProducer, isConsumer])
 
   // Helpers para UI
   const getStatusBadge = (status: TransferStatus): React.ReactElement => {
@@ -496,73 +520,206 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
         </Alert>
       )}
 
-      {/* Tabla de transferencias */}
-      <Card className={cardClass}>
-        <CardHeader>
-          <CardTitle>Transfers</CardTitle>
-          <CardDescription>
-            Showing {Number(filteredTransfers.length)} of {Number(totalTransfers)} transfer{Number(totalTransfers) !== 1 ? 's' : ''}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
-          ) : filteredTransfers.length === 0 ? (
-            <div className="text-center py-12">
-              <ArrowRightLeft className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No transfers found</p>
-              {(filterDirection !== 'all' || filterStatus !== 'all') && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  Try adjusting your filters
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>From</TableHead>
-                    <TableHead>To</TableHead>
-                    <TableHead>Token ID</TableHead>
-                    <TableHead>Token Name</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredTransfers.map((transfer) => (
-                    <TransferRow
-                      key={transfer.id.toString()}
-                      transfer={transfer}
-                      addressToUse={addressToUse}
-                      canAccept={canAccept(transfer)}
-                      canReject={canReject(transfer)}
-                      canCancel={canCancel(transfer)}
-                      onAccept={handleAccept}
-                      onReject={handleReject}
-                      onCancel={handleCancel}
-                      isPending={isPending}
-                      isConfirming={isConfirming}
-                      formatAddress={formatAddress}
-                      formatDate={formatDate}
-                      getStatusBadge={getStatusBadge}
-                      tokenName={tokenNamesMap.get(transfer.tokenId)}
-                    />
+      {/* Tabla de transferencias - Separada para Factory y Retailer */}
+      {(isFactory || isRetailer) ? (
+        <>
+          {/* Transferencias Recibidas - PRIMERO */}
+          <Card className={cardClass}>
+            <CardHeader>
+              <CardTitle>Received Transfers</CardTitle>
+              <CardDescription>
+                Showing {Number(filteredReceivedTransfers.length)} of {Number(receivedTransfers.length)} received transfer{Number(receivedTransfers.length) !== 1 ? 's' : ''}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
                   ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                </div>
+              ) : filteredReceivedTransfers.length === 0 ? (
+                <div className="text-center py-8">
+                  <ArrowRightLeft className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">No received transfers found</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>From</TableHead>
+                        <TableHead>To</TableHead>
+                        <TableHead>Token ID</TableHead>
+                        <TableHead>Token Name</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-center">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredReceivedTransfers.map((transfer) => (
+                        <TransferRow
+                          key={transfer.id.toString()}
+                          transfer={transfer}
+                          addressToUse={addressToUse}
+                          canAccept={canAccept(transfer)}
+                          canReject={canReject(transfer)}
+                          canCancel={canCancel(transfer)}
+                          onAccept={handleAccept}
+                          onReject={handleReject}
+                          onCancel={handleCancel}
+                          isPending={isPending}
+                          isConfirming={isConfirming}
+                          formatAddress={formatAddress}
+                          formatDate={formatDate}
+                          getStatusBadge={getStatusBadge}
+                          tokenName={tokenNamesMap.get(transfer.tokenId)}
+                        />
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Transferencias Enviadas - SEGUNDO */}
+          <Card className={cardClass}>
+            <CardHeader>
+              <CardTitle>Sent Transfers</CardTitle>
+              <CardDescription>
+                Showing {Number(filteredSentTransfers.length)} of {Number(sentTransfers.length)} sent transfer{Number(sentTransfers.length) !== 1 ? 's' : ''}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              ) : filteredSentTransfers.length === 0 ? (
+                <div className="text-center py-8">
+                  <ArrowRightLeft className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">No sent transfers found</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>From</TableHead>
+                        <TableHead>To</TableHead>
+                        <TableHead>Token ID</TableHead>
+                        <TableHead>Token Name</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-center">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredSentTransfers.map((transfer) => (
+                        <TransferRow
+                          key={transfer.id.toString()}
+                          transfer={transfer}
+                          addressToUse={addressToUse}
+                          canAccept={canAccept(transfer)}
+                          canReject={canReject(transfer)}
+                          canCancel={canCancel(transfer)}
+                          onAccept={handleAccept}
+                          onReject={handleReject}
+                          onCancel={handleCancel}
+                          isPending={isPending}
+                          isConfirming={isConfirming}
+                          formatAddress={formatAddress}
+                          formatDate={formatDate}
+                          getStatusBadge={getStatusBadge}
+                          tokenName={tokenNamesMap.get(transfer.tokenId)}
+                        />
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        /* Para Producer y Consumer: una sola tabla */
+        <Card className={cardClass}>
+          <CardHeader>
+            <CardTitle>
+              {isProducer ? 'Sent Transfers' : isConsumer ? 'Received Transfers' : 'Transfers'}
+            </CardTitle>
+            <CardDescription>
+              Showing {Number(filteredTransfers.length)} of {Number(totalTransfers)} transfer{Number(totalTransfers) !== 1 ? 's' : ''}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : filteredTransfers.length === 0 ? (
+              <div className="text-center py-12">
+                <ArrowRightLeft className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No transfers found</p>
+                {(filterDirection !== 'all' || filterStatus !== 'all') && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Try adjusting your filters
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>From</TableHead>
+                      <TableHead>To</TableHead>
+                      <TableHead>Token ID</TableHead>
+                      <TableHead>Token Name</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-center">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredTransfers.map((transfer) => (
+                      <TransferRow
+                        key={transfer.id.toString()}
+                        transfer={transfer}
+                        addressToUse={addressToUse}
+                        canAccept={canAccept(transfer)}
+                        canReject={canReject(transfer)}
+                        canCancel={canCancel(transfer)}
+                        onAccept={handleAccept}
+                        onReject={handleReject}
+                        onCancel={handleCancel}
+                        isPending={isPending}
+                        isConfirming={isConfirming}
+                        formatAddress={formatAddress}
+                        formatDate={formatDate}
+                        getStatusBadge={getStatusBadge}
+                        tokenName={tokenNamesMap.get(transfer.tokenId)}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
