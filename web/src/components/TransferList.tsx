@@ -30,6 +30,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TransferStatus } from '@/contracts/config'
 import { ArrowRightLeft, CheckCircle2, XCircle, Ban, Clock, Pause, Loader2 } from 'lucide-react'
+import { AddressDisplay } from '@/components/AddressDisplay'
 
 type FilterDirection = 'all' | 'sent' | 'received' | string // string para direcciones específicas de recipients
 type FilterStatus = 'all' | 'pending' | 'accepted' | 'rejected' | 'cancelled'
@@ -763,8 +764,12 @@ function TransferRow({
   return (
     <TableRow>
       <TableCell className="font-mono text-sm">#{transfer.id.toString()}</TableCell>
-      <TableCell className="font-mono text-sm">{formatAddress(transfer.from)}</TableCell>
-      <TableCell className="font-mono text-sm">{formatAddress(transfer.to)}</TableCell>
+      <TableCell>
+        <AddressDisplay address={transfer.from} />
+      </TableCell>
+      <TableCell>
+        <AddressDisplay address={transfer.to} />
+      </TableCell>
       <TableCell className="font-mono text-sm">#{transfer.tokenId.toString()}</TableCell>
       <TableCell className="text-sm">
         {tokenName || <span className="text-muted-foreground">Loading...</span>}

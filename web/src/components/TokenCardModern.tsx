@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { TokenType } from '@/contracts/config'
 import { Package, Calendar, User, Hash } from 'lucide-react'
+import { AddressDisplay } from '@/components/AddressDisplay'
 
 interface TokenCardModernProps {
   tokenId: bigint
@@ -83,11 +84,6 @@ export function TokenCardModern({ tokenId, showBalance = false, onClick }: Token
     ? dateCreated.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
     : 'N/A'
 
-  // Formatear dirección del creador
-  const creatorAddress = displayTokenData.creator || 'N/A'
-  const shortAddress = creatorAddress.length > 10
-    ? `${creatorAddress.slice(0, 6)}...${creatorAddress.slice(-4)}`
-    : creatorAddress
 
   return (
     <Card
@@ -160,9 +156,7 @@ export function TokenCardModern({ tokenId, showBalance = false, onClick }: Token
               <User className="h-4 w-4 text-slate-400" />
               <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Creator</span>
             </div>
-            <span className="text-sm font-mono text-slate-700 dark:text-slate-300">
-              {shortAddress}
-            </span>
+            <AddressDisplay address={displayTokenData.creator || 'N/A'} className="text-xs" />
           </div>
 
           <div className="flex items-center justify-between py-2">

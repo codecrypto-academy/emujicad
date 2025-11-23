@@ -9,6 +9,7 @@ import { useAccount } from 'wagmi';
 import { Package, Factory, User, Calendar } from 'lucide-react';
 import { validateTokenDataTuple } from '@/lib/validation';
 import type { TokenData } from '@/types';
+import { AddressDisplay } from '@/components/AddressDisplay';
 
 interface TokenCardProps {
   tokenId?: bigint;
@@ -88,7 +89,6 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
   const { id, name, tokenType, totalSupply, creator, parentToken, createdAt, features } = displayTokenData;
   const isRawMaterial = Number(tokenType) === 0;
   const formattedDate = new Date(Number(createdAt) * 1000).toLocaleDateString();
-  const formattedCreator = creator.slice(0, 6) + '...' + creator.slice(-4);
 
   return (
     <Card
@@ -144,7 +144,7 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
             <User className="h-3 w-3" />
             Creator
           </span>
-          <span className="font-mono text-xs">{formattedCreator}</span>
+          <AddressDisplay address={creator} className="text-xs" />
         </div>
 
                {parentToken !== BigInt(0) && (
