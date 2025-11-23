@@ -6,6 +6,7 @@ import { TokenCard } from '@/components/TokenCard';
 import { TokenCardModern } from '@/components/TokenCardModern';
 import { PauseControl } from '@/components/admin/PauseControl';
 import { useGetUserTokens } from '@/hooks/useGetUserTokens';
+import { useGetUserTokensWithData } from '@/hooks/useGetUserTokensWithData';
 import { useUserTokenStats } from '@/hooks/useUserTokenStats';
 import { useDashboardStats } from '@/hooks/useContractReads';
 import { useIsPaused } from '@/hooks/usePause';
@@ -22,7 +23,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Shield, Package, Users, ArrowRightLeft, AlertCircle, Pause, Table2, User } from 'lucide-react';
 import Link from 'next/link';
-import { UserRole, UserStatus } from '@/contracts/config';
+import { UserRole, UserStatus, TokenType } from '@/contracts/config';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -564,15 +565,13 @@ export default function DashboardPage() {
           {/* Contenido para usuarios regulares */}
           {!isAdmin && (
             <>
-              {/* TokenTypeStatsTable solo tiene sentido para Factory (puede tener ambos tipos de tokens) */}
-              {userInfo && Number(userInfo.role) === UserRole.Factory && (
-                <TokenTypeStatsTable />
-              )}
+              {/* TokenTypeStatsTable - Muestra tokens agrupados por tipo */}
+              <TokenTypeStatsTable />
             </>
           )}
 
-          {/* Mis Tokens Moderno */}
-          {!isAdmin && (
+          {/* Sección "My Tokens" eliminada - La información se muestra en "My Tokens by Type" */}
+          {false && !isAdmin && (
             <div className="mb-10">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
@@ -1008,128 +1007,12 @@ export default function DashboardPage() {
         {/* Contenido para usuarios regulares */}
         {!isAdmin && (
           <>
-            {/* TokenTypeStatsTable solo tiene sentido para Factory (puede tener ambos tipos de tokens) */}
-            {userInfo && Number(userInfo.role) === UserRole.Factory && (
-              <TokenTypeStatsTable />
-            )}
+            {/* TokenTypeStatsTable - Muestra tokens agrupados por tipo para todos los usuarios */}
+            <TokenTypeStatsTable />
           </>
         )}
 
-        {/* Mis Tokens */}
-        {!isAdmin && (
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">My Tokens</h2>
-              <Link 
-                href="/tokens"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm"
-              >
-                View All →
-              </Link>
-            </div>
-
-            {tokensError ? (
-              <Card className="border-red-200 dark:border-red-800">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <AlertCircle className="h-16 w-16 text-red-400 dark:text-red-600 mb-4" />
-                  <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
-                    Error Loading Tokens
-                  </h3>
-                  <p className="text-red-600 dark:text-red-400 text-center mb-4">
-                    {tokensError.message || 'Failed to load your tokens. Please try again.'}
-                  </p>
-                  <Button
-                    onClick={() => window.location.reload()}
-                    variant="outline"
-                  >
-                    Retry
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : isLoadingTokens && displayTokens.length === 0 ? (
-              // Solo mostrar loading si no hay datos previos (displayTokens está vacío)
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardHeader>
-                      <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded"></div>
-                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-2/3"></div>
-                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : displayTokens && displayTokens.length > 0 ? (
-              // Mostrar tokens (mantener datos anteriores durante refetch)
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {displayTokens.slice(0, 6).map((tokenId) => (
-                  useModernDesign ? (
-                    <TokenCardModern 
-                      key={tokenId.toString()}
-                      tokenId={tokenId}
-                      showBalance={true}
-                      onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
-                    />
-                  ) : (
-                    <TokenCard 
-                      key={tokenId.toString()}
-                      tokenId={tokenId}
-                      showBalance={true}
-                      onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
-                    />
-                  )
-                ))}
-              </div>
-            ) : (
-              <Card className="border-dashed dark:border-slate-700">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Package className="h-16 w-16 text-slate-300 dark:text-slate-600 mb-4" />
-                  <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                    No tokens yet
-                  </h3>
-                  <p className="text-slate-600 dark:text-slate-400 text-center mb-4">
-                    {userInfo && 
-                     (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
-                     Number(userInfo.status) === UserStatus.Approved
-                      ? 'Create your first token to start tracking products'
-                      : 'No tokens available yet'}
-                  </p>
-                  {/* Solo Producer y Factory aprobados pueden crear tokens (según el contrato) */}
-                  {userInfo && 
-                   (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
-                   Number(userInfo.status) === UserStatus.Approved && (
-                    <>
-                      {isPaused === true && (
-                        <Alert className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 w-full max-w-md">
-                          <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                          <AlertDescription className="text-yellow-700 dark:text-yellow-300 text-sm">
-                            <strong>⚠️ Contrato Pausado:</strong> No puedes crear tokens mientras el contrato esté pausado.
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                      <Button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          const tokenType = Number(userInfo.role) === UserRole.Producer ? 'raw' : 'product'
-                          router.push(`/tokens/create?type=${tokenType}`)
-                        }}
-                        disabled={isPaused === true}
-                        className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Create Token
-                      </Button>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        )}
+        {/* Sección "My Tokens" eliminada - La información se muestra en "My Tokens by Type" */}
 
         {/* Actividad Reciente para Admin */}
         {isAdmin && (
@@ -1155,11 +1038,25 @@ export default function DashboardPage() {
 }
 
 /**
- * Component to display token statistics grouped by type in a table
+ * Component to display token statistics grouped by type in a table with tokens listed below each category
  */
 function TokenTypeStatsTable() {
   const { address } = useAccount();
+  const router = useRouter();
   const { rowMaterial, finishedProduct, isLoading, error } = useUserTokenStats(address);
+  const { tokens: userTokens, isLoading: isLoadingTokens } = useGetUserTokensWithData(address);
+  const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
+  
+  // Separar tokens por tipo
+  const rawMaterialTokens = useMemo(() => {
+    if (!userTokens) return []
+    return userTokens.filter(token => Number(token.tokenType) === TokenType.RowMaterial)
+  }, [userTokens])
+  
+  const finishedProductTokens = useMemo(() => {
+    if (!userTokens) return []
+    return userTokens.filter(token => Number(token.tokenType) === TokenType.FinishedProduct)
+  }, [userTokens])
 
   // Only show rows that have tokens
   const hasRowMaterial = rowMaterial.tokenCount > 0 || rowMaterial.totalBalance > BigInt(0);
@@ -1207,60 +1104,108 @@ function TokenTypeStatsTable() {
             <p>No tokens yet. Create your first token to see statistics here.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700">
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">
-                    Token Type
-                  </th>
-                  <th className="text-right py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">
-                    Total Balance
-                  </th>
-                  <th className="text-right py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">
-                    Token Count
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {hasRowMaterial && (
-                  <tr className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                        <span className="font-medium text-slate-800 dark:text-slate-200">
-                          {rowMaterial.tokenTypeName}
+          <div className="space-y-6">
+            {/* Raw Material Section */}
+            {hasRowMaterial && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">
+                      {rowMaterial.tokenTypeName}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="text-slate-600 dark:text-slate-400">
+                      Total Balance: <span className="font-semibold text-slate-800 dark:text-slate-200">{rowMaterial.totalBalance.toString()}</span>
+                    </span>
+                    <span className="text-slate-600 dark:text-slate-400">
+                      Count: <span className="font-semibold text-slate-800 dark:text-slate-200">{rowMaterial.tokenCount}</span>
+                    </span>
+                  </div>
+                </div>
+                
+                {isLoadingTokens ? (
+                  <div className="space-y-2">
+                    {[...Array(2)].map((_, i) => (
+                      <Skeleton key={i} className="h-8 w-full" />
+                    ))}
+                  </div>
+                ) : rawMaterialTokens.length > 0 ? (
+                  <div className="space-y-1 pl-5">
+                    {rawMaterialTokens.map((token) => (
+                      <div 
+                        key={token.tokenId.toString()} 
+                        className="flex items-center justify-between py-1 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded px-2 -mx-2 cursor-pointer"
+                        onClick={() => router.push(`/tokens/${token.tokenId.toString()}`)}
+                      >
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">
+                          {token.name || `Token #${token.tokenId.toString()}`}
+                        </span>
+                        <span className="text-slate-600 dark:text-slate-400 font-semibold">
+                          {token.balance?.toString() || '0'}
                         </span>
                       </div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-semibold text-slate-700 dark:text-slate-300">
-                      {rowMaterial.totalBalance.toString()}
-                    </td>
-                    <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-400">
-                      {rowMaterial.tokenCount}
-                    </td>
-                  </tr>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-2 pl-5">
+                    No raw material tokens found
+                  </p>
                 )}
-                {hasFinishedProduct && (
-                  <tr className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                        <span className="font-medium text-slate-800 dark:text-slate-200">
-                          {finishedProduct.tokenTypeName}
+              </div>
+            )}
+
+            {/* Finished Product Section */}
+            {hasFinishedProduct && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">
+                      {finishedProduct.tokenTypeName}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="text-slate-600 dark:text-slate-400">
+                      Total Balance: <span className="font-semibold text-slate-800 dark:text-slate-200">{finishedProduct.totalBalance.toString()}</span>
+                    </span>
+                    <span className="text-slate-600 dark:text-slate-400">
+                      Count: <span className="font-semibold text-slate-800 dark:text-slate-200">{finishedProduct.tokenCount}</span>
+                    </span>
+                  </div>
+                </div>
+                
+                {isLoadingTokens ? (
+                  <div className="space-y-2">
+                    {[...Array(2)].map((_, i) => (
+                      <Skeleton key={i} className="h-8 w-full" />
+                    ))}
+                  </div>
+                ) : finishedProductTokens.length > 0 ? (
+                  <div className="space-y-1 pl-5">
+                    {finishedProductTokens.map((token) => (
+                      <div 
+                        key={token.tokenId.toString()} 
+                        className="flex items-center justify-between py-1 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded px-2 -mx-2 cursor-pointer"
+                        onClick={() => router.push(`/tokens/${token.tokenId.toString()}`)}
+                      >
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">
+                          {token.name || `Token #${token.tokenId.toString()}`}
+                        </span>
+                        <span className="text-slate-600 dark:text-slate-400 font-semibold">
+                          {token.balance?.toString() || '0'}
                         </span>
                       </div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-semibold text-slate-700 dark:text-slate-300">
-                      {finishedProduct.totalBalance.toString()}
-                    </td>
-                    <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-400">
-                      {finishedProduct.tokenCount}
-                    </td>
-                  </tr>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-2 pl-5">
+                    No finished product tokens found
+                  </p>
                 )}
-              </tbody>
-            </table>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

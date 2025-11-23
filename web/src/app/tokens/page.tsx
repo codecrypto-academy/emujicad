@@ -4,6 +4,7 @@ import { Header } from '@/components/Header'
 import { TokenCard } from '@/components/TokenCard'
 import { TokenCardModern } from '@/components/TokenCardModern'
 import { useGetUserTokensWithData } from '@/hooks/useGetUserTokensWithData'
+import { useUserTokenStats } from '@/hooks/useUserTokenStats'
 import { useIsPaused } from '@/hooks/usePause'
 import { useAuth } from '@/contexts/AuthContext'
 import { useContractOwner } from '@/hooks/useContractOwner'
@@ -16,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { Package, Search, Filter, AlertCircle, Loader2, Plus } from 'lucide-react'
+import { Package, Search, Filter, AlertCircle, Loader2, Plus, Table2 } from 'lucide-react'
 import { TokenType, UserRole, UserStatus } from '@/contracts/config'
 import Link from 'next/link'
 import { DebugTokens } from './debug-tokens'
@@ -50,6 +51,7 @@ export default function TokensPage() {
     shouldFetchData ? address : undefined
   )
   const { data: isPaused } = useIsPaused(shouldFetchData)
+  const { rowMaterial, finishedProduct, isLoading: isLoadingStats, error: statsError } = useUserTokenStats(address)
   
   // Verificación directa de admin (más rápida que esperar por AuthContext)
   const isAdminDirect = address && owner && address.toLowerCase() === owner.toLowerCase()
@@ -416,8 +418,8 @@ export default function TokensPage() {
             </Card>
           )}
 
-          {/* Grid de Tokens Moderno */}
-          {!isLoading && !error && filteredTokens.length > 0 && (
+          {/* Grid de Tokens Moderno - Oculto cuando se muestra "My Tokens by Type" */}
+          {false && !isLoading && !error && filteredTokens.length > 0 && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
                 {paginatedTokens.map((token, index) => (
@@ -489,6 +491,17 @@ export default function TokensPage() {
               )}
             </>
           )}
+
+        {/* My Tokens by Type - Con tarjetas completas (Reemplaza la lista general) */}
+        <TokenTypeStatsSection 
+          tokens={tokens}
+          isLoading={isLoading || isLoadingStats}
+          statsError={statsError}
+          rowMaterial={rowMaterial}
+          finishedProduct={finishedProduct}
+          router={router}
+          useModernDesign={useModernDesign}
+        />
         </div>
       </div>
     )
@@ -668,6 +681,17 @@ export default function TokensPage() {
           </CardContent>
         </Card>
 
+        {/* My Tokens by Type - Con tarjetas completas (Reemplaza la lista general) */}
+        <TokenTypeStatsSection 
+          tokens={tokens}
+          isLoading={isLoading || isLoadingStats}
+          statsError={statsError}
+          rowMaterial={rowMaterial}
+          finishedProduct={finishedProduct}
+          router={router}
+          useModernDesign={useModernDesign}
+        />
+
         {/* Loading State */}
         {isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -743,8 +767,8 @@ export default function TokensPage() {
           </Card>
         )}
 
-        {/* Grid de Tokens */}
-        {!isLoading && !error && filteredTokens.length > 0 && (
+        {/* Grid de Tokens - Oculto cuando se muestra "My Tokens by Type" */}
+        {false && !isLoading && !error && filteredTokens.length > 0 && (
           <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
               {paginatedTokens.map((token) => (
@@ -767,7 +791,7 @@ export default function TokensPage() {
             </div>
 
             {/* Paginación */}
-            {totalPages > 1 && (
+            {false && totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-8">
                 <Button
                   variant="outline"
@@ -822,6 +846,188 @@ export default function TokensPage() {
         )}
       </div>
     </div>
+  )
+}
+
+/**
+ * Component to display token statistics grouped by type with full token cards
+ */
+function TokenTypeStatsSection({ 
+  tokens, 
+  isLoading, 
+  statsError, 
+  rowMaterial, 
+  finishedProduct, 
+  router, 
+  useModernDesign 
+}: { 
+  tokens: any[] | undefined
+  isLoading: boolean
+  statsError: Error | null
+  rowMaterial: any
+  finishedProduct: any
+  router: any
+  useModernDesign: boolean
+}) {
+  // Separar tokens por tipo
+  const rawMaterialTokens = useMemo(() => {
+    if (!tokens) return []
+    return tokens.filter(token => Number(token.tokenType) === TokenType.RowMaterial)
+  }, [tokens])
+  
+  const finishedProductTokens = useMemo(() => {
+    if (!tokens) return []
+    return tokens.filter(token => Number(token.tokenType) === TokenType.FinishedProduct)
+  }, [tokens])
+
+  // Only show rows that have tokens
+  const hasRowMaterial = rowMaterial && (rowMaterial.tokenCount > 0 || (rowMaterial.totalBalance && rowMaterial.totalBalance > BigInt(0)))
+  const hasFinishedProduct = finishedProduct && (finishedProduct.tokenCount > 0 || (finishedProduct.totalBalance && finishedProduct.totalBalance > BigInt(0)))
+  const hasAnyTokens = hasRowMaterial || hasFinishedProduct
+
+  if (statsError) {
+    return (
+      <Card className="mb-8 border-red-200 dark:border-red-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-300">
+            <AlertCircle className="h-5 w-5" />
+            Error Loading Token Statistics
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-red-600 dark:text-red-400">
+            {statsError.message || 'Failed to load token statistics. Please try again.'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Siempre mostrar la sección, incluso si no hay tokens (mostrará mensaje vacío)
+
+  return (
+    <Card className="mb-8 border-slate-200 dark:border-slate-700">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
+          <Table2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          My Tokens by Type
+        </CardTitle>
+        <CardDescription className="text-slate-600 dark:text-slate-400">
+          Overview of your tokens grouped by type
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-3">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : !hasAnyTokens ? (
+          <div className="text-center py-8 text-slate-600 dark:text-slate-400">
+            <Package className="h-12 w-12 mx-auto mb-3 text-slate-300 dark:text-slate-600" />
+            <p>No tokens yet. Create your first token to see statistics here.</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {/* Raw Material Section */}
+            {hasRowMaterial && rowMaterial && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b-2 border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+                    <span className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                      {rowMaterial.tokenTypeName}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-6 text-sm">
+                    <span className="text-slate-600 dark:text-slate-400">
+                      Total Balance: <span className="font-bold text-slate-800 dark:text-slate-200">{rowMaterial?.totalBalance?.toString() || '0'}</span>
+                    </span>
+                    <span className="text-slate-600 dark:text-slate-400">
+                      Count: <span className="font-bold text-slate-800 dark:text-slate-200">{rowMaterial?.tokenCount || 0}</span>
+                    </span>
+                  </div>
+                </div>
+                
+                {rawMaterialTokens.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {rawMaterialTokens.map((token) => (
+                      <div key={token.tokenId.toString()}>
+                        {useModernDesign ? (
+                          <TokenCardModern
+                            tokenId={token.tokenId}
+                            showBalance={true}
+                            onClick={() => router.push(`/tokens/${token.tokenId.toString()}`)}
+                          />
+                        ) : (
+                          <TokenCard
+                            tokenId={token.tokenId}
+                            showBalance={true}
+                            onClick={() => router.push(`/tokens/${token.tokenId.toString()}`)}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+                    No raw material tokens found
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Finished Product Section */}
+            {hasFinishedProduct && finishedProduct && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b-2 border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                    <span className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                      {finishedProduct.tokenTypeName}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-6 text-sm">
+                    <span className="text-slate-600 dark:text-slate-400">
+                      Total Balance: <span className="font-bold text-slate-800 dark:text-slate-200">{finishedProduct?.totalBalance?.toString() || '0'}</span>
+                    </span>
+                    <span className="text-slate-600 dark:text-slate-400">
+                      Count: <span className="font-bold text-slate-800 dark:text-slate-200">{finishedProduct?.tokenCount || 0}</span>
+                    </span>
+                  </div>
+                </div>
+                
+                {finishedProductTokens.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {finishedProductTokens.map((token) => (
+                      <div key={token.tokenId.toString()}>
+                        {useModernDesign ? (
+                          <TokenCardModern
+                            tokenId={token.tokenId}
+                            showBalance={true}
+                            onClick={() => router.push(`/tokens/${token.tokenId.toString()}`)}
+                          />
+                        ) : (
+                          <TokenCard
+                            tokenId={token.tokenId}
+                            showBalance={true}
+                            onClick={() => router.push(`/tokens/${token.tokenId.toString()}`)}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+                    No finished product tokens found
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
