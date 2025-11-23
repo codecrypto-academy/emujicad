@@ -3,7 +3,6 @@
 import { Header } from '@/components/Header';
 import { UserProfileCard } from '@/components/UserProfileCard';
 import { TokenCard } from '@/components/TokenCard';
-import { QuickActions } from '@/components/QuickActions';
 import { PauseControl } from '@/components/admin/PauseControl';
 import { useGetUserTokens } from '@/hooks/useGetUserTokens';
 import { useUserTokenStats } from '@/hooks/useUserTokenStats';
@@ -18,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Shield, Package, Users, ArrowRightLeft, AlertCircle, Pause, Table2 } from 'lucide-react';
+import { Shield, Package, Users, ArrowRightLeft, AlertCircle, Pause, Table2, User } from 'lucide-react';
 import Link from 'next/link';
 import { UserRole, UserStatus } from '@/contracts/config';
 
@@ -144,15 +143,23 @@ export default function DashboardPage() {
         
         <div className="container mx-auto px-4 py-12 max-w-7xl">
           {/* Título Moderno */}
-          <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-3">
-              {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
-            </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-400">
-              {isAdmin 
-                ? 'Manage the entire supply chain system' 
-                : 'Track your tokens and supply chain activities'}
-            </p>
+          <div className="mb-10 flex items-start justify-between animate-in fade-in slide-in-from-top-4 duration-700">
+            <div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-3">
+                {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
+              </h1>
+              <p className="text-lg text-slate-600 dark:text-slate-400">
+                {isAdmin 
+                  ? 'Manage the entire supply chain system' 
+                  : 'Track your tokens and supply chain activities'}
+              </p>
+            </div>
+            <Link href="/profile">
+              <Button size="lg" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
+                <User className="h-5 w-5 mr-2" />
+                View Profile
+              </Button>
+            </Link>
           </div>
 
           {/* Estadísticas Principales Modernas */}
@@ -270,14 +277,6 @@ export default function DashboardPage() {
           {/* Contenido para usuarios regulares */}
           {!isAdmin && (
             <>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-                <div className="lg:col-span-1">
-                  <UserProfileCard />
-                </div>
-                <div className="lg:col-span-2">
-                  <QuickActions />
-                </div>
-              </div>
               <TokenTypeStatsTable />
             </>
           )}
@@ -401,15 +400,23 @@ export default function DashboardPage() {
       
       <div className="container mx-auto px-4 py-8">
         {/* Título */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2">
-            {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            {isAdmin 
-              ? 'Manage the entire supply chain system' 
-              : 'Track your tokens and supply chain activities'}
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+              {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400">
+              {isAdmin 
+                ? 'Manage the entire supply chain system' 
+                : 'Track your tokens and supply chain activities'}
+            </p>
+          </div>
+          <Link href="/profile">
+            <Button size="default" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
+              <User className="h-4 w-4 mr-2" />
+              View Profile
+            </Button>
+          </Link>
         </div>
 
         {/* Estadísticas Principales */}
@@ -523,18 +530,6 @@ export default function DashboardPage() {
         {/* Contenido para usuarios regulares */}
         {!isAdmin && (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              {/* Perfil del Usuario */}
-              <div className="lg:col-span-1">
-                <UserProfileCard />
-              </div>
-
-              {/* Acciones Rápidas */}
-              <div className="lg:col-span-2">
-                <QuickActions />
-              </div>
-            </div>
-
             {/* Tabla de Tokens por Tipo */}
             <TokenTypeStatsTable />
           </>

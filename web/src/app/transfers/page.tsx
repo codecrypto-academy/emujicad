@@ -87,6 +87,10 @@ export default function TransfersPage() {
     return null
   }
 
+  // Detectar si es Consumer para layout especial
+  const { userInfo: authUserInfo } = useAuth()
+  const isConsumerRole = authUserInfo && authUserInfo.role === BigInt(3) // Consumer = 3
+  
   // Diseño moderno 2025
   if (useModernDesign) {
     return (
@@ -101,16 +105,22 @@ export default function TransfersPage() {
                 <div className="p-2.5 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 backdrop-blur-sm border border-blue-200/50 dark:border-blue-500/30">
                   <ArrowRightLeft className="h-7 w-7 text-blue-600 dark:text-blue-400" />
                 </div>
-                Transfers
+                {isConsumerRole ? 'Incoming Transfers' : 'Transfers'}
               </h1>
               <p className="text-slate-600 dark:text-slate-400 text-lg font-light">
-                Manage your token transfers in the supply chain
+                {isConsumerRole 
+                  ? 'Review and manage transfers sent to you' 
+                  : 'Manage your token transfers in the supply chain'}
               </p>
             </div>
           </div>
 
-          <CreateTransferForm />
+          {/* Consumer solo ve la lista de transferencias, sin formulario */}
+          {!isConsumerRole && <CreateTransferForm />}
+          
+          {/* Todos los roles ven sus tokens en la misma posición (consistencia) */}
           <UserTokenList />
+          
           <TransferList />
         </div>
       </div>
@@ -127,15 +137,21 @@ export default function TransfersPage() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
             <ArrowRightLeft className="h-10 w-10 text-blue-600 dark:text-blue-400" />
-            Transfers
+            {isConsumerRole ? 'Incoming Transfers' : 'Transfers'}
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            View and manage your token transfers
+            {isConsumerRole 
+              ? 'Review and manage transfers sent to you' 
+              : 'View and manage your token transfers'}
           </p>
         </div>
 
-          <CreateTransferForm />
+          {/* Consumer solo ve la lista de transferencias, sin formulario */}
+          {!isConsumerRole && <CreateTransferForm />}
+          
+          {/* Todos los roles ven sus tokens en la misma posición (consistencia) */}
           <UserTokenList />
+          
           <TransferList />
       </div>
     </div>

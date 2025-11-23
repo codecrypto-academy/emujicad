@@ -217,6 +217,7 @@ export function Header() {
             )}
 
             {/* Action Buttons for Approved Users */}
+            {/* Navegación para usuarios aprobados */}
             {mounted && !isAdmin && userInfo && Number(userInfo.status) === UserStatus.Approved && (
               <div className="flex items-center gap-2 mt-2">
                 {pathname !== '/dashboard' && (
@@ -230,6 +231,40 @@ export function Header() {
                   <Link href="/tokens">
                     <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
                       My Tokens
+                    </Button>
+                  </Link>
+                )}
+                {pathname !== '/transfers' && (
+                  <Link href="/transfers">
+                    <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
+                      Transfers
+                    </Button>
+                  </Link>
+                )}
+                {pathname !== '/profile' && (
+                  <Link href="/profile">
+                    <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
+                      Profile
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            )}
+            
+            {/* Navegación para admin */}
+            {mounted && isAdmin && (
+              <div className="flex items-center gap-2 mt-2">
+                {pathname !== '/dashboard' && (
+                  <Link href="/dashboard">
+                    <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
+                      Dashboard
+                    </Button>
+                  </Link>
+                )}
+                {pathname !== '/profile' && (
+                  <Link href="/profile">
+                    <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
+                      Profile
                     </Button>
                   </Link>
                 )}

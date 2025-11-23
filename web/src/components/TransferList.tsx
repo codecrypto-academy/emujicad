@@ -5,6 +5,8 @@ import { useAccount } from 'wagmi'
 import { useGetUserTransfers, type TransferData } from '@/hooks/useGetUserTransfers'
 import { useTransfer } from '@/hooks/useTransfer'
 import { useIsPaused } from '@/hooks/usePause'
+import { useAuth } from '@/contexts/AuthContext'
+import { UserRole } from '@/contracts/config'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -43,6 +45,7 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
   const transferError: Error | null = error as Error | null
   const { acceptTransfer, rejectTransfer, cancelTransfer, isPending, isConfirming, isSuccess, error: actionError, hash } = useTransfer()
   const { data: isPaused } = useIsPaused()
+  const { userInfo } = useAuth()
   
   const [filterDirection, setFilterDirection] = useState<FilterDirection>('all')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
@@ -50,6 +53,9 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
   
   // Activar diseño moderno si está habilitado
   const useModernDesign: boolean = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
+  
+  // Detectar si el usuario es Consumer para simplificar la UI
+  const isConsumer = userInfo && userInfo.role === BigInt(UserRole.Consumer)
 
   // Refetch cuando la transacción sea exitosa
   useEffect(() => {
@@ -220,8 +226,22 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
     cancelTransfer(transferId)
   }
 
+  // ⚠️ VALIDACIÓN según permisos del contrato inteligente (SupplyChain.sol):
+  // 
+  // ACEPTAR/RECHAZAR (acceptTransfer/rejectTransfer):
+  //   - Roles permitidos: Factory, Retailer, Consumer (modifier: onlyReceiverAllowed)
+  //   - Condición: Solo transferencias RECIBIDAS (transfer.to === msg.sender)
+  //   - Status: Solo PENDING
+  // 
+  // CANCELAR (cancelTransfer):
+  //   - Roles permitidos: Producer, Factory, Retailer (modifier: onlyTransfersAllowed)
+  //   - Condición: Solo transferencias ENVIADAS (transfer.from === msg.sender)
+  //   - Status: Solo PENDING
+  
   const canAccept = (transfer: TransferData): boolean => {
     if (!addressToUse) return false
+    // Solo el DESTINATARIO puede aceptar transferencias RECIBIDAS en estado PENDING
+    // Roles válidos: Factory, Retailer, Consumer
     return (
       transfer.status === TransferStatus.Pending &&
       transfer.to.toLowerCase() === addressToUse.toLowerCase() &&
@@ -231,6 +251,8 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
 
   const canReject = (transfer: TransferData): boolean => {
     if (!addressToUse) return false
+    // Solo el DESTINATARIO puede rechazar transferencias RECIBIDAS en estado PENDING
+    // Roles válidos: Factory, Retailer, Consumer
     return (
       transfer.status === TransferStatus.Pending &&
       transfer.to.toLowerCase() === addressToUse.toLowerCase() &&
@@ -240,6 +262,9 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
 
   const canCancel = (transfer: TransferData): boolean => {
     if (!addressToUse) return false
+    // Solo el REMITENTE puede cancelar transferencias ENVIADAS en estado PENDING
+    // Roles válidos: Producer, Factory, Retailer
+    // Nota: Consumer nunca aparecerá aquí porque no puede crear transferencias
     return (
       transfer.status === TransferStatus.Pending &&
       transfer.from.toLowerCase() === addressToUse.toLowerCase() &&
@@ -269,20 +294,25 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
 
   return (
     <div className="space-y-6">
-      {/* Estadísticas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Estadísticas - Simplificadas para Consumer */}
+      <div className={`grid gap-4 ${isConsumer ? 'grid-cols-3' : 'grid-cols-2 md:grid-cols-4'}`}>
         <Card className={cardClass}>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground">Total Transfers</p>
           </CardContent>
         </Card>
-        <Card className={cardClass}>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.sent}</div>
-            <p className="text-xs text-muted-foreground">Sent</p>
-          </CardContent>
-        </Card>
+        
+        {/* Ocultar "Sent" para Consumer (siempre será 0) */}
+        {!isConsumer && (
+          <Card className={cardClass}>
+            <CardContent className="pt-6">
+              <div className="text-2xl font-bold">{stats.sent}</div>
+              <p className="text-xs text-muted-foreground">Sent</p>
+            </CardContent>
+          </Card>
+        )}
+        
         <Card className={cardClass}>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">{stats.received}</div>
@@ -304,20 +334,25 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Direction</label>
-              <Select value={filterDirection} onValueChange={(value) => setFilterDirection(value as FilterDirection)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="sent">Sent</SelectItem>
-                  <SelectItem value="received">Received</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Consumer solo necesita filtro de Status (todas sus transferencias son "received") */}
+          <div className={`grid gap-4 ${isConsumer ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+            {/* Ocultar filtro Direction para Consumer (todas son "received") */}
+            {!isConsumer && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Direction</label>
+                <Select value={filterDirection} onValueChange={(value) => setFilterDirection(value as FilterDirection)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="sent">Sent</SelectItem>
+                    <SelectItem value="received">Received</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
             <div className="space-y-2">
               <label className="text-sm font-medium">Status</label>
               <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value as FilterStatus)}>
@@ -329,7 +364,8 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="accepted">Accepted</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  {/* Ocultar "Cancelled" para Consumer (nunca cancela porque no envía) */}
+                  {!isConsumer && <SelectItem value="cancelled">Cancelled</SelectItem>}
                 </SelectContent>
               </Select>
             </div>

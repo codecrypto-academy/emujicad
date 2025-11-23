@@ -24,6 +24,9 @@ export function UserTokenList() {
   const cardClass = useModernDesign 
     ? "border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-2xl" 
     : ""
+  
+  // ℹ️ TODOS los roles pueden ver sus tokens (Producer, Factory, Retailer, Consumer)
+  // El Consumer puede ver sus tokens pero no puede crear transferencias
 
   if (error) {
     return (
@@ -41,7 +44,7 @@ export function UserTokenList() {
       <CardHeader>
         <CardTitle>Your Available Tokens</CardTitle>
         <CardDescription>
-          These are the tokens you currently own and can transfer. Use the Token ID in the form above.
+          These are the tokens you currently own. Roles with transfer permissions can use these Token IDs to create transfers.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -75,9 +78,9 @@ export function UserTokenList() {
         ) : (
           <div className="text-center py-8">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">You do not own any tokens.</p>
+            <p className="text-muted-foreground">You do not own any tokens yet.</p>
             <p className="text-sm text-muted-foreground mt-1">
-              You can request a role and create new tokens on the dashboard.
+              Tokens will appear here when you create them or receive transfers from other users.
             </p>
           </div>
         )}

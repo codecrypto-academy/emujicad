@@ -37,8 +37,8 @@ export function AuthRedirect() {
     // ============================================
     // Verificar admin INMEDIATAMENTE si ya terminó de cargar
     if (!isLoading && isAdmin) {
-      // Permitir acceso a páginas de admin
-      if (pathname?.startsWith('/admin')) {
+      // Permitir acceso a páginas de admin y profile
+      if (pathname?.startsWith('/admin') || pathname === '/profile') {
         return
       }
       // Si está en otra página (incluyendo home), redirigir a dashboard
