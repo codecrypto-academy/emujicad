@@ -111,12 +111,20 @@ ensure_logs_dir() {
 # Función para verificar si un puerto está en uso
 check_port() {
     local port=$1
-    # Verificar tanto IPv4 como IPv6
+    # Verificar tanto IPv4 como IPv6 usando múltiples métodos
+    # Método 1: lsof (funciona para IPv4 y algunos casos IPv6)
     if lsof -i :$port -t >/dev/null 2>&1; then
         return 0  # Puerto en uso
-    else
-        return 1  # Puerto libre
     fi
+    # Método 2: netstat (detecta IPv6 mejor)
+    if netstat -tlnp 2>/dev/null | grep -q ":$port "; then
+        return 0  # Puerto en uso
+    fi
+    # Método 3: ss (alternativa moderna)
+    if ss -tlnp 2>/dev/null | grep -q ":$port "; then
+        return 0  # Puerto en uso
+    fi
+    return 1  # Puerto libre
 }
 
 # Función para obtener PID de un proceso en un puerto
