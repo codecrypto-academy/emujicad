@@ -131,6 +131,17 @@ contract EdgeCasesTest is Test {
         supplyChain.createToken("", SupplyChain.TokenType.RowMaterial, 100, "features", 0, 0);
     }
 
+    /// @notice Edge Case 5.5: Token con nombre de 1 carácter
+    /// @dev Cubre branch: if (bytes(name).length < 2) revert InvalidName();
+    function testCreateTokenSingleCharacterName() public {
+        // Setup usuario aprobado
+        setupApprovedProducer();
+        
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidName.selector));
+        vm.prank(producerAddress);
+        supplyChain.createToken("A", SupplyChain.TokenType.RowMaterial, 100, "features", 0, 0);
+    }
+
     /// @notice Edge Case 6: Token con totalSupply = 0
     /// @dev Cubre branch: if (totalSupply == 0) revert InvalidTotalSupply();
     function testCreateTokenZeroSupply() public {

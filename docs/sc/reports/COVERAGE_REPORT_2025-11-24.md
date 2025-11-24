@@ -1,8 +1,8 @@
 # 📊 Reporte Automático de Cobertura - SupplyChain
 
-**Generado**: 2025-11-24 13:04:53  
+**Generado**: 2025-11-24 13:21:33  
 **Comando**: `forge coverage --match-path "test/*"`  
-**Total Tests**: 73 (55 core + 18 edge cases)
+**Total Tests**: 82 (55 core + 27 edge cases)
 
 ## 📈 Métricas Actuales
 
@@ -22,7 +22,7 @@
 ## 🎯 Recomendaciones
 
 ### ✅ Fortalezas
-- Testing comprehensivo de APIs principales (73 tests totales)
+- Testing comprehensivo de APIs principales (82 tests totales)
 - Cobertura excelente de líneas (>80%) y statements (>80%)
 - Cobertura de branches mejorada significativamente (+24% vs inicial)
 - Flujos críticos bien probados con edge cases dedicados
@@ -34,7 +34,7 @@
 
 ### 📦 Suite de Tests
 - **SupplyChain.t.sol**: 55 tests core (flujos principales)
-- **EdgeCasesTest.t.sol**: 18 tests científicos (branches)
+- **EdgeCasesTest.t.sol**: 27 tests científicos (branches + edge cases)
 - Scripts funcionales: Deploy.s.sol, Interactions.s.sol
 
 ## 🚀 Comandos de Reproducción
@@ -55,6 +55,6 @@ forge test --match-path "test/*" -vv
 
 ---
 
-**Última Ejecución**: 2025-11-24 13:04:53  
+**Última Ejecución**: 2025-11-24 13:21:33  
 *Reporte generado automáticamente por coverage-reporter.sh*  
 *Ubicación*: `docs/sc/reports/COVERAGE_REPORT_2025-11-24.md`

@@ -652,7 +652,7 @@ contract SupplyChain  is ReentrancyGuard {
      * @dev Incrementa contador de tokens y actualiza balance inicial del creador.
     */
     function createToken(string memory name, TokenType tokenType, uint totalSupply, string memory features, uint parentId, uint parentAmount) external onlyTokenCreators whenNotPaused {
-        if (bytes(name).length == 0) revert InvalidName();
+        if (bytes(name).length < 2) revert InvalidName();
         if (totalSupply == 0) revert InvalidTotalSupply();
 
         // Validación para productos terminados: deben tener un parentId válido

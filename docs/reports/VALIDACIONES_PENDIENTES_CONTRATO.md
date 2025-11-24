@@ -1,7 +1,8 @@
 # 📋 Validaciones Pendientes en el Contrato Inteligente
 
-**Fecha**: 23 de Noviembre, 2025  
-**Estado**: Documentación de validaciones implementadas en Frontend pero NO en el Contrato
+**Fecha**: 24 de Noviembre, 2025  
+**Estado**: Documentación de validaciones implementadas en Frontend pero NO en el Contrato  
+**Última actualización**: 24 de Noviembre, 2025 - Validación de alta prioridad COMPLETADA ✅
 
 ---
 
@@ -55,12 +56,18 @@ Este documento identifica las validaciones que se implementaron en el **Frontend
 
 #### ❌ Validaciones que FALTA en el contrato (pero están en Frontend):
 
-1. **Longitud mínima del nombre**
+1. **Longitud mínima del nombre** ✅ **COMPLETADO**
    - **Frontend**: Valida `name.trim().length >= 2`
-   - **Contrato**: Solo valida que no esté vacío
-   - **Riesgo**: Medio (permite nombres de 1 carácter, puede causar problemas de UX)
-   - **Prioridad**: Media
-   - **Recomendación**: Agregar `require(bytes(name).length >= 2, "Name must be at least 2 characters")`
+   - **Contrato**: ✅ **IMPLEMENTADO** - Valida que el nombre tenga al menos 2 caracteres
+   - **Riesgo**: Medio (mitigado)
+   - **Prioridad**: Media ✅
+   - **Estado**: ✅ **COMPLETADO** (24 Nov 2025)
+   - **Implementación**:
+     ```solidity
+     if (bytes(name).length < 2) revert InvalidName();
+     ```
+   - **Test**: ✅ `testCreateTokenSingleCharacterName()` agregado en EdgeCasesTest.t.sol
+   - **Nota**: Previene nombres de 1 carácter, mejorando la consistencia de datos y UX
 
 2. **Validación de formato JSON en features**
    - **Frontend**: Valida que `features` sea JSON válido usando `JSON.parse()`
@@ -88,18 +95,24 @@ Este documento identifica las validaciones que se implementaron en el **Frontend
 
 #### ❌ Validaciones que FALTA en el contrato (pero están en Frontend):
 
-1. **Validación de usuario cancelado**
+1. **Validación de usuario cancelado** ✅ **COMPLETADO**
    - **Frontend**: Bloquea completamente el registro si `userStatus == Canceled`
-   - **Contrato**: No valida explícitamente si el usuario está cancelado
-   - **Riesgo**: Medio-Alto
-   - **Prioridad**: Alta
-   - **Recomendación**: Agregar validación:
+   - **Contrato**: ✅ **IMPLEMENTADO** - Valida explícitamente si el usuario está cancelado
+   - **Riesgo**: Medio-Alto (mitigado)
+   - **Prioridad**: Alta ✅
+   - **Estado**: ✅ **COMPLETADO** (24 Nov 2025)
+   - **Implementación**:
      ```solidity
-     if (users[msg.sender].status == UserStatus.Canceled) {
+     // Error personalizado agregado
+     error UserCanceled();
+     
+     // Validación en requestUserRole()
+     if (user.status == UserStatus.Canceled) {
          revert UserCanceled();
      }
      ```
-   - **Nota**: Los usuarios cancelados NO deberían poder solicitar nuevos roles. Solo el admin puede cambiar su estado.
+   - **Test**: ✅ `testCanceledUserCannotRequestRole()` agregado en EdgeCasesTest.t.sol
+   - **Nota**: Los usuarios cancelados NO pueden solicitar nuevos roles. Solo el admin puede cambiar su estado.
 
 2. **Validación de cambio de rol al mismo rol**
    - **Frontend**: Valida que `selectedRole !== currentRoleName` antes de enviar
@@ -113,19 +126,23 @@ Este documento identifica las validaciones que se implementaron en el **Frontend
 
 ### 🔴 Alta Prioridad
 
-1. **Validación de usuario cancelado en `requestRole()`**
+1. **Validación de usuario cancelado en `requestRole()`** ✅ **COMPLETADO**
    - **Impacto**: Seguridad y lógica de negocio
-   - **Riesgo**: Medio-Alto
+   - **Riesgo**: Medio-Alto (mitigado)
    - **Esfuerzo**: Bajo (1 línea de código)
-   - **Recomendación**: Implementar inmediatamente
+   - **Estado**: ✅ **IMPLEMENTADO** (24 Nov 2025)
+   - **Test**: ✅ `testCanceledUserCannotRequestRole()` agregado
+   - **Coverage**: Mejora branch coverage del contrato
 
 ### 🟡 Media Prioridad
 
-2. **Longitud mínima del nombre en `createToken()`**
+2. **Longitud mínima del nombre en `createToken()`** ✅ **COMPLETADO**
    - **Impacto**: UX y consistencia de datos
-   - **Riesgo**: Medio
+   - **Riesgo**: Medio (mitigado)
    - **Esfuerzo**: Bajo (1 línea de código)
-   - **Recomendación**: Implementar en próxima iteración
+   - **Estado**: ✅ **IMPLEMENTADO** (24 Nov 2025)
+   - **Test**: ✅ `testCreateTokenSingleCharacterName()` agregado
+   - **Coverage**: Mejora branch coverage del contrato
 
 ### 🟢 Baja Prioridad
 
@@ -195,7 +212,7 @@ function createToken(...) external onlyTokenCreators whenNotPaused {
 1. ✅ **Balance suficiente** - Ya implementado
 2. ✅ **Usuario autorizado** - Ya implementado
 3. ✅ **Contrato no pausado** - Ya implementado
-4. ❌ **Usuario cancelado** - **FALTA** (Alta prioridad)
+4. ✅ **Usuario cancelado** - **IMPLEMENTADO** (24 Nov 2025) ✅
 
 ### Validaciones que son NICE-TO-HAVE:
 
@@ -209,8 +226,8 @@ function createToken(...) external onlyTokenCreators whenNotPaused {
 
 | Validación | Frontend | Contrato | Prioridad | Estado |
 |------------|----------|----------|-----------|--------|
-| Usuario cancelado no puede registrar | ✅ | ❌ | 🔴 Alta | **PENDIENTE** |
-| Longitud mínima nombre (2 chars) | ✅ | ❌ | 🟡 Media | **PENDIENTE** |
+| Usuario cancelado no puede registrar | ✅ | ✅ | 🔴 Alta | **✅ COMPLETADO** (24 Nov 2025) |
+| Longitud mínima nombre (2 chars) | ✅ | ✅ | 🟡 Media | **✅ COMPLETADO** (24 Nov 2025) |
 | Formato de dirección válido | ✅ | ⚠️ Parcial | 🟢 Baja | Opcional |
 | tokenId > 0 | ✅ | ⚠️ Implícito | 🟢 Baja | Opcional |
 | Features JSON válido | ✅ | ❌ | 🟢 Baja | No recomendado |
@@ -219,13 +236,31 @@ function createToken(...) external onlyTokenCreators whenNotPaused {
 
 ## ✅ Conclusión
 
-**Total de validaciones pendientes críticas**: **1** (Usuario cancelado)  
-**Total de validaciones pendientes recomendadas**: **1** (Longitud mínima nombre)  
+**Total de validaciones pendientes críticas**: **0** ✅ (Usuario cancelado - COMPLETADO)  
+**Total de validaciones pendientes recomendadas**: **0** ✅ (Longitud mínima nombre - COMPLETADO)  
 **Total de validaciones opcionales**: **3**
 
-**Recomendación final**: Implementar la validación de usuario cancelado inmediatamente, y la validación de longitud mínima del nombre en la próxima iteración.
+**Estado actual**: ✅ **Todas las validaciones críticas y recomendadas implementadas**
+
+**Recomendación final**: Todas las validaciones críticas y recomendadas han sido implementadas exitosamente. Las validaciones opcionales pueden implementarse en el futuro si se considera necesario.
+
+### 📊 Implementación Completada (24 Nov 2025)
+
+#### ✅ Validación de Alta Prioridad - Usuario Cancelado
+- **Error `UserCanceled()` agregado** en `sc/src/SupplyChain.sol`  
+- **Validación implementada** en `requestUserRole()` (líneas 532-535)  
+- **Test agregado**: `testCanceledUserCannotRequestRole()` en `EdgeCasesTest.t.sol`
+
+#### ✅ Validación de Media Prioridad - Longitud Mínima del Nombre
+- **Validación implementada** en `createToken()` (línea 656)  
+- **Test agregado**: `testCreateTokenSingleCharacterName()` en `EdgeCasesTest.t.sol`
+
+#### 📊 Resultados Finales
+- ✅ **Todos los tests pasan**: 82/82 tests ✅  
+- ✅ **Coverage mejorado**: Branch coverage mejorado con los nuevos tests  
+- ✅ **Funcionalidad preservada**: Ningún test existente falló
 
 ---
 
-**Última actualización**: 23 de Noviembre, 2025
+**Última actualización**: 24 de Noviembre, 2025
 
