@@ -28,6 +28,62 @@ Este documento identifica las validaciones que se implementaron en el **Frontend
 - ✅ Contrato no pausado (`whenNotPaused`)
 - ✅ Usuario autorizado para transferir (`onlyTransfersAllowed`)
 
+#### ❌ Validaciones CRÍTICAS que FALTA en el contrato:
+
+1. **Validación de rol por tipo de token en `transfer()`** 🔴 **ALTA PRIORIDAD**
+   - **Problema**: No valida que el rol del emisor sea compatible con el tipo de token
+   - **Requisitos**:
+     - Raw Material: Solo Producer puede transferir
+     - Finished Product: Solo Factory o Retailer pueden transferir
+   - **Riesgo**: Alto - Permite transferencias inválidas que rompen la lógica de la cadena de suministro
+   - **Prioridad**: Alta
+   - **Recomendación**: Agregar validación en `transfer()`:
+     ```solidity
+     if (token.tokenType == TokenType.RowMaterial && user.role != UserRole.Producer) {
+         revert InvalidRoleForTokenType();
+     }
+     if (token.tokenType == TokenType.FinishedProduct && 
+         (user.role != UserRole.Factory && user.role != UserRole.Retailer)) {
+         revert InvalidRoleForTokenType();
+     }
+     ```
+
+2. **Validación de rol por tipo de token en `acceptTransfer()`** 🔴 **ALTA PRIORIDAD**
+   - **Problema**: No valida que el rol del receptor sea compatible con el tipo de token
+   - **Requisitos**:
+     - Raw Material: Solo Factory puede aceptar
+     - Finished Product: Solo Retailer o Consumer pueden aceptar
+   - **Riesgo**: Alto - Permite que roles incorrectos acepten transferencias
+   - **Prioridad**: Alta
+   - **Recomendación**: Agregar validación en `acceptTransfer()`:
+     ```solidity
+     if (token.tokenType == TokenType.RowMaterial && user.role != UserRole.Factory) {
+         revert InvalidRoleForTokenType();
+     }
+     if (token.tokenType == TokenType.FinishedProduct && 
+         (user.role != UserRole.Retailer && user.role != UserRole.Consumer)) {
+         revert InvalidRoleForTokenType();
+     }
+     ```
+
+3. **Validación de rol por tipo de token en `rejectTransfer()`** 🔴 **ALTA PRIORIDAD**
+   - **Problema**: No valida que el rol del receptor sea compatible con el tipo de token
+   - **Requisitos**:
+     - Raw Material: Solo Factory puede rechazar
+     - Finished Product: Solo Retailer o Consumer pueden rechazar
+   - **Riesgo**: Alto - Permite que roles incorrectos rechacen transferencias
+   - **Prioridad**: Alta
+   - **Recomendación**: Agregar validación en `rejectTransfer()` (misma lógica que `acceptTransfer()`):
+     ```solidity
+     if (token.tokenType == TokenType.RowMaterial && user.role != UserRole.Factory) {
+         revert InvalidRoleForTokenType();
+     }
+     if (token.tokenType == TokenType.FinishedProduct && 
+         (user.role != UserRole.Retailer && user.role != UserRole.Consumer)) {
+         revert InvalidRoleForTokenType();
+     }
+     ```
+
 #### ❌ Validaciones que FALTA en el contrato (pero están en Frontend):
 
 1. **Validación de formato de dirección**
@@ -134,6 +190,20 @@ Este documento identifica las validaciones que se implementaron en el **Frontend
    - **Test**: ✅ `testCanceledUserCannotRequestRole()` agregado
    - **Coverage**: Mejora branch coverage del contrato
 
+2. **Validación de restricciones de rol por tipo de token en transferencias** ❌ **PENDIENTE**
+   - **Impacto**: Seguridad y lógica de negocio crítica
+   - **Riesgo**: Alto (permite transferencias inválidas en la cadena de suministro)
+   - **Esfuerzo**: Medio (validaciones adicionales en `transfer()` y `acceptTransfer()`)
+   - **Estado**: ❌ **NO IMPLEMENTADO**
+   - **Problema**: El contrato actualmente permite:
+     - ❌ Factory/Retailer pueden transferir Raw Material (solo debería Producer)
+     - ❌ Retailer/Consumer pueden aceptar Raw Material (solo debería Factory)
+     - ❌ Producer puede transferir Finished Product (solo debería Factory/Retailer)
+     - ❌ Factory/Consumer pueden aceptar Finished Product de Producer (solo debería Retailer/Consumer)
+   - **Recomendación**: Implementar validaciones que verifiquen:
+     - Raw Material: Solo Producer puede transferir, solo Factory puede aceptar
+     - Finished Product: Solo Factory/Retailer pueden transferir, solo Retailer/Consumer pueden aceptar
+
 ### 🟡 Media Prioridad
 
 2. **Longitud mínima del nombre en `createToken()`** ✅ **COMPLETADO**
@@ -203,6 +273,92 @@ function createToken(...) external onlyTokenCreators whenNotPaused {
 }
 ```
 
+### 4. Agregar Error Personalizado para Rol Inválido
+
+```solidity
+/**
+ * @notice El rol del usuario no es válido para este tipo de token.
+ */
+error InvalidRoleForTokenType();
+```
+
+### 5. Actualizar `transfer()` con Validación de Rol por Tipo de Token
+
+```solidity
+function transfer(address to, uint tokenId, uint amount) external whenNotPaused onlyTransfersAllowed nonReentrant {
+    // ... validaciones existentes ...
+    
+    Token storage token = tokens[tokenId];
+    if (token.id == 0) revert TokenDoesNotExist();
+    
+    // 🔴 NUEVA VALIDACIÓN: Verificar rol del emisor según tipo de token
+    User storage sender = users[addressToUserId[msg.sender]];
+    
+    if (token.tokenType == TokenType.RowMaterial) {
+        if (sender.role != UserRole.Producer) {
+            revert InvalidRoleForTokenType();
+        }
+    } else if (token.tokenType == TokenType.FinishedProduct) {
+        if (sender.role != UserRole.Factory && sender.role != UserRole.Retailer) {
+            revert InvalidRoleForTokenType();
+        }
+    }
+    
+    // ... resto del código ...
+}
+```
+
+### 6. Actualizar `acceptTransfer()` con Validación de Rol por Tipo de Token
+
+```solidity
+function acceptTransfer(uint transferId) external whenNotPaused onlyReceiverAllowed nonReentrant {
+    // ... validaciones existentes ...
+    
+    Token storage token = tokens[transferItem.tokenId];
+    
+    // 🔴 NUEVA VALIDACIÓN: Verificar rol del receptor según tipo de token
+    User storage receiver = users[addressToUserId[msg.sender]];
+    
+    if (token.tokenType == TokenType.RowMaterial) {
+        if (receiver.role != UserRole.Factory) {
+            revert InvalidRoleForTokenType();
+        }
+    } else if (token.tokenType == TokenType.FinishedProduct) {
+        if (receiver.role != UserRole.Retailer && receiver.role != UserRole.Consumer) {
+            revert InvalidRoleForTokenType();
+        }
+    }
+    
+    // ... resto del código ...
+}
+```
+
+### 7. Actualizar `rejectTransfer()` con Validación de Rol por Tipo de Token
+
+```solidity
+function rejectTransfer(uint transferId) external whenNotPaused onlyReceiverAllowed nonReentrant {
+    // ... validaciones existentes ...
+    
+    Token storage token = tokens[transferItem.tokenId];
+    
+    // 🔴 NUEVA VALIDACIÓN: Verificar rol del receptor según tipo de token
+    // (Misma lógica que acceptTransfer, ya que solo el receptor puede rechazar)
+    User storage receiver = users[addressToUserId[msg.sender]];
+    
+    if (token.tokenType == TokenType.RowMaterial) {
+        if (receiver.role != UserRole.Factory) {
+            revert InvalidRoleForTokenType();
+        }
+    } else if (token.tokenType == TokenType.FinishedProduct) {
+        if (receiver.role != UserRole.Retailer && receiver.role != UserRole.Consumer) {
+            revert InvalidRoleForTokenType();
+        }
+    }
+    
+    // ... resto del código ...
+}
+```
+
 ---
 
 ## 🔒 Consideraciones de Seguridad
@@ -213,6 +369,7 @@ function createToken(...) external onlyTokenCreators whenNotPaused {
 2. ✅ **Usuario autorizado** - Ya implementado
 3. ✅ **Contrato no pausado** - Ya implementado
 4. ✅ **Usuario cancelado** - **IMPLEMENTADO** (24 Nov 2025) ✅
+5. ❌ **Rol por tipo de token en transferencias** - **PENDIENTE** 🔴 **CRÍTICO**
 
 ### Validaciones que son NICE-TO-HAVE:
 
@@ -228,6 +385,9 @@ function createToken(...) external onlyTokenCreators whenNotPaused {
 |------------|----------|----------|-----------|--------|
 | Usuario cancelado no puede registrar | ✅ | ✅ | 🔴 Alta | **✅ COMPLETADO** (24 Nov 2025) |
 | Longitud mínima nombre (2 chars) | ✅ | ✅ | 🟡 Media | **✅ COMPLETADO** (24 Nov 2025) |
+| Rol por tipo de token en transfer() | ✅ | ❌ | 🔴 Alta | **❌ PENDIENTE** |
+| Rol por tipo de token en acceptTransfer() | ✅ | ❌ | 🔴 Alta | **❌ PENDIENTE** |
+| Rol por tipo de token en rejectTransfer() | ✅ | ❌ | 🔴 Alta | **❌ PENDIENTE** |
 | Formato de dirección válido | ✅ | ⚠️ Parcial | 🟢 Baja | Opcional |
 | tokenId > 0 | ✅ | ⚠️ Implícito | 🟢 Baja | Opcional |
 | Features JSON válido | ✅ | ❌ | 🟢 Baja | No recomendado |
@@ -236,11 +396,11 @@ function createToken(...) external onlyTokenCreators whenNotPaused {
 
 ## ✅ Conclusión
 
-**Total de validaciones pendientes críticas**: **0** ✅ (Usuario cancelado - COMPLETADO)  
+**Total de validaciones pendientes críticas**: **3** 🔴 (Validaciones de rol por tipo de token en transfer, acceptTransfer y rejectTransfer)  
 **Total de validaciones pendientes recomendadas**: **0** ✅ (Longitud mínima nombre - COMPLETADO)  
 **Total de validaciones opcionales**: **3**
 
-**Estado actual**: ✅ **Todas las validaciones críticas y recomendadas implementadas**
+**Estado actual**: ⚠️ **Validaciones críticas de seguridad pendientes**
 
 **Recomendación final**: Todas las validaciones críticas y recomendadas han sido implementadas exitosamente. Las validaciones opcionales pueden implementarse en el futuro si se considera necesario.
 
