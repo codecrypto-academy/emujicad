@@ -91,6 +91,11 @@ contract SupplyChain  is ReentrancyGuard {
     error UserWithExistingRole(); // Si se intenta asignar el mismo rol a un usuario ya existente.
  
     /**
+    * @notice El usuario está cancelado y no puede solicitar nuevos roles.
+    */
+    error UserCanceled(); // Si se intenta solicitar un rol cuando el usuario está cancelado.
+ 
+    /**
     * @notice El total de suministro no es válido (>0).
     */
     error InvalidTotalSupply();
@@ -523,6 +528,11 @@ contract SupplyChain  is ReentrancyGuard {
         if ( userExists) {
             
             User storage user = users[userId];
+
+            // Validar que el usuario no esté cancelado
+            if (user.status == UserStatus.Canceled) {
+                revert UserCanceled();
+            }
 
             //if (uint(role) ==  users[nextUserId].role) {
             if (uint(role) ==  uint(user.role)) {

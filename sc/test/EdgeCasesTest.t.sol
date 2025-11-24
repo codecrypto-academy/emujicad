@@ -100,6 +100,26 @@ contract EdgeCasesTest is Test {
         supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
     }
 
+    /// @notice Edge Case 4.5: Usuario cancelado no puede solicitar nuevo rol
+    /// @dev Cubre branch: if (user.status == UserStatus.Canceled) revert UserCanceled();
+    function testCanceledUserCannotRequestRole() public {
+        // Registrar usuario
+        vm.prank(producerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
+        
+        // Cancelar usuario
+        supplyChain.changeStatusUser(producerAddress, SupplyChain.UserStatus.Canceled);
+        
+        // Verificar que el usuario está cancelado
+        SupplyChain.User memory user = supplyChain.getUserInfo(producerAddress);
+        assertEq(uint(user.status), uint(SupplyChain.UserStatus.Canceled), "User should be canceled");
+        
+        // Intentar solicitar un nuevo rol (debe fallar)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.UserCanceled.selector));
+        vm.prank(producerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+    }
+
     /// @notice Edge Case 5: Token con nombre vacío
     /// @dev Cubre branch: if (bytes(name).length == 0) revert InvalidName();
     function testCreateTokenEmptyName() public {
