@@ -1,13 +1,16 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Package, Factory, ShoppingCart, User, ArrowRight, Calendar, Hash, TrendingUp, CheckCircle2, XCircle, Clock, Ban } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Package, Factory, ShoppingCart, User, ArrowRight, Calendar, Hash, TrendingUp, CheckCircle2, XCircle, Clock, Ban, ChevronDown, ChevronRight, Filter, X } from 'lucide-react'
 import { AddressDisplay } from '@/components/AddressDisplay'
 import { TokenType, UserRole, TransferStatus } from '@/contracts/config'
-import type { TraceabilityChain } from '@/hooks/useTokenTraceability'
+import type { TraceabilityChain, TransferTreeNode } from '@/hooks/useTokenTraceability'
 
 interface TraceabilityTimelineProps {
   traceability: TraceabilityChain | null
@@ -15,6 +18,54 @@ interface TraceabilityTimelineProps {
 }
 
 export function TraceabilityTimeline({ traceability, isLoading }: TraceabilityTimelineProps) {
+  // Estado para controlar qué nodos están expandidos
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
+  const [filterAddress, setFilterAddress] = useState<string>('')
+  
+  // Función para toggle de expansión de nodo
+  const toggleNode = (nodeId: string) => {
+    const newExpanded = new Set(expandedNodes)
+    if (newExpanded.has(nodeId)) {
+      newExpanded.delete(nodeId)
+    } else {
+      newExpanded.add(nodeId)
+    }
+    setExpandedNodes(newExpanded)
+  }
+  
+  // Obtener todas las direcciones únicas para el filtro
+  const allAddresses = useMemo(() => {
+    if (!traceability?.tree) return []
+    const addresses = new Set<string>()
+    const collectAddresses = (node: TransferTreeNode) => {
+      addresses.add(node.address.toLowerCase())
+      node.children.forEach(collectAddresses)
+    }
+    collectAddresses(traceability.tree.root)
+    return Array.from(addresses).sort()
+  }, [traceability?.tree])
+  
+  // Función para verificar si un nodo debe mostrarse (filtrado)
+  const shouldShowNode = (node: TransferTreeNode): boolean => {
+    if (!filterAddress) return true
+    const nodeAddress = node.address.toLowerCase()
+    const filterLower = filterAddress.toLowerCase()
+    
+    // Mostrar si el nodo coincide con el filtro o tiene hijos que coinciden
+    if (nodeAddress.includes(filterLower)) return true
+    
+    // Verificar recursivamente en los hijos
+    return node.children.some(child => shouldShowNode(child))
+  }
+  
+  // Expandir automáticamente el nodo raíz
+  React.useEffect(() => {
+    if (traceability?.tree) {
+      const rootId = `${traceability.tree.root.address}-${traceability.tree.root.tokenId}`
+      setExpandedNodes(new Set([rootId]))
+    }
+  }, [traceability?.tree])
+  
   if (isLoading) {
     return (
       <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl">
@@ -145,16 +196,58 @@ export function TraceabilityTimeline({ traceability, isLoading }: TraceabilityTi
             )}
           </div>
         )}
+        
+        {/* Filtro por dirección */}
+        {traceability.tree && allAddresses.length > 0 && (
+          <div className="mt-4 flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Select value={filterAddress || 'all'} onValueChange={(v) => setFilterAddress(v === 'all' ? '' : v)}>
+              <SelectTrigger className="w-[250px]">
+                <SelectValue placeholder="Filter by address..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Addresses</SelectItem>
+                {allAddresses.map(addr => (
+                  <SelectItem key={addr} value={addr}>
+                    {addr.slice(0, 6)}...{addr.slice(-4)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {filterAddress && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setFilterAddress('')}
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
       </CardHeader>
       
       <CardContent className="p-6">
-        <div className="relative">
-          {/* Timeline Line */}
-          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 via-purple-500 to-green-500 opacity-30 dark:opacity-50" />
-          
-          {/* Steps */}
-          <div className="space-y-8">
-            {traceability.steps.map((step, index) => {
+        {traceability.tree ? (
+          <TreeNodeComponent
+            node={traceability.tree.root}
+            level={0}
+            expandedNodes={expandedNodes}
+            onToggle={toggleNode}
+            shouldShow={shouldShowNode}
+            getRoleIcon={getRoleIcon}
+            getRoleColor={getRoleColor}
+            formatTimestamp={formatTimestamp}
+          />
+        ) : (
+          <div className="relative">
+            {/* Timeline Line */}
+            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 via-purple-500 to-green-500 opacity-30 dark:opacity-50" />
+            
+            {/* Steps */}
+            <div className="space-y-8">
+              {traceability.steps.map((step, index) => {
               const isLast = index === traceability.steps.length - 1
               const timestamp = formatTimestamp(step.timestamp)
               const roleColor = getRoleColor(step.role)
@@ -380,9 +473,292 @@ export function TraceabilityTimeline({ traceability, isLoading }: TraceabilityTi
             })}
           </div>
         </div>
-        
+        )}
       </CardContent>
     </Card>
+  )
+}
+
+// Componente recursivo para renderizar nodos del árbol
+interface TreeNodeComponentProps {
+  node: TransferTreeNode
+  level: number
+  expandedNodes: Set<string>
+  onToggle: (nodeId: string) => void
+  shouldShow: (node: TransferTreeNode) => boolean
+  getRoleIcon: (role: string) => React.ReactNode
+  getRoleColor: (role: string) => string
+  formatTimestamp: (timestamp: bigint) => { date: string; time: string; full: string }
+}
+
+function TreeNodeComponent({
+  node,
+  level,
+  expandedNodes,
+  onToggle,
+  shouldShow,
+  getRoleIcon,
+  getRoleColor,
+  formatTimestamp,
+}: TreeNodeComponentProps) {
+  const nodeId = `${node.address}-${node.tokenId}-${node.transferId || 'root'}`
+  const isExpanded = expandedNodes.has(nodeId)
+  const hasChildren = node.children.length > 0
+  const visibleChildren = node.children.filter(shouldShow)
+  const shouldRender = shouldShow(node)
+  
+  if (!shouldRender && visibleChildren.length === 0) {
+    return null
+  }
+  
+  const timestamp = formatTimestamp(node.timestamp)
+  const roleColor = getRoleColor(node.role)
+  
+  return (
+    <div className="relative">
+      {/* Línea vertical para conectar con hijos */}
+      {hasChildren && isExpanded && visibleChildren.length > 0 && (
+        <div 
+          className="absolute left-8 top-16 bottom-0 w-0.5 bg-gradient-to-b opacity-30 dark:opacity-50"
+          style={{ 
+            background: `linear-gradient(to bottom, ${roleColor.includes('blue') ? '#3b82f6' : roleColor.includes('purple') ? '#a855f7' : roleColor.includes('orange') ? '#f97316' : '#10b981'}, transparent)`,
+            marginLeft: `${level * 24}px`
+          }}
+        />
+      )}
+      
+      {/* Nodo */}
+      {shouldRender && (
+        <div className="relative flex items-start gap-4 mb-4" style={{ marginLeft: `${level * 24}px` }}>
+          {/* Botón de expandir/colapsar */}
+          {hasChildren && (
+            <button
+              onClick={() => onToggle(nodeId)}
+              className="mt-2 p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              )}
+            </button>
+          )}
+          {!hasChildren && <div className="w-6" />}
+          
+          {/* Contenido del nodo */}
+          <div className="flex-1">
+            <div className={`
+              p-4 rounded-xl border-2 transition-all duration-300
+              bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm
+              border-slate-200/50 dark:border-slate-700/50
+              hover:border-blue-300 dark:hover:border-blue-600
+              hover:shadow-lg
+            `}>
+              <div className="flex items-start gap-3 mb-3">
+                <div className={`
+                  flex items-center justify-center w-12 h-12 rounded-full
+                  bg-gradient-to-br ${roleColor}
+                  shadow-md
+                  border-2 border-white dark:border-slate-800
+                `}>
+                  <div className="text-white">
+                    {getRoleIcon(node.role)}
+                  </div>
+                </div>
+                
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge className={`bg-gradient-to-r ${roleColor} text-white border-0 px-2 py-0.5 text-xs`}>
+                      {node.role}
+                    </Badge>
+                    {node.isCreation ? (
+                      <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                        <Package className="h-3 w-3 mr-1" />
+                        Creation
+                      </Badge>
+                    ) : node.children.length > 0 && node.children[0].transferId === node.transferId ? (
+                      // Nodo de ENVÍO (tiene hijos que son recepciones de la misma transferencia)
+                      <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                        <ArrowRight className="h-3 w-3 mr-1" />
+                        Transfers to {node.children[0]?.role || 'Receiver'}
+                      </Badge>
+                    ) : node.parent && node.parent.transferId === node.transferId ? (
+                      // Nodo de RECEPCIÓN (tiene el mismo transferId que el padre)
+                      <>
+                        <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                          <ArrowRight className="h-3 w-3 mr-1 rotate-180" />
+                          Receives from {node.parent.role}
+                        </Badge>
+                        {node.transferStatus !== undefined && (
+                          <Badge
+                            variant="outline"
+                            className={
+                              node.transferStatus === TransferStatus.Accepted
+                                ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 text-xs"
+                                : node.transferStatus === TransferStatus.Rejected
+                                ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800 text-xs"
+                                : "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800 text-xs"
+                            }
+                          >
+                            {node.transferStatus === TransferStatus.Accepted ? (
+                              <>
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Transfer Accepted
+                              </>
+                            ) : node.transferStatus === TransferStatus.Rejected ? (
+                              <>
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Transfer Rejected
+                              </>
+                            ) : node.transferStatus === TransferStatus.Pending ? (
+                              <>
+                                <Clock className="h-3 w-3 mr-1" />
+                                Transfer Pending
+                              </>
+                            ) : (
+                              <>
+                                <Ban className="h-3 w-3 mr-1" />
+                                Transfer Cancelled
+                              </>
+                            )}
+                          </Badge>
+                        )}
+                      </>
+                    ) : null}
+                  </div>
+                  
+                  {node.isCreation ? (
+                    <div className="mb-2">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">
+                        Creator:
+                      </p>
+                      <AddressDisplay address={node.address} className="text-sm font-medium" />
+                    </div>
+                  ) : node.children.length > 0 && node.children[0].transferId === node.transferId ? (
+                    // Nodo de ENVÍO
+                    <div className="mb-2">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">
+                        Sender ({node.role}):
+                      </p>
+                      <AddressDisplay address={node.address} className="text-sm font-medium" />
+                      <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">
+                          Transferring to:
+                        </p>
+                        {node.children.map((child, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {child.role}
+                            </Badge>
+                            <AddressDisplay address={child.address} className="text-xs font-mono" />
+                            {child.transferStatus !== undefined && (
+                              <Badge
+                                variant="outline"
+                                className={
+                                  child.transferStatus === TransferStatus.Accepted
+                                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 text-xs"
+                                    : child.transferStatus === TransferStatus.Rejected
+                                    ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800 text-xs"
+                                    : "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800 text-xs"
+                                }
+                              >
+                                {['Pending', 'Accepted', 'Rejected', 'Cancelled'][Number(child.transferStatus)]}
+                              </Badge>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : node.parent && node.parent.transferId === node.transferId ? (
+                    // Nodo de RECEPCIÓN
+                    <>
+                      <div className="mb-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <p className="text-xs font-semibold text-muted-foreground mb-1">
+                          Transferred by:
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {node.parent.role}
+                          </Badge>
+                          <AddressDisplay address={node.parent.address} className="text-xs font-mono" />
+                        </div>
+                      </div>
+                      <div className="mb-2">
+                        <p className="text-xs font-semibold text-muted-foreground mb-1">
+                          Receiver ({node.role}):
+                        </p>
+                        <AddressDisplay address={node.address} className="text-sm font-medium" />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="mb-2">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">
+                        {node.role}:
+                      </p>
+                      <AddressDisplay address={node.address} className="text-sm font-medium" />
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                    <Calendar className="h-3 w-3" />
+                    <span>{timestamp.date} {timestamp.time}</span>
+                  </div>
+                  
+                  {node.totalSupply !== undefined && (
+                    <div className="mb-2">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">Total Supply Created:</p>
+                      <p className="text-sm font-semibold text-purple-600 dark:text-purple-400">
+                        {node.totalSupply.toString()} units
+                      </p>
+                    </div>
+                  )}
+                  
+                  {node.amount !== undefined && (
+                    <div className="mb-2">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">
+                        {node.children.length > 0 && node.children[0].transferId === node.transferId
+                          ? 'Amount Transferred:'
+                          : 'Amount Received:'}
+                      </p>
+                      <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                        {node.amount.toString()} units
+                      </p>
+                    </div>
+                  )}
+                  
+                  {node.transferId && (
+                    <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                      <p className="text-xs text-muted-foreground font-mono">
+                        Transfer ID: #{node.transferId.toString()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Renderizar hijos si está expandido */}
+      {isExpanded && visibleChildren.length > 0 && (
+        <div className="ml-8">
+          {visibleChildren.map((child, index) => (
+            <TreeNodeComponent
+              key={`${child.address}-${child.tokenId}-${child.transferId || index}`}
+              node={child}
+              level={level + 1}
+              expandedNodes={expandedNodes}
+              onToggle={onToggle}
+              shouldShow={shouldShow}
+              getRoleIcon={getRoleIcon}
+              getRoleColor={getRoleColor}
+              formatTimestamp={formatTimestamp}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
