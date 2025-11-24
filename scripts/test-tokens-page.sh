@@ -27,11 +27,11 @@ check() {
 echo "📋 PASO 1: Verificación estática"
 echo "───────────────────────────────────────────────────────────────"
 
-# Verificar que el hook existe y está exportado
-if grep -q "export function useGetAllTokens" web/src/hooks/useGetUserTokens.ts; then
-    check "Hook useGetAllTokens() exportado correctamente"
+# Verificar que el hook existe y está exportado (puede ser useGetAllTokens o useGetUserTokensWithData)
+if grep -q "export function useGetAllTokens\|export function useGetUserTokensWithData" web/src/hooks/useGetUserTokens.ts; then
+    check "Hook de tokens exportado correctamente"
 else
-    check "Hook useGetAllTokens() exportado correctamente"
+    check "Hook de tokens exportado correctamente"
 fi
 
 # Verificar que la página existe
@@ -41,11 +41,11 @@ else
     check "Página tokens/page.tsx existe"
 fi
 
-# Verificar imports críticos
-if grep -q "import.*useGetAllTokens" web/src/app/tokens/page.tsx; then
-    check "Página importa useGetAllTokens"
+# Verificar imports críticos (puede ser useGetAllTokens o useGetUserTokensWithData)
+if grep -q "import.*useGetAllTokens\|import.*useGetUserTokensWithData" web/src/app/tokens/page.tsx; then
+    check "Página importa hook de tokens"
 else
-    check "Página importa useGetAllTokens"
+    check "Página importa hook de tokens"
 fi
 
 if grep -q "import.*TokenCard" web/src/app/tokens/page.tsx; then

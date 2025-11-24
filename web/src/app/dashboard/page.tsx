@@ -1,14 +1,12 @@
 'use client';
 
 import { Header } from '@/components/Header';
-import { UserProfileCard } from '@/components/UserProfileCard';
 import { TokenCard } from '@/components/TokenCard';
 import { TokenCardModern } from '@/components/TokenCardModern';
 import { useGetUserTokens, useGetAllTokens } from '@/hooks/useGetUserTokens';
 import { useGetUserTokensWithData } from '@/hooks/useGetUserTokensWithData';
 import { useUserTokenStats } from '@/hooks/useUserTokenStats';
 import { useDashboardStats } from '@/hooks/useContractReads';
-import { useUserStats } from '@/hooks/useAdminUsers';
 import { UserStatsCards } from '@/components/admin/UserStatsCards';
 import { useIsPaused } from '@/hooks/usePause';
 import { useAuth } from '@/contexts/AuthContext';
@@ -78,9 +76,8 @@ export default function DashboardPage() {
   );
 
   // Hooks adicionales para admin (solo se ejecutan si es admin)
-  // Nota: useGetAllTokens y useUserStats no aceptan argumentos, se ejecutan siempre pero solo se usan si es admin
+  // Nota: useGetAllTokens no acepta argumentos, se ejecuta siempre pero solo se usa si es admin
   const { tokens: allTokens, isLoading: isLoadingAllTokens } = useGetAllTokens()
-  const { stats: userStats, isLoading: isLoadingUserStats } = useUserStats()
 
   // Calcular estadísticas de tokens por tipo (solo para admin)
   const tokenStats = useMemo(() => {
@@ -176,9 +173,6 @@ export default function DashboardPage() {
 
   // Detectar roles del usuario
   const isProducer = userInfo && userInfo.role === BigInt(UserRole.Producer)
-  const isConsumer = userInfo && userInfo.role === BigInt(UserRole.Consumer)
-  const isFactory = userInfo && userInfo.role === BigInt(UserRole.Factory)
-  const isRetailer = userInfo && userInfo.role === BigInt(UserRole.Retailer)
 
   // Para Producer: solo usar sentStats
   // Para Consumer: solo usar receivedStats

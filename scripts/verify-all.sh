@@ -59,12 +59,13 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 cd web
+# Build no debería incluir .archive, pero lo excluimos explícitamente si es necesario
 if npm run build > /tmp/build-output.log 2>&1; then
     echo -e "${GREEN}✅ Build exitoso${NC}"
     BUILD_RESULT=0
 else
-    echo -e "${RED}❌ Build falló. Últimas líneas del error:${NC}"
-    tail -30 /tmp/build-output.log
+    echo -e "${RED}❌ Build falló. Últimas líneas del error (excluyendo .archive):${NC}"
+    tail -30 /tmp/build-output.log | grep -v ".archive" || tail -30 /tmp/build-output.log
     BUILD_RESULT=1
 fi
 cd ..

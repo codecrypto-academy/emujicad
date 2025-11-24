@@ -11,7 +11,7 @@ import { User } from 'lucide-react'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { address, isConnected } = useAccount()
+  const { isConnected } = useAccount()
   const { isAuthenticated, isLoading, isAdmin } = useAuth()
   
   const [mounted, setMounted] = useState(false)

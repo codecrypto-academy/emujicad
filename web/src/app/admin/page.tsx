@@ -8,11 +8,10 @@ import { useIsPaused } from '@/hooks/usePause'
 import { Header } from '@/components/Header'
 import { PauseControl } from '@/components/admin/PauseControl'
 import { OwnershipTransfer } from '@/components/admin/OwnershipTransfer'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Shield, Users, AlertCircle } from 'lucide-react'
+import { Users, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AdminPage() {
@@ -29,9 +28,8 @@ export default function AdminPage() {
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase()
 
   // Hooks de datos
-  const shouldFetchData = Boolean(isConnected && !isLoadingOwner && isOwner)
-  
-  const { data: isPaused, isLoading: isLoadingPause } = useIsPaused(shouldFetchData)
+  // Nota: useIsPaused se usa internamente en PauseControl, no necesitamos los valores aquí
+  useIsPaused(Boolean(isConnected && !isLoadingOwner && isOwner))
 
   // Prevenir hydration mismatch - usar startTransition para evitar warning de React
   useEffect(() => {

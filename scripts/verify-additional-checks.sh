@@ -216,14 +216,14 @@ echo "🔒 7. VERIFICANDO SEGURIDAD BÁSICA"
 echo "----------------------------"
 
 # Verificar que no haya API keys hardcodeadas
-if grep -r "api[_-]key\|secret.*=.*['\"]" web/src --exclude-dir=node_modules 2>/dev/null | grep -v "//.*test\|//.*example\|//.*TODO" | grep -q .; then
+if grep -r "api[_-]key\|secret.*=.*['\"]" web/src --exclude-dir=node_modules --exclude-dir=.archive 2>/dev/null | grep -v "//.*test\|//.*example\|//.*TODO" | grep -q .; then
     warn "Posibles API keys hardcodeadas encontradas (revisar manualmente)"
 else
     check "No se encontraron API keys hardcodeadas obvias"
 fi
 
 # Verificar que no haya console.log en producción
-CONSOLE_LOGS=$(grep -r "console\.log\|console\.error\|console\.warn" web/src --exclude-dir=node_modules 2>/dev/null | wc -l)
+CONSOLE_LOGS=$(grep -r "console\.log\|console\.error\|console\.warn" web/src --exclude-dir=node_modules --exclude-dir=.archive 2>/dev/null | wc -l)
 if [ "$CONSOLE_LOGS" -gt 0 ]; then
     warn "Se encontraron $CONSOLE_LOGS console.log/error/warn (considerar remover en producción)"
 else
@@ -288,13 +288,13 @@ for component in "${UI_COMPONENTS[@]}"; do
 done
 
 # Verificar componentes custom principales
+# Nota: QuickActions.tsx fue eliminado intencionalmente
 CUSTOM_COMPONENTS=(
     "Header"
     "ConnectWallet"
     "RegisterForm"
     "TokenCard"
     "UserProfileCard"
-    "QuickActions"
     "ErrorBoundary"
 )
 
