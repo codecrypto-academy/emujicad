@@ -698,16 +698,13 @@ function TreeNodeComponent({
                     ) : null}
                   </div>
                   
-                  {/* Token Information */}
-                  <div className="mb-2 p-2 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      Token #{node.tokenId.toString()}: <span className="font-normal">{node.tokenName}</span> <span className="text-sm text-muted-foreground font-normal">({node.tokenType === TokenType.RowMaterial ? 'Raw Material' : 'Finished Product'})</span>
-                    </p>
-                  </div>
-                  
                   {node.isCreation ? (
-                    <div className="mb-2">
-                      <div className="flex items-center gap-2">
+                    <div className="mb-2 p-2 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          Token #{node.tokenId.toString()}: <span className="font-normal">{node.tokenName}</span> <span className="text-sm text-muted-foreground font-normal">({node.tokenType === TokenType.RowMaterial ? 'Raw Material' : 'Finished Product'})</span>
+                        </p>
+                        <span>•</span>
                         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                           Creator:
                         </p>
@@ -716,23 +713,25 @@ function TreeNodeComponent({
                     </div>
                   ) : node.children.length > 0 && node.children[0].transferId === node.transferId ? (
                     // Nodo de ENVÍO
-                    <div className="mb-2">
-                      <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="mb-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          Token #{node.tokenId.toString()}: <span className="font-normal">{node.tokenName}</span> <span className="text-sm text-muted-foreground font-normal">({node.tokenType === TokenType.RowMaterial ? 'Raw Material' : 'Finished Product'})</span>
+                        </p>
+                        <span>•</span>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          Sender:
+                        </p>
+                        <AddressDisplay address={node.address} className="text-sm font-medium" />
+                        <span>•</span>
+                        <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                          Transferring to:
+                        </p>
                         {node.children.map((child, idx) => (
-                          <div key={idx} className="flex items-center gap-2 flex-wrap">
-                            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                              Sender ({node.role}):
-                            </p>
-                            <AddressDisplay address={node.address} className="text-sm font-medium" />
-                            <span>•</span>
-                            <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
-                              Transferring to:
-                            </p>
-                            <Badge variant="outline" className="text-xs">
-                              {child.role}
-                            </Badge>
+                          <React.Fragment key={idx}>
                             <AddressDisplay address={child.address} className="text-sm font-mono" />
-                          </div>
+                            {idx < node.children.length - 1 && <span>•</span>}
+                          </React.Fragment>
                         ))}
                       </div>
                     </div>
@@ -741,19 +740,27 @@ function TreeNodeComponent({
                     <div className="mb-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                          Transferred by ({node.parent.role}):
+                          Token #{node.tokenId.toString()}: <span className="font-normal">{node.tokenName}</span> <span className="text-sm text-muted-foreground font-normal">({node.tokenType === TokenType.RowMaterial ? 'Raw Material' : 'Finished Product'})</span>
+                        </p>
+                        <span>•</span>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          Transferred by:
                         </p>
                         <AddressDisplay address={node.parent.address} className="text-sm font-medium" />
                         <span>•</span>
                         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                          Receiver ({node.role}):
+                          Receiver:
                         </p>
                         <AddressDisplay address={node.address} className="text-sm font-medium" />
                       </div>
                     </div>
                   ) : (
-                    <div className="mb-2">
-                      <div className="flex items-center gap-2">
+                    <div className="mb-2 p-2 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          Token #{node.tokenId.toString()}: <span className="font-normal">{node.tokenName}</span> <span className="text-sm text-muted-foreground font-normal">({node.tokenType === TokenType.RowMaterial ? 'Raw Material' : 'Finished Product'})</span>
+                        </p>
+                        <span>•</span>
                         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                           {node.role}:
                         </p>
