@@ -14,6 +14,13 @@ import {SupplyChain} from "../src/SupplyChain.sol";
  * - Uses changeStatusUser() by owner to approve users  
  * - Correct function signatures for createToken() and transfer()
  * - Proper enum values (UserRole and UserStatus)
+ * 
+ * DEMONSTRATION PHASES:
+ * - PHASE 1: User Registration
+ * - PHASE 2: Token Creation
+ * - PHASE 3: Transfers
+ * - PHASE 4: Rejection & Cancellation
+ * - PHASE 5: Ownership Transfer
  */
 contract SupplyChainInteractions is Script {
     SupplyChain public supplyChain;
@@ -24,6 +31,7 @@ contract SupplyChainInteractions is Script {
     address public factoryAddress = address(0x2222);
     address public retailerAddress = address(0x3333);
     address public consumerAddress = address(0x4444);
+    address public newOwnerCandidate = address(0x9999); // Nueva dirección que nunca ha solicitado un rol
     
     function setUp() public {
         // Deploy new contract for testing
@@ -133,6 +141,32 @@ contract SupplyChainInteractions is Script {
         vm.prank(producerAddress);
         supplyChain.cancelTransfer(6);
         console.log("Transfer 6 cancelled");
+        
+        // PHASE 5: OWNERSHIP TRANSFER DEMONSTRATION
+        console.log("\n=== PHASE 5: OWNERSHIP TRANSFER ===");
+        
+        // Guardar el owner original
+        address originalOwner = supplyChain.owner();
+        console.log("Original owner:", originalOwner);
+        
+        // Owner actual inicia la transferencia de ownership
+        vm.prank(originalOwner);
+        supplyChain.initiateOwnershipTransfer(newOwnerCandidate);
+        console.log("Ownership transfer initiated to:", newOwnerCandidate);
+        console.log("Pending owner:", supplyChain.getPendingOwner());
+        console.log("Current owner (should be unchanged):", supplyChain.owner());
+        
+        // El candidato acepta la transferencia de ownership
+        vm.prank(newOwnerCandidate);
+        supplyChain.acceptOwnershipTransfer();
+        console.log("Ownership transfer accepted!");
+        console.log("New owner:", supplyChain.owner());
+        console.log("Pending owner (should be zero):", supplyChain.getPendingOwner());
+        
+        // Nota: El nuevo owner no puede registrarse como usuario
+        // El contrato valida que el owner no puede ser parte del proceso de SupplyChain
+        // Si intentara requestUserRole(), el contrato revertiría con InvalidAddress
+        console.log("Note: New owner cannot register as user (owner is separate from supply chain)");
         
         // FINAL STATUS
         console.log("\n=== FINAL STATUS ===");
