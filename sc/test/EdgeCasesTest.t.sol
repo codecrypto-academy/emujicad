@@ -385,10 +385,15 @@ contract EdgeCasesTest is Test {
         vm.prank(factoryAddress);
         supplyChain.createToken("Product 1", SupplyChain.TokenType.FinishedProduct, 50, "{}", 1, 50);
         
-        // Transferir producto terminado a otro factory
+        // Registrar Retailer para poder aceptar Finished Product
+        vm.prank(retailerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Retailer);
+        supplyChain.changeStatusUser(retailerAddress, SupplyChain.UserStatus.Approved);
+        
+        // Transferir producto terminado a Retailer (Factory puede transferir Finished Product)
         vm.prank(factoryAddress);
-        supplyChain.transfer(factoryAddress, 2, 25);
-        vm.prank(factoryAddress);
+        supplyChain.transfer(retailerAddress, 2, 25);
+        vm.prank(retailerAddress);
         supplyChain.acceptTransfer(2);
         
         // Intentar crear producto usando otro producto terminado como parent (debe fallar)
@@ -482,5 +487,242 @@ contract EdgeCasesTest is Test {
         
         // Verificar que el balance del token 1 es 0
         assertEq(supplyChain.getTokenBalance(1, factoryAddress), 0, "Factory balance of token 1 should be 0");
+    }
+
+    // ============================================================================
+    // 🔴 FASE 4: VALIDACIONES DE ROL POR TIPO DE TOKEN (NUEVAS VALIDACIONES)
+    // ============================================================================
+
+    /// @notice Edge Case 24: Factory no puede transferir Raw Material
+    /// @dev Cubre branch: if (token.tokenType == TokenType.RowMaterial && sender.role != UserRole.Producer) revert InvalidRoleForTokenType();
+    function testFactoryCannotTransferRawMaterial() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        // Producer crea Raw Material
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Transferir Raw Material a Factory (válido)
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // Factory intenta transferir Raw Material (debe fallar)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidRoleForTokenType.selector));
+        vm.prank(factoryAddress);
+        supplyChain.transfer(retailerAddress, 1, 25);
+    }
+
+    /// @notice Edge Case 25: Retailer no puede transferir Raw Material
+    /// @dev Cubre branch: if (token.tokenType == TokenType.RowMaterial && sender.role != UserRole.Producer) revert InvalidRoleForTokenType();
+    function testRetailerCannotTransferRawMaterial() public {
+        setupApprovedProducer();
+        
+        vm.prank(retailerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Retailer);
+        supplyChain.changeStatusUser(retailerAddress, SupplyChain.UserStatus.Approved);
+        
+        // Producer crea Raw Material
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Transferir Raw Material a Retailer (válido - Producer -> Factory -> Retailer)
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // Factory transfiere a Retailer (esto debería fallar porque Factory no puede transferir Raw Material)
+        // Pero primero necesitamos que Factory tenga el token, así que esto fallará en la validación nueva
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidRoleForTokenType.selector));
+        vm.prank(factoryAddress);
+        supplyChain.transfer(retailerAddress, 1, 25);
+    }
+
+    /// @notice Edge Case 26: Producer no puede transferir Finished Product
+    /// @dev Cubre branch: if (token.tokenType == TokenType.FinishedProduct && sender.role != Factory && sender.role != Retailer) revert InvalidRoleForTokenType();
+    function testProducerCannotTransferFinishedProduct() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        // Producer crea Raw Material
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Transferir a Factory
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // Factory crea Finished Product
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Finished Product", SupplyChain.TokenType.FinishedProduct, 25, "{}", 1, 25);
+        
+        // Transferir Finished Product a Producer (válido para Factory)
+        vm.prank(factoryAddress);
+        supplyChain.transfer(producerAddress, 2, 10);
+        
+        // Producer intenta transferir Finished Product (debe fallar)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidRoleForTokenType.selector));
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 2, 5);
+    }
+
+    /// @notice Edge Case 27: Retailer no puede aceptar Raw Material
+    /// @dev Cubre branch: if (token.tokenType == TokenType.RowMaterial && receiver.role != UserRole.Factory) revert InvalidRoleForTokenType();
+    function testRetailerCannotAcceptRawMaterial() public {
+        setupApprovedProducer();
+        
+        vm.prank(retailerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Retailer);
+        supplyChain.changeStatusUser(retailerAddress, SupplyChain.UserStatus.Approved);
+        
+        // Producer crea Raw Material
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Producer intenta transferir Raw Material a Retailer (esto debería fallar en acceptTransfer)
+        vm.prank(producerAddress);
+        supplyChain.transfer(retailerAddress, 1, 50);
+        
+        // Retailer intenta aceptar Raw Material (debe fallar)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidRoleForTokenType.selector));
+        vm.prank(retailerAddress);
+        supplyChain.acceptTransfer(1);
+    }
+
+    /// @notice Edge Case 28: Consumer no puede aceptar Raw Material
+    /// @dev Cubre branch: if (token.tokenType == TokenType.RowMaterial && receiver.role != UserRole.Factory) revert InvalidRoleForTokenType();
+    function testConsumerCannotAcceptRawMaterial() public {
+        setupApprovedProducer();
+        
+        vm.prank(consumerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Consumer);
+        supplyChain.changeStatusUser(consumerAddress, SupplyChain.UserStatus.Approved);
+        
+        // Producer crea Raw Material
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Producer intenta transferir Raw Material a Consumer (esto debería fallar en acceptTransfer)
+        vm.prank(producerAddress);
+        supplyChain.transfer(consumerAddress, 1, 50);
+        
+        // Consumer intenta aceptar Raw Material (debe fallar)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidRoleForTokenType.selector));
+        vm.prank(consumerAddress);
+        supplyChain.acceptTransfer(1);
+    }
+
+    /// @notice Edge Case 29: Factory no puede aceptar Finished Product
+    /// @dev Cubre branch: if (token.tokenType == TokenType.FinishedProduct && receiver.role != Retailer && receiver.role != Consumer) revert InvalidRoleForTokenType();
+    function testFactoryCannotAcceptFinishedProduct() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        // Producer crea Raw Material
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Transferir a Factory
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // Factory crea Finished Product
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Finished Product", SupplyChain.TokenType.FinishedProduct, 25, "{}", 1, 25);
+        
+        // Factory intenta transferir Finished Product a otro Factory
+        address anotherFactory = makeAddr("anotherFactory");
+        vm.prank(anotherFactory);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(anotherFactory, SupplyChain.UserStatus.Approved);
+        
+        vm.prank(factoryAddress);
+        supplyChain.transfer(anotherFactory, 2, 10);
+        
+        // Otro Factory intenta aceptar Finished Product (debe fallar)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidRoleForTokenType.selector));
+        vm.prank(anotherFactory);
+        supplyChain.acceptTransfer(2);
+    }
+
+    /// @notice Edge Case 30: Factory no puede rechazar Finished Product
+    /// @dev Cubre branch: if (token.tokenType == TokenType.FinishedProduct && receiver.role != Retailer && receiver.role != Consumer) revert InvalidRoleForTokenType();
+    function testFactoryCannotRejectFinishedProduct() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        // Producer crea Raw Material
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Transferir a Factory
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // Factory crea Finished Product
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Finished Product", SupplyChain.TokenType.FinishedProduct, 25, "{}", 1, 25);
+        
+        // Factory intenta transferir Finished Product a otro Factory
+        address anotherFactory = makeAddr("anotherFactory");
+        vm.prank(anotherFactory);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(anotherFactory, SupplyChain.UserStatus.Approved);
+        
+        vm.prank(factoryAddress);
+        supplyChain.transfer(anotherFactory, 2, 10);
+        
+        // Otro Factory intenta rechazar Finished Product (debe fallar)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidRoleForTokenType.selector));
+        vm.prank(anotherFactory);
+        supplyChain.rejectTransfer(2);
+    }
+
+    /// @notice Edge Case 31: Consumer no puede rechazar Raw Material
+    /// @dev Cubre branch: if (token.tokenType == TokenType.RowMaterial && receiver.role != UserRole.Factory) revert InvalidRoleForTokenType();
+    function testConsumerCannotRejectRawMaterial() public {
+        setupApprovedProducer();
+        
+        vm.prank(consumerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Consumer);
+        supplyChain.changeStatusUser(consumerAddress, SupplyChain.UserStatus.Approved);
+        
+        // Producer crea Raw Material
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Producer intenta transferir Raw Material a Consumer (esto debería fallar en rejectTransfer)
+        vm.prank(producerAddress);
+        supplyChain.transfer(consumerAddress, 1, 50);
+        
+        // Consumer intenta rechazar Raw Material (debe fallar)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidRoleForTokenType.selector));
+        vm.prank(consumerAddress);
+        supplyChain.rejectTransfer(1);
     }
 }

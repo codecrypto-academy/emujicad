@@ -267,11 +267,11 @@ $(ls -1 *.sh 2>/dev/null | sort)
 
 **coverage-reporter.sh:**
 - Estado: $(test -f coverage-reporter.sh && echo "✅ Existe" || echo "❌ No encontrado")
-- Verificación: $(grep -q "82.*test\|82 tests" coverage-reporter.sh && echo "✅ Referencias correctas" || echo "⚠️ Revisar referencias")
+- Verificación: $(grep -q "90.*test\|90 tests" coverage-reporter.sh && echo "✅ Referencias correctas" || echo "⚠️ Revisar referencias")
 
 **validate-all.sh:**
 - Estado: $(test -f validate-all.sh && echo "✅ Existe" || echo "❌ No encontrado")
-- Verificación: $(grep -q "82 tests" validate-all.sh && echo "✅ Referencias correctas" || echo "⚠️ Revisar referencias")
+- Verificación: $(grep -q "90 tests" validate-all.sh && echo "✅ Referencias correctas" || echo "⚠️ Revisar referencias")
 
 ---
 

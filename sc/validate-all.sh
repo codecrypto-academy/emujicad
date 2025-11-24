@@ -118,8 +118,8 @@ echo -e "${CYAN}  FASE 3: EJECUCIÓN DE TESTS${NC}"
 echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 
 run_validation "Tests de SupplyChain.t.sol (55 tests)" "forge test --match-path test/SupplyChain.t.sol" "55 passed"
-run_validation "Tests de EdgeCasesTest.t.sol (27 tests)" "forge test --match-path test/EdgeCasesTest.t.sol" "27 passed"
-run_validation "Total de tests correctos (82 tests)" "forge test --match-path 'test/*'" "82 tests passed"
+run_validation "Tests de EdgeCasesTest.t.sol (35 tests)" "forge test --match-path test/EdgeCasesTest.t.sol" "35 passed"
+run_validation "Total de tests correctos (90 tests)" "forge test --match-path 'test/*'" "90 tests passed"
 
 echo -e "\n${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "${CYAN}  FASE 4: SCRIPTS DE DEPLOYMENT${NC}"
@@ -281,8 +281,8 @@ generate_validation_report() {
 
 ### ✅ FASE 3: Tests (3/3)
 - Tests de SupplyChain.t.sol (55 tests)
-- Tests de EdgeCasesTest.t.sol (27 tests)
-- Total: 82 tests ejecutados
+- Tests de EdgeCasesTest.t.sol (35 tests)
+- Total: 90 tests ejecutados
 
 ### ✅ FASE 4: Scripts de Deployment (2/2)
 - SupplyChainDeploy.s.sol funcional
@@ -389,7 +389,7 @@ if [ $FAILED -eq 0 ]; then
     echo -e "${GREEN}║                                                               ║${NC}"
     echo -e "${GREEN}║  ✅ Proyecto listo para presentación académica                ║${NC}"
     echo -e "${GREEN}║  ✅ Contratos compilados y validados                          ║${NC}"
-    echo -e "${GREEN}║  ✅ 82 tests pasando (100% success rate)                      ║${NC}"
+    echo -e "${GREEN}║  ✅ 90 tests pasando (100% success rate)                      ║${NC}"
     echo -e "${GREEN}║  ✅ Scripts funcionales                                       ║${NC}"
     echo -e "${GREEN}║  ✅ Coverage > 80% en métricas principales                    ║${NC}"
     echo -e "${GREEN}║  ✅ Documentación completa y consistente                      ║${NC}"

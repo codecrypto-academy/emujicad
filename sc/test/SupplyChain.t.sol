@@ -946,21 +946,34 @@ contract SupplyChainTest is Test {
         supplyChain.createToken("Wood", SupplyChain.TokenType.RowMaterial, 100, "", 0, 0);
 
         // Transfer some tokens to consumer first (through factory/retailer)
-        _registerAndApproveUser(retailerAddress, SupplyChain.UserRole.Retailer);
+        // Primero Producer -> Factory (Raw Material)
+        _registerAndApproveUser(factoryAddress, SupplyChain.UserRole.Factory);
         vm.prank(producerAddress);
-        supplyChain.transfer(retailerAddress, 1, 50);
-        vm.prank(retailerAddress);
+        supplyChain.transfer(factoryAddress, 1, 50);
+        vm.prank(factoryAddress);
         supplyChain.acceptTransfer(1);
         
+        // Factory crea Finished Product
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Chair", SupplyChain.TokenType.FinishedProduct, 25, "", 1, 25);
+        
+        // Factory -> Retailer (Finished Product)
+        _registerAndApproveUser(retailerAddress, SupplyChain.UserRole.Retailer);
+        vm.prank(factoryAddress);
+        supplyChain.transfer(retailerAddress, 2, 20);
         vm.prank(retailerAddress);
-        supplyChain.transfer(consumerAddress, 1, 25);
-        vm.prank(consumerAddress);
         supplyChain.acceptTransfer(2);
+        
+        // Retailer -> Consumer (Finished Product)
+        vm.prank(retailerAddress);
+        supplyChain.transfer(consumerAddress, 2, 10);
+        vm.prank(consumerAddress);
+        supplyChain.acceptTransfer(3);
 
-        // Consumer cannot transfer to anyone
+        // Consumer cannot transfer to anyone (Consumer no puede transferir Finished Product)
         vm.prank(consumerAddress);
         vm.expectRevert(SupplyChain.NoTransfersAllowed.selector);
-        supplyChain.transfer(producerAddress, 1, 10);
+        supplyChain.transfer(producerAddress, 2, 5);
     }
 
     // --- Tests de eventos ---

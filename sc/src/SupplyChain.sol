@@ -96,6 +96,11 @@ contract SupplyChain  is ReentrancyGuard {
     error UserCanceled(); // Si se intenta solicitar un rol cuando el usuario está cancelado.
  
     /**
+    * @notice El rol del usuario no es válido para este tipo de token.
+    */
+    error InvalidRoleForTokenType(); // Si se intenta transferir/aceptar/rechazar un token con un rol incompatible.
+ 
+    /**
     * @notice El total de suministro no es válido (>0).
     */
     error InvalidTotalSupply();
@@ -762,6 +767,16 @@ contract SupplyChain  is ReentrancyGuard {
         Token storage token = tokens[tokenId];
         if (token.id == 0) revert TokenDoesNotExist();
 
+        // Validar que el rol del emisor sea compatible con el tipo de token
+        User storage sender = users[addressToUserId[msg.sender]];
+        if (token.tokenType == TokenType.RowMaterial) {
+            if (sender.role != UserRole.Producer) revert InvalidRoleForTokenType();
+        } else if (token.tokenType == TokenType.FinishedProduct) {
+            if (sender.role != UserRole.Factory && sender.role != UserRole.Retailer) {
+                revert InvalidRoleForTokenType();
+            }
+        }
+
         uint256 senderBalance = token.balance[msg.sender];
         if (senderBalance < amount) revert InsufficientBalance(senderBalance, amount);
 
@@ -802,6 +817,16 @@ contract SupplyChain  is ReentrancyGuard {
         if (transferItem.to != msg.sender) revert Unauthorized();
         
         Token storage token = tokens[transferItem.tokenId];
+        
+        // Validar que el rol del receptor sea compatible con el tipo de token
+        User storage receiver = users[addressToUserId[msg.sender]];
+        if (token.tokenType == TokenType.RowMaterial) {
+            if (receiver.role != UserRole.Factory) revert InvalidRoleForTokenType();
+        } else if (token.tokenType == TokenType.FinishedProduct) {
+            if (receiver.role != UserRole.Retailer && receiver.role != UserRole.Consumer) {
+                revert InvalidRoleForTokenType();
+            }
+        }
         
         // Incrementar balance del receptor
         token.balance[transferItem.to] += transferItem.amount;
@@ -873,6 +898,16 @@ contract SupplyChain  is ReentrancyGuard {
         if (transferItem.to != msg.sender) revert Unauthorized();
 
         Token storage token = tokens[transferItem.tokenId];
+        
+        // Validar que el rol del receptor sea compatible con el tipo de token
+        User storage receiver = users[addressToUserId[msg.sender]];
+        if (token.tokenType == TokenType.RowMaterial) {
+            if (receiver.role != UserRole.Factory) revert InvalidRoleForTokenType();
+        } else if (token.tokenType == TokenType.FinishedProduct) {
+            if (receiver.role != UserRole.Retailer && receiver.role != UserRole.Consumer) {
+                revert InvalidRoleForTokenType();
+            }
+        }
 
         // 🔹 Verificar si el emisor tenía 0 unidades antes de devolver los tokens
         bool senderHadZeroBefore = (token.balance[transferItem.from] == 0);

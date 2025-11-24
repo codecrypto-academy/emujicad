@@ -136,7 +136,7 @@ generate_markdown_report() {
 
 **Generado**: $timestamp  
 **Comando**: \`forge coverage --match-path "test/*"\`  
-**Total Tests**: 82 (55 core + 27 edge cases)
+**Total Tests**: 90 (55 core + 35 edge cases)
 
 ## 📈 Métricas Actuales
 
@@ -156,7 +156,7 @@ $COVERAGE_OUTPUT
 ## 🎯 Recomendaciones
 
 ### ✅ Fortalezas
-- Testing comprehensivo de APIs principales (82 tests totales)
+- Testing comprehensivo de APIs principales (90 tests totales)
 - Cobertura excelente de líneas (>80%) y statements (>80%)
 - Cobertura de branches mejorada significativamente (+24% vs inicial)
 - Flujos críticos bien probados con edge cases dedicados
@@ -168,7 +168,7 @@ $COVERAGE_OUTPUT
 
 ### 📦 Suite de Tests
 - **SupplyChain.t.sol**: 55 tests core (flujos principales)
-- **EdgeCasesTest.t.sol**: 27 tests científicos (branches + edge cases)
+- **EdgeCasesTest.t.sol**: 35 tests científicos (branches + edge cases)
 - Scripts funcionales: Deploy.s.sol, Interactions.s.sol
 
 ## 🚀 Comandos de Reproducción
