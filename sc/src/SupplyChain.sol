@@ -786,8 +786,8 @@ contract SupplyChain  is ReentrancyGuard {
      * @dev Requiere que el token exista.
      */
     function getToken(uint tokenId) public view returns (uint256 id, address creator, string memory name, TokenType tokenType, uint256 totalSupply, string memory features, uint256 parentId, uint256 dateCreated) {
-    Token storage token = tokens[tokenId];
-    if (token.id == 0) revert TokenDoesNotExist();
+        if (tokenId == 0 || tokenId >= nextTokenId) revert TokenDoesNotExist();
+        Token storage token = tokens[tokenId];
         return (token.id, token.creator, token.name, token.tokenType, token.totalSupply, token.features, token.parentId, token.dateCreated);
     }
 
@@ -874,7 +874,7 @@ contract SupplyChain  is ReentrancyGuard {
     *      Requiere que el contrato no esté pausado.
     */
     function acceptTransfer(uint transferId) external whenNotPaused onlyReceiverAllowed nonReentrant{
-        if (transfers[transferId].id == 0) revert TransferDoesNotExist();
+        if (transferId == 0 || transferId >= nextTransferId) revert TransferDoesNotExist();
 
         Transfer storage transferItem = transfers[transferId];
 
@@ -929,7 +929,7 @@ contract SupplyChain  is ReentrancyGuard {
     *      Requiere que el contrato no esté pausado.
     */
     function cancelTransfer(uint transferId) external whenNotPaused onlyTransfersAllowed nonReentrant{
-        if (transfers[transferId].id == 0) revert TransferDoesNotExist();
+        if (transferId == 0 || transferId >= nextTransferId) revert TransferDoesNotExist();
 
         Transfer storage transferItem = transfers[transferId];
 
@@ -964,6 +964,8 @@ contract SupplyChain  is ReentrancyGuard {
     *      Requiere que el contrato no esté pausado.
     */
     function rejectTransfer(uint transferId) external whenNotPaused onlyReceiverAllowed nonReentrant {
+        if (transferId == 0 || transferId >= nextTransferId) revert TransferDoesNotExist();
+        
         Transfer storage transferItem = transfers[transferId];
         if (transferItem.status != TransferStatus.Pending) revert TransferNotPending();
         if (transferItem.to != msg.sender) revert Unauthorized();
