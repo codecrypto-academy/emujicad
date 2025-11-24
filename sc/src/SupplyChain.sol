@@ -435,18 +435,26 @@ contract SupplyChain  is ReentrancyGuard {
     }
 
     function _onlyTokenCreators() internal view {
-        User storage user = users[addressToUserId[msg.sender]];
-        if (msg.sender == owner) revert Unauthorized();
-         if (!((user.role == UserRole.Producer || user.role == UserRole.Factory) && user.status == UserStatus.Approved)) revert Unauthorized();
-     }
+        uint256 userId = addressToUserId[msg.sender];  // Caché
+        if (userId == 0 || msg.sender == owner) revert Unauthorized();
+        
+        User storage user = users[userId];
+        if (!((user.role == UserRole.Producer || user.role == UserRole.Factory) && user.status == UserStatus.Approved)) revert Unauthorized();
+    }
 
     function _onlyReceiverAllowed() internal view {
-        User storage user = users[addressToUserId[msg.sender]];
+        uint256 userId = addressToUserId[msg.sender];  // Caché
+        if (userId == 0) revert NoReceiverAllowed();
+        
+        User storage user = users[userId];
         if (!(user.status == UserStatus.Approved && (user.role == UserRole.Factory || user.role == UserRole.Retailer || user.role == UserRole.Consumer))) revert NoReceiverAllowed();
     }
 
     function _onlyTransfersAllowed() internal view {
-        User storage user = users[addressToUserId[msg.sender]];
+        uint256 userId = addressToUserId[msg.sender];  // Caché
+        if (userId == 0) revert NoTransfersAllowed();
+        
+        User storage user = users[userId];
         if (!(user.status == UserStatus.Approved && (user.role == UserRole.Producer || user.role == UserRole.Factory || user.role == UserRole.Retailer))) revert NoTransfersAllowed();
     }
 
@@ -514,7 +522,8 @@ contract SupplyChain  is ReentrancyGuard {
     *      Si una dirección alguna vez llamó a requestUserRole(), no puede ser owner.
     */
     function acceptOwnershipTransfer() external whenNotPaused {
-        if (msg.sender != pendingOwner) revert Unauthorized();
+        address _pendingOwner = pendingOwner;  // Caché
+        if (msg.sender != _pendingOwner) revert Unauthorized();
         
         // Validar que el nuevo owner nunca haya solicitado un rol
         // El owner no puede ser parte del proceso de SupplyChain en ningún momento
@@ -525,10 +534,10 @@ contract SupplyChain  is ReentrancyGuard {
             revert UserExists();
         }
         
-        address oldOwner = owner;
-        owner = pendingOwner;
+        address _owner = owner;  // Caché
+        owner = _pendingOwner;
         pendingOwner = address(0);
-        emit OwnershipTransferred(oldOwner, owner);
+        emit OwnershipTransferred(_owner, _pendingOwner);
     }
 
     /**
@@ -539,24 +548,22 @@ contract SupplyChain  is ReentrancyGuard {
     *      - El pendingOwner no desea aceptar la transferencia.
     */
     function rejectOwnershipTransfer() external whenNotPaused {
-        // Verificar que haya una transferencia pendiente
-        if (pendingOwner == address(0)) revert InvalidAddress();
+        address _pendingOwner = pendingOwner;  // Caché
+        if (_pendingOwner == address(0)) revert InvalidAddress();
         
-        // Solo el owner actual o el pendingOwner pueden cancelar
-        bool isOwner = msg.sender == owner;
-        bool isPendingOwner = msg.sender == pendingOwner;
+        address _owner = owner;  // Caché
+        bool isOwner = msg.sender == _owner;
+        bool isPendingOwner = msg.sender == _pendingOwner;
         
         if (!isOwner && !isPendingOwner) revert Unauthorized();
         
-        address cancelledPendingOwner = pendingOwner;
-        address currentOwner = owner;
         pendingOwner = address(0);
         
         // Emitir evento diferente según quién cancela/rechaza
         if (isOwner) {
-            emit OwnershipTransferCancelledByOwner(currentOwner, cancelledPendingOwner);
+            emit OwnershipTransferCancelledByOwner(_owner, _pendingOwner);
         } else {
-            emit OwnershipTransferRejectedByPendingOwner(currentOwner, cancelledPendingOwner);
+            emit OwnershipTransferRejectedByPendingOwner(_owner, _pendingOwner);
         }
     }
 
@@ -823,8 +830,10 @@ contract SupplyChain  is ReentrancyGuard {
         Token storage token = tokens[tokenId];
         if (token.id == 0) revert TokenDoesNotExist();
 
+        uint256 userId = addressToUserId[msg.sender];  // Caché
+        User storage sender = users[userId];  // Caché
+        
         // Validar que el rol del emisor sea compatible con el tipo de token
-        User storage sender = users[addressToUserId[msg.sender]];
         if (token.tokenType == TokenType.RowMaterial) {
             if (sender.role != UserRole.Producer) revert InvalidRoleForTokenType();
         } else if (token.tokenType == TokenType.FinishedProduct) {
@@ -833,7 +842,7 @@ contract SupplyChain  is ReentrancyGuard {
             }
         }
 
-        uint256 senderBalance = token.balance[msg.sender];
+        uint256 senderBalance = token.balance[msg.sender];  // Caché
         if (senderBalance < amount) revert InsufficientBalance(senderBalance, amount);
 
         // Disminuir balance del remitente inmediatamente para evitar doble gasto
@@ -874,8 +883,10 @@ contract SupplyChain  is ReentrancyGuard {
         
         Token storage token = tokens[transferItem.tokenId];
         
+        uint256 userId = addressToUserId[msg.sender];  // Caché
+        User storage receiver = users[userId];  // Caché
+        
         // Validar que el rol del receptor sea compatible con el tipo de token
-        User storage receiver = users[addressToUserId[msg.sender]];
         if (token.tokenType == TokenType.RowMaterial) {
             if (receiver.role != UserRole.Factory) revert InvalidRoleForTokenType();
         } else if (token.tokenType == TokenType.FinishedProduct) {
@@ -884,17 +895,21 @@ contract SupplyChain  is ReentrancyGuard {
             }
         }
         
+        // Caché de balances
+        uint256 receiverBalance = token.balance[transferItem.to];
+        uint256 senderBalance = token.balance[transferItem.from];
+        
         // Incrementar balance del receptor
-        token.balance[transferItem.to] += transferItem.amount;
+        token.balance[transferItem.to] = receiverBalance + transferItem.amount;
 
         // 🔹 ACTUALIZAR CONTADORES DE TOKENS POR USUARIO 🔹
         // Si el emisor ya no tiene saldo de este token, reduce su contador
-        if (token.balance[transferItem.from] == 0 && userTokenCount[transferItem.from] > 0) {
+        if (senderBalance == 0 && userTokenCount[transferItem.from] > 0) {
             userTokenCount[transferItem.from]--;
         }
 
         // Si el receptor no tenía este token antes, incrementa su contador
-        if (token.balance[transferItem.to] == transferItem.amount) {
+        if (receiverBalance == 0) {
             userTokenCount[transferItem.to]++;
         }
 
