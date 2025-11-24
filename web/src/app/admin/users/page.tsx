@@ -12,7 +12,8 @@ import Link from 'next/link'
 
 export default function AdminUsersPage() {
   const { address, isConnected } = useAccount()
-  const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner()
+  const shouldFetchOwner = Boolean(isConnected && address)
+  const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner(shouldFetchOwner)
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   
@@ -21,9 +22,12 @@ export default function AdminUsersPage() {
 
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase()
 
-  // Prevenir hydration mismatch
+  // Prevenir hydration mismatch - usar setTimeout para diferir el setState
   useEffect(() => {
-    setMounted(true)
+    const timer = setTimeout(() => {
+      setMounted(true)
+    }, 0)
+    return () => clearTimeout(timer)
   }, [])
 
   // Redireccionar si no es owner o si se desconecta
@@ -37,11 +41,11 @@ export default function AdminUsersPage() {
   }, [isOwner, isConnected, isLoadingOwner, router, mounted])
 
   // No renderizar nada hasta que se monte en el cliente
+  // No renderizar Header durante carga inicial para evitar problemas de hidratación
   if (!mounted || isLoadingOwner) {
     if (useModernDesign) {
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
-          <Header />
           <div className="container mx-auto px-4 py-12">
             <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8 text-center">
               <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-xl w-48 mx-auto animate-pulse mb-4"></div>
