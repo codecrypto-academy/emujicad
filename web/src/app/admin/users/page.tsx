@@ -12,7 +12,8 @@ import Link from 'next/link'
 
 export default function AdminUsersPage() {
   const { address, isConnected } = useAccount()
-  const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner()
+  const shouldFetchOwner = Boolean(isConnected && address)
+  const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner(shouldFetchOwner)
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   
@@ -21,9 +22,12 @@ export default function AdminUsersPage() {
 
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase()
 
-  // Prevenir hydration mismatch
+  // Prevenir hydration mismatch - usar setTimeout para diferir el setState
   useEffect(() => {
-    setMounted(true)
+    const timer = setTimeout(() => {
+      setMounted(true)
+    }, 0)
+    return () => clearTimeout(timer)
   }, [])
 
   // Redireccionar si no es owner o si se desconecta

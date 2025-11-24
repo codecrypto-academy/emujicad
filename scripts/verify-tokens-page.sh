@@ -72,11 +72,11 @@ else
     check "Página web/src/app/tokens/page.tsx existe"
 fi
 
-# Verificar que importa el hook
-if grep -q "useGetAllTokens" web/src/app/tokens/page.tsx; then
-    check "Página importa useGetAllTokens"
+# Verificar que importa el hook (la página usa useGetUserTokensWithData, no useGetAllTokens)
+if grep -q "useGetUserTokensWithData\|useGetAllTokens" web/src/app/tokens/page.tsx; then
+    check "Página importa hook de tokens (useGetUserTokensWithData o useGetAllTokens)"
 else
-    check "Página importa useGetAllTokens"
+    check "Página importa hook de tokens (useGetUserTokensWithData o useGetAllTokens)"
 fi
 
 # Verificar que importa TokenCard

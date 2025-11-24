@@ -136,7 +136,7 @@ generate_markdown_report() {
 
 **Generado**: $timestamp  
 **Comando**: \`forge coverage --match-path "test/*"\`  
-**Total Tests**: 90 (55 core + 35 edge cases)
+**Total Tests**: 104 (64 core + 40 edge cases)
 
 ## 📈 Métricas Actuales
 
@@ -156,7 +156,7 @@ $COVERAGE_OUTPUT
 ## 🎯 Recomendaciones
 
 ### ✅ Fortalezas
-- Testing comprehensivo de APIs principales (90 tests totales)
+- Testing comprehensivo de APIs principales (104 tests totales)
 - Cobertura excelente de líneas (>80%) y statements (>80%)
 - Cobertura de branches mejorada significativamente (+24% vs inicial)
 - Flujos críticos bien probados con edge cases dedicados

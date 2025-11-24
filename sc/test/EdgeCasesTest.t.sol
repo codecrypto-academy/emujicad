@@ -725,4 +725,123 @@ contract EdgeCasesTest is Test {
         vm.prank(consumerAddress);
         supplyChain.rejectTransfer(1);
     }
+
+    // ============================================================================
+    // 🔴 FASE 5: EDGE CASES DE OWNERSHIP TRANSFER (NUEVAS VALIDACIONES)
+    // ============================================================================
+
+    /// @notice Edge Case 32: Usuario con rol Approved no puede aceptar ownership
+    /// @dev Cubre branch: if (userId != 0) revert UserExists();
+    ///      Cualquier usuario que haya solicitado un rol (independientemente del estado) no puede ser owner
+    function testApprovedUserCannotAcceptOwnership() public {
+        address newOwner = makeAddr("newOwner");
+        
+        // Registrar y aprobar usuario
+        vm.prank(newOwner);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
+        supplyChain.changeStatusUser(newOwner, SupplyChain.UserStatus.Approved);
+        
+        // Iniciar transferencia
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        
+        // Intentar aceptar ownership (debe fallar porque el usuario ya existe en el sistema)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.UserExists.selector));
+        vm.prank(newOwner);
+        supplyChain.acceptOwnershipTransfer();
+        
+        // Verificar que el owner sigue siendo el original
+        assertEq(supplyChain.owner(), owner, "Owner should remain the same");
+    }
+
+    /// @notice Edge Case 33: Usuario con rol Rejected NO puede aceptar ownership
+    /// @dev Un usuario que haya solicitado un rol (incluso si fue rechazado) no puede ser owner
+    function testRejectedUserCannotAcceptOwnership() public {
+        address newOwner = makeAddr("newOwner");
+        
+        // Registrar y rechazar usuario
+        vm.prank(newOwner);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
+        supplyChain.changeStatusUser(newOwner, SupplyChain.UserStatus.Rejected);
+        
+        // Iniciar transferencia
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        
+        // Intentar aceptar ownership (debe fallar porque el usuario ya existe en el sistema)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.UserExists.selector));
+        vm.prank(newOwner);
+        supplyChain.acceptOwnershipTransfer();
+        
+        // Verificar que el owner sigue siendo el original
+        assertEq(supplyChain.owner(), owner, "Owner should remain the same");
+    }
+
+    /// @notice Edge Case 34: Usuario con rol Canceled NO puede aceptar ownership
+    /// @dev Un usuario que haya solicitado un rol (incluso si fue cancelado) no puede ser owner
+    function testCanceledUserCannotAcceptOwnership() public {
+        address newOwner = makeAddr("newOwner");
+        
+        // Registrar y cancelar usuario
+        vm.prank(newOwner);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
+        supplyChain.changeStatusUser(newOwner, SupplyChain.UserStatus.Canceled);
+        
+        // Iniciar transferencia
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        
+        // Intentar aceptar ownership (debe fallar porque el usuario ya existe en el sistema)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.UserExists.selector));
+        vm.prank(newOwner);
+        supplyChain.acceptOwnershipTransfer();
+        
+        // Verificar que el owner sigue siendo el original
+        assertEq(supplyChain.owner(), owner, "Owner should remain the same");
+    }
+
+    /// @notice Edge Case 35: Nuevo owner puede pausar/despausar contrato
+    /// @dev Después de aceptar ownership, el nuevo owner tiene todos los permisos
+    function testNewOwnerCanPauseUnpause() public {
+        address newOwner = makeAddr("newOwner");
+        
+        // Transferir ownership
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        vm.prank(newOwner);
+        supplyChain.acceptOwnershipTransfer();
+        
+        // Nuevo owner puede pausar
+        vm.prank(newOwner);
+        supplyChain.pause();
+        assertTrue(supplyChain.isPaused(), "Contract should be paused");
+        
+        // Nuevo owner puede despausar
+        vm.prank(newOwner);
+        supplyChain.unpause();
+        assertFalse(supplyChain.isPaused(), "Contract should not be paused");
+    }
+
+    /// @notice Edge Case 36: Owner antiguo pierde permisos después de transferencia
+    /// @dev Después de transferir ownership, el owner antiguo no puede aprobar usuarios
+    function testOldOwnerLosesPermissions() public {
+        address newOwner = makeAddr("newOwner");
+        address testUser = makeAddr("testUser");
+        
+        // Transferir ownership
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        vm.prank(newOwner);
+        supplyChain.acceptOwnershipTransfer();
+        
+        // Usuario solicita rol
+        vm.prank(testUser);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
+        
+        // Owner antiguo NO puede aprobar usuarios
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.NoOwner.selector));
+        supplyChain.changeStatusUser(testUser, SupplyChain.UserStatus.Approved);
+        
+        // Nuevo owner SÍ puede aprobar usuarios
+        vm.prank(newOwner);
+        supplyChain.changeStatusUser(testUser, SupplyChain.UserStatus.Approved);
+        
+        SupplyChain.User memory user = supplyChain.getUserInfo(testUser);
+        assertEq(uint(user.status), uint(SupplyChain.UserStatus.Approved), "New owner should be able to approve");
+    }
 }

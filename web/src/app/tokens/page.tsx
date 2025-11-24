@@ -44,7 +44,8 @@ export default function TokensPage() {
   
   // 2. Hooks de datos - se ejecutan siempre, pero se deshabilitan si no está autenticado
   // Usar isAuthenticated para habilitar/deshabilitar consultas
-  const shouldFetchData = isConnected && !isLoadingAuth && isAuthenticated
+  // Asegurar que shouldFetchData sea boolean (no string vacío)
+  const shouldFetchData = Boolean(isConnected && !isLoadingAuth && isAuthenticated)
   
   const { owner, isLoading: isLoadingOwner } = useContractOwner(shouldFetchData)
   const { tokens, isLoading, error, totalTokens } = useGetUserTokensWithData(

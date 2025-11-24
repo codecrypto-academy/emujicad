@@ -813,10 +813,234 @@ contract SupplyChainTest is Test {
         
         // Accept ownership
         vm.prank(newOwner);
-        supplyChain.acceptOwnership();
+        supplyChain.acceptOwnershipTransfer();
         
         assertEq(supplyChain.owner(), newOwner, "New owner should be set");
         assertEq(supplyChain.getPendingOwner(), address(0), "Pending owner should be reset");
+    }
+
+    /// @notice Test: PendingOwner puede rechazar la transferencia de ownership
+    /// @dev Verifica que el pendingOwner puede rechazar la transferencia pendiente y se emite el evento correcto
+    function testRejectOwnershipTransfer() public {
+        address newOwner = makeAddr("newOwner");
+        
+        // Iniciar transferencia
+        vm.prank(owner);
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        
+        assertEq(supplyChain.getPendingOwner(), newOwner, "Pending owner should be set");
+        
+        // Rechazar ownership y verificar evento
+        vm.expectEmit(true, true, false, true);
+        emit SupplyChain.OwnershipTransferRejectedByPendingOwner(owner, newOwner);
+        
+        vm.prank(newOwner);
+        supplyChain.rejectOwnershipTransfer();
+        
+        // Verificar que el owner sigue siendo el original
+        assertEq(supplyChain.owner(), owner, "Owner should remain the same");
+        assertEq(supplyChain.getPendingOwner(), address(0), "Pending owner should be reset");
+    }
+
+    /// @notice Test: Owner actual puede cancelar la transferencia pendiente
+    /// @dev Verifica que el owner actual puede cancelar una transferencia que inició por error y se emite el evento correcto
+    function testOwnerCanCancelOwnershipTransfer() public {
+        address newOwner = makeAddr("newOwner");
+        
+        // Iniciar transferencia
+        vm.prank(owner);
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        
+        assertEq(supplyChain.getPendingOwner(), newOwner, "Pending owner should be set");
+        
+        // Owner actual puede cancelar la transferencia y verificar evento
+        vm.expectEmit(true, true, false, true);
+        emit SupplyChain.OwnershipTransferCancelledByOwner(owner, newOwner);
+        
+        vm.prank(owner);
+        supplyChain.rejectOwnershipTransfer();
+        
+        // Verificar que el owner sigue siendo el original
+        assertEq(supplyChain.owner(), owner, "Owner should remain the same");
+        assertEq(supplyChain.getPendingOwner(), address(0), "Pending owner should be reset");
+    }
+
+    /// @notice Test: Solo el owner o pendingOwner pueden rechazar la transferencia
+    /// @dev Verifica que solo el owner actual o el pendingOwner pueden llamar rejectOwnershipTransfer
+    ///      y que se emiten los eventos correctos
+    function testOnlyOwnerOrPendingOwnerCanReject() public {
+        address newOwner = makeAddr("newOwner");
+        address randomUser = makeAddr("randomUser");
+        
+        // Iniciar transferencia
+        vm.prank(owner);
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        
+        // Random user no puede rechazar
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.Unauthorized.selector));
+        vm.prank(randomUser);
+        supplyChain.rejectOwnershipTransfer();
+        
+        // Owner actual SÍ puede rechazar y emite evento de cancelación
+        vm.expectEmit(true, true, false, true);
+        emit SupplyChain.OwnershipTransferCancelledByOwner(owner, newOwner);
+        
+        vm.prank(owner);
+        supplyChain.rejectOwnershipTransfer();
+        
+        // Reiniciar transferencia para probar pendingOwner
+        vm.prank(owner);
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        
+        // PendingOwner SÍ puede rechazar y emite evento de rechazo
+        vm.expectEmit(true, true, false, true);
+        emit SupplyChain.OwnershipTransferRejectedByPendingOwner(owner, newOwner);
+        
+        vm.prank(newOwner);
+        supplyChain.rejectOwnershipTransfer();
+        
+        assertEq(supplyChain.getPendingOwner(), address(0), "Pending owner should be reset");
+    }
+
+    /// @notice Test: No se puede rechazar si no hay transferencia pendiente
+    /// @dev Verifica que se revierte si no hay pendingOwner
+    function testCannotRejectWhenNoPendingTransfer() public {
+        // No hay transferencia pendiente
+        assertEq(supplyChain.getPendingOwner(), address(0), "No pending owner");
+        
+        // Intentar rechazar sin transferencia pendiente debe fallar
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidAddress.selector));
+        vm.prank(owner);
+        supplyChain.rejectOwnershipTransfer();
+    }
+
+    /// @notice Test: Usuario con rol Approved no puede aceptar ownership
+    /// @dev Valida que el nuevo owner no pueda tener rol Approved
+    function testApprovedUserCannotAcceptOwnership() public {
+        address newOwner = makeAddr("newOwner");
+        
+        // Registrar y aprobar usuario
+        vm.prank(newOwner);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
+        vm.prank(owner);
+        supplyChain.changeStatusUser(newOwner, SupplyChain.UserStatus.Approved);
+        
+        // Iniciar transferencia
+        vm.prank(owner);
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        
+        // Intentar aceptar ownership (debe fallar porque el usuario ya existe en el sistema)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.UserExists.selector));
+        vm.prank(newOwner);
+        supplyChain.acceptOwnershipTransfer();
+        
+        // Verificar que el owner sigue siendo el original
+        assertEq(supplyChain.owner(), owner, "Owner should remain the same");
+    }
+
+    /// @notice Test: Usuario con rol Pending NO puede aceptar ownership
+    /// @dev Un usuario que haya solicitado un rol (incluso en estado Pending) no puede ser owner
+    function testPendingUserCannotAcceptOwnership() public {
+        address newOwner = makeAddr("newOwner");
+        
+        // Registrar usuario (estado Pending)
+        vm.prank(newOwner);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
+        
+        // Iniciar transferencia
+        vm.prank(owner);
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        
+        // Intentar aceptar ownership (debe fallar porque el usuario ya existe en el sistema)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.UserExists.selector));
+        vm.prank(newOwner);
+        supplyChain.acceptOwnershipTransfer();
+        
+        // Verificar que el owner sigue siendo el original
+        assertEq(supplyChain.owner(), owner, "Owner should remain the same");
+    }
+
+    /// @notice Test: Usuario sin rol puede aceptar ownership
+    /// @dev Un usuario sin registro puede aceptar ownership
+    function testUserWithoutRoleCanAcceptOwnership() public {
+        address newOwner = makeAddr("newOwner");
+        
+        // Iniciar transferencia (newOwner no tiene rol)
+        vm.prank(owner);
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        
+        // Aceptar ownership (debe funcionar)
+        vm.prank(newOwner);
+        supplyChain.acceptOwnershipTransfer();
+        
+        // Verificar que el nuevo owner es el owner
+        assertEq(supplyChain.owner(), newOwner, "New owner should be set");
+        
+        // Verificar que el nuevo owner puede aprobar usuarios
+        vm.prank(producerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
+        
+        vm.prank(newOwner);
+        supplyChain.changeStatusUser(producerAddress, SupplyChain.UserStatus.Approved);
+        
+        SupplyChain.User memory user = supplyChain.getUserInfo(producerAddress);
+        assertEq(uint(user.status), uint(SupplyChain.UserStatus.Approved), "New owner should be able to approve users");
+    }
+
+    /// @notice Test: Nuevo owner no puede registrarse como usuario
+    /// @dev Después de aceptar ownership, el nuevo owner no puede tener rol
+    function testNewOwnerCannotRegisterAsUser() public {
+        address newOwner = makeAddr("newOwner");
+        
+        // Transferir ownership
+        vm.prank(owner);
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        vm.prank(newOwner);
+        supplyChain.acceptOwnershipTransfer();
+        
+        // Intentar registrarse como usuario (debe fallar)
+        vm.expectRevert(abi.encodeWithSelector(SupplyChain.InvalidAddress.selector));
+        vm.prank(newOwner);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
+    }
+
+    /// @notice Test: Flujo completo de ownership transfer con aprobación de usuarios
+    /// @dev Verifica que después de transferir ownership, solo el nuevo owner puede aprobar
+    function testOwnershipTransferCompleteFlow() public {
+        address newOwner = makeAddr("newOwner");
+        address user1 = makeAddr("user1");
+        address user2 = makeAddr("user2");
+        
+        // Usuarios solicitan rol antes de transferencia
+        vm.prank(user1);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
+        vm.prank(user2);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        
+        // Transferir ownership
+        vm.prank(owner);
+        supplyChain.initiateOwnershipTransfer(newOwner);
+        vm.prank(newOwner);
+        supplyChain.acceptOwnershipTransfer();
+        
+        // Verificar que el owner antiguo NO puede aprobar usuarios
+        vm.expectRevert(SupplyChain.NoOwner.selector);
+        vm.prank(owner);
+        supplyChain.changeStatusUser(user1, SupplyChain.UserStatus.Approved);
+        
+        // Verificar que el nuevo owner SÍ puede aprobar usuarios
+        vm.prank(newOwner);
+        supplyChain.changeStatusUser(user1, SupplyChain.UserStatus.Approved);
+        
+        SupplyChain.User memory user = supplyChain.getUserInfo(user1);
+        assertEq(uint(user.status), uint(SupplyChain.UserStatus.Approved), "New owner should be able to approve users");
+        
+        // Verificar que el nuevo owner puede rechazar usuarios
+        vm.prank(newOwner);
+        supplyChain.changeStatusUser(user2, SupplyChain.UserStatus.Rejected);
+        
+        user = supplyChain.getUserInfo(user2);
+        assertEq(uint(user.status), uint(SupplyChain.UserStatus.Rejected), "New owner should be able to reject users");
     }
 
     // --- Tests adicionales de seguridad ---
@@ -843,7 +1067,7 @@ contract SupplyChainTest is Test {
         
         vm.prank(randomUser);
         vm.expectRevert(SupplyChain.Unauthorized.selector);
-        supplyChain.acceptOwnership();
+        supplyChain.acceptOwnershipTransfer();
     }
 
     function testUnauthorizedUserCannotPause() public {

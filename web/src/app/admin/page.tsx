@@ -7,17 +7,19 @@ import { useContractOwner } from '@/hooks/useContractOwner'
 import { useIsPaused } from '@/hooks/usePause'
 import { Header } from '@/components/Header'
 import { PauseControl } from '@/components/admin/PauseControl'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { OwnershipTransfer } from '@/components/admin/OwnershipTransfer'
+import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Shield, Users, AlertCircle } from 'lucide-react'
+import { Users, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AdminPage() {
   const { address, isConnected } = useAccount()
-  const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner()
+  const shouldFetchOwner = Boolean(isConnected && address)
+  const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner(shouldFetchOwner)
   const router = useRouter()
+  // Inicializar mounted directamente para evitar setState en effect
   const [mounted, setMounted] = useState(false)
   
   // Activar diseño moderno si está habilitado
@@ -28,11 +30,13 @@ export default function AdminPage() {
   // Hooks de datos
   const shouldFetchData = isConnected && !isLoadingOwner && isOwner
   
-  const { data: isPaused, isLoading: isLoadingPause } = useIsPaused(shouldFetchData)
-
-  // Prevenir hydration mismatch
+  // Prevenir hydration mismatch - usar startTransition para evitar warning de React
   useEffect(() => {
-    setMounted(true)
+    // Usar setTimeout para diferir el setState fuera del render síncrono
+    const timer = setTimeout(() => {
+      setMounted(true)
+    }, 0)
+    return () => clearTimeout(timer)
   }, [])
 
   // Redireccionar si no es owner o si se desconecta
@@ -122,6 +126,11 @@ export default function AdminPage() {
         {/* Control de Pausa */}
         <div className="mb-10">
           <PauseControl />
+        </div>
+
+        {/* Transferencia de Ownership */}
+        <div className="mb-10">
+          <OwnershipTransfer />
         </div>
 
         {/* Accesos Rápidos */}

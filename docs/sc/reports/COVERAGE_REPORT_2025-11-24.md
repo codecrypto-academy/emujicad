@@ -1,28 +1,28 @@
 # 📊 Reporte Automático de Cobertura - SupplyChain
 
-**Generado**: 2025-11-24 13:38:10  
+**Generado**: 2025-11-24 18:40:05  
 **Comando**: `forge coverage --match-path "test/*"`  
-**Total Tests**: 90 (55 core + 35 edge cases)
+**Total Tests**: 104 (64 core + 40 edge cases)
 
 ## 📈 Métricas Actuales
 
 ```
-| src/SupplyChain.sol                                            | 85.60% (214/250) | 82.67% (229/277) | 70.67% (53/75) | 80.95% (34/42) |
+| src/SupplyChain.sol                                            | 86.36% (228/264) | 83.73% (247/295) | 72.50% (58/80) | 81.40% (35/43) |
 ```
 
 ## 📊 Análisis Detallado
 
 | Métrica | Cobertura | Estado | Estándar Industrial |
 |---------|-----------|--------|-------------------|
-| 📏 Lines | 85.60 (214/250) | 🟢 Excelente | >70% Good, >80% Excellent |
-| 📝 Statements | 82.67 (229/277) | 🟢 Excelente | >70% Good, >80% Excellent |
-| 🌿 Branches | 70.67 (53/75) | 🟢 Muy Bueno | >60% Good, >75% Excellent |
-| ⚡ Functions | 80.95 (34/42) | 🟢 Excelente | >75% Good, >85% Excellent |
+| 📏 Lines | 86.36 (228/264) | 🟢 Excelente | >70% Good, >80% Excellent |
+| 📝 Statements | 83.73 (247/295) | 🟢 Excelente | >70% Good, >80% Excellent |
+| 🌿 Branches | 72.50 (58/80) | 🟢 Muy Bueno | >60% Good, >75% Excellent |
+| ⚡ Functions | 81.40 (35/43) | 🟢 Excelente | >75% Good, >85% Excellent |
 
 ## 🎯 Recomendaciones
 
 ### ✅ Fortalezas
-- Testing comprehensivo de APIs principales (90 tests totales)
+- Testing comprehensivo de APIs principales (104 tests totales)
 - Cobertura excelente de líneas (>80%) y statements (>80%)
 - Cobertura de branches mejorada significativamente (+24% vs inicial)
 - Flujos críticos bien probados con edge cases dedicados
@@ -55,6 +55,6 @@ forge test --match-path "test/*" -vv
 
 ---
 
-**Última Ejecución**: 2025-11-24 13:38:10  
+**Última Ejecución**: 2025-11-24 18:40:05  
 *Reporte generado automáticamente por coverage-reporter.sh*  
 *Ubicación*: `docs/sc/reports/COVERAGE_REPORT_2025-11-24.md`
