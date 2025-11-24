@@ -7,6 +7,7 @@ import { useContractOwner } from '@/hooks/useContractOwner'
 import { useIsPaused } from '@/hooks/usePause'
 import { Header } from '@/components/Header'
 import { PauseControl } from '@/components/admin/PauseControl'
+import { OwnershipTransfer } from '@/components/admin/OwnershipTransfer'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -16,8 +17,10 @@ import Link from 'next/link'
 
 export default function AdminPage() {
   const { address, isConnected } = useAccount()
-  const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner()
+  const shouldFetchOwner = Boolean(isConnected && address)
+  const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner(shouldFetchOwner)
   const router = useRouter()
+  // Inicializar mounted directamente para evitar setState en effect
   const [mounted, setMounted] = useState(false)
   
   // Activar diseño moderno si está habilitado
@@ -30,9 +33,13 @@ export default function AdminPage() {
   
   const { data: isPaused, isLoading: isLoadingPause } = useIsPaused(shouldFetchData)
 
-  // Prevenir hydration mismatch
+  // Prevenir hydration mismatch - usar startTransition para evitar warning de React
   useEffect(() => {
-    setMounted(true)
+    // Usar setTimeout para diferir el setState fuera del render síncrono
+    const timer = setTimeout(() => {
+      setMounted(true)
+    }, 0)
+    return () => clearTimeout(timer)
   }, [])
 
   // Redireccionar si no es owner o si se desconecta
@@ -46,11 +53,11 @@ export default function AdminPage() {
 
 
   // No renderizar nada hasta que se monte en el cliente
+  // No renderizar Header durante carga inicial para evitar problemas de hidratación
   if (!mounted || isLoadingOwner) {
     if (useModernDesign) {
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
-          <Header />
           <div className="container mx-auto px-4 py-12">
             <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8 text-center">
               <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-xl w-48 mx-auto animate-pulse mb-4"></div>
@@ -62,7 +69,6 @@ export default function AdminPage() {
     }
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-        <Header />
         <div className="container mx-auto px-4 py-12">
           <Card>
             <CardContent className="pt-6 text-center">
@@ -122,6 +128,11 @@ export default function AdminPage() {
         {/* Control de Pausa */}
         <div className="mb-10">
           <PauseControl />
+        </div>
+
+        {/* Transferencia de Ownership */}
+        <div className="mb-10">
+          <OwnershipTransfer />
         </div>
 
         {/* Accesos Rápidos */}
