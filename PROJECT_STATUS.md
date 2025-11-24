@@ -48,6 +48,9 @@
     - Sección "My Tokens by Type" simplificada (lista simple con nombre y balance)
     - Estadísticas de transferencias separadas (sent/received para Factory/Retailer)
     - Sección "My Tokens" eliminada (redundante con /tokens)
+    - Dashboard del admin reorganizado: Users, Tokens, Transfers, Administrator Panel
+    - Estadísticas del sistema completo para admin (no personales)
+    - Secciones redundantes eliminadas (System Activity, Tokens by Type duplicado)
 ✅ Admin Users page (web/src/app/admin/users/page.tsx) - ✅ Diseño Moderno 2025
 ✅ Tokens page COMPLETO (web/src/app/tokens/page.tsx) - ✅ Día 5 + Diseño Moderno 2025
     - Sección "My Tokens by Type" con tarjetas completas agrupadas por tipo
@@ -72,7 +75,7 @@
     - badge, button, card, input, label
     - select, alert, table, dialog, skeleton, textarea
 
-✅ 20+ hooks personalizados (10 archivos):
+✅ 21+ hooks personalizados (11 archivos):
     - useContractReads.ts (5 hooks lectura)
     - useRequestRole.ts (1 hook escritura)
     - useCreateToken.ts (1 hook escritura)
@@ -84,6 +87,7 @@
     - useUserTokenStats.ts (1 hook: estadísticas por tipo)
     - useGetUserTokensWithData.ts (1 hook: tokens con datos completos)
     - useGetUserTransfers.ts (1 hook: transferencias de un usuario) - ✅ Día 7
+    - useGetAllTransfers.ts (1 hook: todas las transferencias del sistema) - ✅ Día 8
 
 ✅ Componentes admin implementados:
     - UserManagementTable.tsx (tabla + filtros + acciones + pausa)
@@ -99,6 +103,7 @@
     - CreateTransferForm.tsx (formulario para crear transferencias con validaciones) - ✅ Día 7
     - UserTokenList.tsx (lista de tokens del usuario para UX) - ✅ Día 7
     - AddressDisplay.tsx (componente para mostrar direcciones con copy y tooltip) - ✅ Día 7
+    - TokenTypeStatsSection.tsx (sección de tokens por tipo con tarjetas completas) - ✅ Día 7
 
 ✅ Features UX implementados:
     - Theme toggle (claro/oscuro) - solo admin y aprobados
@@ -176,7 +181,7 @@
 
 **Progreso**: 6/6 componentes (100%) ⭐ Día 7
 
-### 🚨 PRIORIDAD 3: Hooks Adicionales (9/9 implementados)
+### 🚨 PRIORIDAD 3: Hooks Adicionales (10/10 implementados)
 **Necesarios para las páginas**:
 ```
 ✅ useGetUserTokens(address)               - IMPLEMENTADO (3 hooks: getUserTokens, getToken, getTokenBalance)
@@ -188,9 +193,10 @@
 ✅ useContractOwner()                      - IMPLEMENTADO (verificar admin)
 ✅ useGetAllTokens()                       - IMPLEMENTADO (todos los tokens) ⭐ Día 5
 ✅ useGetUserTransfers(address)            - IMPLEMENTADO (transferencias de un usuario) ⭐ Día 7
+✅ useGetAllTransfers()                    - IMPLEMENTADO (todas las transferencias del sistema) ⭐ Día 8
 ```
 
-**Progreso**: 9/9 hooks necesarios (100%) ⭐ Día 7
+**Progreso**: 10/10 hooks necesarios (100%) ⭐ Día 8
 
 ### 🚨 PRIORIDAD 4: Video Demo (Falta +1.5 puntos)
 **Tiempo estimado**: 3-4 horas
@@ -258,22 +264,35 @@
 
 ---
 
-### **🗓️ Día 8 - Domingo 23 Nov (Panel Admin Dedicado)** ✅ COMPLETADO
-**Tiempo**: 4-6 horas | **Impacto**: +0.1 puntos
+### **🗓️ Día 8 - Domingo 23 Nov (Panel Admin Dedicado + Reorganización Dashboard)** ✅ COMPLETADO
+**Tiempo**: 6-8 horas | **Impacto**: +0.1 puntos + UX mejorado
 
 #### Tareas:
 ```typescript
 1. [x] Crear web/src/app/admin/page.tsx (panel admin principal) ✅
    - [x] Mover PauseControl desde dashboard ✅
-   - [x] Agregar estadísticas adicionales del sistema ✅
-   - [x] Estadísticas de tokens por tipo (Raw Material / Finished Product) ✅
-   - [x] Estadísticas de usuarios (UserStatsCards) ✅
-   - [x] Centralizar funciones administrativas ✅
-   - [x] Accesos rápidos a gestión de usuarios y dashboard ✅
+   - [x] Simplificar panel admin (solo PauseControl + Manage Users) ✅
+   - [x] Eliminar "View Dashboard" (duplicado con header) ✅
 
 2. [x] Actualizar dashboard para remover PauseControl ✅
    - [x] Agregar link a /admin desde dashboard ✅
    - [x] Mantener acceso rápido a Manage Users ✅
+
+3. [x] Reorganizar dashboard del admin ✅
+   - [x] Orden: Users, Tokens, Transfers, Administrator Panel ✅
+   - [x] Tarjetas principales: Users, Tokens, Transfers (en ese orden) ✅
+   - [x] Mover estadísticas del sistema al dashboard ✅
+   - [x] Eliminar sección "System Activity" (placeholder) ✅
+   - [x] Eliminar sección "Tokens by Type" (duplicada) ✅
+
+4. [x] Crear hook useGetAllTransfers para estadísticas del sistema ✅
+   - [x] Obtener todas las transferencias del sistema ✅
+   - [x] Calcular estadísticas por estado (Pending, Accepted, Rejected, Cancelled) ✅
+
+5. [x] Eliminar totales redundantes ✅
+   - [x] UserStatsCards: Eliminar "Total Usuarios" ✅
+   - [x] Tokens Statistics: Eliminar "Total Tokens" ✅
+   - [x] Transfer Statistics: Eliminar "Total Transfers" ✅
 ```
 
 **Estado**: ✅ COMPLETADO
@@ -514,10 +533,24 @@ Video:
 ```
 ✅ Implemented: Panel Admin principal (`/admin/page.tsx`) completamente funcional.
 ✅ Implemented: PauseControl movido desde dashboard a `/admin`.
-✅ Implemented: Estadísticas del sistema:
-    - Total Tokens, Users, Transfers
-    - Tokens por tipo (Raw Material / Finished Product)
-    - Estadísticas de usuarios (UserStatsCards integrado)
+✅ Implemented: Hook `useGetAllTransfers` para obtener todas las transferencias del sistema.
+✅ Implemented: Estadísticas del sistema en dashboard del admin:
+    - User Statistics (Pendientes, Aprobados, Rechazados, Cancelados)
+    - Tokens Statistics (Raw Material, Finished Product)
+    - Transfer Statistics (Pending, Accepted, Rejected, Cancelled) - Estadísticas del sistema completo
+✅ Enhanced: Dashboard del admin reorganizado:
+    - Orden: Users, Tokens, Transfers, Administrator Panel
+    - Tarjetas principales: Users, Tokens, Transfers (en ese orden)
+    - Eliminada sección "System Activity" (placeholder sin funcionalidad)
+    - Eliminada sección "Tokens by Type" (duplicada con "Tokens Statistics")
+✅ Enhanced: Eliminados totales redundantes:
+    - UserStatsCards: Eliminado "Total Usuarios" (ya está en tarjeta principal)
+    - Tokens Statistics: Eliminado "Total Tokens" (ya está en tarjeta principal)
+    - Transfer Statistics: Eliminado "Total Transfers" (ya está en tarjeta principal)
+✅ Enhanced: Panel Admin simplificado:
+    - Solo contiene PauseControl y Manage Users
+    - "View Dashboard" eliminado (duplicado con header)
+    - Estadísticas del sistema movidas al dashboard
 ✅ Enhanced: Dashboard actualizado con links a `/admin` y `/admin/users`.
 ✅ Enhanced: Centralización de funciones administrativas en `/admin`.
 ✅ Enhanced: Diseño moderno 2025 aplicado al panel admin.
@@ -525,8 +558,10 @@ Video:
 Progreso:
 - Páginas: 7/8 (87.5%) → 8/8 (100%) ✅
 - Frontend: 2.8/3.0 (93%) → 3.0/3.0 (100%) ✅
+- Hooks: 9/9 (100%) → 10/10 (100%) ✅ (useGetAllTransfers agregado)
 - Puntuación: 7.3/9.5 → 7.4/9.5
 - Todas las páginas esenciales completadas ✅
+- Dashboard del admin completamente funcional con estadísticas del sistema ✅
 ```
 
 ### Día 7 - Sesión Anterior (22 Nov, 2025) ✅ COMPLETADO
@@ -679,5 +714,5 @@ Issues resueltos en Día 4:
 
 ---
 
-**Última modificación**: 22 Nov 2025  
-**Próxima actualización**: Después de completar Páginas Adicionales (Día 8)
+**Última modificación**: 23 Nov 2025  
+**Próxima actualización**: Después de completar Video Demo (Día 9)
