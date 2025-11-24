@@ -627,30 +627,41 @@ function TreeNodeComponent({
                     ) : null}
                   </div>
                   
+                  {/* Token Information */}
+                  <div className="mb-2 p-2 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      Token #{node.tokenId.toString()}: <span className="font-normal">{node.tokenName}</span> <span className="text-sm text-muted-foreground font-normal">({node.tokenType === TokenType.RowMaterial ? 'Raw Material' : 'Finished Product'})</span>
+                    </p>
+                  </div>
+                  
                   {node.isCreation ? (
                     <div className="mb-2">
-                      <p className="text-xs font-semibold text-muted-foreground mb-1">
-                        Creator:
-                      </p>
-                      <AddressDisplay address={node.address} className="text-sm font-medium" />
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          Creator:
+                        </p>
+                        <AddressDisplay address={node.address} className="text-sm font-medium" />
+                      </div>
                     </div>
                   ) : node.children.length > 0 && node.children[0].transferId === node.transferId ? (
                     // Nodo de ENVÍO
                     <div className="mb-2">
-                      <p className="text-xs font-semibold text-muted-foreground mb-1">
-                        Sender ({node.role}):
-                      </p>
-                      <AddressDisplay address={node.address} className="text-sm font-medium" />
-                      <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">
-                          Transferring to:
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          Sender ({node.role}):
                         </p>
+                        <AddressDisplay address={node.address} className="text-sm font-medium" />
+                      </div>
+                      <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                         {node.children.map((child, idx) => (
                           <div key={idx} className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                              Transferring to:
+                            </p>
                             <Badge variant="outline" className="text-xs">
                               {child.role}
                             </Badge>
-                            <AddressDisplay address={child.address} className="text-xs font-mono" />
+                            <AddressDisplay address={child.address} className="text-sm font-mono" />
                             {child.transferStatus !== undefined && (
                               <Badge
                                 variant="outline"
@@ -673,66 +684,63 @@ function TreeNodeComponent({
                     // Nodo de RECEPCIÓN
                     <>
                       <div className="mb-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                        <p className="text-xs font-semibold text-muted-foreground mb-1">
-                          Transferred by:
-                        </p>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            {node.parent.role}
-                          </Badge>
-                          <AddressDisplay address={node.parent.address} className="text-xs font-mono" />
+                          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                            Transferred by ({node.parent.role}):
+                          </p>
+                          <AddressDisplay address={node.parent.address} className="text-sm font-medium" />
                         </div>
                       </div>
                       <div className="mb-2">
-                        <p className="text-xs font-semibold text-muted-foreground mb-1">
-                          Receiver ({node.role}):
-                        </p>
-                        <AddressDisplay address={node.address} className="text-sm font-medium" />
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                            Receiver ({node.role}):
+                          </p>
+                          <AddressDisplay address={node.address} className="text-sm font-medium" />
+                        </div>
                       </div>
                     </>
                   ) : (
                     <div className="mb-2">
-                      <p className="text-xs font-semibold text-muted-foreground mb-1">
-                        {node.role}:
-                      </p>
-                      <AddressDisplay address={node.address} className="text-sm font-medium" />
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          {node.role}:
+                        </p>
+                        <AddressDisplay address={node.address} className="text-sm font-medium" />
+                      </div>
                     </div>
                   )}
                   
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                    <Calendar className="h-3 w-3" />
-                    <span>{timestamp.date} {timestamp.time}</span>
-                  </div>
-                  
                   {node.totalSupply !== undefined && (
                     <div className="mb-2">
-                      <p className="text-xs font-semibold text-muted-foreground mb-1">Total Supply Created:</p>
                       <p className="text-sm font-semibold text-purple-600 dark:text-purple-400">
-                        {node.totalSupply.toString()} units
+                        Total Supply Created: {node.totalSupply.toString()} units
                       </p>
                     </div>
                   )}
                   
                   {node.amount !== undefined && (
                     <div className="mb-2">
-                      <p className="text-xs font-semibold text-muted-foreground mb-1">
+                      <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
                         {node.children.length > 0 && node.children[0].transferId === node.transferId
                           ? 'Amount Transferred:'
-                          : 'Amount Received:'}
-                      </p>
-                      <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                        {node.amount.toString()} units
+                          : 'Amount Received:'} {node.amount.toString()} units
                       </p>
                     </div>
                   )}
                   
-                  {node.transferId && (
-                    <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                      <p className="text-xs text-muted-foreground font-mono">
-                        Transfer ID: #{node.transferId.toString()}
-                      </p>
+                  <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      {node.transferId && (
+                        <span className="font-mono">
+                          Transfer ID: #{node.transferId.toString()}
+                        </span>
+                      )}
+                      {node.transferId && <span>•</span>}
+                      <Calendar className="h-3 w-3" />
+                      <span>{timestamp.date} {timestamp.time}</span>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
