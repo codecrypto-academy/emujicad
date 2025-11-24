@@ -4,9 +4,9 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Package, Factory, ShoppingCart, User, ArrowRight, Calendar, Hash, TrendingUp, CheckCircle2 } from 'lucide-react'
+import { Package, Factory, ShoppingCart, User, ArrowRight, Calendar, Hash, TrendingUp, CheckCircle2, XCircle, Clock, Ban } from 'lucide-react'
 import { AddressDisplay } from '@/components/AddressDisplay'
-import { TokenType, UserRole } from '@/contracts/config'
+import { TokenType, UserRole, TransferStatus } from '@/contracts/config'
 import type { TraceabilityChain } from '@/hooks/useTokenTraceability'
 
 interface TraceabilityTimelineProps {
@@ -207,9 +207,29 @@ export function TraceabilityTimeline({ traceability, isLoading }: TraceabilityTi
                               </Badge>
                             )}
                             {step.stage === 'transfer' && (
-                              <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
-                                <ArrowRight className="h-3 w-3 mr-1" />
-                                Transfer
+                              <Badge 
+                                variant="outline" 
+                                className={
+                                  step.isSender === true
+                                    ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                                    : step.transferStatus === TransferStatus.Accepted
+                                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800"
+                                    : step.transferStatus === TransferStatus.Rejected
+                                    ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800"
+                                    : "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800"
+                                }
+                              >
+                                {step.isSender === true ? (
+                                  <>
+                                    <ArrowRight className="h-3 w-3 mr-1" />
+                                    Sent
+                                  </>
+                                ) : (
+                                  <>
+                                    <ArrowRight className="h-3 w-3 mr-1 rotate-180" />
+                                    Received
+                                  </>
+                                )}
                               </Badge>
                             )}
                           </div>
@@ -234,12 +254,28 @@ export function TraceabilityTimeline({ traceability, isLoading }: TraceabilityTi
                       
                       {/* Details Grid */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
-                        {/* Address */}
+                        {/* Address - Mostrar claramente si es quien transfiere o quien recibe */}
                         <div>
                           <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">
-                            {step.stage === 'creation' ? 'Creator' : step.role === 'Factory' ? 'To Factory' : step.role === 'Retailer' ? 'To Retailer' : 'To Consumer'}
+                            {step.stage === 'creation' 
+                              ? 'Creator' 
+                              : step.isSender === true
+                              ? `${step.role} (Sender)`
+                              : step.isSender === false
+                              ? `${step.role} (Receiver)`
+                              : step.role}
                           </p>
                           <AddressDisplay address={step.address} className="text-sm font-medium" />
+                          {step.stage === 'transfer' && step.isSender === false && step.transferStatus === TransferStatus.Accepted && (
+                            <p className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">
+                              ✓ Received
+                            </p>
+                          )}
+                          {step.stage === 'transfer' && step.isSender === false && step.transferStatus === TransferStatus.Rejected && (
+                            <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-medium">
+                              ✗ Rejected
+                            </p>
+                          )}
                         </div>
                         
                         {/* Timestamp */}
@@ -256,8 +292,20 @@ export function TraceabilityTimeline({ traceability, isLoading }: TraceabilityTi
                           </div>
                         </div>
                         
+                        {/* Total Supply (if creation) */}
+                        {step.stage === 'creation' && step.totalSupply !== undefined && (
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">
+                              Total Supply Created
+                            </p>
+                            <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                              {step.totalSupply.toString()} units
+                            </p>
+                          </div>
+                        )}
+                        
                         {/* Amount (if transfer) */}
-                        {step.amount && (
+                        {step.stage === 'transfer' && step.amount && (
                           <div>
                             <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">
                               Amount Transferred
@@ -268,8 +316,44 @@ export function TraceabilityTimeline({ traceability, isLoading }: TraceabilityTi
                           </div>
                         )}
                         
+                        {/* Transfer Status (if transfer) */}
+                        {step.stage === 'transfer' && step.transferStatus !== undefined && (
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">
+                              Transfer Status
+                            </p>
+                            {(() => {
+                              const statusLabels = ['Pending', 'Accepted', 'Rejected', 'Cancelled']
+                              const statusIcons = {
+                                [TransferStatus.Pending]: Clock,
+                                [TransferStatus.Accepted]: CheckCircle2,
+                                [TransferStatus.Rejected]: XCircle,
+                                [TransferStatus.Cancelled]: Ban,
+                              }
+                              const statusColors = {
+                                [TransferStatus.Pending]: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+                                [TransferStatus.Accepted]: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+                                [TransferStatus.Rejected]: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+                                [TransferStatus.Cancelled]: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
+                              }
+                              const StatusIcon = statusIcons[step.transferStatus] || Clock
+                              const statusLabel = statusLabels[Number(step.transferStatus)] || 'Unknown'
+                              
+                              return (
+                                <Badge
+                                  variant="outline"
+                                  className={`${statusColors[step.transferStatus] || ''} flex items-center gap-1 w-fit`}
+                                >
+                                  <StatusIcon className="h-3 w-3" />
+                                  {statusLabel}
+                                </Badge>
+                              )
+                            })()}
+                          </div>
+                        )}
+                        
                         {/* Transfer ID (if transfer) */}
-                        {step.transferId && (
+                        {step.stage === 'transfer' && step.transferId && (
                           <div>
                             <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">
                               Transfer ID

@@ -16,8 +16,11 @@ export interface TraceabilityStep {
   role: 'Producer' | 'Factory' | 'Retailer' | 'Consumer'
   address: string
   timestamp: bigint
-  amount?: bigint
+  amount?: bigint // Para transferencias: cantidad transferida
+  totalSupply?: bigint // Para creaciones: cantidad total creada
   transferId?: bigint
+  transferStatus?: TransferStatus // Estado de la transferencia (Accepted, Rejected, Pending)
+  isSender?: boolean // true = quien transfiere, false = quien recibe
   description: string
 }
 
@@ -96,29 +99,62 @@ export function useTokenTraceability(tokenId: bigint | undefined) {
       role: 'Producer',
       address: rawMaterialToken.creator,
       timestamp: rawMaterialToken.createdAt,
+      totalSupply: rawMaterialToken.totalSupply,
       description: `Raw Material "${rawMaterialToken.name}" created by Producer`,
     })
     
     // Paso 2: Transferencia Producer → Factory
-    const producerToFactoryTransfer = allTransfers.find(
+    // Buscar transferencias del Producer (quien creó el token)
+    const producerToFactoryTransfers = allTransfers.filter(
       t => t.tokenId === rawMaterialToken.id && 
-           t.status === TransferStatus.Accepted &&
            t.from.toLowerCase() === rawMaterialToken.creator.toLowerCase()
-    )
+    ).sort((a, b) => {
+      // Ordenar por fecha, más reciente primero
+      if (a.dateCreated > b.dateCreated) return -1
+      if (a.dateCreated < b.dateCreated) return 1
+      return 0
+    })
     
-    if (producerToFactoryTransfer) {
+    // Mostrar la transferencia más reciente
+    if (producerToFactoryTransfers.length > 0) {
+      const producerToFactoryTransfer = producerToFactoryTransfers[0]
+      
+      // Paso 2a: Producer transfiere (desde Producer)
       steps.push({
         step: 2,
         stage: 'transfer',
         tokenId: rawMaterialToken.id,
         tokenName: rawMaterialToken.name,
         tokenType: TokenType.RowMaterial,
-        role: 'Factory',
-        address: producerToFactoryTransfer.to,
+        role: 'Producer',
+        address: producerToFactoryTransfer.from, // Producer es quien transfiere
         timestamp: producerToFactoryTransfer.dateCreated,
         amount: producerToFactoryTransfer.amount,
         transferId: producerToFactoryTransfer.id,
-        description: `Transferred ${producerToFactoryTransfer.amount.toString()} units to Factory`,
+        transferStatus: producerToFactoryTransfer.status,
+        isSender: true, // Producer es quien envía
+        description: `Producer transferred ${producerToFactoryTransfer.amount.toString()} units of Raw Material`,
+      })
+      
+      // Paso 2b: Factory recibe (hacia Factory)
+      steps.push({
+        step: 3,
+        stage: 'transfer',
+        tokenId: rawMaterialToken.id,
+        tokenName: rawMaterialToken.name,
+        tokenType: TokenType.RowMaterial,
+        role: 'Factory',
+        address: producerToFactoryTransfer.to, // Factory es quien recibe
+        timestamp: producerToFactoryTransfer.dateCreated,
+        amount: producerToFactoryTransfer.amount,
+        transferId: producerToFactoryTransfer.id,
+        transferStatus: producerToFactoryTransfer.status,
+        isSender: false, // Factory es quien recibe
+        description: producerToFactoryTransfer.status === TransferStatus.Accepted
+          ? `Factory received ${producerToFactoryTransfer.amount.toString()} units of Raw Material (Accepted)`
+          : producerToFactoryTransfer.status === TransferStatus.Rejected
+          ? `Factory rejected ${producerToFactoryTransfer.amount.toString()} units of Raw Material`
+          : `Factory pending to accept ${producerToFactoryTransfer.amount.toString()} units of Raw Material`,
       })
     }
     
@@ -127,9 +163,9 @@ export function useTokenTraceability(tokenId: bigint | undefined) {
       const finishedProductToken = allTokens.find(t => t.id === finishedProductTokenId)
       
       if (finishedProductToken) {
-        // Paso 3: Creación del producto terminado por Factory
+        // Paso 4: Creación del producto terminado por Factory
         steps.push({
-          step: 3,
+          step: 4,
           stage: 'creation',
           tokenId: finishedProductToken.id,
           tokenName: finishedProductToken.name,
@@ -137,51 +173,110 @@ export function useTokenTraceability(tokenId: bigint | undefined) {
           role: 'Factory',
           address: finishedProductToken.creator,
           timestamp: finishedProductToken.createdAt,
+          totalSupply: finishedProductToken.totalSupply,
           description: `Finished Product "${finishedProductToken.name}" created by Factory using Raw Material`,
         })
         
-        // Paso 4: Transferencia Factory → Retailer
-        const factoryToRetailerTransfer = allTransfers.find(
+        // Paso 5: Transferencia Factory → Retailer
+        const factoryToRetailerTransfers = allTransfers.filter(
           t => t.tokenId === finishedProductToken.id && 
-               t.status === TransferStatus.Accepted &&
                t.from.toLowerCase() === finishedProductToken.creator.toLowerCase()
-        )
+        ).sort((a, b) => {
+          if (a.dateCreated > b.dateCreated) return -1
+          if (a.dateCreated < b.dateCreated) return 1
+          return 0
+        })
         
-        if (factoryToRetailerTransfer) {
+        if (factoryToRetailerTransfers.length > 0) {
+          const factoryToRetailerTransfer = factoryToRetailerTransfers[0]
+          
+          // Paso 5a: Factory transfiere (desde Factory)
           steps.push({
-            step: 4,
+            step: 5,
+            stage: 'transfer',
+            tokenId: finishedProductToken.id,
+            tokenName: finishedProductToken.name,
+            tokenType: TokenType.FinishedProduct,
+            role: 'Factory',
+            address: factoryToRetailerTransfer.from, // Factory es quien transfiere
+            timestamp: factoryToRetailerTransfer.dateCreated,
+            amount: factoryToRetailerTransfer.amount,
+            transferId: factoryToRetailerTransfer.id,
+            transferStatus: factoryToRetailerTransfer.status,
+            isSender: true, // Factory es quien envía
+            description: `Factory transferred ${factoryToRetailerTransfer.amount.toString()} units of Finished Product`,
+          })
+          
+          // Paso 5b: Retailer recibe (hacia Retailer)
+          steps.push({
+            step: 6,
             stage: 'transfer',
             tokenId: finishedProductToken.id,
             tokenName: finishedProductToken.name,
             tokenType: TokenType.FinishedProduct,
             role: 'Retailer',
-            address: factoryToRetailerTransfer.to,
+            address: factoryToRetailerTransfer.to, // Retailer es quien recibe
             timestamp: factoryToRetailerTransfer.dateCreated,
             amount: factoryToRetailerTransfer.amount,
             transferId: factoryToRetailerTransfer.id,
-            description: `Transferred ${factoryToRetailerTransfer.amount.toString()} units to Retailer`,
+            transferStatus: factoryToRetailerTransfer.status,
+            isSender: false, // Retailer es quien recibe
+            description: factoryToRetailerTransfer.status === TransferStatus.Accepted
+              ? `Retailer received ${factoryToRetailerTransfer.amount.toString()} units of Finished Product (Accepted)`
+              : factoryToRetailerTransfer.status === TransferStatus.Rejected
+              ? `Retailer rejected ${factoryToRetailerTransfer.amount.toString()} units of Finished Product`
+              : `Retailer pending to accept ${factoryToRetailerTransfer.amount.toString()} units of Finished Product`,
           })
           
-          // Paso 5: Transferencia Retailer → Consumer
-          const retailerToConsumerTransfer = allTransfers.find(
+          // Paso 6: Transferencia Retailer → Consumer
+          const retailerToConsumerTransfers = allTransfers.filter(
             t => t.tokenId === finishedProductToken.id && 
-                 t.status === TransferStatus.Accepted &&
                  t.from.toLowerCase() === factoryToRetailerTransfer.to.toLowerCase()
-          )
+          ).sort((a, b) => {
+            if (a.dateCreated > b.dateCreated) return -1
+            if (a.dateCreated < b.dateCreated) return 1
+            return 0
+          })
           
-          if (retailerToConsumerTransfer) {
+          if (retailerToConsumerTransfers.length > 0) {
+            const retailerToConsumerTransfer = retailerToConsumerTransfers[0]
+            
+            // Paso 6a: Retailer transfiere (desde Retailer)
             steps.push({
-              step: 5,
+              step: 7,
+              stage: 'transfer',
+              tokenId: finishedProductToken.id,
+              tokenName: finishedProductToken.name,
+              tokenType: TokenType.FinishedProduct,
+              role: 'Retailer',
+              address: retailerToConsumerTransfer.from, // Retailer es quien transfiere
+              timestamp: retailerToConsumerTransfer.dateCreated,
+              amount: retailerToConsumerTransfer.amount,
+              transferId: retailerToConsumerTransfer.id,
+              transferStatus: retailerToConsumerTransfer.status,
+              isSender: true, // Retailer es quien envía
+              description: `Retailer transferred ${retailerToConsumerTransfer.amount.toString()} units of Finished Product`,
+            })
+            
+            // Paso 6b: Consumer recibe (hacia Consumer)
+            steps.push({
+              step: 8,
               stage: 'transfer',
               tokenId: finishedProductToken.id,
               tokenName: finishedProductToken.name,
               tokenType: TokenType.FinishedProduct,
               role: 'Consumer',
-              address: retailerToConsumerTransfer.to,
+              address: retailerToConsumerTransfer.to, // Consumer es quien recibe
               timestamp: retailerToConsumerTransfer.dateCreated,
               amount: retailerToConsumerTransfer.amount,
               transferId: retailerToConsumerTransfer.id,
-              description: `Transferred ${retailerToConsumerTransfer.amount.toString()} units to Consumer`,
+              transferStatus: retailerToConsumerTransfer.status,
+              isSender: false, // Consumer es quien recibe
+              description: retailerToConsumerTransfer.status === TransferStatus.Accepted
+                ? `Consumer received ${retailerToConsumerTransfer.amount.toString()} units of Finished Product (Accepted)`
+                : retailerToConsumerTransfer.status === TransferStatus.Rejected
+                ? `Consumer rejected ${retailerToConsumerTransfer.amount.toString()} units of Finished Product`
+                : `Consumer pending to accept ${retailerToConsumerTransfer.amount.toString()} units of Finished Product`,
             })
           }
         }

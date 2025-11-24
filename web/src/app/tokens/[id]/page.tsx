@@ -1,6 +1,6 @@
 'use client'
 
-import { use } from 'react'
+import { use, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { useGetToken, useGetTokenBalance } from '@/hooks/useGetUserTokens'
@@ -96,15 +96,11 @@ export default function TokenDetailPage({ params }: PageProps) {
       accepted: 0,
       rejected: 0,
       cancelled: 0,
-      totalAmount: BigInt(0),
     }
     
     tokenTransfers.forEach(t => {
       if (t.status === TransferStatus.Pending) stats.pending++
-      else if (t.status === TransferStatus.Accepted) {
-        stats.accepted++
-        stats.totalAmount += t.amount
-      }
+      else if (t.status === TransferStatus.Accepted) stats.accepted++
       else if (t.status === TransferStatus.Rejected) stats.rejected++
       else if (t.status === TransferStatus.Cancelled) stats.cancelled++
     })
@@ -231,11 +227,9 @@ export default function TokenDetailPage({ params }: PageProps) {
           )}
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Columna principal - Información del token */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Card principal del token */}
-            <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl overflow-hidden">
+        <div className="space-y-6">
+          {/* Card principal del token */}
+          <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl overflow-hidden">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -344,8 +338,10 @@ export default function TokenDetailPage({ params }: PageProps) {
                 )}
               </CardContent>
             </Card>
-            
-            {/* Historial de transferencias */}
+          
+          {/* Transfer History y Transfer Statistics lado a lado */}
+          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+            {/* Transfer History */}
             <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -442,11 +438,8 @@ export default function TokenDetailPage({ params }: PageProps) {
                 )}
               </CardContent>
             </Card>
-          </div>
-          
-          {/* Columna lateral - Estadísticas */}
-          <div className="space-y-6">
-            {/* Estadísticas de transferencias */}
+            
+            {/* Transfer Statistics */}
             <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -483,31 +476,20 @@ export default function TokenDetailPage({ params }: PageProps) {
                     {transferStats.cancelled}
                   </span>
                 </div>
-                <div className="border-t pt-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Total Transferred</span>
-                    <span className="font-bold text-lg text-blue-600 dark:text-blue-400">
-                      {transferStats.totalAmount.toString()}
-                    </span>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>
-        </div>
         
-        {/* Trazabilidad End-to-End - Sección completa al final */}
-        <div className="mt-6">
-          <TraceabilityTimeline 
-            traceability={traceability || null}
-            isLoading={isLoadingTraceability}
-          />
+          {/* Trazabilidad End-to-End - Sección completa al final */}
+          <div className="mt-6">
+            <TraceabilityTimeline 
+              traceability={traceability || null}
+              isLoading={isLoadingTraceability}
+            />
+          </div>
         </div>
       </div>
     </div>
   )
 }
-
-// Necesario para usar useMemo y useState
-import { useMemo, useState } from 'react'
 
