@@ -779,41 +779,128 @@ function AdminRoute() {
 | useTransfer.ts | 4 | Escritura | ✅ |
 | useAdminUsers.ts | 2 | Lectura + Escritura | ✅ |
 | useContractOwner.ts | 1 | Lectura | ✅ |
-| useGetUserTokens.ts | 3 | Lectura | ✅ Día 4 |
+| useGetUserTokens.ts | 4 | Lectura | ✅ Día 4-5 |
 | usePause.ts | 3 | Lectura + Escritura | ✅ Día 4 |
-| **TOTAL** | **22** | **13 lectura + 9 escritura** | **100%** |
+| useUserTokenStats.ts | 1 | Lectura | ✅ Día 7 |
+| useGetUserTokensWithData.ts | 1 | Lectura | ✅ Día 7 |
+| useGetUserTransfers.ts | 1 | Lectura | ✅ Día 7 |
+| **TOTAL** | **25** | **16 lectura + 9 escritura** | **100%** |
 
 **Nota**: 
 - `useContractReads.ts` incluye 6 hooks (5 individuales + 1 optimizado batch)
-- `useGetUserTokens.ts` incluye 3 hooks
+- `useGetUserTokens.ts` incluye 4 hooks (getUserTokens, getToken, getTokenBalance, useGetAllTokens)
 - `usePause.ts` incluye 3 hooks
 - `useTransfer.ts` incluye 4 hooks
 - `useAdminUsers.ts` incluye 2 hooks
-- Total documentado: 22 hooks únicos (18 hooks principales + 4 hooks adicionales de admin)
+- Total documentado: 25 hooks únicos (21 hooks principales + 4 hooks adicionales de admin) ⭐ Día 7
 
 ---
 
-## ❌ Hooks Pendientes (para futuras páginas)
+## ✅ Hooks Nuevos (Día 7)
 
-Según el smart contract, estos hooks mejorarían la funcionalidad:
-- `useGetTransfer(transferId)` - Info completa de transferencia
-- `useGetUserTransfers(address)` - Array de transfers del usuario
-- `useGetAllTokens()` - Array de todos los tokens del sistema
+### **useGetUserTransfers(address)** ✅ IMPLEMENTADO
+**Ubicación**: `web/src/hooks/useGetUserTransfers.ts`
 
-Estos hooks son necesarios para las páginas `/transfers` y `/tokens` (lista completa).
+Obtiene todas las transferencias de un usuario (enviadas y recibidas).
+
+```typescript
+import { useGetUserTransfers } from '@/hooks/useGetUserTransfers'
+
+function Component() {
+  const { data: transfers, isLoading, error } = useGetUserTransfers('0x...')
+  
+  // transfers = TransferData[] con from, to, tokenId, amount, status, etc.
+}
+```
+
+**Retorna**:
+```typescript
+{
+  transfers: TransferData[] | undefined
+  isLoading: boolean
+  error: Error | null
+}
+```
+
+**Características**:
+- Parsea correctamente la tupla de datos del contrato
+- Incluye información completa de cada transferencia
+- Usado en TransferList para mostrar transferencias
+
+---
+
+### **useUserTokenStats()** ✅ IMPLEMENTADO
+**Ubicación**: `web/src/hooks/useUserTokenStats.ts`
+
+Obtiene estadísticas de tokens por tipo (Raw Material / Finished Product).
+
+```typescript
+import { useUserTokenStats } from '@/hooks/useUserTokenStats'
+
+function Component() {
+  const { rowMaterial, finishedProduct, isLoading, error } = useUserTokenStats()
+}
+```
+
+**Retorna**:
+```typescript
+{
+  rowMaterial: { tokenTypeName, totalBalance, tokenCount } | undefined
+  finishedProduct: { tokenTypeName, totalBalance, tokenCount } | undefined
+  isLoading: boolean
+  error: Error | null
+}
+```
+
+---
+
+### **useGetUserTokensWithData()** ✅ IMPLEMENTADO
+**Ubicación**: `web/src/hooks/useGetUserTokensWithData.ts`
+
+Obtiene tokens del usuario con todos sus datos completos (no solo IDs).
+
+```typescript
+import { useGetUserTokensWithData } from '@/hooks/useGetUserTokensWithData'
+
+function Component() {
+  const { tokens, isLoading, error } = useGetUserTokensWithData('0x...')
+}
+```
+
+**Retorna**:
+```typescript
+{
+  tokens: TokenWithData[] | undefined
+  isLoading: boolean
+  error: Error | null
+}
+```
+
+---
+
+## ❌ Hooks Pendientes (opcionales)
+
+Según el smart contract, estos hooks podrían mejorar la funcionalidad:
+- `useGetTransfer(transferId)` - Info completa de una transferencia específica
+
+**Nota**: `useGetAllTokens()` ya está implementado en `useGetUserTokens.ts` (Día 5).
 
 ---
 
 ## 📝 Notas de Actualización (Día 4)
 
 ### Hooks Nuevos:
-- ✅ **useGetUserTokens()** - Obtener tokens del usuario
-- ✅ **useGetToken()** - Obtener info de un token
-- ✅ **useGetTokenBalance()** - Obtener balance de un token
-- ✅ **useIsPaused()** - Leer estado de pausa
-- ✅ **usePause()** - Pausar contrato
-- ✅ **useUnpause()** - Reanudar contrato
-- ✅ **useUserIdByAddress()** - Optimización para AuthContext
+- ✅ **useGetUserTokens()** - Obtener tokens del usuario (Día 4)
+- ✅ **useGetToken()** - Obtener info de un token (Día 4)
+- ✅ **useGetTokenBalance()** - Obtener balance de un token (Día 4)
+- ✅ **useGetAllTokens()** - Obtener todos los tokens del sistema (Día 5)
+- ✅ **useIsPaused()** - Leer estado de pausa (Día 4)
+- ✅ **usePause()** - Pausar contrato (Día 4)
+- ✅ **useUnpause()** - Reanudar contrato (Día 4)
+- ✅ **useUserIdByAddress()** - Optimización para AuthContext (Día 4)
+- ✅ **useGetUserTransfers()** - Transferencias de un usuario (Día 7)
+- ✅ **useUserTokenStats()** - Estadísticas por tipo (Día 7)
+- ✅ **useGetUserTokensWithData()** - Tokens con datos completos (Día 7)
 
 ### Hooks Mejorados:
 - ✅ **useContractReads.ts** - Agregado `useUserIdByAddress` para detección rápida

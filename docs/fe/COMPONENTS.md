@@ -587,25 +587,70 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 ---
 
-## ❌ Componentes Pendientes
+## ✅ Componentes Nuevos (Día 7)
 
-### **TransferList.tsx**
-**Propósito**: Lista de transferencias pendientes/completadas
+### **TransferList.tsx** ✅ IMPLEMENTADO
+**Ubicación**: `web/src/components/TransferList.tsx`  
+**Líneas**: 450+
 
-**Props esperados**:
-```tsx
-interface TransferListProps {
-  transfers: Transfer[]
-  showActions?: boolean // Mostrar botones Accept/Reject
-}
-```
+**Propósito**: Lista de transferencias con separación sent/received y filtros por rol.
 
-**Funcionalidad esperada**:
-- Tabla con transferencias
+**Características**:
+- Separación de transferencias enviadas/recibidas para Factory/Retailer
+- Filtros dinámicos por rol (From/To según corresponda)
+- Token Name mostrado junto al Token ID
+- Botones de acción (Accept/Reject/Cancel) con estilo uniforme
+- Direcciones clickeables con AddressDisplay
 - Estados: Pending, Accepted, Rejected
-- Botones Accept/Reject para pendientes
-- Filtros por estado
-- Paginación si hay muchas
+- Actualización automática tras acciones
+
+---
+
+### **CreateTransferForm.tsx** ✅ IMPLEMENTADO
+**Ubicación**: `web/src/components/CreateTransferForm.tsx`  
+**Líneas**: 300+
+
+**Propósito**: Formulario para crear nuevas transferencias con validaciones.
+
+**Características**:
+- Dropdown de destinatarios filtrado por rol:
+  - Producer → solo Factory aprobados
+  - Factory → solo Retailer aprobados
+  - Retailer → solo Consumer aprobados
+- Dropdown de tokens mostrando nombre (internamente usa ID)
+- Validación de cantidad (no 0, no mayor que balance disponible)
+- Orden de campos: Token, Amount, Recipient
+- Validación de pausa del contrato
+- Mensajes de éxito amigables (sin hash técnico)
+
+---
+
+### **UserTokenList.tsx** ✅ IMPLEMENTADO
+**Ubicación**: `web/src/components/UserTokenList.tsx`  
+**Líneas**: 150+
+
+**Propósito**: Lista de tokens del usuario para mejorar UX (usado en dashboard).
+
+**Características**:
+- Muestra tokens con balance > 0
+- Filtrado por tipo de token según rol
+- Integración con TokenCard/TokenCardModern
+- Loading states y empty states
+
+---
+
+### **AddressDisplay.tsx** ✅ IMPLEMENTADO
+**Ubicación**: `web/src/components/AddressDisplay.tsx`  
+**Líneas**: 80+
+
+**Propósito**: Componente reutilizable para mostrar direcciones con copy y tooltip.
+
+**Características**:
+- Dirección truncada (0x1234...5678)
+- Botón de copiar al portapapeles
+- Tooltip con dirección completa
+- Previene navegación accidental (e.stopPropagation)
+- Indicador visual de copia exitosa
 
 ---
 
@@ -637,31 +682,36 @@ web/src/components/
 │   ├── dialog.tsx            ✅
 │   ├── alert.tsx             ✅
 │   └── skeleton.tsx          ✅ (Día 4)
-└── TransferList.tsx           ❌ PENDIENTE
+├── TransferList.tsx           ✅ IMPLEMENTADO (Día 7 - Lista transferencias con filtros)
+├── CreateTransferForm.tsx     ✅ IMPLEMENTADO (Día 7 - Formulario crear transferencia)
+├── UserTokenList.tsx          ✅ IMPLEMENTADO (Día 7 - Lista tokens usuario)
+└── AddressDisplay.tsx         ✅ IMPLEMENTADO (Día 7 - Direcciones con copy/tooltip)
 ```
 
-**Total**: 21 componentes (10 Shadcn + 11 personalizados)
-- ✅ Implementados: 20 componentes
-- ❌ Pendientes: 1 componente (TransferList.tsx)
+**Total**: 25 componentes (11 Shadcn + 14 personalizados) ⭐ Día 7
+- ✅ Implementados: 25 componentes
+- ❌ Pendientes: 0 componentes
 
 ---
 
 ## 🎯 Próximos Pasos
 
-1. **Implementar TransferList.tsx** - Lista de transferencias (para página /transfers)
-
-Este componente se usará en la página `/transfers` que falta por implementar.
+1. **Páginas adicionales** - Detalles de token, transferir token, perfil, panel admin principal
 
 ---
 
 ## 📝 Notas de Actualización (Día 4)
 
 ### Componentes Nuevos:
-- ✅ **TokenCard.tsx** - Tarjeta reutilizable para tokens
+- ✅ **TokenCard.tsx** - Tarjeta reutilizable para tokens (Día 4)
 - ✅ **TokenCardModern.tsx** - Versión moderna 2025 con glassmorphism (Día 6)
-- ✅ **UserProfileCard.tsx** - Perfil de usuario
-- ✅ **QuickActions.tsx** - Acciones rápidas con validación de pausa
-- ✅ **PauseControl.tsx** - Control de pausa para admin
+- ✅ **UserProfileCard.tsx** - Perfil de usuario (Día 4)
+- ✅ **QuickActions.tsx** - Acciones rápidas con validación de pausa (Día 4)
+- ✅ **PauseControl.tsx** - Control de pausa para admin (Día 4)
+- ✅ **TransferList.tsx** - Lista de transferencias con filtros (Día 7)
+- ✅ **CreateTransferForm.tsx** - Formulario crear transferencia (Día 7)
+- ✅ **UserTokenList.tsx** - Lista tokens usuario (Día 7)
+- ✅ **AddressDisplay.tsx** - Direcciones con copy/tooltip (Día 7)
 
 ### Componentes Mejorados:
 - ✅ **Header.tsx** - Agregado badge de "Contract Pausado"

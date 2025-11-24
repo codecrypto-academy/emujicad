@@ -7,15 +7,17 @@
 
 ## 🎯 ESTADO ACTUAL (Snapshot)
 
-### Puntuación Académica: **7.2/9.5** ✅ APROBATORIO
+### Puntuación Académica: **7.3/9.5** ✅ APROBATORIO
+
+**Nota**: Actualizado tras verificación - Profile ya estaba implementado. Estado real: 7/9 páginas (78%).
 
 | Componente | Actual | Máximo | Estado |
 |------------|--------|---------|---------|
 | Smart Contract | 4.0 | 4.0 | ✅ 100% |
-| Frontend | 2.7 | 3.0 | ✅ 90% (6/9 páginas, falta +0.3) |
+| Frontend | 2.8 | 3.0 | ✅ 93% (7/9 páginas, falta +0.2) |
 | Extras | 0.5 | 1.0 | ⚠️ 50% (deploy script validado) |
 | Video | 0.0 | 1.5 | ❌ 0% |
-| **TOTAL** | **7.2** | **9.5** | **Falta +2.3 pts para 9.5** |
+| **TOTAL** | **7.3** | **9.5** | **Falta +2.2 pts para 9.5** |
 
 **Nota**: La puntuación se ajustó considerando la página de Transferencias implementada.
 
@@ -43,17 +45,26 @@
 ✅ Layout con providers (web/src/app/layout.tsx)
 ✅ Landing page MEJORADA (web/src/app/page.tsx) - ✅ Diseño Moderno 2025
 ✅ Dashboard page COMPLETO (web/src/app/dashboard/page.tsx) - ✅ Diseño Moderno 2025
+    - Sección "My Tokens by Type" simplificada (lista simple con nombre y balance)
+    - Estadísticas de transferencias separadas (sent/received para Factory/Retailer)
+    - Sección "My Tokens" eliminada (redundante con /tokens)
 ✅ Admin Users page (web/src/app/admin/users/page.tsx) - ✅ Diseño Moderno 2025
 ✅ Tokens page COMPLETO (web/src/app/tokens/page.tsx) - ✅ Día 5 + Diseño Moderno 2025
+    - Sección "My Tokens by Type" con tarjetas completas agrupadas por tipo
+    - Filtros de búsqueda y por tipo funcionales
 ✅ Tokens Create page COMPLETO (web/src/app/tokens/create/page.tsx) - ✅ Día 6 + Diseño Moderno 2025
 ✅ Transfers page COMPLETO (web/src/app/transfers/page.tsx) - ✅ Día 7 + Diseño Moderno 2025
+    - Separación de transferencias enviadas/recibidas (Factory/Retailer)
+    - CreateTransferForm integrado con validaciones
+    - Filtros mejorados por rol
+    - Estadísticas actualizadas automáticamente
 ✅ AuthContext completo (web/src/contexts/AuthContext.tsx) - ✅ NUEVO
 
 ✅ Componentes específicos implementados (6/6):
     - ConnectWallet.tsx (conexión wallet)
     - Header.tsx (navegación + branding + info usuario + pausa badge)
     - ThemeToggle.tsx (modo claro/oscuro con persistencia por usuario)
-    - TokenCard.tsx (tarjeta de token con detalles) - ✅ NUEVO
+    - TokenCard.tsx (tarjeta de token con detalles)
     - TokenCardModern.tsx (tarjeta moderna 2025 con glassmorphism) - ✅ Día 6
     - TransferList.tsx (lista de transferencias con acciones) - ✅ Día 7
 
@@ -68,10 +79,11 @@
     - useTransfer.ts (4 hooks escritura)
     - useContractOwner.ts (1 hook lectura)
     - useAdminUsers.ts (2 hooks: getAllUsers + changeUserStatus)
-    - useGetUserTokens.ts (4 hooks: getUserTokens, getToken, getTokenBalance, useGetAllTokens) - ✅ NUEVO
-    - usePause.ts (3 hooks: isPaused, pause, unpause) - ✅ NUEVO
-    - useUserTokenStats.ts (1 hook: estadísticas por tipo) - ✅ NUEVO
-    - useGetUserTokensWithData.ts (1 hook: tokens con datos completos) - ✅ NUEVO
+    - useGetUserTokens.ts (4 hooks: getUserTokens, getToken, getTokenBalance, useGetAllTokens)
+    - usePause.ts (3 hooks: isPaused, pause, unpause)
+    - useUserTokenStats.ts (1 hook: estadísticas por tipo)
+    - useGetUserTokensWithData.ts (1 hook: tokens con datos completos)
+    - useGetUserTransfers.ts (1 hook: transferencias de un usuario) - ✅ Día 7
 
 ✅ Componentes admin implementados:
     - UserManagementTable.tsx (tabla + filtros + acciones + pausa)
@@ -82,10 +94,11 @@
 ✅ Componentes adicionales:
     - RegisterForm.tsx (registro con validación de pausa)
     - ChangeRoleDialog.tsx (cambio de rol con validación de pausa)
-    - UserProfileCard.tsx (perfil de usuario) - ✅ NUEVO
-    - QuickActions.tsx (acciones rápidas con validación de pausa) - ✅ NUEVO
-    - CreateTransferForm.tsx (formulario para crear transferencias) - ✅ Día 7
+    - UserProfileCard.tsx (perfil de usuario)
+    - QuickActions.tsx (acciones rápidas con validación de pausa)
+    - CreateTransferForm.tsx (formulario para crear transferencias con validaciones) - ✅ Día 7
     - UserTokenList.tsx (lista de tokens del usuario para UX) - ✅ Día 7
+    - AddressDisplay.tsx (componente para mostrar direcciones con copy y tooltip) - ✅ Día 7
 
 ✅ Features UX implementados:
     - Theme toggle (claro/oscuro) - solo admin y aprobados
@@ -127,8 +140,8 @@
 
 ## ❌ PENDIENTE (Crítico para aprobar con 9.5/10)
 
-### 🚨 PRIORIDAD 1: Páginas Frontend (Falta +0.3 punto)
-**Tiempo estimado**: 2-3 días (15-20 horas)
+### 🚨 PRIORIDAD 1: Páginas Frontend (Falta +0.2 punto)
+**Tiempo estimado**: 1-2 días (8-12 horas)
 
 ```
 ✅ web/src/app/page.tsx                    - Landing con MetaMask + Stats
@@ -137,13 +150,13 @@
 ✅ web/src/app/tokens/page.tsx             - Lista todos los tokens COMPLETO ⭐ Día 5
 ✅ web/src/app/tokens/create/page.tsx     - Crear token COMPLETO ⭐ Día 6
 ✅ web/src/app/transfers/page.tsx         - Gestión transferencias COMPLETO ⭐ Día 7
+✅ web/src/app/profile/page.tsx            - Perfil usuario COMPLETO ⭐ Ya implementado
 ❌ web/src/app/tokens/[id]/page.tsx       - Detalles token
 ❌ web/src/app/tokens/[id]/transfer/page.tsx - Transferir token
 ❌ web/src/app/admin/page.tsx              - Panel admin principal
-❌ web/src/app/profile/page.tsx            - Perfil usuario
 ```
 
-**Progreso**: 6/9 páginas (67%) ⭐ Día 7
+**Progreso**: 7/9 páginas (78%) ⭐ Actualizado
 
 ### 🚨 PRIORIDAD 2: Componentes Específicos (6/6 implementados)
 ```
@@ -444,9 +457,9 @@ Frontend:
 [x] Tokens (lista) - ✅ COMPLETADO ⭐ Día 5
 [x] Tokens (crear) - ✅ COMPLETADO ⭐ Día 6
 [x] Transferencias - ✅ COMPLETADO ⭐ Día 7
+[x] Profile - ✅ COMPLETADO ⭐ Ya estaba implementado
 [ ] Tokens (detalles)
 [ ] Tokens (transferir)
-[ ] Profile
 [ ] Admin (panel principal)
 
 Extras:
@@ -477,16 +490,29 @@ Video:
 ```
 ✅ Fixed: Error de TypeScript en `useGetUserTransfers` que impedía mostrar la lista de transferencias. El hook ahora parsea correctamente la tupla de datos del contrato.
 ✅ Implemented: Página de Transferencias (`/transfers`) completamente funcional.
-✅ Implemented: Componente `CreateTransferForm` para iniciar nuevas transferencias.
-✅ Implemented: Componente `UserTokenList` para mostrar los tokens que posee el usuario, mejorando la UX al crear una transferencia.
-✅ Enhanced: `TransferList` ahora se muestra correctamente.
-✅ Enhanced: La página de transferencias ahora permite crear y listar transferencias.
+✅ Implemented: Componente `CreateTransferForm` para iniciar nuevas transferencias con:
+    - Dropdown de destinatarios filtrado por rol (Producer→Factory, Factory→Retailer, Retailer→Consumer)
+    - Dropdown de tokens mostrando nombre (internamente usa ID)
+    - Validación de cantidad (no 0, no mayor que balance disponible)
+    - Orden de campos: Token, Amount, Recipient
+✅ Implemented: Componente `UserTokenList` para mostrar los tokens que posee el usuario (removido de /transfers, ahora solo en dashboard/tokens).
+✅ Implemented: Componente `AddressDisplay` para mostrar direcciones con copy y tooltip.
+✅ Enhanced: `TransferList` con:
+    - Separación de transferencias enviadas/recibidas para Factory/Retailer
+    - Filtros mejorados por rol (From/To según corresponda)
+    - Token Name mostrado junto al Token ID
+    - Botones de acción con estilo uniforme
+    - Direcciones clickeables con AddressDisplay
+✅ Enhanced: Dashboard con sección "My Tokens by Type" simplificada (lista simple).
+✅ Enhanced: Página /tokens con sección "My Tokens by Type" con tarjetas completas.
+✅ Enhanced: Estadísticas de transferencias separadas (sent/received) en dashboard.
+✅ Enhanced: Mensajes de éxito más amigables (sin hash técnico).
 
 Progreso:
 - Páginas: 5/9 (56%) → 6/9 (67%)
 - Hooks: 8/9 (89%) → 9/9 (100%)
-- Componentes: 5/6 (83%) → 6/6 (100%)
-- UX: Flujo de transferencias completo (crear y ver).
+- Componentes: 5/6 (83%) → 6/6 (100%) + 3 adicionales (CreateTransferForm, UserTokenList, AddressDisplay)
+- UX: Flujo de transferencias completo (crear y ver), mejoras en dashboard y tokens.
 ```
 
 ### Día 6 - Sesión Anterior (21 Nov, 2025) ✅ COMPLETADO

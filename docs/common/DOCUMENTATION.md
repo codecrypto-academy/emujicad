@@ -47,12 +47,12 @@ Supply Chain Tracker es una DApp descentralizada para gestionar cadenas de sumin
 - **Tests**: 80 tests (100% passing)
 - **Coverage**: 83.33% líneas, 80.09% statements, 64.41% branches
 - **Frontend**: ~4,000+ líneas de código productivo
-- **Hooks**: 18 hooks personalizados (incluye useDashboardStats optimizado)
-- **Componentes**: 22 componentes (12 personalizados + 10 Shadcn UI, incluye TokenCardModern)
-- **Páginas**: 5 de 9 implementadas (56%) - Todas con Diseño Moderno 2025
+- **Hooks**: 21 hooks personalizados (incluye useDashboardStats optimizado, useGetUserTransfers, useUserTokenStats, useGetUserTokensWithData)
+- **Componentes**: 25 componentes (15 personalizados + 10 Shadcn UI, incluye TokenCardModern, CreateTransferForm, UserTokenList, AddressDisplay)
+- **Páginas**: 6 de 9 implementadas (67%) - Todas con Diseño Moderno 2025
 - **Tests Frontend**: 17 tests (14 unitarios + 3 E2E) pasando
-- **Tiempo de desarrollo**: ~45 horas (Días 1-6)
-- **Estado**: 7.0/9.5 ✅ APROBATORIO (83% Frontend)
+- **Tiempo de desarrollo**: ~55 horas (Días 1-7)
+- **Estado**: 7.2/9.5 ✅ APROBATORIO (90% Frontend)
 
 ---
 
@@ -294,7 +294,12 @@ web/
 │   │   ├── useCreateToken.ts      # Crear token
 │   │   ├── useTransfer.ts         # 4 hooks transferencias
 │   │   ├── useAdminUsers.ts       # 2 hooks admin (getAllUsers, changeStatus)
-│   │   └── useContractOwner.ts    # Verificar ownership
+│   │   ├── useContractOwner.ts    # Verificar ownership
+│   │   ├── useGetUserTokens.ts    # 4 hooks tokens (getUserTokens, getToken, getTokenBalance, useGetAllTokens)
+│   │   ├── usePause.ts            # 3 hooks pausa (isPaused, pause, unpause)
+│   │   ├── useUserTokenStats.ts   # Estadísticas por tipo
+│   │   ├── useGetUserTokensWithData.ts # Tokens con datos completos
+│   │   └── useGetUserTransfers.ts # Transferencias de un usuario
 │   │
 │   └── lib/
 │       ├── utils.ts            # cn() helper
@@ -802,7 +807,10 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - [x] AuthContext optimizado para redirecciones rápidas ⭐ Día 4
 - [x] Página de Tokens (lista) con filtros y búsqueda ⭐ Día 5
 - [x] Página de Crear Token con validaciones ⭐ Día 6
-- [x] Diseño Moderno 2025 aplicado a 5 páginas ⭐ Día 6
+- [x] Diseño Moderno 2025 aplicado a 6 páginas ⭐ Día 6-7
+- [x] Página de Transferencias completa con CreateTransferForm ⭐ Día 7
+- [x] Componentes nuevos: CreateTransferForm, UserTokenList, AddressDisplay ⭐ Día 7
+- [x] Hooks nuevos: useGetUserTransfers, useUserTokenStats, useGetUserTokensWithData ⭐ Día 7
 
 ### **✅ Día 4 (20 Nov)**: Dashboard y Optimizaciones ✅ COMPLETADO
 
@@ -877,14 +885,17 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - [ ] Botón para transferir (si aplica)
 - [ ] Gráfico de supply chain
 
-#### **Día 7 (22 Nov)**: Transferencias
-- [ ] Página `/transfers`
-- [ ] Tabla de transferencias
-- [ ] Filtros: Enviadas/Recibidas/Pending/etc.
-- [ ] Botones de acción (Accept/Reject/Cancel)
-- [ ] Modal de confirmación
-- [ ] Loading states
-- [ ] Actualizaciones en tiempo real
+#### **✅ Día 7 (22 Nov)**: Transferencias ✅ COMPLETADO
+- [x] Página `/transfers` ✅
+- [x] Tabla de transferencias con separación sent/received (Factory/Retailer) ✅
+- [x] Filtros: Enviadas/Recibidas/Pending/Accepted/Rejected por rol ✅
+- [x] Botones de acción (Accept/Reject/Cancel) con estilo uniforme ✅
+- [x] CreateTransferForm con validaciones y dropdowns filtrados ✅
+- [x] Componente AddressDisplay para direcciones clickeables ✅
+- [x] Loading states y actualizaciones automáticas ✅
+- [x] Estadísticas separadas (sent/received) en dashboard ✅
+- [x] Mejoras en dashboard: "My Tokens by Type" simplificado ✅
+- [x] Mejoras en /tokens: "My Tokens by Type" con tarjetas completas ✅
 
 #### **Día 7 (24 Nov)**: Panel Admin
 - [ ] Página `/admin`
@@ -949,9 +960,9 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - **Líneas de código**: ~4,000+
 - **Archivos creados**: 25+
 - **Archivos modificados**: 10+
-- **Hooks**: 18 (5 lectura + 10 escritura + 3 admin)
-- **Componentes**: 22 (10 Shadcn + 12 personalizados, incluye TokenCardModern)
-- **Páginas**: 5 de 9 (56%) - Todas con Diseño Moderno 2025
+- **Hooks**: 21 (16 lectura + 9 escritura, incluye useGetUserTransfers, useUserTokenStats, useGetUserTokensWithData)
+- **Componentes**: 25 (11 Shadcn + 14 personalizados, incluye TokenCardModern, CreateTransferForm, UserTokenList, AddressDisplay)
+- **Páginas**: 6 de 9 (67%) - Todas con Diseño Moderno 2025
 - **Features**: Theme toggle, Multi-tab sync, Admin panel completo, Diseño Moderno 2025
 
 ### **Tiempo de Desarrollo**:
