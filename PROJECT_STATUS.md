@@ -140,23 +140,29 @@
 
 ## ❌ PENDIENTE (Crítico para aprobar con 9.5/10)
 
-### 🚨 PRIORIDAD 1: Páginas Frontend (Falta +0.2 punto)
-**Tiempo estimado**: 1-2 días (8-12 horas)
+### 🚨 PRIORIDAD 1: Páginas Frontend (Falta +0.1 punto)
+**Tiempo estimado**: 1 día (4-6 horas)
 
 ```
 ✅ web/src/app/page.tsx                    - Landing con MetaMask + Stats
-✅ web/src/app/dashboard/page.tsx          - Dashboard usuario COMPLETO
+✅ web/src/app/dashboard/page.tsx          - Dashboard usuario COMPLETO (incluye vista admin)
 ✅ web/src/app/admin/users/page.tsx       - Gestión usuarios COMPLETA
 ✅ web/src/app/tokens/page.tsx             - Lista todos los tokens COMPLETO ⭐ Día 5
 ✅ web/src/app/tokens/create/page.tsx     - Crear token COMPLETO ⭐ Día 6
 ✅ web/src/app/transfers/page.tsx         - Gestión transferencias COMPLETO ⭐ Día 7
-✅ web/src/app/profile/page.tsx            - Perfil usuario COMPLETO ⭐ Ya implementado
-❌ web/src/app/tokens/[id]/page.tsx       - Detalles token
-❌ web/src/app/tokens/[id]/transfer/page.tsx - Transferir token
-❌ web/src/app/admin/page.tsx              - Panel admin principal
+✅ web/src/app/profile/page.tsx          - Perfil usuario COMPLETO ⭐ Ya implementado
+❌ web/src/app/admin/page.tsx              - Panel admin principal (mover PauseControl + más stats)
 ```
 
-**Progreso**: 7/9 páginas (78%) ⭐ Actualizado
+**Notas**:
+- ✅ **Transferencias**: Ya implementadas en `/transfers` con `CreateTransferForm` - NO necesita página separada
+- ✅ **Detalles Token**: Los detalles se muestran en las tarjetas de `/tokens` - NO necesita página separada (opcional)
+- ⚠️ **Admin Panel**: Dashboard actual tiene vista admin, pero se recomienda crear `/admin` dedicado para:
+  - Mover `PauseControl` desde dashboard
+  - Agregar más estadísticas del sistema
+  - Centralizar funciones administrativas
+
+**Progreso**: 7/8 páginas esenciales (87.5%) ⭐ Actualizado
 
 ### 🚨 PRIORIDAD 2: Componentes Específicos (6/6 implementados)
 ```
@@ -252,16 +258,27 @@
 
 ---
 
-### **🗓️ Día 8 - Domingo 23 Nov (Páginas Adicionales)**
+### **🗓️ Día 8 - Domingo 23 Nov (Panel Admin Dedicado)**
 **Tiempo**: 4-6 horas | **Impacto**: +0.1 puntos
 
 #### Tareas:
 ```typescript
-1. [ ] Crear web/src/app/tokens/[id]/page.tsx (detalles token)
-2. [ ] Crear web/src/app/tokens/[id]/transfer/page.tsx (transferir token)
-3. [ ] Crear web/src/app/admin/page.tsx (panel admin principal)
-4. [ ] Crear web/src/app/profile/page.tsx (perfil usuario)
+1. [ ] Crear web/src/app/admin/page.tsx (panel admin principal)
+   - [ ] Mover PauseControl desde dashboard
+   - [ ] Agregar estadísticas adicionales del sistema
+   - [ ] Centralizar funciones administrativas
+   - [ ] Accesos rápidos a gestión de usuarios
+   - [ ] Logs de eventos importantes (opcional)
+
+2. [ ] OPCIONAL: web/src/app/tokens/[id]/page.tsx (detalles token)
+   - Solo si se requiere página dedicada con historial completo
+   - Actualmente los detalles se ven en las tarjetas de /tokens
 ```
+
+**Nota**: 
+- ✅ `/profile` ya está implementado
+- ✅ Transferencias ya funcionan desde `/transfers` - NO necesita página separada
+- ⚠️ Panel Admin es la única página esencial pendiente
 
 ---
 
@@ -299,15 +316,19 @@ Tareas técnicas:
 
 ### ➡️ **EMPEZAR: Páginas Adicionales (Día 8)**
 
-**Archivos a crear**:
-1. `web/src/app/tokens/[id]/page.tsx` - Página de detalles de un token
-2. `web/src/app/profile/page.tsx` - Página de perfil de usuario
-3. `web/src/app/admin/page.tsx` - Panel principal de administración
+**Archivo a crear**:
+1. `web/src/app/admin/page.tsx` - Panel principal de administración
 
-**Orden de implementación**:
-1. Crear página de perfil de usuario
-2. Crear página de detalles de token
-3. Crear panel de administración principal
+**Tareas**:
+1. Crear página `/admin` con estadísticas del sistema
+2. Mover `PauseControl` desde dashboard a `/admin`
+3. Agregar más estadísticas administrativas
+4. Centralizar funciones administrativas
+
+**Nota**: 
+- ✅ `/profile` ya está implementado
+- ✅ Transferencias funcionan desde `/transfers` con `CreateTransferForm`
+- ✅ Detalles de tokens se muestran en las tarjetas de `/tokens`
 
 ---
 
@@ -458,9 +479,8 @@ Frontend:
 [x] Tokens (crear) - ✅ COMPLETADO ⭐ Día 6
 [x] Transferencias - ✅ COMPLETADO ⭐ Día 7
 [x] Profile - ✅ COMPLETADO ⭐ Ya estaba implementado
-[ ] Tokens (detalles)
-[ ] Tokens (transferir)
-[ ] Admin (panel principal)
+[ ] Admin (panel principal) - Mover PauseControl + más stats
+[ ] Tokens (detalles) - OPCIONAL (detalles ya en tarjetas)
 
 Extras:
 [x] Deploy script validado
