@@ -56,7 +56,7 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
   
   // Activar diseño moderno si está habilitado
   const useModernDesign: boolean = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
-  
+
   // Detectar roles del usuario para simplificar la UI
   const isConsumer = userInfo && userInfo.role === BigInt(UserRole.Consumer)
   const isProducer = userInfo && userInfo.role === BigInt(UserRole.Producer)
@@ -159,7 +159,7 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
       return () => clearTimeout(timer)
     }
   }, [isSuccess, hash, lastSuccessHash, refetchTransfers])
-  
+
   // Escuchar evento cuando se crea una nueva transferencia
   useEffect(() => {
     const handleTransferCreated = (event: Event) => {
@@ -196,14 +196,14 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
       // Filtro por dirección "From" (remitente)
       if (filterFrom !== 'all') {
         if (transfer.from.toLowerCase() !== filterFrom.toLowerCase()) {
-          return false
+        return false
         }
       }
 
       // Filtro por dirección "To" (destinatario)
       if (filterTo !== 'all') {
         if (transfer.to.toLowerCase() !== filterTo.toLowerCase()) {
-          return false
+        return false
         }
       }
 
@@ -436,18 +436,18 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
 
             {/* Filtro "To" - Para Producer, Factory y Retailer */}
             {(isProducer || isFactory || isRetailer) && (
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <label className="text-sm font-medium">To</label>
                 <Select value={filterTo} onValueChange={(value) => setFilterTo(value as FilterAddress)}>
-                  <SelectTrigger>
+                <SelectTrigger>
                     <SelectValue>
                       {filterTo === 'all' 
                         ? 'All' 
                         : formatAddress(filterTo)}
                     </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
                     {uniqueToAddresses.length > 0 ? (
                       uniqueToAddresses.map((toAddr) => (
                         <SelectItem key={toAddr} value={toAddr}>
@@ -457,9 +457,9 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
                     ) : (
                       <SelectItem value="all" disabled>No recipients yet</SelectItem>
                     )}
-                  </SelectContent>
-                </Select>
-              </div>
+                </SelectContent>
+              </Select>
+            </div>
             )}
             
             {/* Filtro Status - Para todos */}
@@ -689,74 +689,74 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
         </>
       ) : (
         /* Para Producer y Consumer: una sola tabla */
-        <Card className={cardClass}>
-          <CardHeader>
+      <Card className={cardClass}>
+        <CardHeader>
             <CardTitle>
               {isProducer ? 'Sent Transfers' : isConsumer ? 'Received Transfers' : 'Transfers'}
             </CardTitle>
-            <CardDescription>
-              Showing {Number(filteredTransfers.length)} of {Number(totalTransfers)} transfer{Number(totalTransfers) !== 1 ? 's' : ''}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
-              </div>
-            ) : filteredTransfers.length === 0 ? (
-              <div className="text-center py-12">
-                <ArrowRightLeft className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No transfers found</p>
+          <CardDescription>
+            Showing {Number(filteredTransfers.length)} of {Number(totalTransfers)} transfer{Number(totalTransfers) !== 1 ? 's' : ''}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : filteredTransfers.length === 0 ? (
+            <div className="text-center py-12">
+              <ArrowRightLeft className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No transfers found</p>
                 {(filterFrom !== 'all' || filterTo !== 'all' || filterStatus !== 'all') && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Try adjusting your filters
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>From</TableHead>
-                      <TableHead>To</TableHead>
-                      <TableHead>Token ID</TableHead>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Try adjusting your filters
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>From</TableHead>
+                    <TableHead>To</TableHead>
+                    <TableHead>Token ID</TableHead>
                       <TableHead>Token Name</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Date</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
                       <TableHead className="text-center">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTransfers.map((transfer) => (
-                      <TransferRow
-                        key={transfer.id.toString()}
-                        transfer={transfer}
-                        addressToUse={addressToUse}
-                        canAccept={canAccept(transfer)}
-                        canReject={canReject(transfer)}
-                        canCancel={canCancel(transfer)}
-                        onAccept={handleAccept}
-                        onReject={handleReject}
-                        onCancel={handleCancel}
-                        isPending={isPending}
-                        isConfirming={isConfirming}
-                        formatAddress={formatAddress}
-                        formatDate={formatDate}
-                        getStatusBadge={getStatusBadge}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTransfers.map((transfer) => (
+                    <TransferRow
+                      key={transfer.id.toString()}
+                      transfer={transfer}
+                      addressToUse={addressToUse}
+                      canAccept={canAccept(transfer)}
+                      canReject={canReject(transfer)}
+                      canCancel={canCancel(transfer)}
+                      onAccept={handleAccept}
+                      onReject={handleReject}
+                      onCancel={handleCancel}
+                      isPending={isPending}
+                      isConfirming={isConfirming}
+                      formatAddress={formatAddress}
+                      formatDate={formatDate}
+                      getStatusBadge={getStatusBadge}
                         tokenName={tokenNamesMap.get(transfer.tokenId)}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
       )}
     </div>
   )

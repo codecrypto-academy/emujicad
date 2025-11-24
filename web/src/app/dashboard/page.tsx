@@ -322,43 +322,43 @@ export default function DashboardPage() {
           <div className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mb-6`}>
             {/* Total Users - Solo visible para administrador */}
             {isAdmin && (
-              <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
+            <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                      Total Users
-                    </h3>
-                    <div className="p-2 rounded-xl bg-green-500/10 dark:bg-green-400/20">
-                      <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    </div>
-                  </div>
-                  <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
-                    {statsErrors?.totalUsers ? (
-                      <span className="text-red-500 text-sm">Error</span>
-                    ) : isInitialStatsLoading ? (
-                      <Skeleton className="h-10 w-20" />
-                    ) : stableTotalUsers !== undefined ? Number(stableTotalUsers) : '-'}
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Registered users
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Total Tokens */}
-            <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 delay-100">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                    {isAdmin ? 'Total Tokens' : 'My Tokens'}
+                      Total Users
                   </h3>
-                  <div className="p-2 rounded-xl bg-blue-500/10 dark:bg-blue-400/20">
-                    <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <div className="p-2 rounded-xl bg-green-500/10 dark:bg-green-400/20">
+                      <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
                 </div>
+                  <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
+                    {statsErrors?.totalUsers ? (
+                    <span className="text-red-500 text-sm">Error</span>
+                  ) : isInitialStatsLoading ? (
+                    <Skeleton className="h-10 w-20" />
+                    ) : stableTotalUsers !== undefined ? Number(stableTotalUsers) : '-'}
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Registered users
+                </p>
+              </div>
+            </div>
+            )}
+
+            {/* Total Tokens */}
+              <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 delay-100">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                    {isAdmin ? 'Total Tokens' : 'My Tokens'}
+                    </h3>
+                  <div className="p-2 rounded-xl bg-blue-500/10 dark:bg-blue-400/20">
+                    <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                  </div>
                 <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent mb-2">
                   {isAdmin ? (
                     // Admin: Total del sistema
@@ -373,12 +373,12 @@ export default function DashboardPage() {
                       <Skeleton className="h-10 w-20" />
                     ) : displayTokens.length
                   )}
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                   {isAdmin ? 'Tokens in the system' : 'Tokens you own'}
-                </p>
+                  </p>
+                </div>
               </div>
-            </div>
 
             {/* Total Transfers */}
             <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-right-4 delay-200">
@@ -396,9 +396,9 @@ export default function DashboardPage() {
                   {isAdmin ? (
                     // Admin: Total del sistema
                     statsErrors?.totalTransfers ? (
-                      <span className="text-red-500 text-sm">Error</span>
-                    ) : isInitialStatsLoading ? (
-                      <Skeleton className="h-10 w-20" />
+                    <span className="text-red-500 text-sm">Error</span>
+                  ) : isInitialStatsLoading ? (
+                    <Skeleton className="h-10 w-20" />
                     ) : stableTotalTransfers !== undefined ? Number(stableTotalTransfers) : '-'
                   ) : (
                     // Usuario: Total de sus transferencias
@@ -719,18 +719,18 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </Link>
-                    <Link 
-                      href="/admin/users"
-                      className="block p-4 bg-white/80 dark:bg-slate-800/80 rounded-xl border-2 border-amber-200 dark:border-amber-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-lg transition-all cursor-pointer group/link"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Users className="h-8 w-8 text-amber-600 dark:text-amber-400 group-hover/link:scale-110 transition-transform" />
-                        <div>
-                          <h3 className="font-semibold text-slate-800 dark:text-slate-200">Manage Users</h3>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">Approve or reject user registrations</p>
-                        </div>
+                  <Link 
+                    href="/admin/users"
+                    className="block p-4 bg-white/80 dark:bg-slate-800/80 rounded-xl border-2 border-amber-200 dark:border-amber-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-lg transition-all cursor-pointer group/link"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Users className="h-8 w-8 text-amber-600 dark:text-amber-400 group-hover/link:scale-110 transition-transform" />
+                      <div>
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-200">Manage Users</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Approve or reject user registrations</p>
                       </div>
-                    </Link>
+                    </div>
+                  </Link>
                   </div>
                 </div>
               </div>
@@ -794,11 +794,11 @@ export default function DashboardPage() {
                           onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
                         />
                       ) : (
-                        <TokenCard 
-                          tokenId={tokenId}
-                          showBalance={true}
-                          onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
-                        />
+                      <TokenCard 
+                        tokenId={tokenId}
+                        showBalance={true}
+                        onClick={() => router.push(`/tokens/${tokenId.toString()}`)}
+                      />
                       )}
                     </div>
                   ))}
@@ -882,36 +882,36 @@ export default function DashboardPage() {
           {/* Total Users - Solo visible para administrador */}
           {isAdmin && (
             <Card className="border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   Total Users
-                </CardTitle>
+              </CardTitle>
                 <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </CardHeader>
-              <CardContent>
+            </CardHeader>
+            <CardContent>
                 <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                   {statsErrors?.totalUsers ? (
-                    <span className="text-red-500 text-sm">Error</span>
-                  ) : isInitialStatsLoading ? (
-                    <Skeleton className="h-9 w-16" />
+                  <span className="text-red-500 text-sm">Error</span>
+                ) : isInitialStatsLoading ? (
+                  <Skeleton className="h-9 w-16" />
                   ) : stableTotalUsers !== undefined ? Number(stableTotalUsers) : '-'}
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                   Registered users
-                </p>
-              </CardContent>
-            </Card>
+              </p>
+            </CardContent>
+          </Card>
           )}
 
           {/* Total Tokens */}
           <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 delay-100">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 {isAdmin ? 'Total Tokens' : 'My Tokens'}
-              </CardTitle>
+                </CardTitle>
               <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
               <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                 {isAdmin ? (
                   // Admin: Total del sistema
@@ -926,12 +926,12 @@ export default function DashboardPage() {
                     <Skeleton className="h-9 w-16" />
                   ) : displayTokens.length
                 )}
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                 {isAdmin ? 'Tokens in the system' : 'Tokens you own'}
-              </p>
-            </CardContent>
-          </Card>
+                </p>
+              </CardContent>
+            </Card>
 
           {/* Total Transfers */}
           <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-right-4 delay-200">
@@ -946,9 +946,9 @@ export default function DashboardPage() {
                 {isAdmin ? (
                   // Admin: Total del sistema
                   statsErrors?.totalTransfers ? (
-                    <span className="text-red-500 text-sm">Error</span>
-                  ) : isInitialStatsLoading ? (
-                    <Skeleton className="h-9 w-16" />
+                  <span className="text-red-500 text-sm">Error</span>
+                ) : isInitialStatsLoading ? (
+                  <Skeleton className="h-9 w-16" />
                   ) : stableTotalTransfers !== undefined ? Number(stableTotalTransfers) : '-'
                 ) : (
                   // Usuario: Total de sus transferencias
@@ -1259,15 +1259,15 @@ function TokenTypeStatsTable() {
         ) : (
           <div className="space-y-6">
             {/* Raw Material Section */}
-            {hasRowMaterial && (
+                {hasRowMaterial && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                     <span className="font-semibold text-slate-800 dark:text-slate-200">
-                      {rowMaterial.tokenTypeName}
-                    </span>
-                  </div>
+                          {rowMaterial.tokenTypeName}
+                        </span>
+                      </div>
                   <div className="flex items-center gap-4 text-sm">
                     <span className="text-slate-600 dark:text-slate-400">
                       Total Balance: <span className="font-semibold text-slate-800 dark:text-slate-200">{rowMaterial.totalBalance.toString()}</span>
@@ -1307,18 +1307,18 @@ function TokenTypeStatsTable() {
                   </p>
                 )}
               </div>
-            )}
+                )}
 
             {/* Finished Product Section */}
-            {hasFinishedProduct && (
+                {hasFinishedProduct && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
                     <span className="font-semibold text-slate-800 dark:text-slate-200">
-                      {finishedProduct.tokenTypeName}
-                    </span>
-                  </div>
+                          {finishedProduct.tokenTypeName}
+                        </span>
+                      </div>
                   <div className="flex items-center gap-4 text-sm">
                     <span className="text-slate-600 dark:text-slate-400">
                       Total Balance: <span className="font-semibold text-slate-800 dark:text-slate-200">{finishedProduct.totalBalance.toString()}</span>

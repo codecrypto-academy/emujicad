@@ -184,7 +184,7 @@ export function CreateTransferForm() {
       setFormError('Amount must be a positive number.')
       return
     }
-    
+
     // Validar que el amount no exceda el balance disponible
     if (selectedToken && selectedToken.balance && amountNum > Number(selectedToken.balance)) {
       setFormError(`Insufficient balance. Available: ${selectedToken.balance.toString()}`)
@@ -267,12 +267,12 @@ export function CreateTransferForm() {
               ) : availableTokens.length === 0 ? (
                 <div className="p-2 text-sm text-muted-foreground border rounded-md">
                   No tokens available (balance &gt; 0 required)
-                </div>
+            </div>
               ) : (
                 <Select
                   value={selectedTokenId}
                   onValueChange={setSelectedTokenId}
-                  disabled={isPending || isConfirming}
+                disabled={isPending || isConfirming}
                 >
                   <SelectTrigger id="token" className="w-full">
                     <SelectValue placeholder="Select token..." />
@@ -346,7 +346,7 @@ export function CreateTransferForm() {
                 <Select
                   value={to}
                   onValueChange={setTo}
-                  disabled={isPending || isConfirming}
+                disabled={isPending || isConfirming}
                 >
                   <SelectTrigger id="to" className="w-full">
                     <SelectValue placeholder={`Select ${targetRoleName || 'recipient'}...`} />
@@ -417,14 +417,14 @@ export function CreateTransferForm() {
               <p className="mt-2 text-sm">
                 Tu transferencia ha sido enviada y está pendiente de aprobación por parte del destinatario.
                 {' '}
-                <a 
+              <a 
                   href={`https://etherscan.io/tx/${hash}`}
-                  target="_blank" 
-                  rel="noopener noreferrer"
+                target="_blank" 
+                rel="noopener noreferrer"
                   className="underline text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-                >
+              >
                   Ver detalles de la transacción
-                </a>
+              </a>
               </p>
             </AlertDescription>
           </Alert>

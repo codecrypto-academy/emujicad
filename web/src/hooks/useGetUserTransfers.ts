@@ -161,7 +161,7 @@ export function useGetUserTransfers(userAddress?: `0x${string}`) {
         // Validar que el status esté en el rango válido (0-3)
         if (statusValue >= 0 && statusValue <= 3) {
           // Orden según struct Transfer: id, from, to, tokenId, dateCreated, amount, status
-          processedTransfers.push({
+        processedTransfers.push({
             id: transferArray[0],
             from: transferArray[1],
             to: transferArray[2],

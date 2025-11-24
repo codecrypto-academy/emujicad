@@ -167,7 +167,7 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Parent Token</span>
             <div className="flex items-center gap-2">
-              <Badge variant="outline">#{parentToken.toString()}</Badge>
+            <Badge variant="outline">#{parentToken.toString()}</Badge>
               {isLoadingParentToken ? (
                 <span className="text-xs text-muted-foreground">Loading...</span>
               ) : parentTokenData?.name ? (

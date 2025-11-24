@@ -82,10 +82,24 @@ export default function TokenDetailPage({ params }: PageProps) {
       : undefined
   }, [rawParentTokenData])
   
-  // Filtrar transferencias por tokenId
+  // Filtrar transferencias por tokenId y ordenar por fecha de creación (más antiguas primero)
+  // Si las fechas son iguales, usar ID como criterio de desempate (más bajo primero)
   const tokenTransfers = useMemo(() => {
     if (!allTransfers || allTransfers.length === 0) return []
-    return allTransfers.filter(t => t.tokenId === tokenId)
+    return allTransfers
+      .filter(t => t.tokenId === tokenId)
+      .sort((a, b) => {
+        const dateA = Number(a.dateCreated)
+        const dateB = Number(b.dateCreated)
+        // Ordenar por fecha ascendente (más antiguas primero)
+        if (dateA !== dateB) {
+          return dateA - dateB
+        }
+        // Si las fechas son iguales, ordenar por ID ascendente (más bajo primero)
+        const idA = Number(a.id)
+        const idB = Number(b.id)
+        return idA - idB
+      })
   }, [allTransfers, tokenId])
   
   // Estadísticas de transferencias

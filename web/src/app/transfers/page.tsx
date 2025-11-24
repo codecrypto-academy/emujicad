@@ -92,7 +92,7 @@ export default function TransfersPage() {
   const isProducerRole = userInfo && userInfo.role === BigInt(0) // Producer = 0
   const isFactoryRole = userInfo && userInfo.role === BigInt(1) // Factory = 1
   const isRetailerRole = userInfo && userInfo.role === BigInt(2) // Retailer = 2
-  
+
   // Diseño moderno 2025
   if (useModernDesign) {
     return (
