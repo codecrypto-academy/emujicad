@@ -4,7 +4,7 @@
 
 pragma solidity 0.8.30;
 
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 
 /**
@@ -73,7 +73,12 @@ contract SupplyChain  is ReentrancyGuard {
     /**
     * @notice El usuario ya tiene al menos un rol aprobado.
     */
-    error ExistingUserWithApprovedRole(); // Si se intenta registrar. 
+    error ExistingUserWithApprovedRole(); // Si se intenta registrar.
+
+    /**
+    * @notice El usuario ya existe en el sistema (ha solicitado un rol en algún momento).
+    */
+    error UserExists(); // Si se intenta que un usuario existente sea owner. 
  
      /**
     * @notice La consulta o acción requiere un Usuario existente.
@@ -295,6 +300,16 @@ contract SupplyChain  is ReentrancyGuard {
     */
     event OwnershipTransferred(address indexed previousOwner, address indexed newContractOwner);
 
+    /**
+    * @notice Evento cuando la transferencia de ownership es cancelada por el owner actual.
+    */
+    event OwnershipTransferCancelledByOwner(address indexed owner, address indexed cancelledPendingOwner);
+
+    /**
+    * @notice Evento cuando la transferencia de ownership es rechazada por el pendingOwner.
+    */
+    event OwnershipTransferRejectedByPendingOwner(address indexed owner, address indexed rejectedPendingOwner);
+
     // eventos para los users tokens y transfers
  
     /**
@@ -495,13 +510,54 @@ contract SupplyChain  is ReentrancyGuard {
     /**
     * @notice El candidato a owner debe aceptar para completar la transferencia de ownership.
     * @dev Solo llamable por el address pendingOwner previamente configurado.
+    * @dev Valida que el nuevo owner nunca haya solicitado un rol en el sistema.
+    *      Si una dirección alguna vez llamó a requestUserRole(), no puede ser owner.
     */
-    function acceptOwnership() external whenNotPaused {
+    function acceptOwnershipTransfer() external whenNotPaused {
         if (msg.sender != pendingOwner) revert Unauthorized();
+        
+        // Validar que el nuevo owner nunca haya solicitado un rol
+        // El owner no puede ser parte del proceso de SupplyChain en ningún momento
+        uint256 userId = addressToUserId[msg.sender];
+        if (userId != 0) {
+            // El usuario existe en el sistema (ha solicitado un rol en algún momento)
+            // No puede ser owner, independientemente de su estado (Pending, Approved, Rejected, Canceled)
+            revert UserExists();
+        }
+        
         address oldOwner = owner;
         owner = pendingOwner;
         pendingOwner = address(0);
         emit OwnershipTransferred(oldOwner, owner);
+    }
+
+    /**
+    * @notice El owner actual o el pendingOwner pueden cancelar/rechazar la transferencia de ownership.
+    * @dev Solo llamable por el owner actual o el address pendingOwner previamente configurado.
+    * @dev Permite cancelar la transferencia pendiente si:
+    *      - El owner actual cometió un error al iniciar la transferencia, o
+    *      - El pendingOwner no desea aceptar la transferencia.
+    */
+    function rejectOwnershipTransfer() external whenNotPaused {
+        // Verificar que haya una transferencia pendiente
+        if (pendingOwner == address(0)) revert InvalidAddress();
+        
+        // Solo el owner actual o el pendingOwner pueden cancelar
+        bool isOwner = msg.sender == owner;
+        bool isPendingOwner = msg.sender == pendingOwner;
+        
+        if (!isOwner && !isPendingOwner) revert Unauthorized();
+        
+        address cancelledPendingOwner = pendingOwner;
+        address currentOwner = owner;
+        pendingOwner = address(0);
+        
+        // Emitir evento diferente según quién cancela/rechaza
+        if (isOwner) {
+            emit OwnershipTransferCancelledByOwner(currentOwner, cancelledPendingOwner);
+        } else {
+            emit OwnershipTransferRejectedByPendingOwner(currentOwner, cancelledPendingOwner);
+        }
     }
 
     /**

@@ -78,8 +78,9 @@ export default function DashboardPage() {
   );
 
   // Hooks adicionales para admin (solo se ejecutan si es admin)
-  const { tokens: allTokens, isLoading: isLoadingAllTokens } = useGetAllTokens(shouldFetchData && isAdmin)
-  const { stats: userStats, isLoading: isLoadingUserStats } = useUserStats(shouldFetchData && isAdmin)
+  // Nota: useGetAllTokens y useUserStats no aceptan argumentos, se ejecutan siempre pero solo se usan si es admin
+  const { tokens: allTokens, isLoading: isLoadingAllTokens } = useGetAllTokens()
+  const { stats: userStats, isLoading: isLoadingUserStats } = useUserStats()
 
   // Calcular estadísticas de tokens por tipo (solo para admin)
   const tokenStats = useMemo(() => {
