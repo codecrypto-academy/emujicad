@@ -765,7 +765,7 @@ export default function DashboardPage() {
                 <div className="rounded-2xl bg-red-50/80 dark:bg-red-900/20 backdrop-blur-xl border border-red-200 dark:border-red-800 p-12 text-center">
                   <AlertCircle className="h-16 w-16 text-red-400 dark:text-red-600 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">Error Loading Tokens</h3>
-                  <p className="text-red-600 dark:text-red-400 mb-4">{tokensError.message || 'Failed to load your tokens. Please try again.'}</p>
+                  <p className="text-red-600 dark:text-red-400 mb-4">{tokensError?.message || 'Failed to load your tokens. Please try again.'}</p>
                   <Button onClick={() => window.location.reload()} variant="outline">Retry</Button>
                 </div>
               ) : isLoadingTokens && displayTokens.length === 0 ? (
@@ -810,12 +810,14 @@ export default function DashboardPage() {
                   <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">No tokens yet</h3>
                   <p className="text-slate-600 dark:text-slate-400 mb-6">
                     {userInfo && 
+                     userInfo.status !== undefined &&
                      (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
                      Number(userInfo.status) === UserStatus.Approved
                       ? 'Create your first token to start tracking products'
                       : 'No tokens available yet'}
                   </p>
                   {userInfo && 
+                   userInfo.status !== undefined &&
                    (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
                    Number(userInfo.status) === UserStatus.Approved && (
                     <>
