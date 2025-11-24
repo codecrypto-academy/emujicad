@@ -499,6 +499,7 @@ export default function TokenDetailPage({ params }: PageProps) {
             <TraceabilityTimeline 
               traceability={traceability || null}
               isLoading={isLoadingTraceability}
+              currentUserRole={userInfo?.role}
             />
           </div>
         </div>

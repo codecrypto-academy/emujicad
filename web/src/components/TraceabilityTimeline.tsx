@@ -10,14 +10,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Package, Factory, ShoppingCart, User, ArrowRight, Calendar, Hash, TrendingUp, CheckCircle2, XCircle, Clock, Ban, ChevronDown, ChevronRight, Filter, X } from 'lucide-react'
 import { AddressDisplay } from '@/components/AddressDisplay'
 import { TokenType, UserRole, TransferStatus } from '@/contracts/config'
+
+// Función helper para convertir string de rol a UserRole enum
+const getRoleEnum = (role: string): bigint => {
+  switch (role) {
+    case 'Producer':
+      return BigInt(UserRole.Producer)
+    case 'Factory':
+      return BigInt(UserRole.Factory)
+    case 'Retailer':
+      return BigInt(UserRole.Retailer)
+    case 'Consumer':
+      return BigInt(UserRole.Consumer)
+    default:
+      return BigInt(0)
+  }
+}
 import type { TraceabilityChain, TransferTreeNode } from '@/hooks/useTokenTraceability'
 
 interface TraceabilityTimelineProps {
   traceability: TraceabilityChain | null
   isLoading: boolean
+  currentUserRole?: bigint | null // Rol del usuario actual
 }
 
-export function TraceabilityTimeline({ traceability, isLoading }: TraceabilityTimelineProps) {
+export function TraceabilityTimeline({ traceability, isLoading, currentUserRole }: TraceabilityTimelineProps) {
   // Estado para controlar qué nodos están expandidos
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
   const [filterAddress, setFilterAddress] = useState<string>('')
@@ -239,6 +256,7 @@ export function TraceabilityTimeline({ traceability, isLoading }: TraceabilityTi
             getRoleIcon={getRoleIcon}
             getRoleColor={getRoleColor}
             formatTimestamp={formatTimestamp}
+            currentUserRole={currentUserRole}
           />
         ) : (
           <div className="relative">
@@ -489,6 +507,7 @@ interface TreeNodeComponentProps {
   getRoleIcon: (role: string) => React.ReactNode
   getRoleColor: (role: string) => string
   formatTimestamp: (timestamp: bigint) => { date: string; time: string; full: string }
+  currentUserRole?: bigint | null
 }
 
 function TreeNodeComponent({
@@ -500,6 +519,7 @@ function TreeNodeComponent({
   getRoleIcon,
   getRoleColor,
   formatTimestamp,
+  currentUserRole,
 }: TreeNodeComponentProps) {
   const nodeId = `${node.address}-${node.tokenId}-${node.transferId || 'root'}`
   const isExpanded = expandedNodes.has(nodeId)
@@ -513,6 +533,13 @@ function TreeNodeComponent({
   
   const timestamp = formatTimestamp(node.timestamp)
   const roleColor = getRoleColor(node.role)
+  
+  // Verificar si este nodo corresponde al rol del usuario actual
+  const nodeRoleEnum = getRoleEnum(node.role)
+  // Comparar bigints correctamente
+  const isCurrentUserRole = currentUserRole !== null && 
+                            currentUserRole !== undefined && 
+                            BigInt(nodeRoleEnum) === BigInt(currentUserRole)
   
   return (
     <div className="relative">
@@ -549,10 +576,18 @@ function TreeNodeComponent({
           <div className="flex-1">
             <div className={`
               p-4 rounded-xl border-2 transition-all duration-300
-              bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm
-              border-slate-200/50 dark:border-slate-700/50
-              hover:border-blue-300 dark:hover:border-blue-600
-              hover:shadow-lg
+              backdrop-blur-sm
+              ${isCurrentUserRole
+                ? node.role === 'Producer' 
+                  ? 'bg-gradient-to-br from-green-50 via-white to-green-50/30 border-green-400 dark:border-green-500 shadow-lg shadow-green-200/60 dark:shadow-green-900/40 dark:from-green-900/30 dark:via-slate-800 dark:to-green-900/20' 
+                  : node.role === 'Factory'
+                  ? 'bg-gradient-to-br from-orange-50 via-white to-orange-50/30 border-orange-400 dark:border-orange-500 shadow-lg shadow-orange-200/60 dark:shadow-orange-900/40 dark:from-orange-900/30 dark:via-slate-800 dark:to-orange-900/20'
+                  : node.role === 'Retailer'
+                  ? 'bg-gradient-to-br from-red-50 via-white to-red-50/30 border-red-400 dark:border-red-500 shadow-lg shadow-red-200/60 dark:shadow-red-900/40 dark:from-red-900/30 dark:via-slate-800 dark:to-red-900/20'
+                  : 'bg-gradient-to-br from-blue-50 via-white to-blue-50/30 border-blue-400 dark:border-blue-500 shadow-lg shadow-blue-200/60 dark:shadow-blue-900/40 dark:from-blue-900/30 dark:via-slate-800 dark:to-blue-900/20'
+                : 'bg-gradient-to-br from-white via-white to-slate-50/50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-900/50 border-slate-200/50 dark:border-slate-700/50 shadow-sm'
+              }
+              hover:shadow-xl hover:scale-[1.02]
             `}>
               <div className="flex items-start gap-3 mb-3">
                 <div className={`
@@ -578,10 +613,46 @@ function TreeNodeComponent({
                       </Badge>
                     ) : node.children.length > 0 && node.children[0].transferId === node.transferId ? (
                       // Nodo de ENVÍO (tiene hijos que son recepciones de la misma transferencia)
-                      <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
-                        <ArrowRight className="h-3 w-3 mr-1" />
-                        Transfers to {node.children[0]?.role || 'Receiver'}
-                      </Badge>
+                      <>
+                        <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                          <ArrowRight className="h-3 w-3 mr-1" />
+                          Transfers to {node.children[0]?.role || 'Receiver'}
+                        </Badge>
+                        {node.children[0]?.transferStatus !== undefined && (
+                          <Badge
+                            variant="outline"
+                            className={
+                              node.children[0].transferStatus === TransferStatus.Accepted
+                                ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 text-xs"
+                                : node.children[0].transferStatus === TransferStatus.Rejected
+                                ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800 text-xs"
+                                : "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800 text-xs"
+                            }
+                          >
+                            {node.children[0].transferStatus === TransferStatus.Accepted ? (
+                              <>
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Transfer Accepted
+                              </>
+                            ) : node.children[0].transferStatus === TransferStatus.Rejected ? (
+                              <>
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Transfer Rejected
+                              </>
+                            ) : node.children[0].transferStatus === TransferStatus.Pending ? (
+                              <>
+                                <Clock className="h-3 w-3 mr-1" />
+                                Transfer Pending
+                              </>
+                            ) : (
+                              <>
+                                <Ban className="h-3 w-3 mr-1" />
+                                Transfer Cancelled
+                              </>
+                            )}
+                          </Badge>
+                        )}
+                      </>
                     ) : node.parent && node.parent.transferId === node.transferId ? (
                       // Nodo de RECEPCIÓN (tiene el mismo transferId que el padre)
                       <>
@@ -646,15 +717,14 @@ function TreeNodeComponent({
                   ) : node.children.length > 0 && node.children[0].transferId === node.transferId ? (
                     // Nodo de ENVÍO
                     <div className="mb-2">
-                      <div className="flex items-center gap-2 mb-2">
-                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                          Sender ({node.role}):
-                        </p>
-                        <AddressDisplay address={node.address} className="text-sm font-medium" />
-                      </div>
-                      <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                         {node.children.map((child, idx) => (
-                          <div key={idx} className="flex items-center gap-2">
+                          <div key={idx} className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                              Sender ({node.role}):
+                            </p>
+                            <AddressDisplay address={node.address} className="text-sm font-medium" />
+                            <span>•</span>
                             <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
                               Transferring to:
                             </p>
@@ -662,44 +732,25 @@ function TreeNodeComponent({
                               {child.role}
                             </Badge>
                             <AddressDisplay address={child.address} className="text-sm font-mono" />
-                            {child.transferStatus !== undefined && (
-                              <Badge
-                                variant="outline"
-                                className={
-                                  child.transferStatus === TransferStatus.Accepted
-                                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 text-xs"
-                                    : child.transferStatus === TransferStatus.Rejected
-                                    ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800 text-xs"
-                                    : "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800 text-xs"
-                                }
-                              >
-                                {['Pending', 'Accepted', 'Rejected', 'Cancelled'][Number(child.transferStatus)]}
-                              </Badge>
-                            )}
                           </div>
                         ))}
                       </div>
                     </div>
                   ) : node.parent && node.parent.transferId === node.transferId ? (
                     // Nodo de RECEPCIÓN
-                    <>
-                      <div className="mb-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                            Transferred by ({node.parent.role}):
-                          </p>
-                          <AddressDisplay address={node.parent.address} className="text-sm font-medium" />
-                        </div>
+                    <div className="mb-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          Transferred by ({node.parent.role}):
+                        </p>
+                        <AddressDisplay address={node.parent.address} className="text-sm font-medium" />
+                        <span>•</span>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          Receiver ({node.role}):
+                        </p>
+                        <AddressDisplay address={node.address} className="text-sm font-medium" />
                       </div>
-                      <div className="mb-2">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                            Receiver ({node.role}):
-                          </p>
-                          <AddressDisplay address={node.address} className="text-sm font-medium" />
-                        </div>
-                      </div>
-                    </>
+                    </div>
                   ) : (
                     <div className="mb-2">
                       <div className="flex items-center gap-2">
@@ -711,34 +762,39 @@ function TreeNodeComponent({
                     </div>
                   )}
                   
-                  {node.totalSupply !== undefined && (
-                    <div className="mb-2">
-                      <p className="text-sm font-semibold text-purple-600 dark:text-purple-400">
-                        Total Supply Created: {node.totalSupply.toString()} units
-                      </p>
-                    </div>
-                  )}
-                  
-                  {node.amount !== undefined && (
-                    <div className="mb-2">
-                      <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                        {node.children.length > 0 && node.children[0].transferId === node.transferId
-                          ? 'Amount Transferred:'
-                          : 'Amount Received:'} {node.amount.toString()} units
-                      </p>
-                    </div>
-                  )}
-                  
                   <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      {node.transferId && (
-                        <span className="font-mono">
-                          Transfer ID: #{node.transferId.toString()}
-                        </span>
+                    <div className="flex items-center gap-2 text-sm flex-wrap">
+                      {node.totalSupply !== undefined && (
+                        <>
+                          <span className="font-semibold text-purple-600 dark:text-purple-400">
+                            Total Supply Created: {node.totalSupply.toString()} units
+                          </span>
+                          <span>•</span>
+                        </>
                       )}
-                      {node.transferId && <span>•</span>}
-                      <Calendar className="h-3 w-3" />
-                      <span>{timestamp.date} {timestamp.time}</span>
+                      
+                      {node.amount !== undefined && (
+                        <>
+                          <span className="font-semibold text-blue-600 dark:text-blue-400">
+                            {node.children.length > 0 && node.children[0].transferId === node.transferId
+                              ? 'Amount Transferred:'
+                              : 'Amount Received:'} {node.amount.toString()} units
+                          </span>
+                          <span>•</span>
+                        </>
+                      )}
+                      
+                      {node.transferId && (
+                        <>
+                          <span className="font-mono text-muted-foreground">
+                            Transfer ID: #{node.transferId.toString()}
+                          </span>
+                          <span>•</span>
+                        </>
+                      )}
+                      
+                      <Calendar className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-muted-foreground">{timestamp.date} {timestamp.time}</span>
                     </div>
                   </div>
                 </div>
@@ -762,6 +818,7 @@ function TreeNodeComponent({
               getRoleIcon={getRoleIcon}
               getRoleColor={getRoleColor}
               formatTimestamp={formatTimestamp}
+              currentUserRole={currentUserRole}
             />
           ))}
         </div>
