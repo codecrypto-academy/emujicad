@@ -26,7 +26,7 @@ export default function AdminPage() {
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase()
 
   // Hooks de datos
-  const shouldFetchData = isConnected && !isLoadingOwner && isOwner
+  const shouldFetchData = Boolean(isConnected && !isLoadingOwner && isOwner)
   
   const { data: isPaused, isLoading: isLoadingPause } = useIsPaused(shouldFetchData)
 
