@@ -8,8 +8,8 @@ export function UserStatsCards() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {[...Array(5)].map((_, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
               <CardTitle className="h-4 bg-gray-200 rounded w-1/2"></CardTitle>
@@ -24,18 +24,7 @@ export function UserStatsCards() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-      {/* Total Users */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
-          <CardDescription>Registrados</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-3xl font-bold">{stats.total}</p>
-        </CardContent>
-      </Card>
-
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       {/* Pending */}
       <Card className="border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
         <CardHeader>

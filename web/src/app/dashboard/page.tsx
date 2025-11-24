@@ -4,14 +4,16 @@ import { Header } from '@/components/Header';
 import { UserProfileCard } from '@/components/UserProfileCard';
 import { TokenCard } from '@/components/TokenCard';
 import { TokenCardModern } from '@/components/TokenCardModern';
-import { PauseControl } from '@/components/admin/PauseControl';
-import { useGetUserTokens } from '@/hooks/useGetUserTokens';
+import { useGetUserTokens, useGetAllTokens } from '@/hooks/useGetUserTokens';
 import { useGetUserTokensWithData } from '@/hooks/useGetUserTokensWithData';
 import { useUserTokenStats } from '@/hooks/useUserTokenStats';
 import { useDashboardStats } from '@/hooks/useContractReads';
+import { useUserStats } from '@/hooks/useAdminUsers';
+import { UserStatsCards } from '@/components/admin/UserStatsCards';
 import { useIsPaused } from '@/hooks/usePause';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetUserTransfers } from '@/hooks/useGetUserTransfers';
+import { useGetAllTransfers } from '@/hooks/useGetAllTransfers';
 import { TransferStatus } from '@/contracts/config';
 import { validateBigIntArray } from '@/lib/validation';
 import { useAccount } from 'wagmi';
@@ -21,7 +23,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Shield, Package, Users, ArrowRightLeft, AlertCircle, Pause, Table2, User } from 'lucide-react';
+import { Shield, Package, Users, ArrowRightLeft, AlertCircle, Pause, Table2, User, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { UserRole, UserStatus, TokenType } from '@/contracts/config';
 
@@ -65,10 +67,58 @@ export default function DashboardPage() {
   // CRÍTICO: Deshabilitar si no está autenticado para evitar consultas innecesarias
   const { data: isPaused } = useIsPaused(shouldFetchData);
   
-  // Obtener transferencias del usuario para estadísticas
+  // Obtener transferencias del usuario para estadísticas (solo para usuarios no-admin)
   const { transfers, isLoading: isLoadingTransfers, refetch: refetchTransfers } = useGetUserTransfers(
-    shouldFetchData ? address : undefined
+    shouldFetchData && !isAdmin ? address : undefined
   );
+
+  // Obtener todas las transferencias del sistema (solo para admin)
+  const { transfers: allTransfers, isLoading: isLoadingAllTransfers } = useGetAllTransfers(
+    shouldFetchData && isAdmin
+  );
+
+  // Hooks adicionales para admin (solo se ejecutan si es admin)
+  const { tokens: allTokens, isLoading: isLoadingAllTokens } = useGetAllTokens(shouldFetchData && isAdmin)
+  const { stats: userStats, isLoading: isLoadingUserStats } = useUserStats(shouldFetchData && isAdmin)
+
+  // Calcular estadísticas de tokens por tipo (solo para admin)
+  const tokenStats = useMemo(() => {
+    if (!allTokens || allTokens.length === 0) {
+      return {
+        rawMaterial: 0,
+        finishedProduct: 0,
+        total: 0
+      }
+    }
+
+    const rawMaterial = allTokens.filter(t => Number(t.tokenType) === TokenType.RowMaterial).length
+    const finishedProduct = allTokens.filter(t => Number(t.tokenType) === TokenType.FinishedProduct).length
+
+    return {
+      rawMaterial,
+      finishedProduct,
+      total: allTokens.length
+    }
+  }, [allTokens])
+
+  // Calcular estadísticas de transferencias del sistema (solo para admin)
+  const systemTransferStats = useMemo(() => {
+    if (!allTransfers || allTransfers.length === 0) {
+      return {
+        pending: 0,
+        accepted: 0,
+        rejected: 0,
+        cancelled: 0,
+      }
+    }
+    
+    return {
+      pending: allTransfers.filter(t => Number(t.status) === TransferStatus.Pending).length,
+      accepted: allTransfers.filter(t => Number(t.status) === TransferStatus.Accepted).length,
+      rejected: allTransfers.filter(t => Number(t.status) === TransferStatus.Rejected).length,
+      cancelled: allTransfers.filter(t => Number(t.status) === TransferStatus.Cancelled).length,
+    }
+  }, [allTransfers])
   
   // Separar transferencias en enviadas y recibidas
   const sentTransfers = useMemo(() => {
@@ -270,8 +320,35 @@ export default function DashboardPage() {
 
           {/* Estadísticas Principales Modernas */}
           <div className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mb-6`}>
+            {/* Total Users - Solo visible para administrador */}
+            {isAdmin && (
+              <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                      Total Users
+                    </h3>
+                    <div className="p-2 rounded-xl bg-green-500/10 dark:bg-green-400/20">
+                      <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                  </div>
+                  <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
+                    {statsErrors?.totalUsers ? (
+                      <span className="text-red-500 text-sm">Error</span>
+                    ) : isInitialStatsLoading ? (
+                      <Skeleton className="h-10 w-20" />
+                    ) : stableTotalUsers !== undefined ? Number(stableTotalUsers) : '-'}
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Registered users
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Total Tokens */}
-            <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
+            <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 delay-100">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -302,33 +379,6 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
-
-            {/* Total Users - Solo visible para administrador */}
-            {isAdmin && (
-              <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 delay-100">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                      Total Users
-                    </h3>
-                    <div className="p-2 rounded-xl bg-green-500/10 dark:bg-green-400/20">
-                      <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    </div>
-                  </div>
-                  <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
-                    {statsErrors?.totalUsers ? (
-                      <span className="text-red-500 text-sm">Error</span>
-                    ) : isInitialStatsLoading ? (
-                      <Skeleton className="h-10 w-20" />
-                    ) : stableTotalUsers !== undefined ? Number(stableTotalUsers) : '-'}
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Registered users
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Total Transfers */}
             <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-right-4 delay-200">
@@ -530,10 +580,121 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Panel de Administrador Moderno */}
+          {/* Secciones del Administrador */}
           {isAdmin && (
             <div className="mb-10 space-y-6">
-              <PauseControl />
+              {/* Estadísticas de Usuarios (Solo Admin) */}
+              <div className="mb-10">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
+                  User Statistics
+                </h2>
+                <UserStatsCards />
+              </div>
+
+              {/* Estadísticas de Tokens (Solo Admin) */}
+              <div className="mb-10">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
+                  Tokens Statistics
+                </h2>
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                  <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-blue-200/50 dark:border-blue-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                          Raw Material
+                        </h3>
+                        <div className="p-2 rounded-xl bg-blue-500/10 dark:bg-blue-400/20">
+                          <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                      </div>
+                      <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent mb-2">
+                        {isLoadingAllTokens ? (
+                          <Skeleton className="h-10 w-20" />
+                        ) : tokenStats.rawMaterial}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                        {tokenStats.rawMaterial === 1 ? 'Token' : 'Tokens'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-green-200/50 dark:border-green-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                          Finished Product
+                        </h3>
+                        <div className="p-2 rounded-xl bg-green-500/10 dark:bg-green-400/20">
+                          <Package className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        </div>
+                      </div>
+                      <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
+                        {isLoadingAllTokens ? (
+                          <Skeleton className="h-10 w-20" />
+                        ) : tokenStats.finishedProduct}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                        {tokenStats.finishedProduct === 1 ? 'Token' : 'Tokens'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Estadísticas de Transferencias del Sistema (Solo Admin) */}
+              <div className="mb-10">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
+                  Transfer Statistics
+                </h2>
+                
+                <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+                  <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                    <div className="relative p-6">
+                      <div className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 dark:from-yellow-400 dark:to-yellow-300 bg-clip-text text-transparent mb-2">
+                        {isLoadingAllTransfers ? (
+                          <Skeleton className="h-10 w-20" />
+                        ) : systemTransferStats.pending}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Pending</p>
+                    </div>
+                  </div>
+                  
+                  <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-green-200/50 dark:border-green-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                    <div className="relative p-6">
+                      <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
+                        {isLoadingAllTransfers ? (
+                          <Skeleton className="h-10 w-20" />
+                        ) : systemTransferStats.accepted}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Accepted</p>
+                    </div>
+                  </div>
+                  
+                  <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-red-200/50 dark:border-red-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                    <div className="relative p-6">
+                      <div className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300 bg-clip-text text-transparent mb-2">
+                        {isLoadingAllTransfers ? (
+                          <Skeleton className="h-10 w-20" />
+                        ) : systemTransferStats.rejected}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Rejected</p>
+                    </div>
+                  </div>
+                  
+                  <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                    <div className="relative p-6">
+                      <div className="text-4xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent mb-2">
+                        {isLoadingAllTransfers ? (
+                          <Skeleton className="h-10 w-20" />
+                        ) : systemTransferStats.cancelled}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Cancelled</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Panel de Administrador Moderno */}
               <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50/80 to-yellow-50/80 dark:from-amber-900/30 dark:to-yellow-900/30 backdrop-blur-xl border border-amber-200/50 dark:border-amber-700/50 shadow-xl">
                 <div className="relative p-6">
                   <div className="flex items-center gap-3 mb-4">
@@ -542,21 +703,35 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <h2 className="text-xl font-bold text-amber-800 dark:text-amber-200">Administrator Panel</h2>
-                      <p className="text-sm text-amber-700/80 dark:text-amber-300/80">Manage users, approve registrations, and oversee the system</p>
+                      <p className="text-sm text-amber-700/80 dark:text-amber-300/80">Manage the entire supply chain system</p>
                     </div>
                   </div>
-                  <Link 
-                    href="/admin/users"
-                    className="block p-4 bg-white/80 dark:bg-slate-800/80 rounded-xl border-2 border-amber-200 dark:border-amber-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-lg transition-all cursor-pointer group/link"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Users className="h-8 w-8 text-amber-600 dark:text-amber-400 group-hover/link:scale-110 transition-transform" />
-                      <div>
-                        <h3 className="font-semibold text-slate-800 dark:text-slate-200">Manage Users</h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">Approve or reject user registrations</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Link 
+                      href="/admin"
+                      className="block p-4 bg-white/80 dark:bg-slate-800/80 rounded-xl border-2 border-amber-200 dark:border-amber-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-lg transition-all cursor-pointer group/link"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Settings className="h-8 w-8 text-amber-600 dark:text-amber-400 group-hover/link:scale-110 transition-transform" />
+                        <div>
+                          <h3 className="font-semibold text-slate-800 dark:text-slate-200">Admin Panel</h3>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">System controls and pause</p>
+                        </div>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                    <Link 
+                      href="/admin/users"
+                      className="block p-4 bg-white/80 dark:bg-slate-800/80 rounded-xl border-2 border-amber-200 dark:border-amber-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-lg transition-all cursor-pointer group/link"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Users className="h-8 w-8 text-amber-600 dark:text-amber-400 group-hover/link:scale-110 transition-transform" />
+                        <div>
+                          <h3 className="font-semibold text-slate-800 dark:text-slate-200">Manage Users</h3>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">Approve or reject user registrations</p>
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -671,20 +846,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Actividad Reciente para Admin */}
-          {isAdmin && (
-            <div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
-                System Activity
-              </h2>
-              <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg p-6">
-                <div className="text-center py-8 text-slate-600 dark:text-slate-400">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-2 text-slate-400 dark:text-slate-600" />
-                  <p>Activity timeline coming soon...</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     )
@@ -718,8 +879,32 @@ export default function DashboardPage() {
 
         {/* Estadísticas Principales */}
         <div className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mb-6`}>
+          {/* Total Users - Solo visible para administrador */}
+          {isAdmin && (
+            <Card className="border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Total Users
+                </CardTitle>
+                <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                  {statsErrors?.totalUsers ? (
+                    <span className="text-red-500 text-sm">Error</span>
+                  ) : isInitialStatsLoading ? (
+                    <Skeleton className="h-9 w-16" />
+                  ) : stableTotalUsers !== undefined ? Number(stableTotalUsers) : '-'}
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                  Registered users
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Total Tokens */}
-          <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
+          <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 delay-100">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 {isAdmin ? 'Total Tokens' : 'My Tokens'}
@@ -747,30 +932,6 @@ export default function DashboardPage() {
               </p>
             </CardContent>
           </Card>
-
-          {/* Total Users - Solo visible para administrador */}
-          {isAdmin && (
-            <Card className="border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 delay-100">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Total Users
-                </CardTitle>
-                <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                  {statsErrors?.totalUsers ? (
-                    <span className="text-red-500 text-sm">Error</span>
-                  ) : isInitialStatsLoading ? (
-                    <Skeleton className="h-9 w-16" />
-                  ) : stableTotalUsers !== undefined ? Number(stableTotalUsers) : '-'}
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                  Registered users
-                </p>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Total Transfers */}
           <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-right-4 delay-200">
@@ -970,9 +1131,6 @@ export default function DashboardPage() {
         {/* Panel de Administrador */}
         {isAdmin && (
           <div className="mb-8 space-y-6">
-            {/* Control de Pausa */}
-            <PauseControl />
-
             <Card className="border-amber-300 dark:border-amber-700 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
@@ -980,14 +1138,27 @@ export default function DashboardPage() {
                   Administrator Panel
                 </CardTitle>
                 <CardDescription className="dark:text-amber-300/80">
-                  Manage users, approve registrations, and oversee the system
+                  Manage the entire supply chain system
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Link 
+                    href="/admin"
+                    className="p-4 bg-white dark:bg-slate-800 rounded-lg border-2 border-amber-200 dark:border-amber-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-md transition-all cursor-pointer group"
+                    aria-label="Navigate to admin panel"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Settings className="h-8 w-8 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
+                      <div>
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-200">Admin Panel</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">System statistics and controls</p>
+                      </div>
+                    </div>
+                  </Link>
                   <Link 
                     href="/admin/users"
-                    className="flex-1 p-4 bg-white dark:bg-slate-800 rounded-lg border-2 border-amber-200 dark:border-amber-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-md transition-all cursor-pointer group"
+                    className="p-4 bg-white dark:bg-slate-800 rounded-lg border-2 border-amber-200 dark:border-amber-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-md transition-all cursor-pointer group"
                     aria-label="Navigate to user management page"
                   >
                     <div className="flex items-center gap-3">
@@ -1014,24 +1185,6 @@ export default function DashboardPage() {
 
         {/* Sección "My Tokens" eliminada - La información se muestra en "My Tokens by Type" */}
 
-        {/* Actividad Reciente para Admin */}
-        {isAdmin && (
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">System Activity</h2>
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest actions in the supply chain</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-slate-600 dark:text-slate-400">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-2 text-slate-400 dark:text-slate-600" />
-                  <p>Activity timeline coming soon...</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
       </div>
     </div>
   );
