@@ -201,15 +201,23 @@ Sin embargo, según `README.md`, estas páginas **están listadas como requerida
 
 ## 📝 Checklist de Implementación
 
-### `/tokens/[id]`:
-- [ ] Crear estructura de página
-- [ ] Implementar sección de información principal
-- [ ] Implementar sección de trazabilidad (solo Finished Product)
-- [ ] Implementar tabla de historial de transferencias
-- [ ] Implementar sección de distribución de tokens
-- [ ] Agregar botones de acción
-- [ ] Agregar links desde `/tokens` (token cards)
-- [ ] Testing y validación
+### `/tokens/[id]`: ✅ COMPLETADO
+- [x] Crear estructura de página
+- [x] Implementar sección de información principal
+- [x] Implementar sección de trazabilidad end-to-end (árbol interactivo)
+- [x] Implementar tabla de historial de transferencias
+- [x] Implementar estadísticas de transferencias
+- [x] Agregar botones de acción
+- [x] Agregar links desde `/tokens` (token cards)
+- [x] Testing y validación
+
+**Características implementadas**:
+- ✅ Visualización de árbol de trazabilidad con expand/collapse
+- ✅ Filtrado por dirección en el árbol
+- ✅ Resaltado de nodos según el rol del usuario actual
+- ✅ Muestra creación, envío, recepción y aceptación/rechazo de transferencias
+- ✅ Información del token en la línea superior de cada nodo
+- ✅ Formato optimizado (todo en una línea para ahorrar espacio vertical)
 
 ### `/tokens/[id]/transfer`:
 - [ ] Crear estructura de página

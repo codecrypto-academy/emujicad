@@ -901,6 +901,8 @@ Según el smart contract, estos hooks podrían mejorar la funcionalidad:
 - ✅ **useGetUserTransfers()** - Transferencias de un usuario (Día 7)
 - ✅ **useUserTokenStats()** - Estadísticas por tipo (Día 7)
 - ✅ **useGetUserTokensWithData()** - Tokens con datos completos (Día 7)
+- ✅ **useGetAllTransfers()** - Todas las transferencias del sistema (Día 8)
+- ✅ **useTokenTraceability()** - Trazabilidad end-to-end con árbol jerárquico (Día 8)
 
 ### Hooks Mejorados:
 - ✅ **useContractReads.ts** - Agregado `useUserIdByAddress` para detección rápida

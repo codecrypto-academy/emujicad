@@ -686,9 +686,10 @@ web/src/components/
 ├── CreateTransferForm.tsx     ✅ IMPLEMENTADO (Día 7 - Formulario crear transferencia)
 ├── UserTokenList.tsx          ✅ IMPLEMENTADO (Día 7 - Lista tokens usuario)
 └── AddressDisplay.tsx         ✅ IMPLEMENTADO (Día 7 - Direcciones con copy/tooltip)
+└── TraceabilityTimeline.tsx   ✅ IMPLEMENTADO (Día 8 - Trazabilidad end-to-end con árbol interactivo)
 ```
 
-**Total**: 25 componentes (11 Shadcn + 14 personalizados) ⭐ Día 7
+**Total**: 26 componentes (11 Shadcn + 15 personalizados) ⭐ Día 8
 - ✅ Implementados: 25 componentes
 - ❌ Pendientes: 0 componentes
 
@@ -712,6 +713,7 @@ web/src/components/
 - ✅ **CreateTransferForm.tsx** - Formulario crear transferencia (Día 7)
 - ✅ **UserTokenList.tsx** - Lista tokens usuario (Día 7)
 - ✅ **AddressDisplay.tsx** - Direcciones con copy/tooltip (Día 7)
+- ✅ **TraceabilityTimeline.tsx** - Trazabilidad end-to-end con árbol interactivo (Día 8)
 
 ### Componentes Mejorados:
 - ✅ **Header.tsx** - Agregado badge de "Contract Pausado"
