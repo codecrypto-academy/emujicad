@@ -1,5 +1,7 @@
 # 🧭 Guía de Navegación - Páginas de Tokens
 
+> **📋 Esta guía explica cómo navegar entre las páginas de tokens. Para el estado completo del proyecto, consulta [PROJECT_STATUS.md](../PROJECT_STATUS.md)**
+
 ## 📍 Flujo de Navegación Completo
 
 ### **Paso 1: Ir a la Lista de Tokens**

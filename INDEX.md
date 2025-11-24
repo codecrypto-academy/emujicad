@@ -1,7 +1,7 @@
 # 📚 Índice de Documentación - Supply Chain Tracker
 
 > **Guía completa de toda la documentación del proyecto**  
-> **Última actualización**: 22 de noviembre de 2025 | **Estructura profesional**: docs/
+> **Última actualización**: 24 de noviembre de 2025 | **Estructura profesional**: docs/
 
 ---
 
@@ -23,9 +23,9 @@ Si es tu primera vez con el proyecto, sigue este orden:
 **Propósito**: Single source of truth para el estado del proyecto  
 **Contenido**:
 - Estado actual completado vs pendiente
-- Puntuación académica detallada (8.0/10 actual)
+- Puntuación académica detallada (7.4/9.5 actual)
 - Roadmap día a día (Días 4-8)
-- Próximo paso inmediato (Gestión de Tokens - Día 5)
+- Próximo paso inmediato (Video Demo - Día 9)
 - Checklist de tareas pendientes
 - Comandos rápidos de verificación
 - Métricas de progreso visuales
@@ -204,9 +204,9 @@ Si es tu primera vez con el proyecto, sigue este orden:
 #### Ubicación: `sc/`
 
 **Archivos principales**:
-- `src/SupplyChain.sol` - Contrato principal (934 líneas)
+- `src/SupplyChain.sol` - Contrato principal (970+ líneas)
 - `test/SupplyChain.t.sol` - Tests core (55 tests)
-- `test/EdgeCasesTest.t.sol` - Tests edge cases (18 tests)
+- `test/EdgeCasesTest.t.sol` - Tests edge cases (35 tests)
 - `script/SupplyChainDeploy.s.sol` - Script deployment
 
 **Documentación relacionada**:
@@ -442,7 +442,7 @@ Por frecuencia de uso:
 - Actualizar docs/fe/ cuando se modifique frontend
 - Actualizar docs/sc/ cuando se modifique smart contract
 
-**Última actualización**: 19 de Noviembre, 2025
+**Última actualización**: 24 de Noviembre, 2025
 
 ---
 
@@ -478,7 +478,7 @@ Por frecuencia de uso:
 ---
 
 **Índice creado**: 18 de Noviembre, 2025  
-**Última actualización**: 22 de Noviembre, 2025 - Día 7  
-**Versión**: 2.6.0 - Actualización Día 7: Página Transferencias, 6/9 páginas, Componentes nuevos (CreateTransferForm, UserTokenList, AddressDisplay)  
-**Estado**: ✅ 48 archivos .md | 43 en docs/ | 5 en root | Scripts 100% funcionales | Score: 7.2/9.5  
-**Nota**: Documentación consolidada - Redundancias eliminadas, referencias actualizadas, transferencias y componentes nuevos documentados
+**Última actualización**: 24 de Noviembre, 2025 - Día 7 (Validaciones Críticas)  
+**Versión**: 2.7.0 - Actualización Día 7: Validaciones críticas del contrato, 90 tests, 85.60% coverage  
+**Estado**: ✅ 9/9 páginas (100%) | 26 componentes | 22 hooks | 90 tests | Validaciones críticas completadas | Score: 7.4/9.5  
+**Nota**: Documentación consolidada - Redundancias eliminadas, referencias actualizadas, PROJECT_STATUS.md como fuente de verdad

@@ -1,8 +1,10 @@
 # 📚 Documentación Completa - Supply Chain Tracker
 
-**Fecha**: 21 Noviembre 2025  
-**Versión**: 1.2.0  
+**Fecha**: 24 Noviembre 2025  
+**Versión**: 1.3.0  
 **Proyecto**: Supply Chain DApp (PFM Web3)
+
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ---
 
@@ -43,16 +45,19 @@ Supply Chain Tracker es una DApp descentralizada para gestionar cadenas de sumin
 
 ### **Métricas del Proyecto**:
 
-- **Smart Contract**: 971 líneas de código
-- **Tests**: 80 tests (100% passing)
-- **Coverage**: 83.33% líneas, 80.09% statements, 64.41% branches
+> **📋 Para métricas actualizadas, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
+- **Smart Contract**: 970+ líneas de código
+- **Tests**: 90 tests (100% passing) - 55 core + 35 edge cases
+- **Coverage**: 85.60% líneas, 82.67% statements, 70.67% branches, 80.95% functions
+- **Validaciones críticas**: 5 implementadas (100% completadas)
 - **Frontend**: ~4,000+ líneas de código productivo
-- **Hooks**: 21 hooks personalizados (incluye useDashboardStats optimizado, useGetUserTransfers, useUserTokenStats, useGetUserTokensWithData)
-- **Componentes**: 25 componentes (15 personalizados + 10 Shadcn UI, incluye TokenCardModern, CreateTransferForm, UserTokenList, AddressDisplay)
-- **Páginas**: 6 de 9 implementadas (67%) - Todas con Diseño Moderno 2025
+- **Hooks**: 22 hooks personalizados (12 archivos)
+- **Componentes**: 26 componentes (15 personalizados + 11 Shadcn UI)
+- **Páginas**: 9 de 9 implementadas (100%) - Todas con Diseño Moderno 2025
 - **Tests Frontend**: 17 tests (14 unitarios + 3 E2E) pasando
-- **Tiempo de desarrollo**: ~55 horas (Días 1-7)
-- **Estado**: 7.2/9.5 ✅ APROBATORIO (90% Frontend)
+- **Tiempo de desarrollo**: ~61-68 horas (Días 1-7)
+- **Estado**: 7.4/9.5 ✅ APROBATORIO (100% Frontend, validaciones críticas completadas)
 
 ---
 
@@ -785,9 +790,10 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 
 ## 🗺️ Roadmap
 
-### **✅ Completado (Días 1-4 - 18-21 Nov 2025)**:
+### **✅ Completado (Días 1-8 - 18-24 Nov 2025)**:
 
-- [x] Smart contract implementado y testeado (934 líneas, 73 tests)
+- [x] Smart contract implementado y testeado (970+ líneas, 90 tests, 85.60% coverage)
+- [x] Validaciones críticas del contrato (5 validaciones completadas)
 - [x] Frontend base con Next.js 16 + TypeScript + Tailwind
 - [x] Integración Web3 con wagmi + viem + ethers
 - [x] Componentes UI con Shadcn (9 componentes)
@@ -811,6 +817,14 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - [x] Página de Transferencias completa con CreateTransferForm ⭐ Día 7
 - [x] Componentes nuevos: CreateTransferForm, UserTokenList, AddressDisplay ⭐ Día 7
 - [x] Hooks nuevos: useGetUserTransfers, useUserTokenStats, useGetUserTokensWithData ⭐ Día 7
+- [x] Panel Admin principal (`/admin`) ⭐ Día 8
+- [x] Página de Detalles de Token (`/tokens/[id]`) con trazabilidad end-to-end ⭐ Día 8
+- [x] Página de Transferir desde Detalles (`/tokens/[id]/transfer`) ⭐ Día 8
+- [x] Hook `useGetAllTransfers` para estadísticas del sistema ⭐ Día 8
+- [x] Hook `useTokenTraceability` para árbol jerárquico ⭐ Día 8
+- [x] Componente `TraceabilityTimeline` con expand/collapse ⭐ Día 8
+- [x] Validaciones críticas del contrato (5 validaciones) ⭐ Día 7
+- [x] Tests adicionales (90 tests totales, 85.60% coverage) ⭐ Día 7
 
 ### **✅ Día 4 (20 Nov)**: Dashboard y Optimizaciones ✅ COMPLETADO
 
@@ -897,34 +911,26 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - [x] Mejoras en dashboard: "My Tokens by Type" simplificado ✅
 - [x] Mejoras en /tokens: "My Tokens by Type" con tarjetas completas ✅
 
-#### **Día 7 (24 Nov)**: Panel Admin
-- [ ] Página `/admin`
-- [ ] Tabla de usuarios registrados
-- [ ] Filtros por rol y estado
-- [ ] Botones de acción (Approve/Reject/Suspend)
-- [ ] Estadísticas globales
-- [ ] Logs de eventos importantes
-- [ ] Protección: Solo accesible por owner
+#### **Día 7 (24 Nov)**: Validaciones Críticas del Contrato ✅ COMPLETADO
+- [x] Validación: Usuario cancelado no puede registrar
+- [x] Validación: Longitud mínima nombre (2 chars)
+- [x] Validación: Rol por tipo de token en transfer()
+- [x] Validación: Rol por tipo de token en acceptTransfer()
+- [x] Validación: Rol por tipo de token en rejectTransfer()
+- [x] Tests adicionales (8 nuevos tests)
+- [x] Coverage mejorado (85.60% lines, 70.67% branches)
+
+#### **Día 8 (23 Nov)**: Panel Admin y Páginas Adicionales ✅ COMPLETADO
+- [x] Página `/admin` - Panel principal de administración
+- [x] Página `/tokens/[id]` - Detalles con trazabilidad end-to-end
+- [x] Página `/tokens/[id]/transfer` - Transferir desde detalles
+- [x] Hook `useGetAllTransfers` para estadísticas del sistema
+- [x] Hook `useTokenTraceability` para árbol jerárquico
+- [x] Componente `TraceabilityTimeline` con expand/collapse
 
 ### **🎯 Semana 2 (25-28 Nov 2025)**:
 
-#### **Día 8 (25 Nov)**: E2E Testing
-- [ ] Tests de flujo completo de usuario
-- [ ] Tests de flujo de transferencias
-- [ ] Tests de panel admin
-- [ ] Tests de manejo de errores
-- [ ] Scripts de testing automatizado
-
-#### **Días 9-10 (25-26 Nov)**: Documentación IA
-- [ ] Archivo `IA.md` con:
-  - IAs utilizadas (ChatGPT, Claude, Copilot)
-  - Tiempo consumido por tarea
-  - Errores encontrados y soluciones
-  - Prompts efectivos
-  - Lecciones aprendidas
-  - Comparación de IAs
-
-#### **Día 11 (27 Nov)**: Video Demo
+#### **Día 9 (24 Nov)**: Video Demo (PRÓXIMO)
 - [ ] Script del video (5 minutos)
 - [ ] Grabación con OBS/Loom:
   - Arquitectura del proyecto

@@ -1,6 +1,6 @@
 # 📊 PROJECT STATUS - Supply Chain Tracker
 
-> **Última actualización**: 22 de Noviembre, 2025  
+> **Última actualización**: 24 de Noviembre, 2025  
 > **Propósito**: Single source of truth para estado del proyecto y próximos pasos
 
 ---
@@ -9,7 +9,7 @@
 
 ### Puntuación Académica: **7.4/9.5** ✅ APROBATORIO
 
-**Nota**: Actualizado tras implementación de Panel Admin y Trazabilidad End-to-End (Día 8). Estado real: 9/9 páginas esenciales (100%).
+**Nota**: Actualizado tras implementación de Validaciones Críticas del Contrato (Día 7). Estado real: 9/9 páginas esenciales (100%), 90 tests (100% pasando), 85.60% coverage.
 
 | Componente | Actual | Máximo | Estado |
 |------------|--------|---------|---------|
@@ -27,17 +27,23 @@
 
 ### Smart Contract (4.0/4.0 puntos)
 ```
-✅ SupplyChain.sol - 970 líneas
-✅ 80 tests (55 core + 18 edge cases + 7 nuevos) - 100% pasando
-✅ Coverage: 83.33% lines, 64.41% branches
+✅ SupplyChain.sol - 970+ líneas
+✅ 90 tests (55 core + 35 edge cases) - 100% pasando
+✅ Coverage: 85.60% lines, 70.67% branches, 82.67% statements, 80.95% functions
 ✅ Deployed en Anvil (ChainID 31337)
 ✅ Scripts deployment automatizados
 ✅ Documentación completa (18 archivos en docs/sc/)
 ✅ Sistema de pausabilidad implementado (pause/unpause)
 ✅ Control de pausa por roles (Pauser role)
+✅ Validaciones críticas completadas (5 validaciones):
+   - Usuario cancelado no puede registrar
+   - Longitud mínima nombre (2 chars)
+   - Rol por tipo de token en transfer()
+   - Rol por tipo de token en acceptTransfer()
+   - Rol por tipo de token en rejectTransfer()
 ```
 
-### Frontend - Infraestructura (2.7/3.0 puntos - 90%)
+### Frontend (3.0/3.0 puntos - 100%)
 ```
 ✅ Next.js 16 + TypeScript + Tailwind
 ✅ wagmi 2.12 + viem 2.21 + ethers 6.13
@@ -717,5 +723,5 @@ Issues resueltos en Día 4:
 
 ---
 
-**Última modificación**: 23 Nov 2025  
+**Última modificación**: 24 Nov 2025  
 **Próxima actualización**: Después de completar Video Demo (Día 9)
