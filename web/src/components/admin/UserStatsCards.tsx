@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useUserStats } from '@/hooks/useAdminUsers'
+import { DebugLabel } from '@/lib/debug'
 
 export function UserStatsCards() {
   const { stats, isLoading } = useUserStats()
@@ -9,6 +10,7 @@ export function UserStatsCards() {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <DebugLabel component="UserStatsCards" section="LoadingState" props={{ isLoading }} />
         {[...Array(4)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
@@ -25,6 +27,7 @@ export function UserStatsCards() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <DebugLabel component="UserStatsCards" section="StatsGrid" props={{ stats, isLoading }} />
       {/* Pending */}
       <Card className="border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
         <CardHeader>

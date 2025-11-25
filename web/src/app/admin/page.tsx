@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Users, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { DebugLabel } from '@/lib/debug'
 
 export default function AdminPage() {
   const { address, isConnected } = useAccount()
@@ -56,6 +57,7 @@ export default function AdminPage() {
     if (useModernDesign) {
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+          <DebugLabel component="AdminPage" section="LoadingState" props={{ mounted, isLoadingOwner, useModernDesign: true }} />
           <div className="container mx-auto px-4 py-12">
             <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8 text-center">
               <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-xl w-48 mx-auto animate-pulse mb-4"></div>
@@ -67,6 +69,7 @@ export default function AdminPage() {
     }
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        <DebugLabel component="AdminPage" section="LoadingState" props={{ mounted, isLoadingOwner, useModernDesign: false }} />
         <div className="container mx-auto px-4 py-12">
           <Card>
             <CardContent className="pt-6 text-center">
@@ -87,6 +90,7 @@ export default function AdminPage() {
   if (ownerError) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+        <DebugLabel component="AdminPage" section="ErrorState" props={{ hasError: true, errorMessage: ownerError.message }} />
         <Header />
         <div className="container mx-auto px-4 py-12">
           <Alert variant="destructive">
@@ -104,11 +108,13 @@ export default function AdminPage() {
     <div className={`min-h-screen ${useModernDesign 
       ? 'bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800' 
       : 'bg-slate-50 dark:bg-slate-900'}`}>
+      <DebugLabel component="AdminPage" section="MainContent" props={{ isOwner, useModernDesign, isConnected }} />
       <Header />
       
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         {/* Título Moderno */}
         <div className="mb-10 flex items-start justify-between animate-in fade-in slide-in-from-top-4 duration-700">
+          <DebugLabel component="AdminPage" section="TitleSection" props={{ useModernDesign }} />
           <div>
             <h1 className={`${useModernDesign 
               ? 'text-5xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-3' 
@@ -125,16 +131,19 @@ export default function AdminPage() {
 
         {/* Control de Pausa */}
         <div className="mb-10">
+          <DebugLabel component="AdminPage" section="PauseControlSection" props={{ useModernDesign }} />
           <PauseControl />
         </div>
 
         {/* Transferencia de Ownership */}
         <div className="mb-10">
+          <DebugLabel component="AdminPage" section="OwnershipTransferSection" props={{ useModernDesign }} />
           <OwnershipTransfer />
         </div>
 
         {/* Accesos Rápidos */}
         <div className="mb-10">
+          <DebugLabel component="AdminPage" section="QuickActionsSection" props={{ useModernDesign }} />
           <h2 className={`${useModernDesign 
             ? 'text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6' 
             : 'text-2xl font-bold text-slate-800 dark:text-slate-200 mb-6'}`}>

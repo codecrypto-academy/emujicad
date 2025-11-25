@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAccount } from 'wagmi';
 import { Shield, User, CheckCircle } from 'lucide-react';
+import { DebugLabel } from '@/lib/debug';
 
 export function AdminProfileCard() {
   const { address, isConnected } = useAccount();
@@ -11,6 +12,7 @@ export function AdminProfileCard() {
   if (!isConnected || !address) {
     return (
       <Card>
+        <DebugLabel component="AdminProfileCard" section="NotConnectedState" props={{ isConnected, hasAddress: !!address }} />
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
@@ -28,6 +30,7 @@ export function AdminProfileCard() {
 
   return (
     <Card className="border-purple-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-left-4">
+      <DebugLabel component="AdminProfileCard" section="MainContent" props={{ isConnected, hasAddress: !!address }} />
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-purple-600 dark:text-purple-400" />

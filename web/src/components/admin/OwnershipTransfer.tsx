@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AddressDisplay } from '@/components/AddressDisplay'
+import { DebugLabel } from '@/lib/debug'
 
 export function OwnershipTransfer() {
   const { address, isConnected } = useAccount()
@@ -116,6 +117,7 @@ export function OwnershipTransfer() {
     if (useModernDesign) {
       return (
         <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-6">
+          <DebugLabel component="OwnershipTransfer" section="LoadingState" props={{ isLoadingOwner, isLoadingPending, useModernDesign: true }} />
           <div className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin text-slate-600 dark:text-slate-400" />
             <span className="text-sm text-slate-600 dark:text-slate-400">Verificando ownership...</span>
@@ -125,6 +127,7 @@ export function OwnershipTransfer() {
     }
     return (
       <Card>
+        <DebugLabel component="OwnershipTransfer" section="LoadingState" props={{ isLoadingOwner, isLoadingPending, useModernDesign: false }} />
         <CardHeader>
           <CardTitle>Transferencia de Ownership</CardTitle>
         </CardHeader>
@@ -143,6 +146,7 @@ export function OwnershipTransfer() {
     return (
       <>
         <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-50/80 to-indigo-50/80 dark:from-purple-900/30 dark:to-indigo-900/30 backdrop-blur-xl border border-purple-200/50 dark:border-purple-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
+          <DebugLabel component="OwnershipTransfer" section="MainCard" props={{ isOwner, hasPendingOwner, isPendingOwnerAddress, useModernDesign: true }} />
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -331,9 +335,10 @@ export function OwnershipTransfer() {
 
         {/* Dialog para iniciar transferencia */}
         <Dialog open={showInitiateDialog} onOpenChange={setShowInitiateDialog}>
-          <DialogContent className="rounded-2xl">
+          <DebugLabel component="OwnershipTransfer" section="InitiateDialog" props={{ showInitiateDialog, useModernDesign: true }} />
+          <DialogContent className="rounded-2xl" aria-labelledby="initiate-transfer-title">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+              <DialogTitle id="initiate-transfer-title" className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
                 <Crown className="h-5 w-5" />
                 Iniciar Transferencia de Ownership
               </DialogTitle>
@@ -406,9 +411,10 @@ export function OwnershipTransfer() {
 
         {/* Dialog para rechazar ownership */}
         <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-          <DialogContent className="rounded-2xl">
+          <DebugLabel component="OwnershipTransfer" section="RejectDialog" props={{ showRejectDialog, useModernDesign: true }} />
+          <DialogContent className="rounded-2xl" aria-labelledby="reject-transfer-title">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+              <DialogTitle id="reject-transfer-title" className="flex items-center gap-2 text-red-600 dark:text-red-400">
                 <XCircle className="h-5 w-5" />
                 {isOwner ? 'Cancelar' : 'Rechazar'} Transferencia de Ownership
               </DialogTitle>
@@ -463,9 +469,10 @@ export function OwnershipTransfer() {
 
         {/* Dialog para aceptar ownership */}
         <Dialog open={showAcceptDialog} onOpenChange={setShowAcceptDialog}>
-          <DialogContent className="rounded-2xl">
+          <DebugLabel component="OwnershipTransfer" section="AcceptDialog" props={{ showAcceptDialog, useModernDesign: true }} />
+          <DialogContent className="rounded-2xl" aria-labelledby="accept-transfer-title">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <DialogTitle id="accept-transfer-title" className="flex items-center gap-2 text-green-600 dark:text-green-400">
                 <CheckCircle2 className="h-5 w-5" />
                 Aceptar Ownership
               </DialogTitle>
@@ -538,6 +545,7 @@ export function OwnershipTransfer() {
   return (
     <>
       <Card className="border-purple-500 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 transition-all duration-300 hover:shadow-lg">
+        <DebugLabel component="OwnershipTransfer" section="MainCard" props={{ isOwner, hasPendingOwner, isPendingOwnerAddress, useModernDesign: false }} />
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -719,9 +727,10 @@ export function OwnershipTransfer() {
 
       {/* Dialogs */}
       <Dialog open={showInitiateDialog} onOpenChange={setShowInitiateDialog}>
-        <DialogContent>
+        <DebugLabel component="OwnershipTransfer" section="InitiateDialog" props={{ showInitiateDialog, useModernDesign: false }} />
+        <DialogContent aria-labelledby="initiate-transfer-title-original">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+            <DialogTitle id="initiate-transfer-title-original" className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
               <Crown className="h-5 w-5" />
               Iniciar Transferencia de Ownership
             </DialogTitle>
@@ -771,9 +780,10 @@ export function OwnershipTransfer() {
       </Dialog>
 
       <Dialog open={showAcceptDialog} onOpenChange={setShowAcceptDialog}>
-        <DialogContent>
+        <DebugLabel component="OwnershipTransfer" section="AcceptDialog" props={{ showAcceptDialog, useModernDesign: false }} />
+        <DialogContent aria-labelledby="accept-transfer-title-original">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
+            <DialogTitle id="accept-transfer-title-original" className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <CheckCircle2 className="h-5 w-5" />
               Aceptar Ownership
             </DialogTitle>
@@ -825,9 +835,10 @@ export function OwnershipTransfer() {
       </Dialog>
 
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <DialogContent>
+        <DebugLabel component="OwnershipTransfer" section="RejectDialog" props={{ showRejectDialog, useModernDesign: false }} />
+        <DialogContent aria-labelledby="reject-transfer-title-original">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+            <DialogTitle id="reject-transfer-title-original" className="flex items-center gap-2 text-red-600 dark:text-red-400">
               <XCircle className="h-5 w-5" />
               {isOwner ? 'Cancelar' : 'Rechazar'} Transferencia de Ownership
             </DialogTitle>

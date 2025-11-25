@@ -4,20 +4,35 @@ import { ConnectWallet } from '@/components/ConnectWallet'
 import { Header } from '@/components/Header'
 import { RegisterForm } from '@/components/RegisterForm'
 import { ChangeRoleDialog } from '@/components/ChangeRoleDialog'
+import { RegistrationSubmittedCard } from '@/components/RegistrationSubmittedCard'
 import { useAccount } from 'wagmi'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { UserStatus } from '@/contracts/config'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { DebugLabel } from '@/lib/debug'
 
 export default function Home() {
   const router = useRouter()
   const { address, isConnected } = useAccount()
   const { isAdmin, isAuthenticated, isLoading, userInfo, refetchUserData } = useAuth()
+  const [showRegistrationSuccess, setShowRegistrationSuccess] = useState(false)
+  const [submittedRole, setSubmittedRole] = useState<string>('')
+  
+  // Debug: Log cuando showRegistrationSuccess cambia
+  React.useEffect(() => {
+    console.log('[HomePage] showRegistrationSuccess changed:', showRegistrationSuccess, 'submittedRole:', submittedRole)
+  }, [showRegistrationSuccess, submittedRole])
+  
+  // Handler para recibir el rol del RegisterForm
+  const handleRoleSubmitted = React.useCallback((role: string) => {
+    console.log('[HomePage] Role submitted:', role)
+    setSubmittedRole(role)
+  }, [])
   
   // Activar diseño moderno si está habilitado
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
@@ -111,7 +126,8 @@ export default function Home() {
   // Diseño moderno 2025
   if (useModernDesign) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 relative">
+        <DebugLabel component="HomePage" section="ModernDesign" position="bottom-right" props={{ isConnected, isAdmin, isAuthenticated, isLoading, hasUserInfo: !!userInfo, showRegistrationSuccess }} />
         {/* Header solo para usuarios conectados */}
         {isConnected && <Header />}
 
@@ -145,10 +161,12 @@ export default function Home() {
                 </div>
               )}
               
-              {/* CRÍTICO: Si NO está cargando Y NO está autenticado Y NO tiene userInfo (no registrado), mostrar formulario INMEDIATAMENTE */}
-              {/* EXCLUIR usuarios con estados específicos (Pending, Rejected, Canceled) - solo mostrar formulario si NO está registrado */}
-              {!isLoading && !isAuthenticated && !userInfo && (
+              {/* CRÍTICO: Mostrar RegisterForm SOLO si NO hay userInfo (usuario no registrado) Y el mensaje de éxito NO está visible */}
+              {/* IMPORTANTE: Cuando showRegistrationSuccess = true, NO mostrar el formulario, solo mostrar RegistrationSubmittedCard */}
+              {/* IMPORTANTE: Si userInfo existe (incluso con status Pending), NO mostrar el formulario de registro */}
+              {(!isLoading && !isAuthenticated && !showRegistrationSuccess && !userInfo) && (
                 <div className="group relative overflow-hidden rounded-3xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-2xl p-8 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <DebugLabel component="HomePage" section="RegisterFormContainer" props={{ showRegistrationSuccess, hasUserInfo: !!userInfo, userStatus: null }} />
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <div className="relative">
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-700 dark:from-slate-100 dark:to-blue-300 bg-clip-text text-transparent mb-2">
@@ -157,15 +175,37 @@ export default function Home() {
                     <p className="text-slate-600 dark:text-slate-400 mb-6">
                       Please register to start using the supply chain tracker
                     </p>
-                    <RegisterForm userInfo={userInfo} />
+                    <RegisterForm 
+                      userInfo={userInfo} 
+                      onRegistrationSuccess={refetchUserData}
+                      onShowSuccessChange={setShowRegistrationSuccess}
+                      onRoleSubmitted={handleRoleSubmitted}
+                    />
                   </div>
                 </div>
               )}
               
-              {!isLoading && userInfo && userInfo.id !== undefined && userInfo.id !== BigInt(0) && (
+              {/* Registration Submitted Card - Mostrar cuando showRegistrationSuccess = true */}
+              {showRegistrationSuccess && submittedRole ? (
+                <>
+                  {console.log('[HomePage] ✅ Rendering RegistrationSubmittedCard', { showRegistrationSuccess, submittedRole })}
+                  <RegistrationSubmittedCard 
+                    selectedRole={submittedRole} 
+                    showRegistrationSuccess={showRegistrationSuccess}
+                  />
+                </>
+              ) : (
+                showRegistrationSuccess && console.log('[HomePage] ❌ Cannot render RegistrationSubmittedCard', { showRegistrationSuccess, submittedRole })
+              )}
+              
+              {/* User registered - mostrar estado */}
+              {/* Mostrar esta sección solo si userInfo existe Y el mensaje de éxito ya desapareció (después de 4 segundos) */}
+              {/* IMPORTANTE: Si showRegistrationSuccess es false, mostrar ApprovalPendingCard incluso si userInfo aún no está disponible (se actualizará con el refetch) */}
+              {!isLoading && !showRegistrationSuccess && userInfo && userInfo.id !== undefined && userInfo.id !== BigInt(0) && (
                 <>
                   {Number(userInfo.status) === UserStatus.Pending && (
                     <div className="group relative overflow-hidden rounded-3xl bg-yellow-50/80 dark:bg-yellow-900/30 backdrop-blur-xl border border-yellow-200 dark:border-yellow-800 shadow-xl p-8 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                      <DebugLabel component="HomePage" section="ApprovalPendingCard" props={{ userStatus: Number(userInfo.status), userId: userInfo.id.toString(), showRegistrationSuccess }} />
                       <div className="relative">
                         <h2 className="text-2xl font-bold text-yellow-800 dark:text-yellow-200 mb-4 flex items-center gap-2">
                           ⏳ Approval Pending
@@ -173,8 +213,11 @@ export default function Home() {
                         <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-2">
                           Your role request as <strong>{getRoleIcon(Number(userInfo.role))} {getRoleName(Number(userInfo.role))}</strong> is waiting for administrator approval.
                         </p>
-                        <p className="text-sm text-yellow-600 dark:text-yellow-400 mb-6">
+                        <p className="text-sm text-yellow-600 dark:text-yellow-400 mb-2">
                           You will be able to access the system once approved.
+                        </p>
+                        <p className="text-sm text-yellow-600 dark:text-yellow-400 mb-6">
+                          You can also modify your role if it is still pending approval.
                         </p>
                         <div className="pt-4 border-t border-yellow-200 dark:border-yellow-800">
                           <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} onSuccess={refetchUserData} />
@@ -258,7 +301,8 @@ export default function Home() {
 
   // Diseño original
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black relative">
+      <DebugLabel component="HomePage" section="OriginalDesign" position="bottom-right" props={{ isConnected, isAdmin, isAuthenticated, isLoading, hasUserInfo: !!userInfo, showRegistrationSuccess }} />
       <main className="flex min-h-screen w-full max-w-6xl flex-col py-8 px-4 md:px-8 space-y-6 bg-white dark:bg-black">
         {/* Header solo para usuarios conectados */}
         {isConnected && <Header />}
@@ -291,11 +335,14 @@ export default function Home() {
               </Card>
             )}
             
-            {/* CRÍTICO: Si NO está cargando Y NO está autenticado Y NO tiene userInfo (no registrado), mostrar formulario INMEDIATAMENTE */}
-            {/* EXCLUIR usuarios con estados específicos (Pending, Rejected, Canceled) - solo mostrar formulario si NO está registrado */}
-            {!isLoading && !isAuthenticated && !userInfo && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                <Card className="border-blue-500/50 transition-all duration-300 hover:shadow-lg">
+            {/* CRÍTICO: Si NO está cargando Y NO está autenticado */}
+            {/* Mostrar formulario SOLO si NO hay userInfo (usuario no registrado) Y el mensaje de éxito NO está visible */}
+            {/* IMPORTANTE: Cuando showRegistrationSuccess = true, NO mostrar el formulario, solo mostrar RegistrationSubmittedCard */}
+            {/* IMPORTANTE: Si userInfo existe (incluso con status Pending), NO mostrar el formulario de registro */}
+            {(!isLoading && !isAuthenticated && !showRegistrationSuccess && !userInfo) && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 relative">
+                <DebugLabel component="HomePage" section="RegisterFormContainer" props={{ showRegistrationSuccess, hasUserInfo: !!userInfo, userStatus: null }} />
+                <Card className="border-blue-500/50 transition-all duration-300 hover:shadow-lg relative">
                   <CardHeader>
                     <CardTitle>Welcome! 👋</CardTitle>
                     <CardDescription>
@@ -303,18 +350,34 @@ export default function Home() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <RegisterForm userInfo={userInfo} />
+                    <RegisterForm 
+                      userInfo={userInfo} 
+                      onRegistrationSuccess={refetchUserData}
+                      onShowSuccessChange={setShowRegistrationSuccess}
+                      onRoleSubmitted={handleRoleSubmitted}
+                    />
                   </CardContent>
                 </Card>
               </div>
             )}
             
+            {/* Registration Submitted Card - Mostrar cuando showRegistrationSuccess = true */}
+            {showRegistrationSuccess && submittedRole && (
+              <RegistrationSubmittedCard 
+                selectedRole={submittedRole} 
+                showRegistrationSuccess={showRegistrationSuccess}
+              />
+            )}
+            
             {/* User registered - mostrar estado */}
-            {!isLoading && userInfo && userInfo.id !== undefined && userInfo.id !== BigInt(0) && (
+            {/* Mostrar esta sección solo si userInfo existe Y el mensaje de éxito ya desapareció (después de 4 segundos) */}
+            {/* IMPORTANTE: Si showRegistrationSuccess es false, mostrar ApprovalPendingCard incluso si userInfo aún no está disponible (se actualizará con el refetch) */}
+            {!isLoading && !showRegistrationSuccess && userInfo && userInfo.id !== undefined && userInfo.id !== BigInt(0) && (
               <>
                 {/* User Pending */}
                 {Number(userInfo.status) === UserStatus.Pending && (
-                  <Card className="border-yellow-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-bottom-4">
+                  <Card className="border-yellow-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-bottom-4 relative">
+                    <DebugLabel component="HomePage" section="ApprovalPendingCard" props={{ userStatus: Number(userInfo.status), userId: userInfo.id.toString(), showRegistrationSuccess }} />
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         ⏳ Approval Pending
@@ -326,6 +389,9 @@ export default function Home() {
                       </p>
                       <p className="text-sm text-muted-foreground">
                         You will be able to access the system once approved.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        You can also modify your role if it is still pending approval.
                       </p>
                       <div className="pt-4 border-t">
                         <ChangeRoleDialog currentRole={Number(userInfo.role)} userStatus={Number(userInfo.status)} onSuccess={refetchUserData} />

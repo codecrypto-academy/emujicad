@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { DebugLabel } from '@/lib/debug'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -19,9 +20,11 @@ type RoleType = 'Producer' | 'Factory' | 'Retailer' | 'Consumer' | ''
 interface RegisterFormProps {
   onRegistrationSuccess?: () => void
   userInfo?: UserInfo | null
+  onShowSuccessChange?: (show: boolean) => void
+  onRoleSubmitted?: (role: string) => void
 }
 
-export function RegisterForm({ onRegistrationSuccess, userInfo }: RegisterFormProps = {}) {
+export function RegisterForm({ onRegistrationSuccess, userInfo, onShowSuccessChange, onRoleSubmitted }: RegisterFormProps = {}) {
   const [selectedRole, setSelectedRole] = useState<RoleType>('')
   const { address } = useAccount()
   const { data: isPaused } = useIsPaused()
@@ -31,24 +34,132 @@ export function RegisterForm({ onRegistrationSuccess, userInfo }: RegisterFormPr
   // Solo el administrador puede cambiar el estado de Canceled a Pending
   const isCanceled = Boolean(userInfo && Number(userInfo.status) === UserStatus.Canceled)
   
-  // Refetch user info cuando el registro es exitoso
+  // Manejar el éxito de la transacción: mostrar mensaje verde durante 4 segundos completos
+  // Usar useRef para evitar que el efecto se ejecute múltiples veces
+  const successHandledRef = React.useRef(false)
+  // Guardar selectedRole en un ref para asegurar que esté disponible cuando isSuccess se vuelve true
+  const selectedRoleRef = React.useRef<RoleType>('')
+  
+  // Actualizar el ref cuando selectedRole cambie
   React.useEffect(() => {
-    if (isSuccess && onRegistrationSuccess) {
-      // Refetch inmediatamente y luego de nuevo después de un delay
-      // Esto asegura que la blockchain se haya actualizado
-      onRegistrationSuccess()
-      const timer1 = setTimeout(() => {
-        onRegistrationSuccess()
-      }, 1000) // 1 segundo
-      const timer2 = setTimeout(() => {
-        onRegistrationSuccess()
-      }, 3000) // 3 segundos
-      return () => {
-        clearTimeout(timer1)
-        clearTimeout(timer2)
+    selectedRoleRef.current = selectedRole
+  }, [selectedRole])
+  
+  // Usar useRef para almacenar las funciones de callback y evitar que cambien en cada render
+  // Esto previene que el useEffect se ejecute múltiples veces
+  const onRegistrationSuccessRef = React.useRef(onRegistrationSuccess)
+  const onShowSuccessChangeRef = React.useRef(onShowSuccessChange)
+  const onRoleSubmittedRef = React.useRef(onRoleSubmitted)
+  
+  // Actualizar las refs cuando cambien las funciones
+  React.useEffect(() => {
+    onRegistrationSuccessRef.current = onRegistrationSuccess
+    onShowSuccessChangeRef.current = onShowSuccessChange
+    onRoleSubmittedRef.current = onRoleSubmitted
+  }, [onRegistrationSuccess, onShowSuccessChange, onRoleSubmitted])
+  
+  // Debug: Log cuando isSuccess cambia
+  React.useEffect(() => {
+    console.log('[RegisterForm] isSuccess changed:', isSuccess, 'selectedRole:', selectedRole, 'selectedRoleRef.current:', selectedRoleRef.current)
+    console.log('[RegisterForm] Callbacks:', {
+      onShowSuccessChange: !!onShowSuccessChangeRef.current,
+      onRoleSubmitted: !!onRoleSubmittedRef.current,
+      onRegistrationSuccess: !!onRegistrationSuccessRef.current
+    })
+  }, [isSuccess, selectedRole])
+  
+  // Guardar los timers en un ref para evitar que se limpien prematuramente
+  const timersRef = React.useRef<NodeJS.Timeout[]>([])
+  // Flag para indicar si los timers ya están configurados y no deben limpiarse
+  const timersSetupRef = React.useRef(false)
+  
+  React.useEffect(() => {
+    if (isSuccess && !successHandledRef.current) {
+      // Marcar como manejado para evitar ejecuciones múltiples
+      successHandledRef.current = true
+      timersSetupRef.current = true
+      
+      console.log('[RegisterForm] ✅ Transaction successful - showing success message for 4 seconds')
+      console.log('[RegisterForm] Current state:', { selectedRole, selectedRoleRef: selectedRoleRef.current })
+      
+      // Limpiar timers anteriores si existen (solo si no están configurados)
+      if (!timersSetupRef.current) {
+        timersRef.current.forEach(timer => clearTimeout(timer))
+        timersRef.current = []
       }
+      
+      // 1. Notificar al padre INMEDIATAMENTE para mostrar RegistrationSubmittedCard
+      if (onShowSuccessChangeRef.current) {
+        console.log('[RegisterForm] Calling onShowSuccessChange(true)')
+        onShowSuccessChangeRef.current(true)
+      } else {
+        console.error('[RegisterForm] ❌ onShowSuccessChangeRef.current is null!')
+      }
+      
+      // 2. Pasar el rol seleccionado al padre para mostrarlo en RegistrationSubmittedCard
+      // Usar el ref para asegurar que tenemos el valor correcto
+      const roleToSubmit = selectedRoleRef.current || selectedRole
+      console.log('[RegisterForm] Role to submit:', roleToSubmit, 'hasCallback:', !!onRoleSubmittedRef.current)
+      if (onRoleSubmittedRef.current && roleToSubmit) {
+        console.log('[RegisterForm] ✅ Calling onRoleSubmitted with role:', roleToSubmit)
+        onRoleSubmittedRef.current(roleToSubmit)
+      } else {
+        console.error('[RegisterForm] ❌ Cannot submit role:', { roleToSubmit, hasCallback: !!onRoleSubmittedRef.current })
+      }
+      
+      // 3. UN SOLO refetch después de 1 segundo para actualizar el header rápidamente
+      // La información se guardará en localStorage y se usará para el ApprovalPendingCard sin más refetches
+      const timer1 = setTimeout(() => {
+        console.log('[RegisterForm] ⏰ Timer 1 (1s) - Refetching user data ONCE to update header and save to localStorage')
+        if (onRegistrationSuccessRef.current) {
+          onRegistrationSuccessRef.current()
+        }
+      }, 1000)
+      timersRef.current.push(timer1)
+      
+      // 4. Después de 4 segundos completos: ocultar RegistrationSubmittedCard y mostrar ApprovalPendingCard
+      // NO hacer más refetches - usar la información del localStorage
+      const timer2 = setTimeout(() => {
+        console.log('[RegisterForm] ⏰ Timer 2 (4s) - Hiding success message and showing Approval Pending card')
+        if (onShowSuccessChangeRef.current) {
+          console.log('[RegisterForm] Calling onShowSuccessChange(false)')
+          onShowSuccessChangeRef.current(false)
+        } else {
+          console.error('[RegisterForm] ❌ onShowSuccessChangeRef.current is null when trying to hide!')
+        }
+        // NO hacer más refetches - la información ya está en localStorage
+        successHandledRef.current = false // Resetear para permitir futuros registros
+        timersSetupRef.current = false // Resetear el flag
+        timersRef.current = [] // Limpiar el array de timers
+      }, 4000) // 4 segundos completos - el mensaje se mantiene visible todo este tiempo
+      timersRef.current.push(timer2)
+      
+      console.log('[RegisterForm] ✅ All timers set up:', timersRef.current.length)
+      
+      return () => {
+        // NO limpiar los timers si ya están configurados
+        // El cleanup solo debe ejecutarse si el componente se desmonta ANTES de que isSuccess sea true
+        if (!timersSetupRef.current) {
+          console.log('[RegisterForm] 🧹 Cleaning up timers (component unmounting before success)')
+          timersRef.current.forEach(timer => clearTimeout(timer))
+          timersRef.current = []
+        } else {
+          console.warn('[RegisterForm] ⚠️ useEffect cleanup called but timers are active - NOT cleaning up to preserve timers!')
+          console.warn('[RegisterForm] This usually means the component is re-rendering. Timers will continue running.')
+        }
+      }
+    } else if (error && !isSuccess) {
+      // Solo resetear si hay error Y no hay éxito
+      console.log('[RegisterForm] ❌ Error occurred, resetting state')
+      if (onShowSuccessChangeRef.current) {
+        onShowSuccessChangeRef.current(false)
+      }
+      successHandledRef.current = false
+      timersSetupRef.current = false
+      timersRef.current.forEach(timer => clearTimeout(timer))
+      timersRef.current = []
     }
-  }, [isSuccess, onRegistrationSuccess])
+  }, [isSuccess, error]) // NO incluir selectedRole aquí - causa re-ejecuciones que limpian los timers
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -58,29 +169,11 @@ export function RegisterForm({ onRegistrationSuccess, userInfo }: RegisterFormPr
     requestRole(selectedRole)
   }
 
-  if (isSuccess) {
-    return (
-      <Card className="border-green-200 bg-green-50">
-        <CardHeader>
-          <CardTitle className="text-green-700">✅ Registration Submitted!</CardTitle>
-          <CardDescription>
-            Your request for <span className="font-semibold">{selectedRole}</span> role has been sent to the administrator
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-green-700 mb-3">
-            Please wait for the administrator to review your request.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            💡 Reload the page to see your registration status
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
-
+  // El mensaje de éxito ahora se muestra en RegistrationSubmittedCard en page.tsx
+  // Ya no necesitamos renderizar el mensaje verde aquí
   return (
-    <Card>
+    <Card className="relative">
+      <DebugLabel component="RegisterForm" section="Form" props={{ isCanceled, isPaused, selectedRole }} />
       <CardHeader>
         <CardTitle>🆕 Register as User</CardTitle>
         <CardDescription>Choose your role in the supply chain</CardDescription>

@@ -87,7 +87,7 @@ function DialogFormContent({ currentRole, userStatus, onSuccess, onClose }: { cu
       {isSuccess ? (
         <>
           <DialogHeader>
-            <DialogTitle className="text-green-700">✅ Role Change Requested!</DialogTitle>
+            <DialogTitle id="change-role-title" className="text-green-700">✅ Role Change Requested!</DialogTitle>
             <DialogDescription>
               Your request to change to <span className="font-semibold">{selectedRole}</span> role has been submitted to the administrator
             </DialogDescription>
@@ -99,7 +99,7 @@ function DialogFormContent({ currentRole, userStatus, onSuccess, onClose }: { cu
       ) : (
         <>
           <DialogHeader>
-            <DialogTitle>Change Your Role</DialogTitle>
+            <DialogTitle id="change-role-title">Change Your Role</DialogTitle>
             <DialogDescription>
               {userStatus === UserStatus.Rejected 
                 ? 'You can request a different role after rejection'
@@ -212,7 +212,7 @@ function DialogFormContent({ currentRole, userStatus, onSuccess, onClose }: { cu
             Change Role
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" aria-labelledby="change-role-title">
           <DialogFormContent 
             key={dialogKey}
             currentRole={currentRole}

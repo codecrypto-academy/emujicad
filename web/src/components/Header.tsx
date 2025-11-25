@@ -2,6 +2,7 @@
 
 import { useAccount, useDisconnect } from 'wagmi'
 import { Button } from '@/components/ui/button'
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -59,7 +60,11 @@ export function Header() {
   // Renderizar siempre la misma estructura para evitar hydration mismatch
   // Usar mounted solo para el contenido interno, no para la estructura
   return (
-    <Card className="mb-6 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 transition-all duration-300 animate-in fade-in slide-in-from-top-2">
+    <Card 
+      className="mb-6 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 transition-all duration-300 animate-in fade-in slide-in-from-top-2 relative"
+      style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}
+    >
+      <DebugLabel component="Header" props={{ isAdmin, isAuthenticated, hasUserInfo: !!userInfo, userStatus: userInfo ? Number(userInfo.status) : null }} position="top-right" offset={4} />
       <div className="p-6">
         <div className="flex flex-col gap-4">
           {/* Row 1: Title and Actions */}

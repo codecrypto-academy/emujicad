@@ -253,9 +253,9 @@ export function ConnectWallet() {
           Instalar Wallet
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-labelledby="install-wallet-title">
         <DialogHeader>
-          <DialogTitle>📱 Necesitas una Wallet</DialogTitle>
+          <DialogTitle id="install-wallet-title">📱 Necesitas una Wallet</DialogTitle>
           <DialogDescription>
             Para usar esta aplicación, necesitas instalar una wallet de criptomonedas
           </DialogDescription>

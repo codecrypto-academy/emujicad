@@ -7,6 +7,69 @@ import { UserStatus } from '@/contracts/config';
 import { validateUserInfo, validateUserInfoTuple } from '@/lib/validation';
 import type { UserInfo } from '@/types';
 
+// Funciones helper para localStorage
+function getUserInfoKey(address: string): string {
+  return `userInfo_${address.toLowerCase()}`
+}
+
+function storeUserInfo(address: string, userInfo: UserInfo): void {
+  if (typeof window === 'undefined') return
+  try {
+    const key = getUserInfoKey(address)
+    const data = {
+      id: userInfo.id.toString(),
+      userAddress: userInfo.userAddress,
+      role: userInfo.role.toString(),
+      status: userInfo.status.toString(),
+    }
+    localStorage.setItem(key, JSON.stringify(data))
+    console.log('💾 [AuthContext] userInfo guardado en localStorage:', key)
+  } catch (error) {
+    console.error('❌ [AuthContext] Error guardando userInfo en localStorage:', error)
+  }
+}
+
+function getStoredUserInfo(address: string): UserInfo | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const key = getUserInfoKey(address)
+    const stored = localStorage.getItem(key)
+    if (!stored) return null
+    
+    const data = JSON.parse(stored)
+    const userInfo: UserInfo = {
+      id: BigInt(data.id),
+      userAddress: data.userAddress,
+      role: BigInt(data.role),
+      status: BigInt(data.status),
+    }
+    
+    // Validar que la dirección coincida
+    if (userInfo.userAddress.toLowerCase() !== address.toLowerCase()) {
+      console.warn('⚠️ [AuthContext] Dirección en localStorage no coincide, limpiando')
+      localStorage.removeItem(key)
+      return null
+    }
+    
+    console.log('📦 [AuthContext] userInfo cargado de localStorage:', key)
+    return userInfo
+  } catch (error) {
+    console.error('❌ [AuthContext] Error cargando userInfo de localStorage:', error)
+    return null
+  }
+}
+
+function clearStoredUserInfo(address: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    const key = getUserInfoKey(address)
+    localStorage.removeItem(key)
+    console.log('🗑️ [AuthContext] userInfo eliminado de localStorage:', key)
+  } catch (error) {
+    console.error('❌ [AuthContext] Error eliminando userInfo de localStorage:', error)
+  }
+}
+
 type AuthContextType = {
   isAdmin: boolean;
   isApproved: boolean;
@@ -71,6 +134,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (!isConnected) {
       console.log('AuthContext: No conectado, seteando estados en false');
+      // Limpiar localStorage cuando se desconecta
+      if (address) {
+        clearStoredUserInfo(address)
+      }
       setAuthState({
         isAdmin: false,
         isApproved: false,
@@ -132,6 +199,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // NO esperar a que terminen todas las consultas - determinar inmediatamente
     if (userId !== undefined && userId === BigInt(0)) {
       console.log('AuthContext: Usuario no registrado (userId = 0) - determinando inmediatamente');
+      // Limpiar localStorage si existe información antigua
+      if (address) {
+        clearStoredUserInfo(address)
+      }
       setAuthState({
         isAdmin: false,
         isApproved: false,
@@ -141,6 +212,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refetchUserData,
       });
       return;
+    }
+    
+    // Si userId existe pero aún no tenemos userInfo del contrato, intentar cargar del localStorage
+    // Esto es útil justo después de registrar un usuario, antes de que el refetch complete
+    if (userId !== undefined && userId > BigInt(0) && !rawUserInfo && address && isLoadingUser) {
+      const storedUserInfo = getStoredUserInfo(address)
+      if (storedUserInfo && storedUserInfo.id === userId) {
+        console.log('AuthContext: ⚡ Usando userInfo del localStorage mientras se carga del contrato')
+        const userStatus = Number(storedUserInfo.status)
+        const isApproved = userStatus === UserStatus.Approved
+        setAuthState({
+          isAdmin: false,
+          isApproved,
+          isAuthenticated: isApproved,
+          userInfo: storedUserInfo,
+          isLoading: false, // Ya tenemos la info, no necesitamos esperar
+          refetchUserData,
+        })
+        return
+      }
     }
     
     // CRÍTICO: Si hay error en useUserInfo, el usuario no existe
@@ -158,8 +249,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // CRÍTICO: Intentar cargar del localStorage ANTES de esperar las consultas del contrato
+    // Esto permite mostrar el ApprovalPendingCard inmediatamente al refrescar la página
+    if (address && (isLoadingAdmin || isLoadingUserId || isLoadingUser)) {
+      const storedUserInfo = getStoredUserInfo(address)
+      if (storedUserInfo) {
+        console.log('AuthContext: ⚡ Cargando userInfo del localStorage mientras se consulta el contrato')
+        const userStatus = Number(storedUserInfo.status)
+        const isApproved = userStatus === UserStatus.Approved
+        setAuthState({
+          isAdmin: false,
+          isApproved,
+          isAuthenticated: isApproved,
+          userInfo: storedUserInfo,
+          isLoading: false, // Ya tenemos la info del localStorage, mostrar inmediatamente
+          refetchUserData,
+        })
+        // Continuar con las consultas del contrato en segundo plano para actualizar si es necesario
+        return
+      }
+    }
+    
     // Esperar por las consultas de registro si aún están cargando
-    // Solo si NO sabemos aún si el usuario está registrado
+    // Solo si NO sabemos aún si el usuario está registrado Y no hay info en localStorage
     if (isLoadingAdmin || isLoadingUserId || isLoadingUser) {
       console.log('AuthContext: Verificando registro...', { isLoadingAdmin, isLoadingUserId, isLoadingUser });
       setAuthState(prev => ({ ...prev, isLoading: true }));
@@ -183,15 +295,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log('AuthContext: Carga completa, procesando datos de usuario registrado...');
     
     // Validación robusta de userInfo
-    const userInfo = rawUserInfo
+    let userInfo = rawUserInfo
       ? (Array.isArray(rawUserInfo)
           ? validateUserInfoTuple(rawUserInfo)
           : validateUserInfo(rawUserInfo))
       : null;
     
+    // Si no hay userInfo pero userId existe, intentar cargar del localStorage
+    if (!userInfo && userId && typeof userId === 'bigint' && userId > BigInt(0) && address) {
+      console.log('AuthContext: userId existe pero userInfo es null, intentando cargar del localStorage');
+      const storedUserInfo = getStoredUserInfo(address)
+      if (storedUserInfo && storedUserInfo.id === userId) {
+        console.log('AuthContext: ✅ userInfo encontrado en localStorage, usando datos guardados')
+        userInfo = storedUserInfo
+      }
+    }
+    
     // Si no hay userInfo pero userId existe, algo está mal - tratar como no autenticado
     if (!userInfo && userId && typeof userId === 'bigint' && userId > BigInt(0)) {
-      console.log('AuthContext: userId existe pero userInfo es null, marcando como no autenticado');
+      console.log('AuthContext: userId existe pero userInfo es null (ni del contrato ni del localStorage), marcando como no autenticado');
       setAuthState({
         isAdmin: false,
         isApproved: false,
@@ -211,6 +333,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userStatus = userInfo ? Number(userInfo.status) : null;
     const isApproved = userStatus === UserStatus.Approved;
     const isAuthenticated = isApproved; // Solo aprobados están autenticados
+    
+    // IMPORTANTE: Guardar userInfo en localStorage cuando se obtiene del contrato
+    // Esto evita llamadas adicionales al contrato mientras el usuario está conectado
+    if (userInfo && address && rawUserInfo) {
+      // Solo guardar si viene del contrato (rawUserInfo existe), no si viene del localStorage
+      console.log('AuthContext: 💾 Guardando userInfo en localStorage para evitar refetches innecesarios')
+      storeUserInfo(address, userInfo)
+    }
     
     // IMPORTANTE: Incluir userInfo incluso si no está aprobado
     // para que las páginas puedan mostrar el estatus (Pending, Rejected, Canceled)

@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DebugLabel } from '@/lib/debug'
 
 export function PauseControl() {
   const { data: isPaused, isLoading: isLoadingStatus } = useIsPaused()
@@ -57,6 +58,7 @@ export function PauseControl() {
     if (useModernDesign) {
       return (
         <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-6">
+          <DebugLabel component="PauseControl" section="LoadingState" props={{ isLoadingStatus, useModernDesign: true }} />
           <div className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin text-slate-600 dark:text-slate-400" />
             <span className="text-sm text-slate-600 dark:text-slate-400">Verificando estado...</span>
@@ -66,6 +68,7 @@ export function PauseControl() {
     }
     return (
       <Card>
+        <DebugLabel component="PauseControl" section="LoadingState" props={{ isLoadingStatus, useModernDesign: false }} />
         <CardHeader>
           <CardTitle>Estado del Contrato</CardTitle>
         </CardHeader>
@@ -86,6 +89,7 @@ export function PauseControl() {
     return (
       <>
         <div className={`group relative overflow-hidden rounded-2xl ${paused ? 'bg-red-50/80 dark:bg-red-900/30 border-red-200/50 dark:border-red-800/50' : 'bg-green-50/80 dark:bg-green-900/30 border-green-200/50 dark:border-green-800/50'} backdrop-blur-xl border shadow-lg hover:shadow-2xl transition-all duration-500 animate-in fade-in slide-in-from-bottom-4`}>
+          <DebugLabel component="PauseControl" section="MainCard" props={{ paused, useModernDesign: true, isPausing, isUnpausing }} />
           <div className={`absolute inset-0 ${paused ? 'bg-gradient-to-br from-red-500/10 to-rose-500/10' : 'bg-gradient-to-br from-green-500/10 to-emerald-500/10'} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
           <div className="relative p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -209,9 +213,10 @@ export function PauseControl() {
 
         {/* Dialogs modernos */}
         <Dialog open={showPauseDialog} onOpenChange={setShowPauseDialog}>
-          <DialogContent className="rounded-2xl">
+          <DebugLabel component="PauseControl" section="PauseDialog" props={{ showPauseDialog, useModernDesign: true }} />
+          <DialogContent className="rounded-2xl" aria-labelledby="pause-dialog-title">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+              <DialogTitle id="pause-dialog-title" className="flex items-center gap-2 text-red-600 dark:text-red-400">
                 <AlertTriangle className="h-5 w-5" />
                 Confirmar Pausa del Contrato
               </DialogTitle>
@@ -271,9 +276,10 @@ export function PauseControl() {
         </Dialog>
 
         <Dialog open={showUnpauseDialog} onOpenChange={setShowUnpauseDialog}>
-          <DialogContent className="rounded-2xl">
+          <DebugLabel component="PauseControl" section="UnpauseDialog" props={{ showUnpauseDialog, useModernDesign: true }} />
+          <DialogContent className="rounded-2xl" aria-labelledby="unpause-dialog-title">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <DialogTitle id="unpause-dialog-title" className="flex items-center gap-2 text-green-600 dark:text-green-400">
                 <Play className="h-5 w-5" />
                 Reanudar Contrato
               </DialogTitle>
@@ -307,6 +313,7 @@ export function PauseControl() {
   return (
     <>
       <Card className={`${paused ? 'border-red-500 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : 'border-green-500 dark:border-green-700 bg-green-50 dark:bg-green-900/20'} transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-bottom-4`}>
+        <DebugLabel component="PauseControl" section="MainCard" props={{ paused, useModernDesign: false, isPausing, isUnpausing }} />
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {paused ? (
@@ -424,9 +431,10 @@ export function PauseControl() {
 
       {/* Dialog de confirmación para pausar */}
       <Dialog open={showPauseDialog} onOpenChange={setShowPauseDialog}>
-        <DialogContent>
+        <DebugLabel component="PauseControl" section="PauseDialog" props={{ showPauseDialog, useModernDesign: false }} />
+        <DialogContent aria-labelledby="pause-dialog-title-original">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+            <DialogTitle id="pause-dialog-title-original" className="flex items-center gap-2 text-red-600 dark:text-red-400">
               <AlertTriangle className="h-5 w-5" />
               Confirmar Pausa del Contrato
             </DialogTitle>
@@ -485,9 +493,10 @@ export function PauseControl() {
 
       {/* Dialog de confirmación para reanudar */}
       <Dialog open={showUnpauseDialog} onOpenChange={setShowUnpauseDialog}>
-        <DialogContent>
+        <DebugLabel component="PauseControl" section="UnpauseDialog" props={{ showUnpauseDialog, useModernDesign: false }} />
+        <DialogContent aria-labelledby="unpause-dialog-title-original">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
+            <DialogTitle id="unpause-dialog-title-original" className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <Play className="h-5 w-5" />
               Reanudar Contrato
             </DialogTitle>

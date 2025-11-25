@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Pause } from 'lucide-react'
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 export function UserManagementTable() {
   const { users, isLoading, refetch } = useGetAllUsers()
@@ -136,6 +137,7 @@ export function UserManagementTable() {
     if (useModernDesign) {
       return (
         <>
+          <DebugLabel component="UserManagementTable" section="LoadingState" props={{ isLoading, useModernDesign: true }} />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-6 animate-pulse">
@@ -152,6 +154,7 @@ export function UserManagementTable() {
     }
     return (
       <>
+        <DebugLabel component="UserManagementTable" section="LoadingState" props={{ isLoading, useModernDesign: false }} />
         {/* Stats Cards Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {[...Array(5)].map((_, i) => (
@@ -182,6 +185,7 @@ export function UserManagementTable() {
     if (useModernDesign) {
       return (
         <>
+          <DebugLabel component="UserManagementTable" section="EmptyState" props={{ usersCount: users.length, useModernDesign: true }} />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
             <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg p-6">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -200,6 +204,7 @@ export function UserManagementTable() {
     }
     return (
       <>
+        <DebugLabel component="UserManagementTable" section="EmptyState" props={{ usersCount: users.length, useModernDesign: false }} />
         {/* Stats Cards - Empty State */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <Card>
@@ -227,7 +232,8 @@ export function UserManagementTable() {
 
   // Diseño moderno para stats cards
   const StatsCards = useModernDesign ? (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+    <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+      <DebugLabel component="UserManagementTable" section="StatsCards" props={{ stats, useModernDesign: true }} position="top-right" offset={4} />
       {/* Total Users */}
       <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -279,7 +285,8 @@ export function UserManagementTable() {
       </div>
     </div>
   ) : (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+    <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+      <DebugLabel component="UserManagementTable" section="StatsCards" props={{ stats, useModernDesign: false }} position="top-right" offset={30} />
       {/* Total Users */}
       <Card>
         <CardHeader className="pb-2">
@@ -343,7 +350,8 @@ export function UserManagementTable() {
       {StatsCards}
 
       {useModernDesign ? (
-        <div className="group relative overflow-hidden rounded-3xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
+        <div className="group relative overflow-hidden rounded-3xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-2xl" style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+          <DebugLabel component="UserManagementTable" section="MainTable" props={{ usersCount: users.length, filteredCount: filteredUsers.length, filterStatus, useModernDesign: true, isPaused: isPaused === true }} position="top-right" offset={4} />
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative p-8">
             <div className="flex justify-between items-center mb-6">
@@ -477,7 +485,8 @@ export function UserManagementTable() {
           </div>
         </div>
       ) : (
-        <Card>
+        <Card style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+          <DebugLabel component="UserManagementTable" section="MainTable" props={{ usersCount: users.length, filteredCount: filteredUsers.length, filterStatus, useModernDesign: false, isPaused: isPaused === true }} position="top-right" offset={4} />
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>Gestión de Usuarios</CardTitle>
