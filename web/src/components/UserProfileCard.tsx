@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { User, Shield, CheckCircle, Clock, XCircle, Ban } from 'lucide-react';
 import { validateUserInfo, validateUserInfoTuple } from '@/lib/validation';
 import type { UserInfo } from '@/types';
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug';
 
 export function UserProfileCard() {
   const { address, isConnected } = useAccount();
@@ -23,7 +24,8 @@ export function UserProfileCard() {
 
   if (!isConnected || !address) {
     return (
-      <Card>
+      <Card style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="UserProfileCard" section="NotConnectedState" props={{ isConnected, hasAddress: !!address }} position="top-right" offset={4} />
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
@@ -41,7 +43,8 @@ export function UserProfileCard() {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="UserProfileCard" section="LoadingState" props={{ isLoading }} position="top-right" offset={4} />
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
@@ -59,7 +62,8 @@ export function UserProfileCard() {
 
   if (!userInfo || userInfo.id === BigInt(0)) {
     return (
-      <Card className="border-yellow-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-left-4">
+      <Card className="border-yellow-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-left-4" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="UserProfileCard" section="NotRegisteredState" props={{ hasUserInfo: !!userInfo }} position="top-right" offset={4} />
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
@@ -102,7 +106,8 @@ export function UserProfileCard() {
   const status = Number(userInfo.status);
 
   return (
-    <Card className="transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-left-4">
+    <Card className="transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-left-4" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+      <DebugLabel component="UserProfileCard" section="MainContent" props={{ hasUserInfo: !!userInfo, userStatus: status }} position="top-right" offset={4} />
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <User className="h-5 w-5 transition-transform duration-200 hover:scale-110" />

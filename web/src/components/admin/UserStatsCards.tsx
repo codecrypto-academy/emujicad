@@ -9,8 +9,8 @@ export function UserStatsCards() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <DebugLabel component="UserStatsCards" section="LoadingState" props={{ isLoading }} />
+      <div className="relative grid grid-cols-1 md:grid-cols-4 gap-4">
+        <DebugLabel component="UserStatsCards" section="LoadingState" props={{ isLoading }} position="top-left" offset={4} />
         {[...Array(4)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
@@ -26,8 +26,8 @@ export function UserStatsCards() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <DebugLabel component="UserStatsCards" section="StatsGrid" props={{ stats, isLoading }} />
+    <div className="relative grid grid-cols-1 md:grid-cols-4 gap-4">
+      <DebugLabel component="UserStatsCards" section="StatsGrid" props={{ stats, isLoading }} position="top-left" offset={4} />
       {/* Pending */}
       <Card className="border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
         <CardHeader>

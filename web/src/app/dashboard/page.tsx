@@ -24,6 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Shield, Package, Users, ArrowRightLeft, AlertCircle, Pause, Table2, User, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { UserRole, UserStatus, TokenType } from '@/contracts/config';
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -269,6 +270,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <DebugLabel component="DashboardPage" section="LoadingState" props={{ isLoading }} position="top-right" offset={4} />
         <Header />
         <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
           <Card className="w-96">
@@ -289,12 +291,13 @@ export default function DashboardPage() {
   // Diseño moderno 2025
   if (useModernDesign) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+      <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
         <Header />
         
         <div className="container mx-auto px-4 py-12 max-w-7xl">
           {/* Título Moderno */}
-          <div className="mb-10 flex items-start justify-between animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="relative mb-10 flex items-start justify-between animate-in fade-in slide-in-from-top-4 duration-700" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+            <DebugLabel component="DashboardPage" section="TitleSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
             <div>
             <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-3">
               {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
@@ -314,7 +317,8 @@ export default function DashboardPage() {
           </div>
 
           {/* Estadísticas Principales Modernas */}
-          <div className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mb-6`}>
+          <div className={`relative grid grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mb-6`} style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+            <DebugLabel component="DashboardPage" section="MainStatsSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
             {/* Total Users - Solo visible para administrador */}
             {isAdmin && (
             <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
@@ -411,7 +415,8 @@ export default function DashboardPage() {
 
           {/* Estadísticas de Transferencias */}
           {!isAdmin && (
-            <div className="mb-10">
+            <div className="relative mb-10" style={DEBUG_MODE ? { border: '3px solid rgba(128, 0, 128, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+              <DebugLabel component="DashboardPage" section="TransferStatsSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
               <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
                 Transfer Statistics
               </h2>
@@ -577,9 +582,11 @@ export default function DashboardPage() {
 
           {/* Secciones del Administrador */}
           {isAdmin && (
-            <div className="mb-10 space-y-6">
+            <div className="relative mb-10 space-y-6" style={DEBUG_MODE ? { border: '3px solid rgba(255, 192, 203, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+              <DebugLabel component="DashboardPage" section="AdminSection" props={{ useModernDesign: true, isAdmin }} position="top-left" offset={4} />
               {/* Estadísticas de Usuarios (Solo Admin) */}
-              <div className="mb-10">
+              <div className="relative mb-10" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+                <DebugLabel component="DashboardPage" section="UserStatsSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
                   User Statistics
                 </h2>
@@ -587,7 +594,8 @@ export default function DashboardPage() {
               </div>
 
               {/* Estadísticas de Tokens (Solo Admin) */}
-              <div className="mb-10">
+              <div className="relative mb-10" style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+                <DebugLabel component="DashboardPage" section="TokenStatsSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
                   Tokens Statistics
                 </h2>
@@ -637,7 +645,8 @@ export default function DashboardPage() {
               </div>
 
               {/* Estadísticas de Transferencias del Sistema (Solo Admin) */}
-              <div className="mb-10">
+              <div className="relative mb-10" style={DEBUG_MODE ? { border: '3px solid rgba(255, 20, 147, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+                <DebugLabel component="DashboardPage" section="SystemTransferStatsSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
                   Transfer Statistics
                 </h2>
@@ -690,7 +699,8 @@ export default function DashboardPage() {
               </div>
 
               {/* Panel de Administrador Moderno */}
-              <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50/80 to-yellow-50/80 dark:from-amber-900/30 dark:to-yellow-900/30 backdrop-blur-xl border border-amber-200/50 dark:border-amber-700/50 shadow-xl">
+              <div className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50/80 to-yellow-50/80 dark:from-amber-900/30 dark:to-yellow-900/30 backdrop-blur-xl border border-amber-200/50 dark:border-amber-700/50 shadow-xl" style={DEBUG_MODE ? { border: '3px solid rgba(255, 140, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+                <DebugLabel component="DashboardPage" section="AdministratorPanel" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
                 <div className="relative p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-3 rounded-xl bg-amber-500/20 dark:bg-amber-400/20">
@@ -734,10 +744,11 @@ export default function DashboardPage() {
 
           {/* Contenido para usuarios regulares */}
           {!isAdmin && (
-            <>
+            <div className="relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+              <DebugLabel component="DashboardPage" section="UserTokensSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
               {/* TokenTypeStatsTable - Muestra tokens agrupados por tipo */}
               <TokenTypeStatsTable />
-            </>
+            </div>
           )}
 
           {/* Sección "My Tokens" eliminada - La información se muestra en "My Tokens by Type" */}
@@ -844,18 +855,21 @@ export default function DashboardPage() {
           )}
 
         </div>
+        {/* DebugLabel de la página principal al final */}
+        <DebugLabel component="DashboardPage" section="MainContent" props={{ isAdmin, useModernDesign: true, isAuthenticated }} position="bottom-right" offset={4} />
       </div>
     )
   }
 
   // Diseño original
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
       <Header />
       
       <div className="container mx-auto px-4 py-8">
         {/* Título */}
-        <div className="mb-8 flex items-start justify-between">
+        <div className="relative mb-8 flex items-start justify-between" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="DashboardPage" section="TitleSection" props={{ useModernDesign: false, isAdmin }} position="top-right" offset={4} />
           <div>
           <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2">
             {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
@@ -875,7 +889,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Estadísticas Principales */}
-        <div className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mb-6`}>
+        <div className={`relative grid grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mb-6`} style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="DashboardPage" section="MainStatsSection" props={{ useModernDesign: false, isAdmin }} position="top-right" offset={4} />
           {/* Total Users - Solo visible para administrador */}
           {isAdmin && (
             <Card className="border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-slate-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
@@ -1174,15 +1189,18 @@ export default function DashboardPage() {
 
         {/* Contenido para usuarios regulares */}
         {!isAdmin && (
-          <>
+          <div className="relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+            <DebugLabel component="DashboardPage" section="UserTokensSection" props={{ useModernDesign: false, isAdmin }} position="top-right" offset={4} />
             {/* TokenTypeStatsTable - Muestra tokens agrupados por tipo para todos los usuarios */}
             <TokenTypeStatsTable />
-          </>
+          </div>
         )}
 
         {/* Sección "My Tokens" eliminada - La información se muestra en "My Tokens by Type" */}
 
       </div>
+      {/* DebugLabel de la página principal al final */}
+      <DebugLabel component="DashboardPage" section="MainContent" props={{ isAdmin, useModernDesign: false, isAuthenticated }} position="bottom-right" offset={4} />
     </div>
   );
 }
@@ -1196,6 +1214,8 @@ function TokenTypeStatsTable() {
   const { rowMaterial, finishedProduct, isLoading, error } = useUserTokenStats(address);
   const { tokens: userTokens, isLoading: isLoadingTokens } = useGetUserTokensWithData(address);
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
+  
+  // DEBUG_MODE ya está importado a nivel del módulo
   
   // Separar tokens por tipo
   const rawMaterialTokens = useMemo(() => {
@@ -1215,7 +1235,8 @@ function TokenTypeStatsTable() {
 
   if (error) {
     return (
-      <Card className="mb-8 border-red-200 dark:border-red-800">
+      <Card className="mb-8 border-red-200 dark:border-red-800" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="TokenTypeStatsTable" section="ErrorState" props={{ hasError: true }} position="top-right" offset={4} />
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-300">
             <AlertCircle className="h-5 w-5" />
@@ -1232,7 +1253,8 @@ function TokenTypeStatsTable() {
   }
 
   return (
-    <Card className="mb-8 border-slate-200 dark:border-slate-700">
+    <Card className="mb-8 border-slate-200 dark:border-slate-700" style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 255, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+      <DebugLabel component="TokenTypeStatsTable" section="MainContent" props={{ isLoading, hasAnyTokens }} position="top-right" offset={4} />
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
           <Table2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
