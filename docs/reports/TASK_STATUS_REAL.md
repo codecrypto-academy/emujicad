@@ -3,6 +3,10 @@
 **Fecha**: 21 de Noviembre, 2025  
 **Última verificación**: Automatizada con scripts de verificación
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**  
+> Este documento refleja el estado del 21 de Noviembre. Para el estado actual, ver PROJECT_STATUS.md.
+
 ---
 
 ## ✅ COMPLETADO (100%)

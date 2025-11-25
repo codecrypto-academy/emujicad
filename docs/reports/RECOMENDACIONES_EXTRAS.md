@@ -24,7 +24,7 @@
 #### 2. **Alto valor académico** 🎓
 - Demuestra conocimiento de testing profesional
 - Muestra que entiendes la importancia de calidad de código
-- Complementa perfectamente los 104 tests del smart contract
+- Complementa perfectamente los 108 tests del smart contract
 - **Impacto visual**: Puedes mostrar en el video demo que tienes tests E2E
 
 #### 3. **Tiempo vs Impacto óptimo** ⏱️

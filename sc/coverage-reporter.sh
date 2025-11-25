@@ -136,7 +136,7 @@ generate_markdown_report() {
 
 **Generado**: $timestamp  
 **Comando**: \`forge coverage --match-path "test/*"\`  
-**Total Tests**: 104 (64 core + 40 edge cases)
+**Total Tests**: 108 (64 core + 44 edge cases)
 
 ## 📈 Métricas Actuales
 
@@ -167,8 +167,8 @@ $COVERAGE_OUTPUT
 - Tests de integración con múltiples actores
 
 ### 📦 Suite de Tests
-- **SupplyChain.t.sol**: 55 tests core (flujos principales)
-- **EdgeCasesTest.t.sol**: 35 tests científicos (branches + edge cases)
+- **SupplyChain.t.sol**: 64 tests core (flujos principales)
+- **EdgeCasesTest.t.sol**: 44 tests científicos (branches + edge cases)
 - Scripts funcionales: Deploy.s.sol, Interactions.s.sol
 
 ## 🚀 Comandos de Reproducción

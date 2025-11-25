@@ -9,7 +9,7 @@
 
 ### Puntuación Académica: **7.4/9.5** ✅ APROBATORIO
 
-**Nota**: Actualizado tras implementación de Validaciones Críticas del Contrato (Día 7). Estado real: 9/9 páginas esenciales (100%), 90 tests (100% pasando), 85.60% coverage.
+**Nota**: Actualizado tras implementación de Optimizaciones del Contrato (Fase 3 completada). Estado real: 9/9 páginas esenciales (100%), 108 tests (100% pasando), 85.60% coverage lines, 72.15% coverage branches.
 
 | Componente | Actual | Máximo | Estado |
 |------------|--------|---------|---------|
@@ -28,8 +28,8 @@
 ### Smart Contract (4.0/4.0 puntos)
 ```
 ✅ SupplyChain.sol - 970+ líneas
-✅ 90 tests (55 core + 35 edge cases) - 100% pasando
-✅ Coverage: 85.60% lines, 70.67% branches, 82.67% statements, 80.95% functions
+✅ 108 tests (64 core + 44 edge cases) - 100% pasando
+✅ Coverage: 85.60% lines, 72.15% branches, 82.67% statements, 80.95% functions
 ✅ Deployed en Anvil (ChainID 31337)
 ✅ Scripts deployment automatizados
 ✅ Documentación completa (18 archivos en docs/sc/)

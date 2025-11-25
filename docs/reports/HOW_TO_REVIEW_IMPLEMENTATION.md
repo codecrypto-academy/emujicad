@@ -4,6 +4,8 @@
 **Objetivo**: Verificar que todas las mejoras implementadas funcionan correctamente  
 **Estado**: ✅ Todas las tareas completadas (ErrorBoundary, Validación, Performance, Tests, Accesibilidad, Animaciones)
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 > **Nota**: Esta guía es específica para revisión manual. Para verificación automatizada, usar los scripts en `scripts/`. Ver [VALIDATION_SUMMARY.md](./VALIDATION_SUMMARY.md) para resumen completo.
 
 ---

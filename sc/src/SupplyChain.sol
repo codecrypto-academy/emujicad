@@ -580,60 +580,69 @@ contract SupplyChain  is ReentrancyGuard {
     * @notice Función para que usuarios, excepto el owner, soliciten un rol en la plataforma.
     * @param role Role solicitado.
     */
-    function requestUserRole(UserRole role) external whenNotPaused { 
-        uint256 userId;
+    function requestUserRole(UserRole role) external whenNotPaused {
+        if (owner == msg.sender) revert InvalidAddress();
+        if (uint(role) > 3) revert InvalidRole();
 
-        //if (msg.sender == address(0) || owner == msg.sender ) revert InvalidAddress();
-        if (owner == msg.sender ) revert InvalidAddress();
-        //if (bytes(role).length == 0) revert InvalidEntry("role");
-        if (uint(role) > 3 ) revert InvalidRole();
-
-        // `storage` crea una referencia a la variable en el almacenamiento de la blockchain.
-        // Modificar `u` modifica directamente el estado del contrato.
-
-        userId = addressToUserId[msg.sender];
-        bool userExists = (userId != 0);
-        if ( userExists) {
-            
-            User storage user = users[userId];
-
-            // Validar que el usuario no esté cancelado
-            if (user.status == UserStatus.Canceled) {
-                revert UserCanceled();
-            }
-
-            //if (uint(role) ==  users[nextUserId].role) {
-            if (uint(role) ==  uint(user.role)) {
-                revert UserWithExistingRole();
-            }
-
-            if  (user.status == UserStatus.Approved) {
-                revert ExistingUserWithApprovedRole();
-            }
-
-            if  (user.status != UserStatus.Pending) {
-                user.status = UserStatus.Pending;
-            }
-            user.role = role;
-            emit UserRoleRequested(msg.sender, role);
+        uint256 userId = addressToUserId[msg.sender];
+        if (userId != 0) {
+            _updateExistingUserRole(userId, role);
+        } else {
+            _createNewUser(role);
         }
-            
-        else{
-            //crea un nuevo User con el ID actual, la dirección que llamó a la función (msg.sender), el rol recibido como parámetro, y un estado definido Pending
-            User storage user = users[nextUserId];
-            user.id = nextUserId;
-            user.userAddress = msg.sender;
-            user.role = role;
+    }
+
+    /**
+    * @notice Actualiza el rol de un usuario existente.
+    * @param userId ID del usuario existente.
+    * @param role Nuevo rol a asignar.
+    * @dev Función interna para manejar la lógica de actualización de usuarios existentes.
+    */
+    function _updateExistingUserRole(uint256 userId, UserRole role) internal {
+        User storage user = users[userId];
+
+        // Validar que el usuario no esté cancelado
+        if (user.status == UserStatus.Canceled) {
+            revert UserCanceled();
+        }
+
+        // Validar que no esté solicitando el mismo rol
+        if (uint(role) == uint(user.role)) {
+            revert UserWithExistingRole();
+        }
+
+        // Validar que no tenga un rol aprobado
+        if (user.status == UserStatus.Approved) {
+            revert ExistingUserWithApprovedRole();
+        }
+
+        // Actualizar estado a Pending si no lo está
+        if (user.status != UserStatus.Pending) {
             user.status = UserStatus.Pending;
-
-            addressToUserId[msg.sender] = nextUserId; //establece la relación entre la dirección y el ID del usuario. 
-            // Incrementar el ID para el próximo usuario
-            
-            unchecked {
-                nextUserId++;
-            }
-            emit UserRoleRequested(msg.sender, role);
         }
+        
+        user.role = role;
+        emit UserRoleRequested(msg.sender, role);
+    }
+
+    /**
+    * @notice Crea un nuevo usuario en el sistema.
+    * @param role Rol a asignar al nuevo usuario.
+    * @dev Función interna para manejar la creación de nuevos usuarios.
+    */
+    function _createNewUser(UserRole role) internal {
+        User storage user = users[nextUserId];
+        user.id = nextUserId;
+        user.userAddress = msg.sender;
+        user.role = role;
+        user.status = UserStatus.Pending;
+
+        addressToUserId[msg.sender] = nextUserId;
+
+        unchecked {
+            nextUserId++;
+        }
+        emit UserRoleRequested(msg.sender, role);
     }
 
     /**
@@ -706,6 +715,37 @@ contract SupplyChain  is ReentrancyGuard {
         }
     }
 
+    /**
+    * @notice Valida que el rol del usuario sea compatible con el tipo de token para transferencia o recepción.
+    * @param role Rol del usuario a validar.
+    * @param tokenType Tipo del token (RowMaterial o FinishedProduct).
+    * @param isTransfer True si es una transferencia (sender), false si es recepción (receiver).
+    * @dev Función interna para consolidar la lógica de validación de roles por tipo de token.
+    */
+    function _validateRoleForTokenType(UserRole role, TokenType tokenType, bool isTransfer) internal pure {
+        if (tokenType == TokenType.RowMaterial) {
+            if (isTransfer) {
+                // Solo Producer puede transferir Raw Material
+                if (role != UserRole.Producer) revert InvalidRoleForTokenType();
+            } else {
+                // Solo Factory puede recibir Raw Material
+                if (role != UserRole.Factory) revert InvalidRoleForTokenType();
+            }
+        } else if (tokenType == TokenType.FinishedProduct) {
+            if (isTransfer) {
+                // Solo Factory o Retailer pueden transferir Finished Product
+                if (role != UserRole.Factory && role != UserRole.Retailer) {
+                    revert InvalidRoleForTokenType();
+                }
+            } else {
+                // Solo Retailer o Consumer pueden recibir Finished Product
+                if (role != UserRole.Retailer && role != UserRole.Consumer) {
+                    revert InvalidRoleForTokenType();
+                }
+            }
+        }
+    }
+
     // Gestión de Tokens
     /**
      * @notice Crea un nuevo token, sea materia prima o producto terminado.
@@ -720,39 +760,71 @@ contract SupplyChain  is ReentrancyGuard {
      * @dev Incrementa contador de tokens y actualiza balance inicial del creador.
     */
     function createToken(string memory name, TokenType tokenType, uint totalSupply, string memory features, uint parentId, uint parentAmount) external onlyTokenCreators whenNotPaused {
-        if (bytes(name).length < 2) revert InvalidName();
-        if (totalSupply == 0) revert InvalidTotalSupply();
+        _validateTokenCreation(name, totalSupply);
 
-        // Validación para productos terminados: deben tener un parentId válido
         if (tokenType == TokenType.FinishedProduct) {
-            if (parentId == 0) revert ParentTokenDoesNotExist();
-            if (parentAmount == 0) revert InvalidAmount();
-            
-            Token storage parentToken = tokens[parentId];
-            if (parentToken.id == 0) revert ParentTokenDoesNotExist();
-            
-            // Validar que el parent token sea de tipo RowMaterial
-            if (parentToken.tokenType != TokenType.RowMaterial) revert ParentTokenDoesNotExist();
-            
-            // Validar que el usuario tenga balance suficiente del token padre
-            uint256 userParentBalance = parentToken.balance[msg.sender];
-            if (userParentBalance < parentAmount) {
-                revert InsufficientBalance(userParentBalance, parentAmount);
-            }
-            
-            // Descontar tokens de materia prima del balance del usuario
-            parentToken.balance[msg.sender] = userParentBalance - parentAmount;
-            
-            // Actualizar contador de tokens del usuario si ya no tiene balance del parent token
-            if (parentToken.balance[msg.sender] == 0 && userTokenCount[msg.sender] > 0) {
-                userTokenCount[msg.sender]--;
-            }
+            _validateAndConsumeParentToken(parentId, parentAmount);
         } else {
             // Para materia prima, parentId debe ser 0 y parentAmount debe ser 0
             if (parentId != 0) revert ParentTokenDoesNotExist();
             if (parentAmount != 0) revert InvalidAmount();
         }
 
+        _createTokenInternal(name, tokenType, totalSupply, features, parentId);
+    }
+
+    /**
+    * @notice Valida los parámetros básicos para la creación de un token.
+    * @param name Nombre del token.
+    * @param totalSupply Suministro total del token.
+    * @dev Función interna para validaciones básicas.
+    */
+    function _validateTokenCreation(string memory name, uint totalSupply) internal pure {
+        if (bytes(name).length < 2) revert InvalidName();
+        if (totalSupply == 0) revert InvalidTotalSupply();
+    }
+
+    /**
+    * @notice Valida y consume el token padre para productos terminados.
+    * @param parentId ID del token padre.
+    * @param parentAmount Cantidad de tokens padre a consumir.
+    * @dev Función interna para validar y consumir tokens de materia prima.
+    */
+    function _validateAndConsumeParentToken(uint parentId, uint parentAmount) internal {
+        if (parentId == 0) revert ParentTokenDoesNotExist();
+        if (parentAmount == 0) revert InvalidAmount();
+
+        Token storage parentToken = tokens[parentId];
+        if (parentToken.id == 0) revert ParentTokenDoesNotExist();
+
+        // Validar que el parent token sea de tipo RowMaterial
+        if (parentToken.tokenType != TokenType.RowMaterial) revert ParentTokenDoesNotExist();
+
+        // Validar que el usuario tenga balance suficiente del token padre
+        uint256 userParentBalance = parentToken.balance[msg.sender];
+        if (userParentBalance < parentAmount) {
+            revert InsufficientBalance(userParentBalance, parentAmount);
+        }
+
+        // Descontar tokens de materia prima del balance del usuario
+        parentToken.balance[msg.sender] = userParentBalance - parentAmount;
+
+        // Actualizar contador de tokens del usuario si ya no tiene balance del parent token
+        if (parentToken.balance[msg.sender] == 0 && userTokenCount[msg.sender] > 0) {
+            userTokenCount[msg.sender]--;
+        }
+    }
+
+    /**
+    * @notice Crea el token en el sistema.
+    * @param name Nombre del token.
+    * @param tokenType Tipo del token.
+    * @param totalSupply Suministro total.
+    * @param features Características del token.
+    * @param parentId ID del token padre.
+    * @dev Función interna para crear el token después de todas las validaciones.
+    */
+    function _createTokenInternal(string memory name, TokenType tokenType, uint totalSupply, string memory features, uint parentId) internal {
         Token storage newToken = tokens[nextTokenId];
         newToken.id = nextTokenId;
         newToken.creator = msg.sender;
@@ -834,13 +906,7 @@ contract SupplyChain  is ReentrancyGuard {
         User storage sender = users[userId];  // Caché
         
         // Validar que el rol del emisor sea compatible con el tipo de token
-        if (token.tokenType == TokenType.RowMaterial) {
-            if (sender.role != UserRole.Producer) revert InvalidRoleForTokenType();
-        } else if (token.tokenType == TokenType.FinishedProduct) {
-            if (sender.role != UserRole.Factory && sender.role != UserRole.Retailer) {
-                revert InvalidRoleForTokenType();
-            }
-        }
+        _validateRoleForTokenType(sender.role, token.tokenType, true);
 
         uint256 senderBalance = token.balance[msg.sender];  // Caché
         if (senderBalance < amount) revert InsufficientBalance(senderBalance, amount);
@@ -887,13 +953,7 @@ contract SupplyChain  is ReentrancyGuard {
         User storage receiver = users[userId];  // Caché
         
         // Validar que el rol del receptor sea compatible con el tipo de token
-        if (token.tokenType == TokenType.RowMaterial) {
-            if (receiver.role != UserRole.Factory) revert InvalidRoleForTokenType();
-        } else if (token.tokenType == TokenType.FinishedProduct) {
-            if (receiver.role != UserRole.Retailer && receiver.role != UserRole.Consumer) {
-                revert InvalidRoleForTokenType();
-            }
-        }
+        _validateRoleForTokenType(receiver.role, token.tokenType, false);
         
         // Caché de balances
         uint256 receiverBalance = token.balance[transferItem.to];
@@ -973,14 +1033,9 @@ contract SupplyChain  is ReentrancyGuard {
         Token storage token = tokens[transferItem.tokenId];
         
         // Validar que el rol del receptor sea compatible con el tipo de token
-        User storage receiver = users[addressToUserId[msg.sender]];
-        if (token.tokenType == TokenType.RowMaterial) {
-            if (receiver.role != UserRole.Factory) revert InvalidRoleForTokenType();
-        } else if (token.tokenType == TokenType.FinishedProduct) {
-            if (receiver.role != UserRole.Retailer && receiver.role != UserRole.Consumer) {
-                revert InvalidRoleForTokenType();
-            }
-        }
+        uint256 userId = addressToUserId[msg.sender];  // Caché
+        User storage receiver = users[userId];  // Caché
+        _validateRoleForTokenType(receiver.role, token.tokenType, false);
 
         // 🔹 Verificar si el emisor tenía 0 unidades antes de devolver los tokens
         bool senderHadZeroBefore = (token.balance[transferItem.from] == 0);

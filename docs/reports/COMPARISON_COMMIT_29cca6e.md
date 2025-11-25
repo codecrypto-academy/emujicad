@@ -4,6 +4,9 @@
 **Commit de referencia:** `29cca6e625acc1fef58ae461ef28db42bee429c3`  
 **Propósito:** Analizar las diferencias entre el código que funcionaba y el código actual después de las correcciones
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**
+
 ---
 
 ## 📋 Resumen Ejecutivo

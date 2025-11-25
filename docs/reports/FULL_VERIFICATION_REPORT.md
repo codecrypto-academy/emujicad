@@ -1,7 +1,10 @@
 # 📊 Reporte Completo de Verificación Automatizada
 
 **Fecha**: 21 de Noviembre, 2025  
-**Ejecución**: Todas las validaciones juntas
+**Ejecución**: Todas las validaciones juntas  
+**Última actualización**: 25 de Noviembre, 2025
+
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ---
 

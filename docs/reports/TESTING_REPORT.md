@@ -5,6 +5,8 @@
 **Script**: deploy.sh v1.0.0  
 **Estado**: ✅ TODAS LAS PRUEBAS PASARON (Validación completa)
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 ---
 
 ## 📋 Resumen Ejecutivo

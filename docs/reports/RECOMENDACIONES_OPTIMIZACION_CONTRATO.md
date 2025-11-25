@@ -2,7 +2,10 @@
 
 **Fecha de análisis**: 24 de Noviembre, 2025  
 **Contrato analizado**: `sc/src/SupplyChain.sol`  
-**Versión Solidity**: 0.8.30
+**Versión Solidity**: 0.8.30  
+**Estado**: ✅ Fase 3 completada (25 Nov 2025)
+
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ---
 
@@ -616,7 +619,7 @@ function transfer(...) external ... {
 - ✅ Considerar agregar `@param` y `@return` en todas las funciones públicas
 
 ### 6.2. **Testing** 🧪
-- ✅ El contrato tiene buena cobertura de tests (104 tests, 85.60%)
+- ✅ El contrato tiene buena cobertura de tests (108 tests, 85.60% lines, 72.15% branches)
 - ✅ Considerar agregar tests de gas para validar optimizaciones
 
 ### 6.3. **Eventos** 📢

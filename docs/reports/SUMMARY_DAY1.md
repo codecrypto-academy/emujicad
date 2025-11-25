@@ -4,6 +4,10 @@
 **Días**: 1-2 del proyecto  
 **Estado**: ✅ Fase de Setup + Documentación Completada
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**  
+> Este documento refleja el estado del Día 1-2. Para el estado actual, ver PROJECT_STATUS.md.
+
 ---
 
 ## 🎯 Resumen Ejecutivo

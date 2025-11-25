@@ -120,6 +120,31 @@ contract EdgeCasesTest is Test {
         supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
     }
 
+    /// @notice Edge Case 4.6: Usuario rechazado puede solicitar nuevo rol (cambia a Pending)
+    /// @dev Cubre branch: if (user.status != UserStatus.Pending) { user.status = UserStatus.Pending; }
+    /// @dev Este test cubre el branch faltante en _updateExistingUserRole línea 620
+    function testRejectedUserCanRequestNewRole() public {
+        // 1. Usuario solicita rol y es rechazado
+        vm.prank(producerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
+        
+        vm.prank(owner);
+        supplyChain.changeStatusUser(producerAddress, SupplyChain.UserStatus.Rejected);
+        
+        // Verificar que el usuario está rechazado
+        SupplyChain.User memory user = supplyChain.getUserInfo(producerAddress);
+        assertEq(uint(user.status), uint(SupplyChain.UserStatus.Rejected), "User should be rejected");
+        
+        // 2. Usuario rechazado solicita un rol diferente (debe cambiar a Pending)
+        vm.prank(producerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        
+        // 3. Verificar que el status cambió a Pending y el rol cambió
+        user = supplyChain.getUserInfo(producerAddress);
+        assertEq(uint(user.status), uint(SupplyChain.UserStatus.Pending), "Status should be Pending after requesting new role");
+        assertEq(uint(user.role), uint(SupplyChain.UserRole.Factory), "Role should be Factory");
+    }
+
     /// @notice Edge Case 5: Token con nombre vacío
     /// @dev Cubre branch: if (bytes(name).length == 0) revert InvalidName();
     function testCreateTokenEmptyName() public {
@@ -152,8 +177,8 @@ contract EdgeCasesTest is Test {
         supplyChain.createToken("Test Token", SupplyChain.TokenType.RowMaterial, 0, "features", 0, 0);
     }
 
-    /// @notice Edge Case 7: Token con parentId inexistente
-    /// @dev Cubre branch: if (parentId != 0 && tokens[parentId].id == 0) revert ParentTokenDoesNotExist();
+    /// @notice Edge Case 7: Token RowMaterial con parentId != 0 (debe ser 0)
+    /// @dev Cubre branch: if (parentId != 0) revert ParentTokenDoesNotExist(); en createToken línea 769
     function testCreateTokenInvalidParent() public {
         setupApprovedProducer();
         
@@ -843,5 +868,99 @@ contract EdgeCasesTest is Test {
         
         SupplyChain.User memory user = supplyChain.getUserInfo(testUser);
         assertEq(uint(user.status), uint(SupplyChain.UserStatus.Approved), "New owner should be able to approve");
+    }
+
+    // ============================================================================
+    // 🔴 FASE 5: BRANCHES FALTANTES DE REFACTORIZACIÓN (OPTIMIZACIÓN FASE 3)
+    // ============================================================================
+
+    /// @notice Edge Case 40: userTokenCount == 0 cuando balance llega a 0 (no decrementa)
+    /// @dev Cubre branch else implícito: if (parentToken.balance[msg.sender] == 0 && userTokenCount[msg.sender] > 0) en _validateAndConsumeParentToken línea 813
+    /// @dev Este test cubre el caso donde userTokenCount ya es 0, por lo que no se debe decrementar
+    function testUserTokenCountNotDecrementedWhenAlreadyZero() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        // Crear token padre
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Transferir todo el balance al factory
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 100);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // Producer ahora tiene 0 balance y 0 userTokenCount (ya se decrementó)
+        // Factory consume todo para crear Finished Product
+        vm.prank(factoryAddress);
+        supplyChain.createToken("Finished Product", SupplyChain.TokenType.FinishedProduct, 100, "{}", 1, 100);
+        
+        // Verificar que producer tiene 0 balance del token 1
+        assertEq(supplyChain.getTokenBalance(1, producerAddress), 0, "Producer should have 0 balance of token 1");
+        // Verificar que factory tiene el Finished Product
+        assertEq(supplyChain.getTokenBalance(2, factoryAddress), 100, "Factory should have Finished Product");
+    }
+
+    /// @notice Edge Case 41: userTokenCount del sender == 0 en acceptTransfer (no decrementa)
+    /// @dev Cubre branch else implícito: if (senderBalance == 0 && userTokenCount[transferItem.from] > 0) en acceptTransfer línea 967
+    /// @dev Este test cubre el caso donde el sender ya tiene userTokenCount == 0
+    function testAcceptTransferWhenSenderTokenCountIsZero() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        // Crear token y transferir todo
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 100);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(1);
+        
+        // Producer ahora tiene 0 balance y 0 userTokenCount
+        // Crear otro token y transferir parte
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material 2", SupplyChain.TokenType.RowMaterial, 50, "{}", 0, 0);
+        
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 2, 30);
+        vm.prank(factoryAddress);
+        supplyChain.acceptTransfer(2);
+        
+        // Verificar que producer tiene balance del token 2
+        assertEq(supplyChain.getTokenBalance(2, producerAddress), 20, "Producer should have 20 balance of token 2");
+    }
+
+    /// @notice Edge Case 42: senderHadZeroBefore == false en rejectTransfer (no incrementa)
+    /// @dev Cubre branch else implícito: if (senderHadZeroBefore) en rejectTransfer línea 1047
+    /// @dev Este test cubre el caso donde el sender ya tenía balance > 0 antes del rechazo
+    function testRejectTransferWhenSenderHadBalance() public {
+        setupApprovedProducer();
+        
+        vm.prank(factoryAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
+        supplyChain.changeStatusUser(factoryAddress, SupplyChain.UserStatus.Approved);
+        
+        // Crear token
+        vm.prank(producerAddress);
+        supplyChain.createToken("Raw Material", SupplyChain.TokenType.RowMaterial, 100, "{}", 0, 0);
+        
+        // Transferir parte (producer mantiene balance)
+        vm.prank(producerAddress);
+        supplyChain.transfer(factoryAddress, 1, 30);
+        
+        // Factory rechaza la transferencia
+        vm.prank(factoryAddress);
+        supplyChain.rejectTransfer(1);
+        
+        // Verificar que producer tiene el balance completo de vuelta
+        assertEq(supplyChain.getTokenBalance(1, producerAddress), 100, "Producer should have full balance back");
     }
 }

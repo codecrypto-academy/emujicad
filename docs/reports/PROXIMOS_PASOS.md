@@ -11,7 +11,7 @@
 ## 📊 Resumen Ejecutivo
 
 ### ✅ Completado (100%)
-- ✅ **Smart Contract**: 4.0/4.0 puntos (90 tests, 85.60% coverage, 5 validaciones críticas)
+- ✅ **Smart Contract**: 4.0/4.0 puntos (108 tests, 85.60% coverage lines, 72.15% coverage branches, 5 validaciones críticas)
 - ✅ **Frontend**: 3.0/3.0 puntos (9/9 páginas, 26 componentes, 22 hooks)
 - ✅ **Extras**: 0.5/1.0 puntos (deploy script validado)
 - ✅ **Validaciones críticas**: 5/5 completadas (usuario cancelado, longitud nombre, rol por tipo de token)
@@ -50,7 +50,7 @@
    - Mostrar código del contrato (SupplyChain.sol)
    - Ejecutar tests: `cd sc && forge test`
    - Mostrar coverage: `forge coverage`
-   - Mencionar: 90 tests, 85.60% coverage, validaciones críticas
+   - Mencionar: 108 tests, 85.60% coverage lines, 72.15% coverage branches, validaciones críticas
 
 3. **Demo Frontend (2.5m)**
    - **Conectar MetaMask** (10s)
@@ -177,7 +177,7 @@
 - [ ] No incluir archivos sensibles (private keys, .env)
 
 ### Código
-- [ ] Todos los tests pasando (90/90)
+- [ ] Todos los tests pasando (108/108)
 - [ ] Build de producción sin errores (`npm run build`)
 - [ ] Linting sin errores críticos
 - [ ] Código comentado donde sea necesario
@@ -254,7 +254,7 @@
 
 1. **El Video Demo es crítico**: Representa +1.5 puntos (16% de la nota total)
 2. **Todas las funcionalidades están completas**: 9/9 páginas, 26 componentes, 22 hooks
-3. **Smart Contract está en excelente estado**: 90 tests, 85.60% coverage, validaciones críticas
+3. **Smart Contract está en excelente estado**: 108 tests, 85.60% coverage lines, 72.15% coverage branches, validaciones críticas
 4. **Documentación está completa**: 36+ archivos .md, 13,000+ líneas
 
 **Próximo paso inmediato**: Crear y grabar Video Demo (Día 9)

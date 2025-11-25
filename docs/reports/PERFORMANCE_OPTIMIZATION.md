@@ -3,6 +3,8 @@
 **Fecha**: 21 de Noviembre, 2025  
 **Estado**: ✅ **IMPLEMENTADO**
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 ---
 
 ## 🎯 Objetivo

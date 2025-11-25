@@ -2,7 +2,10 @@
 
 **Fecha de creación**: 24 de Noviembre, 2025  
 **Contrato**: `sc/src/SupplyChain.sol`  
-**Enfoque**: Incremental, seguro, probado en cada paso
+**Enfoque**: Incremental, seguro, probado en cada paso  
+**Estado**: ✅ Fase 3 completada (25 Nov 2025)
+
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ---
 
@@ -393,7 +396,7 @@ git tag -a v1.1.0-optimized -m "Optimizaciones de caché de storage - Fase 1"
 
 **Checklist Final**:
 - ✅ Todos los tests pasan (104/104)
-- ✅ Cobertura se mantiene o mejora (≥85.60%)
+- ✅ Cobertura se mantiene o mejora (≥85.60% lines, ≥72.15% branches)
 - ✅ Frontend funciona correctamente
 - ✅ No hay errores de compilación
 - ✅ Documentación actualizada
@@ -835,7 +838,7 @@ forge test -vvv
 
 **Checklist Final**:
 - ✅ Todos los tests pasan (104/104)
-- ✅ Cobertura ≥85.60%
+- ✅ Cobertura ≥85.60% lines, ≥72.15% branches
 - ✅ Frontend funciona correctamente
 - ✅ No hay errores de compilación
 - ✅ No hay warnings de linting

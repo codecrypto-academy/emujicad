@@ -4,6 +4,10 @@
 **Día**: 4 del proyecto  
 **Estado**: ✅ Dashboard + Sistema de Pausabilidad Completado
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**  
+> Este documento refleja el estado del Día 4. Para el estado actual, ver PROJECT_STATUS.md.
+
 ---
 
 ## 🎯 Resumen Ejecutivo

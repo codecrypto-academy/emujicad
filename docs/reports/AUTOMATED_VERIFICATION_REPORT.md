@@ -4,6 +4,8 @@
 **Script**: `scripts/verify-low-priority-tasks.sh`  
 **Estado**: ✅ **TODAS LAS TAREAS COMPLETADAS**
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 > **Nota**: Este reporte es específico para tareas de baja prioridad. Para el reporte completo de todas las validaciones, ver [FULL_VERIFICATION_REPORT.md](./FULL_VERIFICATION_REPORT.md) o [VALIDATION_SUMMARY.md](./VALIDATION_SUMMARY.md)
 
 ---

@@ -26,7 +26,7 @@ Este directorio contiene scripts de Foundry para automatizar el deployment y dem
 
 ## 📁 Archivos Disponibles
 
-### 1. `Deploy.s.sol` - Script de Deployment
+### 1. `SupplyChainDeploy.s.sol` - Script de Deployment
 - **Propósito**: Deployment automatizado con configuración inicial
 - **Características**:
   - Deploy del contrato SupplyChain
@@ -34,14 +34,14 @@ Este directorio contiene scripts de Foundry para automatizar el deployment y dem
   - Verificación automática post-deployment
   - Logs detallados del proceso
 
-### 2. `Interactions.s.sol` - Demo de Flujo Completo  
+### 2. `SupplyChainInteractions.s.sol` - Demo de Flujo Completo  
 - **Propósito**: Demostración automatizada de workflow completo
 - **Fases incluidas**:
-  - ✅ Registro de usuarios (Manufacturer, Distributor, Retailer)
-  - ✅ Creación de tokens con metadata
-  - ✅ Flujo de transferencias completo
-  - ✅ Aceptación y rechazo de transfers
-  - ✅ Casos edge (cancelaciones)
+  - ✅ PHASE 1: Registro de usuarios (Producer, Factory, Retailer, Consumer)
+  - ✅ PHASE 2: Creación de tokens con metadata (Raw Material y Finished Product)
+  - ✅ PHASE 3: Flujo de transferencias completo
+  - ✅ PHASE 4: Aceptación, rechazo y cancelación de transfers
+  - ✅ PHASE 5: Transferencia de ownership (initiate, accept, reject)
   - ✅ Validación final del sistema
 
 ## 🚀 Instrucciones de Uso
@@ -65,7 +65,7 @@ export RPC_URL="http://localhost:8545"  # Anvil local o testnet
 anvil
 
 # Deploy contract
-forge script script/Deploy.s.sol \
+forge script script/SupplyChainDeploy.s.sol \
   --rpc-url $RPC_URL \
   --private-key $PRIVATE_KEY \
   --broadcast
@@ -75,10 +75,11 @@ forge script script/Deploy.s.sol \
 
 ### 2. Demo Workflow Completo
 ```bash
-# Actualizar contract address en Interactions.s.sol línea 19
+# El script SupplyChainInteractions.s.sol despliega su propio contrato en setUp()
+# No es necesario actualizar ninguna dirección
 
 # Ejecutar demo completo
-forge script script/Interactions.s.sol \
+forge script script/SupplyChainInteractions.s.sol \
   --rpc-url $RPC_URL \
   --private-key $PRIVATE_KEY \
   --broadcast
@@ -135,14 +136,17 @@ Contract address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
 ## 🔧 Personalización
 
 ### Modificar Datos Demo
-- Actualizar addresses en `Interactions.s.sol` líneas 14-16
-- Cambiar nombres de productos en `_createToken()` calls
-- Ajustar notas de transfers según necesidades
+- Actualizar addresses en `SupplyChainInteractions.s.sol` líneas 23-34
+- Cambiar nombres de productos en `createToken()` calls
+- Ajustar cantidades de tokens según necesidades
 
-### Añadir Nuevos Escenarios
-- Extend `run()` function con nuevas fases
-- Implementar casos de ownership transfer
-- Agregar escenarios de pause/unpause
+### Escenarios Incluidos
+- ✅ PHASE 1: Registro y aprobación de usuarios
+- ✅ PHASE 2: Creación de tokens (Raw Material y Finished Product)
+- ✅ PHASE 3: Transferencias entre roles
+- ✅ PHASE 4: Rechazo y cancelación de transfers
+- ✅ PHASE 5: Transferencia de ownership (ya implementado)
+- 🔄 Agregar escenarios de pause/unpause (opcional)
 
 ## ⚠️ Notas Importantes
 

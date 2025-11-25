@@ -1,6 +1,9 @@
 # 📊 Resumen Completo de Validaciones
 
-**Fecha**: 21 de Noviembre, 2025
+**Fecha**: 21 de Noviembre, 2025  
+**Última actualización**: 25 de Noviembre, 2025
+
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ---
 
