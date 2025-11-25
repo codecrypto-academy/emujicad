@@ -173,21 +173,29 @@ start_anvil() {
     
     print_step "Iniciando Anvil en $ANVIL_HOST:$ANVIL_PORT con Chain ID $ANVIL_CHAIN_ID..."
     
-    # Verificar si existe estado persistente
+    # Verificar y mostrar estado de persistencia
+    local state_exists=false
+    local state_size=""
     if [ -f "$ANVIL_STATE_FILE" ]; then
-        print_info "Estado persistente encontrado: $ANVIL_STATE_FILE"
-        print_info "Anvil restaurará el estado anterior al iniciar"
+        state_exists=true
+        state_size=$(du -h "$ANVIL_STATE_FILE" 2>/dev/null | cut -f1)
+        print_success "✅ Estado persistente encontrado: $ANVIL_STATE_FILE"
+        print_info "   📊 Tamaño: $state_size"
+        print_info "   🔄 Anvil restaurará el estado anterior (tokens, transferencias, usuarios)"
     else
-        print_info "Iniciando con blockchain limpia (sin estado previo)"
+        print_info "ℹ️  Iniciando con blockchain limpia (sin estado previo)"
+        print_info "   📝 El estado se guardará en: $ANVIL_STATE_FILE"
     fi
     
     # Iniciar Anvil en background con nohup y persistencia de estado
     cd "$SC_DIR"
+    print_step "Iniciando Anvil con persistencia de estado habilitada..."
     nohup anvil \
         --host "$ANVIL_HOST" \
         --port "$ANVIL_PORT" \
         --chain-id "$ANVIL_CHAIN_ID" \
         --state "$ANVIL_STATE_FILE" \
+        --accounts 15 \
         > "$ANVIL_LOG_FILE" 2>&1 &
     
     local anvil_pid=$!
@@ -198,7 +206,21 @@ start_anvil() {
     
     # Esperar a que Anvil esté listo
     if wait_for_port $ANVIL_PORT 10; then
-        print_success "Anvil iniciado correctamente"
+        # Validar que Anvil está corriendo con persistencia
+        sleep 1
+        if pgrep -f "anvil.*--state.*$ANVIL_STATE_FILE" > /dev/null; then
+            print_success "Anvil iniciado correctamente"
+            print_success "✅ Persistencia de estado: HABILITADA"
+            print_info "   📁 Archivo de estado: $ANVIL_STATE_FILE"
+            if [ "$state_exists" = true ]; then
+                print_info "   ✅ Estado anterior restaurado ($state_size)"
+            else
+                print_info "   📝 Nuevo estado se guardará automáticamente"
+            fi
+        else
+            print_warning "Anvil iniciado, pero no se pudo verificar el flag --state"
+            print_info "Verifica manualmente: ps aux | grep anvil | grep --state"
+        fi
         
         # Mostrar cuentas disponibles
         print_info "Cuenta deployer: $DEPLOYER_ADDRESS"
