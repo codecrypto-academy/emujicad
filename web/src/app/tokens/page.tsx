@@ -21,6 +21,7 @@ import { Package, Search, Filter, AlertCircle, Loader2, Plus, Table2 } from 'luc
 import { TokenType, UserRole, UserStatus } from '@/contracts/config'
 import Link from 'next/link'
 import { DebugTokens } from './debug-tokens'
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 export default function TokensPage() {
   const router = useRouter()
@@ -212,12 +213,13 @@ export default function TokensPage() {
   // Diseño moderno 2025
   if (useModernDesign) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+      <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
         <Header />
         
         <div className="container mx-auto px-4 py-12 max-w-7xl">
           {/* Título moderno con animación */}
-          <div className="mb-12 flex items-start justify-between animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="relative mb-12 flex items-start justify-between animate-in fade-in slide-in-from-top-4 duration-700" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+            <DebugLabel component="TokensPage" section="TitleSection" props={{ useModernDesign: true }} position="top-right" offset={4} />
             <div className="space-y-3">
               <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-slate-900 dark:from-white dark:via-blue-200 dark:to-white bg-clip-text text-transparent mb-2 flex items-center gap-3">
                 <div className="p-2.5 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 backdrop-blur-sm border border-blue-200/50 dark:border-blue-500/30">
@@ -248,7 +250,8 @@ export default function TokensPage() {
           </div>
 
           {/* Filtros modernos con glassmorphism */}
-          <Card className="mb-10 border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 rounded-3xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+          <Card className="relative mb-10 border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 rounded-3xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100" style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+            <DebugLabel component="TokensPage" section="FiltersSection" props={{ useModernDesign: true, shouldShowTypeFilter }} position="top-right" offset={4} />
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-100 text-xl">
                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10">
@@ -357,7 +360,8 @@ export default function TokensPage() {
 
           {/* Loading State Moderno */}
           {isLoading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+              <DebugLabel component="TokensPage" section="LoadingState" props={{ isLoading }} position="top-right" offset={4} />
               {Array.from({ length: 8 }).map((_, i) => (
                 <Card key={i} className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl overflow-hidden animate-pulse">
                   <CardHeader className="pb-3">
@@ -375,7 +379,8 @@ export default function TokensPage() {
 
           {/* Error State Moderno */}
           {error && !isLoading && (
-            <Card className="mb-8 border-0 bg-red-50/70 dark:bg-red-900/20 backdrop-blur-xl shadow-xl rounded-3xl border-red-200/50 dark:border-red-800/50">
+            <Card className="relative mb-8 border-0 bg-red-50/70 dark:bg-red-900/20 backdrop-blur-xl shadow-xl rounded-3xl border-red-200/50 dark:border-red-800/50" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+              <DebugLabel component="TokensPage" section="ErrorState" props={{ hasError: true }} position="top-right" offset={4} />
               <CardContent className="pt-6 pb-6">
                 <div className="flex items-center gap-3">
                   <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
@@ -390,7 +395,8 @@ export default function TokensPage() {
 
           {/* Empty State Moderno */}
           {!isLoading && !error && filteredTokens.length === 0 && (
-            <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-xl rounded-3xl overflow-hidden">
+            <Card className="relative border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-xl rounded-3xl overflow-hidden" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+              <DebugLabel component="TokensPage" section="EmptyState" props={{ hasTokens: false }} position="top-right" offset={4} />
               <CardContent className="pt-16 pb-16 text-center">
                 <div className="inline-flex p-4 rounded-3xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 mb-6">
                   <Package className="h-12 w-12 text-blue-600 dark:text-blue-400" />
@@ -493,23 +499,28 @@ export default function TokensPage() {
           )}
 
         {/* My Tokens by Type - Con tarjetas completas (Reemplaza la lista general) */}
-        <TokenTypeStatsSection 
-          tokens={tokens}
-          isLoading={isLoading || isLoadingStats}
-          statsError={statsError}
-          rowMaterial={rowMaterial}
-          finishedProduct={finishedProduct}
-          router={router}
-          useModernDesign={useModernDesign}
-        />
+        <div className="relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="TokensPage" section="TokenTypeStatsSection" props={{ useModernDesign: true }} position="top-right" offset={4} />
+          <TokenTypeStatsSection 
+            tokens={tokens}
+            isLoading={isLoading || isLoadingStats}
+            statsError={statsError}
+            rowMaterial={rowMaterial}
+            finishedProduct={finishedProduct}
+            router={router}
+            useModernDesign={useModernDesign}
+          />
         </div>
+        </div>
+        {/* DebugLabel de la página principal al final */}
+        <DebugLabel component="TokensPage" section="MainContent" props={{ useModernDesign: true, isAuthenticated }} position="bottom-right" offset={4} />
       </div>
     )
   }
 
   // Diseño original
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
       <Header />
       
       <div className="container mx-auto px-4 py-8">
@@ -521,7 +532,8 @@ export default function TokensPage() {
         )}
 
         {/* Título */}
-        <div className="mb-8 flex items-start justify-between">
+        <div className="relative mb-8 flex items-start justify-between" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="TokensPage" section="TitleSection" props={{ useModernDesign: false }} position="top-right" offset={4} />
           <div>
             <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
               <Package className="h-10 w-10 text-blue-600 dark:text-blue-400" />
@@ -682,15 +694,18 @@ export default function TokensPage() {
         </Card>
 
         {/* My Tokens by Type - Con tarjetas completas (Reemplaza la lista general) */}
-        <TokenTypeStatsSection 
-          tokens={tokens}
-          isLoading={isLoading || isLoadingStats}
-          statsError={statsError}
-          rowMaterial={rowMaterial}
-          finishedProduct={finishedProduct}
-          router={router}
-          useModernDesign={useModernDesign}
-        />
+        <div className="relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="TokensPage" section="TokenTypeStatsSection" props={{ useModernDesign: false }} position="top-right" offset={4} />
+          <TokenTypeStatsSection 
+            tokens={tokens}
+            isLoading={isLoading || isLoadingStats}
+            statsError={statsError}
+            rowMaterial={rowMaterial}
+            finishedProduct={finishedProduct}
+            router={router}
+            useModernDesign={useModernDesign}
+          />
+        </div>
 
         {/* Loading State */}
         {isLoading && (
@@ -845,6 +860,8 @@ export default function TokensPage() {
           </>
         )}
       </div>
+      {/* DebugLabel de la página principal al final */}
+      <DebugLabel component="TokensPage" section="MainContent" props={{ useModernDesign: false, isAuthenticated }} position="bottom-right" offset={4} />
     </div>
   )
 }

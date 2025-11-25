@@ -3,6 +3,10 @@
  * Activar con: NEXT_PUBLIC_DEBUG_MODE=true
  */
 
+'use client'
+
+import { useState, useEffect } from 'react'
+
 export const DEBUG_MODE = process.env.NEXT_PUBLIC_DEBUG_MODE === 'true'
 
 // Contador global para numerar los DebugLabels en orden de renderizado
@@ -45,7 +49,14 @@ export function DebugLabel({
   position?: 'top-right' | 'bottom-right' | 'top-left' | 'bottom-left'
   offset?: number // Offset vertical en píxeles
 }) {
-  if (!DEBUG_MODE) return null
+  // Solo renderizar en el cliente después de la hidratación para evitar errores de hidratación
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!DEBUG_MODE || !mounted) return null
 
   // Obtener número estable para este componente+sección (no cambia entre re-renders)
   const componentKey = section ? `${component}::${section}` : component

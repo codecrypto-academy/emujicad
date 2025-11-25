@@ -13,15 +13,13 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Users, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
-import { DebugLabel } from '@/lib/debug'
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 export default function AdminPage() {
   const { address, isConnected } = useAccount()
   const shouldFetchOwner = Boolean(isConnected && address)
   const { owner, isLoading: isLoadingOwner, error: ownerError } = useContractOwner(shouldFetchOwner)
   const router = useRouter()
-  // Inicializar mounted directamente para evitar setState en effect
-  const [mounted, setMounted] = useState(false)
   
   // Activar diseño moderno si está habilitado
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
@@ -32,13 +30,12 @@ export default function AdminPage() {
   // Nota: useIsPaused se usa internamente en PauseControl, no necesitamos los valores aquí
   useIsPaused(Boolean(isConnected && !isLoadingOwner && isOwner))
 
-  // Prevenir hydration mismatch - usar startTransition para evitar warning de React
+  // Prevenir hydration mismatch - inicializar mounted siempre como false
+  // Se actualizará a true solo en el cliente después del primer render
+  const [mounted, setMounted] = useState(false)
+  
   useEffect(() => {
-    // Usar setTimeout para diferir el setState fuera del render síncrono
-    const timer = setTimeout(() => {
-      setMounted(true)
-    }, 0)
-    return () => clearTimeout(timer)
+    setMounted(true)
   }, [])
 
   // Redireccionar si no es owner o si se desconecta
@@ -56,8 +53,8 @@ export default function AdminPage() {
   if (!mounted || isLoadingOwner) {
     if (useModernDesign) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
-          <DebugLabel component="AdminPage" section="LoadingState" props={{ mounted, isLoadingOwner, useModernDesign: true }} />
+        <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+          <DebugLabel component="AdminPage" section="LoadingState" props={{ mounted, isLoadingOwner, useModernDesign: true }} position="top-right" offset={4} />
           <div className="container mx-auto px-4 py-12">
             <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8 text-center">
               <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-xl w-48 mx-auto animate-pulse mb-4"></div>
@@ -68,8 +65,8 @@ export default function AdminPage() {
       )
     }
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-        <DebugLabel component="AdminPage" section="LoadingState" props={{ mounted, isLoadingOwner, useModernDesign: false }} />
+      <div className="relative min-h-screen bg-slate-50 dark:bg-slate-900" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="AdminPage" section="LoadingState" props={{ mounted, isLoadingOwner, useModernDesign: false }} position="top-right" offset={4} />
         <div className="container mx-auto px-4 py-12">
           <Card>
             <CardContent className="pt-6 text-center">
@@ -89,8 +86,8 @@ export default function AdminPage() {
 
   if (ownerError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
-        <DebugLabel component="AdminPage" section="ErrorState" props={{ hasError: true, errorMessage: ownerError.message }} />
+      <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="AdminPage" section="ErrorState" props={{ hasError: true, errorMessage: ownerError.message }} position="top-right" offset={4} />
         <Header />
         <div className="container mx-auto px-4 py-12">
           <Alert variant="destructive">
@@ -105,16 +102,15 @@ export default function AdminPage() {
   }
 
   return (
-    <div className={`min-h-screen ${useModernDesign 
+    <div className={`relative min-h-screen ${useModernDesign 
       ? 'bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800' 
-      : 'bg-slate-50 dark:bg-slate-900'}`}>
-      <DebugLabel component="AdminPage" section="MainContent" props={{ isOwner, useModernDesign, isConnected }} />
+      : 'bg-slate-50 dark:bg-slate-900'}`} style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
       <Header />
       
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         {/* Título Moderno */}
-        <div className="mb-10 flex items-start justify-between animate-in fade-in slide-in-from-top-4 duration-700">
-          <DebugLabel component="AdminPage" section="TitleSection" props={{ useModernDesign }} />
+        <div className="relative mb-10 flex items-start justify-between animate-in fade-in slide-in-from-top-4 duration-700" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="AdminPage" section="TitleSection" props={{ useModernDesign }} position="top-right" offset={4} />
           <div>
             <h1 className={`${useModernDesign 
               ? 'text-5xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-3' 
@@ -130,20 +126,20 @@ export default function AdminPage() {
         </div>
 
         {/* Control de Pausa */}
-        <div className="mb-10">
-          <DebugLabel component="AdminPage" section="PauseControlSection" props={{ useModernDesign }} />
+        <div className="relative mb-10" style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="AdminPage" section="PauseControlSection" props={{ useModernDesign }} position="top-right" offset={4} />
           <PauseControl />
         </div>
 
         {/* Transferencia de Ownership */}
-        <div className="mb-10">
-          <DebugLabel component="AdminPage" section="OwnershipTransferSection" props={{ useModernDesign }} />
+        <div className="relative mb-10" style={DEBUG_MODE ? { border: '3px solid rgba(128, 0, 128, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="AdminPage" section="OwnershipTransferSection" props={{ useModernDesign }} position="top-right" offset={4} />
           <OwnershipTransfer />
         </div>
 
         {/* Accesos Rápidos */}
-        <div className="mb-10">
-          <DebugLabel component="AdminPage" section="QuickActionsSection" props={{ useModernDesign }} />
+        <div className="relative mb-10" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="AdminPage" section="QuickActionsSection" props={{ useModernDesign }} position="top-right" offset={4} />
           <h2 className={`${useModernDesign 
             ? 'text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6' 
             : 'text-2xl font-bold text-slate-800 dark:text-slate-200 mb-6'}`}>
@@ -187,6 +183,8 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
+      {/* DebugLabel de la página principal al final */}
+      <DebugLabel component="AdminPage" section="MainContent" props={{ isOwner, useModernDesign, isConnected }} position="bottom-right" offset={4} />
     </div>
   )
 }
