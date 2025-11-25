@@ -53,6 +53,7 @@ FRONTEND_PID_FILE="$LOGS_DIR/frontend.pid"
 ANVIL_LOG_FILE="$LOGS_DIR/anvil.log"
 FRONTEND_LOG_FILE="$LOGS_DIR/frontend.log"
 DEPLOY_LOG_FILE="$LOGS_DIR/deploy.log"
+ANVIL_STATE_FILE="$LOGS_DIR/anvil_state.json"
 
 # Configuración de red
 ANVIL_PORT=8545
@@ -172,12 +173,21 @@ start_anvil() {
     
     print_step "Iniciando Anvil en $ANVIL_HOST:$ANVIL_PORT con Chain ID $ANVIL_CHAIN_ID..."
     
-    # Iniciar Anvil en background con nohup
+    # Verificar si existe estado persistente
+    if [ -f "$ANVIL_STATE_FILE" ]; then
+        print_info "Estado persistente encontrado: $ANVIL_STATE_FILE"
+        print_info "Anvil restaurará el estado anterior al iniciar"
+    else
+        print_info "Iniciando con blockchain limpia (sin estado previo)"
+    fi
+    
+    # Iniciar Anvil en background con nohup y persistencia de estado
     cd "$SC_DIR"
     nohup anvil \
         --host "$ANVIL_HOST" \
         --port "$ANVIL_PORT" \
         --chain-id "$ANVIL_CHAIN_ID" \
+        --state "$ANVIL_STATE_FILE" \
         > "$ANVIL_LOG_FILE" 2>&1 &
     
     local anvil_pid=$!
@@ -759,6 +769,130 @@ restart_frontend_only() {
 }
 
 # ============================================================================
+# FUNCIÓN: DETENER SOLO ANVIL
+# ============================================================================
+
+stop_anvil_only() {
+    # Buscar todos los procesos de Anvil
+    local anvil_pids=""
+    
+    # Buscar por PID file
+    if [ -f "$ANVIL_PID_FILE" ]; then
+        local file_pid=$(cat "$ANVIL_PID_FILE")
+        if kill -0 "$file_pid" 2>/dev/null; then
+            anvil_pids="$anvil_pids $file_pid"
+        fi
+        rm -f "$ANVIL_PID_FILE"
+    fi
+    
+    # Buscar por puerto
+    local port_pid=$(get_pid_by_port $ANVIL_PORT)
+    if [ -n "$port_pid" ]; then
+        anvil_pids="$anvil_pids $port_pid"
+    fi
+    
+    # Buscar por nombre de proceso
+    local process_pids=$(pgrep -f "anvil.*--port $ANVIL_PORT" 2>/dev/null || true)
+    if [ -n "$process_pids" ]; then
+        anvil_pids="$anvil_pids $process_pids"
+    fi
+    
+    # Eliminar duplicados y espacios
+    anvil_pids=$(echo $anvil_pids | tr ' ' '\n' | sort -u | tr '\n' ' ')
+    
+    if [ -n "$anvil_pids" ]; then
+        print_step "Deteniendo Anvil (PIDs: $anvil_pids)..."
+        for pid in $anvil_pids; do
+            if kill -0 "$pid" 2>/dev/null; then
+                kill "$pid" 2>/dev/null || true
+            fi
+        done
+        sleep 2
+        
+        # Forzar si siguen corriendo
+        for pid in $anvil_pids; do
+            if kill -0 "$pid" 2>/dev/null; then
+                kill -9 "$pid" 2>/dev/null || true
+            fi
+        done
+        
+        # Verificar que se detuvo
+        sleep 1
+        if check_port $ANVIL_PORT; then
+            print_error "No se pudo detener Anvil completamente"
+            return 1
+        else
+            print_success "Anvil detenido correctamente"
+            return 0
+        fi
+    else
+        print_info "Anvil no está corriendo"
+        return 0
+    fi
+}
+
+# ============================================================================
+# FUNCIÓN: LIMPIAR ESTADO DE ANVIL
+# ============================================================================
+
+clean_anvil_state() {
+    print_header "🧹 Limpiar Estado Persistente de Anvil"
+    
+    local anvil_running=false
+    
+    # Verificar si Anvil está corriendo
+    if check_port $ANVIL_PORT; then
+        anvil_running=true
+        print_warning "Anvil está corriendo en puerto $ANVIL_PORT"
+        print_warning "Para limpiar el estado, Anvil debe estar detenido"
+        echo ""
+        read -p "¿Deseas detener Anvil ahora? (s/N): " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Ss]$ ]]; then
+            print_step "Deteniendo Anvil..."
+            if ! stop_anvil_only; then
+                print_error "No se pudo detener Anvil. Operación cancelada."
+                return 1
+            fi
+            sleep 1
+            anvil_running=false
+        else
+            print_info "Operación cancelada. El estado no se limpiará mientras Anvil esté corriendo."
+            return 0
+        fi
+    fi
+    
+    # Verificar nuevamente que Anvil no esté corriendo
+    if check_port $ANVIL_PORT; then
+        print_error "Anvil sigue corriendo. No se puede limpiar el estado."
+        return 1
+    fi
+    
+    # Limpiar el estado
+    if [ -f "$ANVIL_STATE_FILE" ]; then
+        local state_size=$(du -h "$ANVIL_STATE_FILE" | cut -f1)
+        print_warning "Eliminando estado persistente de Anvil (tamaño: $state_size)"
+        print_warning "Esto eliminará todos los datos de la blockchain local (tokens, transferencias, usuarios)"
+        echo ""
+        read -p "¿Estás seguro de que deseas eliminar el estado? (s/N): " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Ss]$ ]]; then
+            rm -f "$ANVIL_STATE_FILE"
+            print_success "Estado persistente eliminado"
+            print_info "Anvil iniciará con una blockchain limpia en el próximo start"
+            return 0
+        else
+            print_info "Operación cancelada. El estado no se eliminó."
+            return 0
+        fi
+    else
+        print_info "No hay estado persistente para eliminar"
+        print_info "Anvil iniciará con una blockchain limpia en el próximo start"
+        return 0
+    fi
+}
+
+# ============================================================================
 # FUNCIÓN: START (INICIAR TODO)
 # ============================================================================
 
@@ -838,11 +972,16 @@ EOF
     echo -e "  ${GREEN}restart${NC}         Reinicia todos los servicios"
     echo -e "  ${GREEN}status${NC}          Muestra el estado de los servicios"
     echo -e "  ${GREEN}metamask${NC}        Muestra instrucciones para configurar MetaMask"
+    echo -e "  ${GREEN}clean${NC}           Limpia el estado persistente de Anvil (requiere Anvil detenido)"
     echo ""
     echo -e "${YELLOW}COMANDOS DE FRONTEND (sin afectar Anvil/Contrato):${NC}"
     echo -e "  ${GREEN}frontend start${NC}  Inicia solo el frontend (requiere Anvil corriendo)"
     echo -e "  ${GREEN}frontend stop${NC}   Detiene solo el frontend"
     echo -e "  ${GREEN}frontend restart${NC} Reinicia solo el frontend"
+    echo ""
+    echo -e "${YELLOW}NOTA:${NC} Anvil ahora persiste el estado entre reinicios."
+    echo -e "      Usa ${GREEN}./deploy.sh clean${NC} para limpiar el estado."
+    echo -e "      Si Anvil está corriendo, te preguntará si deseas detenerlo primero."
     echo ""
     echo -e "  ${GREEN}help${NC}             Muestra esta ayuda"
     echo ""
@@ -929,6 +1068,9 @@ main() {
             ;;
         metamask)
             show_metamask_instructions
+            ;;
+        clean|reset)
+            clean_anvil_state
             ;;
         help|--help|-h)
             show_help
