@@ -176,17 +176,21 @@
 
 #### 1. Selector de Tipo de Filtro de Búsqueda
 - **Ubicación**: `/tokens` - Filtro de búsqueda por nombre (elemento #3)
-- **Descripción**: Permitir al usuario seleccionar el tipo de búsqueda:
-  - **`includes`** (actual): Busca la cadena en cualquier parte del nombre (ej: "A" encuentra "Algodon", "Acero", "Madera")
-  - **`startsWith`**: Busca solo al inicio del nombre (ej: "A" encuentra solo "Algodon" y "Acero")
+- **Estado actual**: El filtro usa `includes` por defecto, buscando la cadena en cualquier parte del nombre
+  - Ejemplo: Buscar "A" encuentra "Algodon", "Acero" y "Madera" (porque "Madera" contiene "a")
+- **Mejora propuesta**: Permitir al usuario seleccionar el tipo de búsqueda:
+  - **`includes`** (actual): Busca la cadena en cualquier parte del nombre
+    - Ejemplo: "A" encuentra "Algodon", "Acero", "Madera"
+  - **`startsWith`**: Busca solo al inicio del nombre
+    - Ejemplo: "A" encuentra solo "Algodon" y "Acero" (no "Madera")
 - **Implementación sugerida**:
   - Agregar un toggle o selector junto al input de búsqueda
   - Opciones: "Contiene" (includes) / "Comienza con" (startsWith)
-  - Guardar preferencia en `localStorage` para persistencia
-- **Beneficio**: Mayor control y precisión en la búsqueda según el caso de uso
+  - Guardar preferencia en `localStorage` para persistencia entre sesiones
+  - Actualizar el `useMemo` de `filteredTokens` en `web/src/app/tokens/page.tsx` (línea ~176)
+- **Beneficio**: Mayor control y precisión en la búsqueda según el caso de uso del usuario
 - **Tiempo estimado**: 1-2 horas
-
-**Nota**: Actualmente el filtro usa `includes` por defecto, que es el comportamiento más flexible y común en búsquedas.
+- **Prioridad**: Baja (mejora de UX opcional)
 
 ---
 

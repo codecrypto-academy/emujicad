@@ -10,6 +10,7 @@ import { useRequestRole } from '@/hooks/useRequestRole'
 import { useIsPaused } from '@/hooks/usePause'
 import { UserStatus } from '@/contracts/config'
 import { Pause } from 'lucide-react'
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 type RoleType = 'Producer' | 'Factory' | 'Retailer' | 'Consumer'
 
@@ -212,14 +213,17 @@ function DialogFormContent({ currentRole, userStatus, onSuccess, onClose }: { cu
             Change Role
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md" aria-labelledby="change-role-title">
-          <DialogFormContent 
-            key={dialogKey}
-            currentRole={currentRole}
-            userStatus={userStatus}
-            onSuccess={onSuccess}
-            onClose={handleClose}
-          />
+        <DialogContent className="sm:max-w-md" aria-labelledby="change-role-title" style={DEBUG_MODE ? { outline: '3px solid rgba(0, 128, 0, 0.6)', outlineOffset: '0px' } : {}}>
+          <div className="relative rounded-2xl">
+            <DebugLabel component="ChangeRoleDialog" section="DialogContent" props={{ userStatus, currentRole, isPaused: isPaused === true, canChangeRole }} position="top-right" offset={-20} />
+            <DialogFormContent 
+              key={dialogKey}
+              currentRole={currentRole}
+              userStatus={userStatus}
+              onSuccess={onSuccess}
+              onClose={handleClose}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     )

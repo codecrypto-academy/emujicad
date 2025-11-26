@@ -35,6 +35,7 @@ import { TokenType, TransferStatus, UserRole } from '@/contracts/config'
 import Link from 'next/link'
 import { useTokenTraceability } from '@/hooks/useTokenTraceability'
 import { TraceabilityTimeline } from '@/components/TraceabilityTimeline'
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -176,7 +177,8 @@ export default function TokenDetailPage({ params }: PageProps) {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="TokenDetailPage" section="LoadingState" props={{ isLoadingToken, isLoadingBalance, tokenId: id }} position="top-right" offset={4} />
         <Header />
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <Skeleton className="h-12 w-64 mb-6" />
@@ -195,7 +197,8 @@ export default function TokenDetailPage({ params }: PageProps) {
   
   if (!tokenData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="TokenDetailPage" section="ErrorState" props={{ tokenId: id, hasTokenData: !!tokenData }} position="top-right" offset={4} />
         <Header />
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <Button
@@ -218,11 +221,13 @@ export default function TokenDetailPage({ params }: PageProps) {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+      <DebugLabel component="TokenDetailPage" section="MainContent" props={{ tokenId: id, hasTokenData: !!tokenData, canTransfer, balance: balance?.toString() }} position="bottom-right" offset={4} />
       <Header />
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header con botón de regreso */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="TokenDetailPage" section="HeaderSection" props={{ canTransfer, hasBalance: balance && balance > BigInt(0) }} position="top-right" offset={4} />
           <Button
             variant="ghost"
             onClick={() => router.push('/tokens')}
@@ -243,7 +248,8 @@ export default function TokenDetailPage({ params }: PageProps) {
         
         <div className="space-y-6">
           {/* Card principal del token */}
-          <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl overflow-hidden">
+          <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl overflow-hidden relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+            <DebugLabel component="TokenDetailPage" section="TokenDetailsCard" props={{ tokenId: id, tokenName: tokenData.name, tokenType: isRawMaterial ? 'RawMaterial' : 'FinishedProduct', totalSupply: tokenData.totalSupply?.toString() }} position="top-right" offset={4} />
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -356,7 +362,8 @@ export default function TokenDetailPage({ params }: PageProps) {
           {/* Transfer History y Transfer Statistics lado a lado */}
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
             {/* Transfer History */}
-            <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl">
+            <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 128, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+              <DebugLabel component="TokenDetailPage" section="TransferHistoryCard" props={{ tokenId: id, transfersCount: filteredTransfers.length, filterStatus }} position="top-right" offset={4} />
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -454,7 +461,8 @@ export default function TokenDetailPage({ params }: PageProps) {
             </Card>
             
             {/* Transfer Statistics */}
-            <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl">
+            <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl relative" style={DEBUG_MODE ? { border: '3px solid rgba(128, 0, 128, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+              <DebugLabel component="TokenDetailPage" section="TransferStatisticsCard" props={{ tokenId: id, transferStats }} position="top-right" offset={4} />
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
@@ -495,7 +503,8 @@ export default function TokenDetailPage({ params }: PageProps) {
           </div>
         
           {/* Trazabilidad End-to-End - Sección completa al final */}
-          <div className="mt-6">
+          <div className="mt-6 relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+            <DebugLabel component="TokenDetailPage" section="TraceabilitySection" props={{ tokenId: id, hasTraceability: !!traceability, isLoadingTraceability }} position="top-right" offset={4} />
             <TraceabilityTimeline 
               traceability={traceability || null}
               isLoading={isLoadingTraceability}

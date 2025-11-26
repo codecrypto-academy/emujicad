@@ -1,6 +1,6 @@
 'use client'
 
-import { use } from 'react'
+import { use, useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { useGetToken, useGetTokenBalance } from '@/hooks/useGetUserTokens'
@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Send, Loader2, CheckCircle, XCircle, Pause, AlertCircle, Package, Hash } from 'lucide-react'
 import { isAddress } from 'viem'
 import { validateTokenDataTuple } from '@/lib/validation'
@@ -23,6 +24,7 @@ import type { TokenData } from '@/types'
 import { AddressDisplay } from '@/components/AddressDisplay'
 import { UserRole, TokenType } from '@/contracts/config'
 import Link from 'next/link'
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -168,7 +170,8 @@ export default function TokenTransferPage({ params }: PageProps) {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="TokenTransferPage" section="LoadingState" props={{ isLoadingToken, isLoadingBalance, tokenId: id }} position="top-right" offset={4} />
         <Header />
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <Skeleton className="h-12 w-64 mb-6" />
@@ -180,7 +183,8 @@ export default function TokenTransferPage({ params }: PageProps) {
   
   if (!tokenData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="TokenTransferPage" section="ErrorState" props={{ tokenId: id, hasTokenData: !!tokenData }} position="top-right" offset={4} />
         <Header />
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <Button
@@ -205,7 +209,8 @@ export default function TokenTransferPage({ params }: PageProps) {
   // Si el usuario es Consumer, mostrar mensaje informativo
   if (userInfo && userInfo.role === BigInt(UserRole.Consumer)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="TokenTransferPage" section="ConsumerRoleState" props={{ tokenId: id, userRole: 'Consumer' }} position="top-right" offset={4} />
         <Header />
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <Button
@@ -216,7 +221,8 @@ export default function TokenTransferPage({ params }: PageProps) {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Token Details
           </Button>
-          <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl">
+          <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+            <DebugLabel component="TokenTransferPage" section="ConsumerRoleCard" props={{ tokenId: id }} position="top-right" offset={4} />
             <CardHeader>
               <CardTitle>Transfer Tokens</CardTitle>
               <CardDescription>Initiate a token transfer</CardDescription>
@@ -239,7 +245,8 @@ export default function TokenTransferPage({ params }: PageProps) {
   // Si no puede transferir por otras razones
   if (!canTransfer && !isAdmin) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="TokenTransferPage" section="CannotTransferState" props={{ tokenId: id, canTransfer, isAdmin }} position="top-right" offset={4} />
         <Header />
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <Button
@@ -250,7 +257,8 @@ export default function TokenTransferPage({ params }: PageProps) {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Token Details
           </Button>
-          <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl">
+          <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+            <DebugLabel component="TokenTransferPage" section="CannotTransferCard" props={{ tokenId: id }} position="top-right" offset={4} />
             <CardHeader>
               <CardTitle>Transfer Tokens</CardTitle>
               <CardDescription>Initiate a token transfer</CardDescription>
@@ -272,7 +280,8 @@ export default function TokenTransferPage({ params }: PageProps) {
   // Si no tiene balance
   if (!balance || balance === BigInt(0)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+        <DebugLabel component="TokenTransferPage" section="NoBalanceState" props={{ tokenId: id, balance: balance?.toString() }} position="top-right" offset={4} />
         <Header />
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <Button
@@ -283,7 +292,8 @@ export default function TokenTransferPage({ params }: PageProps) {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Token Details
           </Button>
-          <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl">
+          <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+            <DebugLabel component="TokenTransferPage" section="NoBalanceCard" props={{ tokenId: id }} position="top-right" offset={4} />
             <CardHeader>
               <CardTitle>Transfer Tokens</CardTitle>
               <CardDescription>Initiate a token transfer</CardDescription>
@@ -303,23 +313,28 @@ export default function TokenTransferPage({ params }: PageProps) {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
+      <DebugLabel component="TokenTransferPage" section="MainContent" props={{ tokenId: id, canTransfer, balance: balance?.toString(), isPaused: isPaused === true }} position="bottom-right" offset={4} />
       <Header />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header con botón de regreso */}
-        <Button
-          variant="ghost"
-          onClick={() => router.push(`/tokens/${id}`)}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Token Details
-        </Button>
+        <div className="relative mb-6" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="TokenTransferPage" section="HeaderSection" props={{ tokenId: id }} position="top-right" offset={4} />
+          <Button
+            variant="ghost"
+            onClick={() => router.push(`/tokens/${id}`)}
+            className="mb-0"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Token Details
+          </Button>
+        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Columna principal - Formulario */}
           <div className="lg:col-span-2">
-            <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl">
+            <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+              <DebugLabel component="TokenTransferPage" section="TransferFormCard" props={{ tokenId: id, amount, to, amountError: !!amountError, isPending, isConfirming, isSuccess }} position="top-right" offset={4} />
               <CardHeader>
                 <CardTitle>Transfer Tokens</CardTitle>
                 <CardDescription>
@@ -549,7 +564,8 @@ export default function TokenTransferPage({ params }: PageProps) {
           
           {/* Columna lateral - Información adicional */}
           <div>
-            <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl">
+            <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 128, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+              <DebugLabel component="TokenTransferPage" section="TokenInfoCard" props={{ tokenId: id, tokenName: tokenData.name, tokenType: isRawMaterial ? 'RawMaterial' : 'FinishedProduct' }} position="top-right" offset={4} />
               <CardHeader>
                 <CardTitle className="text-lg">Token Information</CardTitle>
               </CardHeader>
@@ -587,8 +603,4 @@ export default function TokenTransferPage({ params }: PageProps) {
     </div>
   )
 }
-
-// Necesario para usar useState, useEffect, useMemo
-import { useState, useEffect, useMemo } from 'react'
-import { Badge } from '@/components/ui/badge'
 

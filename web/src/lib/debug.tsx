@@ -128,8 +128,8 @@ export function DebugLabel({
     <div 
       style={{
         position: 'absolute',
-        top: isBottom ? 'auto' : Math.max(offset, 4),
-        bottom: isBottom ? Math.max(offset, 4) : 'auto',
+        top: isBottom ? 'auto' : (offset < 0 ? offset : Math.max(offset, 4)),
+        bottom: isBottom ? (offset < 0 ? offset : Math.max(offset, 4)) : 'auto',
         right: isLeft ? 'auto' : 4,
         left: isLeft ? 4 : 'auto',
         background: 'rgba(255, 0, 0, 0.95)',

@@ -14,7 +14,7 @@ import { UserStatus } from '@/contracts/config'
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { DebugLabel } from '@/lib/debug'
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 export default function Home() {
   const router = useRouter()
@@ -227,7 +227,8 @@ export default function Home() {
                   )}
 
                   {Number(userInfo.status) === UserStatus.Rejected && (
-                    <div className="group relative overflow-hidden rounded-3xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur-xl border border-red-200 dark:border-red-800 shadow-xl p-8 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="group relative overflow-hidden rounded-3xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur-xl border border-red-200 dark:border-red-800 shadow-xl p-8 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+                      <DebugLabel component="HomePage" section="RejectedCard" props={{ userStatus: Number(userInfo.status), userId: userInfo.id.toString(), userRole: Number(userInfo.role) }} position="top-right" offset={4} />
                       <div className="relative">
                         <h2 className="text-2xl font-bold text-red-700 dark:text-red-300 mb-4 flex items-center gap-2">
                           ❌ Role Request Rejected
@@ -246,7 +247,8 @@ export default function Home() {
                   )}
 
                   {Number(userInfo.status) === UserStatus.Canceled && (
-                    <div className="group relative overflow-hidden rounded-3xl bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700 shadow-xl p-8 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="group relative overflow-hidden rounded-3xl bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700 shadow-xl p-8 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700" style={DEBUG_MODE ? { border: '3px solid rgba(128, 128, 128, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+                      <DebugLabel component="HomePage" section="CanceledCard" props={{ userStatus: Number(userInfo.status), userId: userInfo.id.toString(), userRole: Number(userInfo.role) }} position="top-right" offset={4} />
                       <div className="relative">
                         <h2 className="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
                           🚫 Registration Canceled
@@ -402,7 +404,8 @@ export default function Home() {
 
                 {/* User Rejected */}
                 {Number(userInfo.status) === UserStatus.Rejected && (
-                  <Card className="border-red-500/50">
+                  <Card className="border-red-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-bottom-4 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+                    <DebugLabel component="HomePage" section="RejectedCard" props={{ userStatus: Number(userInfo.status), userId: userInfo.id.toString(), userRole: Number(userInfo.role) }} position="top-right" offset={4} />
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-red-600">
                         ❌ Role Request Rejected
@@ -424,7 +427,8 @@ export default function Home() {
 
                 {/* User Canceled */}
                 {Number(userInfo.status) === UserStatus.Canceled && (
-                  <Card className="border-gray-500/50">
+                  <Card className="border-gray-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-bottom-4 relative" style={DEBUG_MODE ? { border: '3px solid rgba(128, 128, 128, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+                    <DebugLabel component="HomePage" section="CanceledCard" props={{ userStatus: Number(userInfo.status), userId: userInfo.id.toString(), userRole: Number(userInfo.role) }} position="top-right" offset={4} />
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         🚫 Registration Canceled
