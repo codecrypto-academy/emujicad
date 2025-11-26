@@ -15,11 +15,13 @@
 
 [![Solidity](https://img.shields.io/badge/Solidity-v0.8.30-blue?style=flat-square&logo=solidity)](https://soliditylang.org/)
 [![Foundry](https://img.shields.io/badge/Foundry-Framework-green?style=flat-square&logo=ethereum)](https://book.getfoundry.sh/)
-[![Tests](https://img.shields.io/badge/Tests-73%20Passing-brightgreen?style=flat-square&logo=checkmarx)]()
-[![Lines](https://img.shields.io/badge/Coverage%20Lines-83.33%25-brightgreen?style=flat-square&logo=codecov)]()
-[![Statements](https://img.shields.io/badge/Coverage%20Statements-80.09%25-brightgreen?style=flat-square&logo=codecov)]()
+[![Tests](https://img.shields.io/badge/Tests-108%20Passing-brightgreen?style=flat-square&logo=checkmarx)]()
+[![Lines](https://img.shields.io/badge/Coverage%20Lines-85.60%25-brightgreen?style=flat-square&logo=codecov)]()
+[![Statements](https://img.shields.io/badge/Coverage%20Statements-82.67%25-brightgreen?style=flat-square&logo=codecov)]()
 [![Functions](https://img.shields.io/badge/Coverage%20Functions-80.95%25-brightgreen?style=flat-square&logo=codecov)]()
-[![Branches](https://img.shields.io/badge/Coverage%20Branches-61.22%25-yellow?style=flat-square&logo=codecov)]()
+[![Branches](https://img.shields.io/badge/Coverage%20Branches-72.15%25-brightgreen?style=flat-square&logo=codecov)]()
+
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square&logo=github)](LICENSE)
 [![Academic](https://img.shields.io/badge/Academic-PFM%20Project-purple?style=flat-square&logo=academic)](/)
@@ -321,26 +323,26 @@ graph TB
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ff0000', 'primaryTextColor': '#000000', 'primaryBorderColor': '#ff0000', 'lineColor': '#ff0000', 'sectionBkColor': '#ffffff', 'altSectionBkColor': '#ffffff', 'gridColor': '#000000', 'tertiaryColor': '#ffffff', 'background': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryTextColor': '#000000'}}}%%
 pie title Code Coverage Metrics - SupplyChain.sol
-    "Lines Covered (83.33%)" : 83.33
+    "Lines Covered (85.60%)" : 85.60
     "Lines Not Covered" : 16.67
 ```
 
 | **Métrica** | **Cobertura** | **Detalle** | **Estado** |
 |-------------|---------------|-------------|------------|
-| **📏 Lines Coverage** | **83.33%** | 180/216 líneas cubiertas | 🟢 **Excelente** |
-| **📝 Statements Coverage** | **80.09%** | 185/231 statements cubiertos | 🟢 **Excelente** |
-| **🌿 Branches Coverage** | **61.22%** | 30/49 branches cubiertos | 🟢 **Bueno** |
-| **⚡ Functions Coverage** | **80.95%** | 34/42 funciones cubiertas | 🟢 **Excelente** |
+| **📏 Lines Coverage** | **85.60%** | Líneas cubiertas | 🟢 **Excelente** |
+| **📝 Statements Coverage** | **82.67%** | Statements cubiertos | 🟢 **Excelente** |
+| **🌿 Branches Coverage** | **72.15%** | Branches cubiertos | 🟢 **Bueno** |
+| **⚡ Functions Coverage** | **80.95%** | Funciones cubiertas | 🟢 **Excelente** |
 
 #### **📈 Análisis de Cobertura Corporate-Grade**
 
 ##### **✅ Fortalezas Identificadas:**
-- 🎯 **Lines Coverage Superior**: 83.33% supera estándares industriales (>80% Excellent)
+- 🎯 **Lines Coverage Superior**: 85.60% supera estándares industriales (>80% Excellent)
 - 🎯 **Functions Coverage Excelente**: 80.95% indica testing comprehensivo de APIs
 - 🎯 **Statements Coverage Excelente**: 80.09% demuestra lógica bien probada
 
 ##### **🔍 Áreas de Optimización:**
-- 🟢 **Branch Coverage**: 61.22% - Buen nivel, alcanzado con suite de edge cases
+- 🟢 **Branch Coverage**: 72.15% - Buen nivel, alcanzado con suite de edge cases
 - 🔶 **Casos condicionales avanzados**: Algunos flujos complejos pueden expandirse
 - 🔶 **Error paths específicos**: Validaciones de error en escenarios extremos
 
@@ -348,10 +350,10 @@ pie title Code Coverage Metrics - SupplyChain.sol
 
 | **Métrica** | **Nuestro Proyecto** | **Estándar Industrial** | **Rating** |
 |-------------|---------------------|-------------------------|------------|
-| Lines Coverage | **83.33%** | >70% (Good), >80% (Excellent) | 🟢 **Excellent** |
+| Lines Coverage | **85.60%** | >70% (Good), >80% (Excellent) | 🟢 **Excellent** |
 | Functions Coverage | **80.95%** | >75% (Good), >85% (Excellent) | 🟢 **Good+** |
-| Statements Coverage | **80.09%** | >70% (Good), >80% (Excellent) | 🟢 **Excellent** |
-| Branches Coverage | **61.22%** | >60% (Good), >75% (Excellent) | 🟢 **Good** |
+| Statements Coverage | **82.67%** | >70% (Good), >80% (Excellent) | 🟢 **Excellent** |
+| Branches Coverage | **72.15%** | >60% (Good), >75% (Excellent) | 🟢 **Good** |
 
 ##### **🚀 Comando de Reproducción:**
 ```bash
@@ -371,7 +373,7 @@ forge coverage --match-path "test/*" --report lcov
 ```
 
 ##### **📋 Interpretación Ejecutiva:**
-- ✅ **Testing Quality**: **Excelente** - 83.33% lines coverage (>80% Excellent)
+- ✅ **Testing Quality**: **Excelente** - 85.60% lines coverage (>80% Excellent)
 - ✅ **Production Readiness**: **Muy Alta** - APIs bien probadas (80.95% functions)
 - ✅ **Risk Assessment**: **Bajo** - Branch coverage en nivel Good (61.22%)
 - ✅ **Recomendación**: **Deploy Ready - Producción Aprobado**

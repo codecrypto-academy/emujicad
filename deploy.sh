@@ -7,22 +7,32 @@
 # Descripción: Script para automatizar deployment de Anvil + Smart Contract + Frontend
 # Autor: Supply Chain Tracker Team
 # Fecha: 18 Noviembre 2025
-# Versión: 1.0.0
+# Última actualización: 26 de Noviembre, 2025
+# Versión: 2.0.0
 #
 # Funcionalidades:
-#   - Iniciar/detener Anvil (blockchain local)
+#   - Iniciar/detener Anvil (blockchain local con persistencia de estado)
 #   - Desplegar smart contract automáticamente
-#   - Actualizar dirección del contrato en frontend
+#   - Actualizar dirección del contrato y ABI en frontend
 #   - Iniciar/detener servidor Next.js
+#   - Gestión independiente del frontend (sin afectar Anvil/Contrato)
+#   - Limpieza de estado persistente de Anvil
 #   - Validar estados de servicios
 #   - Instrucciones para MetaMask
+#   - Detección inteligente de procesos en ejecución
+#   - Logs organizados en directorio logs/
 #
 # Uso:
-#   ./deploy.sh start   - Inicia todo el stack
-#   ./deploy.sh stop    - Detiene todo el stack
-#   ./deploy.sh status  - Muestra estado de servicios
-#   ./deploy.sh restart - Reinicia todo el stack
-#   ./deploy.sh help    - Muestra ayuda
+#   ./deploy.sh start           - Inicia todo el stack (Anvil + Contrato + Frontend)
+#   ./deploy.sh stop            - Detiene todos los servicios
+#   ./deploy.sh restart         - Reinicia todo el stack
+#   ./deploy.sh status          - Muestra estado de servicios
+#   ./deploy.sh metamask        - Muestra instrucciones para configurar MetaMask
+#   ./deploy.sh clean           - Limpia estado persistente de Anvil
+#   ./deploy.sh frontend start  - Inicia solo el frontend
+#   ./deploy.sh frontend stop   - Detiene solo el frontend
+#   ./deploy.sh frontend restart - Reinicia solo el frontend
+#   ./deploy.sh help            - Muestra ayuda completa
 #
 ################################################################################
 

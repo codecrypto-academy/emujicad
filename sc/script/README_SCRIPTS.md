@@ -1,4 +1,6 @@
-# 
+# 📜 Scripts Documentation
+
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 <div align="center">
 

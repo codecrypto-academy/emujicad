@@ -1,5 +1,7 @@
 # 🤖 Scripts Documentation
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 Complete documentation for all automation scripts in the project.
 
 ---
@@ -231,7 +233,7 @@ Next Transfer ID: 6
 | `SupplyChain.t.sol` | 55 | Core functionality |
 | `EdgeCasesTest.t.sol` | 18 | Edge cases & branch coverage |
 
-**Total: 73 tests** (all passing consistently)
+**Total: 108 tests** (all passing consistently)
 
 #### Running Tests
 
@@ -414,10 +416,10 @@ open coverage/index.html
 #### Coverage Metrics
 
 Current project metrics:
-- **Lines**: 78.22% (158/202)
-- **Statements**: 73.21% (164/224)
-- **Branches**: 36.73% (18/49)
-- **Functions**: 77.14% (27/35)
+- **Lines**: 85.60%
+- **Statements**: 82.67%
+- **Branches**: 72.15%
+- **Functions**: 80.95%
 
 #### Interpreting Coverage
 

@@ -1,5 +1,7 @@
 # 📊 Arquitectura de Scripts de Validación
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 **Fecha:** 2025-11-18  
 **Proyecto:** SupplyChain Smart Contract  
 
@@ -260,10 +262,10 @@ ls -lt docs/reports/*$(date +%Y-%m-%d).md
 
 | Métrica | Umbral Mínimo | Estado Actual |
 |---------|--------------|---------------|
-| **Lines** | 80% | 83.33% ✅ |
+| **Lines** | 80% | 85.60% ✅ |
 | **Statements** | 75% | 80.09% ✅ |
 | **Functions** | 75% | 80.95% ✅ |
-| **Branches** | 50% | 61.22% ✅ |
+| **Branches** | 50% | 72.15% ✅ |
 
 ### Umbrales de Tests
 

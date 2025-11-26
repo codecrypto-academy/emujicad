@@ -1,5 +1,7 @@
 # 🧪 Guía de Pruebas - Funcionalidades Existentes
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 > **Fecha**: 22 de Noviembre, 2025  
 > **Propósito**: Verificar que todas las funcionalidades implementadas funcionan correctamente
 

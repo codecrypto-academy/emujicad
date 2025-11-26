@@ -769,6 +769,157 @@ function AdminRoute() {
 
 ---
 
+### Archivo: `usePendingOwner.ts` ✨ NUEVO (1 hook)
+
+#### 21. **usePendingOwner(enabled?: boolean)**
+Hook para obtener la dirección del `pendingOwner` del contrato.
+
+```typescript
+import { usePendingOwner } from '@/hooks/usePendingOwner'
+
+function OwnershipTransfer() {
+  const { pendingOwner, isLoading, error } = usePendingOwner(isConnected)
+  const hasPendingOwner = pendingOwner && pendingOwner !== '0x0000000000000000000000000000000000000000'
+  
+  if (hasPendingOwner) {
+    return <div>Pending Owner: {pendingOwner}</div>
+  }
+}
+```
+
+**Parámetros**:
+- `enabled?: boolean` - Si es `false`, no se ejecuta la consulta (por defecto: `true`)
+
+**Retorna**:
+```typescript
+{
+  pendingOwner: string | undefined  // Dirección del pendingOwner (address(0) si no hay)
+  isLoading: boolean                // Estado de carga
+  error: Error | null              // Error si falla
+}
+```
+
+**Características**:
+- Usa `useReadContract` de wagmi
+- Llama a la función `getPendingOwner()` del contrato
+- Soporta habilitación condicional con `enabled`
+- Similar a `useContractOwner.ts` (patrón consistente)
+
+**Uso típico**:
+```typescript
+const { pendingOwner, isLoading } = usePendingOwner(isConnected)
+const hasPendingOwner = pendingOwner && pendingOwner !== '0x0000000000000000000000000000000000000000'
+```
+
+---
+
+### Archivo: `useOwnershipTransfer.ts` ✨ NUEVO (1 hook con 3 funciones)
+
+#### 22. **useOwnershipTransfer()**
+Hook para gestionar la transferencia de ownership del contrato.
+
+Este hook proporciona funciones para:
+- Iniciar la transferencia de ownership (solo owner actual)
+- Aceptar la transferencia de ownership (solo pendingOwner)
+- Rechazar/cancelar la transferencia (owner actual o pendingOwner)
+
+**Cada función tiene su propio estado independiente** para evitar conflictos.
+
+```typescript
+import { useOwnershipTransfer } from '@/hooks/useOwnershipTransfer'
+
+function OwnershipTransfer() {
+  const { 
+    initiateOwnershipTransfer,
+    acceptOwnershipTransfer,
+    rejectOwnershipTransfer,
+    isPendingInitiate,
+    isConfirmingInitiate,
+    successInitiate,
+    errorInitiate
+  } = useOwnershipTransfer()
+  
+  const handleInitiate = () => {
+    initiateOwnershipTransfer('0x...')
+  }
+  
+  return (
+    <button 
+      onClick={handleInitiate}
+      disabled={isPendingInitiate || isConfirmingInitiate}
+    >
+      {isPendingInitiate ? 'Confirming...' : 'Initiate Transfer'}
+    </button>
+  )
+}
+```
+
+**Funciones expuestas**:
+
+1. **`initiateOwnershipTransfer(newOwner: 0x${string})`**
+   - Solo el owner actual puede llamarla
+   - Inicia la transferencia de ownership a `newOwner`
+   - Establece `pendingOwner = newOwner`
+   - Emite evento: `OwnershipTransferInitiated`
+
+2. **`acceptOwnershipTransfer()`**
+   - Solo el `pendingOwner` puede llamarla
+   - Completa la transferencia de ownership
+   - Valida que el nuevo owner nunca haya solicitado un rol
+   - Si el usuario existe en el sistema → `revert UserExists()`
+   - Emite evento: `OwnershipTransferred`
+
+3. **`rejectOwnershipTransfer()`**
+   - Puede ser llamada por el owner actual o el `pendingOwner`
+   - Cancela/rechaza la transferencia pendiente
+   - Emite eventos diferentes según quién la llama:
+     - `OwnershipTransferCancelledByOwner` (si owner cancela)
+     - `OwnershipTransferRejectedByPendingOwner` (si pendingOwner rechaza)
+
+**Retorna**:
+```typescript
+{
+  // Funciones
+  initiateOwnershipTransfer: (newOwner: `0x${string}`) => void
+  acceptOwnershipTransfer: () => void
+  rejectOwnershipTransfer: () => void
+  
+  // Estados para initiateOwnershipTransfer
+  isPendingInitiate: boolean
+  isConfirmingInitiate: boolean
+  successInitiate: boolean
+  errorInitiate: Error | null
+  initiateHash: `0x${string}` | undefined
+  
+  // Estados para acceptOwnershipTransfer
+  isPendingAccept: boolean
+  isConfirmingAccept: boolean
+  successAccept: boolean
+  errorAccept: Error | null
+  acceptHash: `0x${string}` | undefined
+  
+  // Estados para rejectOwnershipTransfer
+  isPendingReject: boolean
+  isConfirmingReject: boolean
+  successReject: boolean
+  errorReject: Error | null
+  rejectHash: `0x${string}` | undefined
+}
+```
+
+**Características**:
+- ✅ **Estados separados**: 3 instancias de `useWriteContract()` (una por función)
+- ✅ **Confirmaciones separadas**: 3 instancias de `useWaitForTransactionReceipt()` (una por función)
+- ✅ **Estados individuales**: Cada función tiene su propio `isPending`, `isConfirming`, `isSuccess`, `error`, `hash`
+- ✅ Rastrear el estado de cada operación independientemente
+- ✅ Mostrar feedback correcto al usuario (ej: "Iniciando transferencia..." vs "Aceptando ownership...")
+- ✅ Manejar errores específicos por operación
+- ✅ Evitar conflictos cuando se usan múltiples funciones
+
+**Componente relacionado**: `web/src/components/admin/OwnershipTransfer.tsx`
+
+---
+
 ## 📊 Resumen de Hooks por Archivo
 
 | Archivo | Hooks | Tipo | Estado |
@@ -784,7 +935,9 @@ function AdminRoute() {
 | useUserTokenStats.ts | 1 | Lectura | ✅ Día 7 |
 | useGetUserTokensWithData.ts | 1 | Lectura | ✅ Día 7 |
 | useGetUserTransfers.ts | 1 | Lectura | ✅ Día 7 |
-| **TOTAL** | **25** | **16 lectura + 9 escritura** | **100%** |
+| usePendingOwner.ts | 1 | Lectura | ✅ |
+| useOwnershipTransfer.ts | 1 | Escritura | ✅ |
+| **TOTAL** | **27** | **17 lectura + 10 escritura** | **100%** |
 
 **Nota**: 
 - `useContractReads.ts` incluye 6 hooks (5 individuales + 1 optimizado batch)
@@ -792,7 +945,8 @@ function AdminRoute() {
 - `usePause.ts` incluye 3 hooks
 - `useTransfer.ts` incluye 4 hooks
 - `useAdminUsers.ts` incluye 2 hooks
-- Total documentado: 25 hooks únicos (21 hooks principales + 4 hooks adicionales de admin) ⭐ Día 7
+- `useOwnershipTransfer.ts` incluye 3 funciones (initiate, accept, reject) con estados separados
+- Total documentado: 24 hooks personalizados (14 archivos) ⭐
 
 ---
 

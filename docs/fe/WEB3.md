@@ -1,6 +1,8 @@
 # 🔗 Integración Web3
 
-> Documentación de la integración Web3 con wagmi + viem + ethers
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
+Documentación de la integración Web3 con wagmi + viem + ethers
 
 ---
 

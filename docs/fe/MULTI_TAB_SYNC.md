@@ -1,5 +1,7 @@
 # Sincronización de Sesión Multi-Pestaña
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 > ⚠️ **ESTADO ACTUAL**: Implementación parcial (solo sincronización de desconexiones)  
 > **Última actualización**: Día 2 - Feature completa POSTPONED por problemas de race conditions
 

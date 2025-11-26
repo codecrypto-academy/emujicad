@@ -1,5 +1,7 @@
 # 🔒 Security Policy
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 ## 🛡️ Security Overview
 
 This document outlines the security considerations, audit status, and vulnerability reporting process for the SupplyChain smart contract.

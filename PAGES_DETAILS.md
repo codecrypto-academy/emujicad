@@ -1,7 +1,10 @@
 # 📄 Contenido de las Páginas - Estado de Implementación
 
-> **📋 Para el estado completo del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**
+> **📋 Para el estado completo del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**  
+> **📚 Para documentación completa de hooks, consulta [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)**  
+> **📚 Para documentación completa de componentes, consulta [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)**
 
+**Última actualización**: 26 de Noviembre, 2025  
 **Estado**: ✅ Todas las páginas están completadas (9/9 - 100%)
 
 ---
@@ -11,7 +14,9 @@
 ### 🎯 Propósito
 Mostrar información completa y detallada de un token específico, incluyendo su historial de transferencias y trazabilidad completa.
 
-### 📋 Contenido Propuesto
+### 📋 Contenido Implementado
+
+> **Nota**: Este documento describe el contenido implementado en las páginas. Para ver el código fuente, consulta `web/src/app/tokens/[id]/page.tsx`.
 
 #### **Sección 1: Información Principal del Token**
 - **Header con nombre del token** (grande y destacado)
@@ -79,7 +84,9 @@ Mostrar información completa y detallada de un token específico, incluyendo su
 ### 🎯 Propósito
 Formulario de transferencia pre-rellenado con el token seleccionado, permitiendo transferir directamente desde la página de detalles.
 
-### 📋 Contenido Propuesto
+### 📋 Contenido Implementado
+
+> **Nota**: Este documento describe el contenido implementado en las páginas. Para ver el código fuente, consulta `web/src/app/tokens/[id]/transfer/page.tsx`.
 
 #### **Sección 1: Información del Token a Transferir**
 - **Card con resumen del token**:
@@ -134,14 +141,16 @@ Antes de enviar, mostrar:
 
 ## 🔄 Flujo de Navegación
 
+> **📚 Para guía completa de navegación paso a paso con ejemplos prácticos, consulta [NAVEGACION_GUIA.md](./NAVEGACION_GUIA.md)**
+
 ```
 /tokens (lista de tokens)
   └── Click en token card
       └── /tokens/[id] (detalles)
           ├── Click "Transfer Tokens"
           │   └── /tokens/[id]/transfer (formulario)
-          │       ├── Submit → Crear transferencia
-          │       └── Cancel → Volver a /tokens/[id]
+          │       ├── Submit → Crear transferencia → Redirección a /tokens/[id]
+          │       └── Cancel/Back → Volver a /tokens/[id]
           └── Click "View Parent Token" (si aplica)
               └── /tokens/[parentId] (detalles del parent)
 ```
@@ -155,14 +164,18 @@ Antes de enviar, mostrar:
 - ✅ `useGetTokenBalance(tokenId, address)` - Balance del usuario
 - ✅ `useGetAllTransfers()` - Todas las transferencias (filtrar por tokenId)
 - ✅ `useGetToken(parentTokenId)` - Información del token padre (si aplica)
-- ⚠️ **NUEVO**: Hook para obtener todos los usuarios con balance de un token (o filtrar transferencias)
+- ✅ `useTokenTraceability(tokenId)` - Trazabilidad end-to-end con árbol jerárquico
+
+> **📚 Ver documentación completa de hooks**: [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)
 
 ### Para `/tokens/[id]/transfer`:
 - ✅ `useGetToken(tokenId)` - Información del token
 - ✅ `useGetTokenBalance(tokenId, address)` - Balance del usuario
-- ✅ `useUsersByRole(userRole)` - Usuarios disponibles según rol
+- ✅ `useGetAllUsers()` - Usuarios disponibles según rol (filtrado en el componente)
 - ✅ `useTransfer()` - Hook para crear transferencia
 - ✅ `useIsPaused()` - Verificar si el contrato está pausado
+
+> **📚 Ver documentación completa de hooks**: [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)
 
 ---
 
@@ -190,24 +203,23 @@ Antes de enviar, mostrar:
 
 ## ⚠️ Consideraciones
 
-### Opcional vs Requerido
-Según `PROJECT_STATUS.md`, estas páginas son **opcionales** porque:
-- Los detalles se muestran en las tarjetas de `/tokens`
-- Las transferencias se hacen desde `/transfers`
+### Estado de Implementación
+Estas páginas **están implementadas y funcionando** (completadas el 23 de Noviembre, 2025 - Día 8):
+- ✅ `/tokens/[id]` - Página de detalles con trazabilidad end-to-end completa
+- ✅ `/tokens/[id]/transfer` - Formulario de transferencia desde detalles
 
-Sin embargo, según `README.md`, estas páginas **están listadas como requeridas**.
+**Funcionalidad**:
+- ✅ Links desde las tarjetas de tokens (`/tokens`) a `/tokens/[id]`
+- ✅ Botón "Transfer Tokens" en la página de detalles que lleva a `/tokens/[id]/transfer`
+- ✅ Funcionalidad existente en `/tokens` y `/transfers` mantenida
 
-### Recomendación
-- **Implementar ambas páginas** para cumplir 100% con el README.md
-- **Mantener la funcionalidad existente** en `/tokens` y `/transfers`
-- **Agregar links** desde las tarjetas de tokens a `/tokens/[id]`
-- **Agregar botón "Transfer"** en la página de detalles que lleve a `/tokens/[id]/transfer`
+> **📚 Ver estado completo**: [PROJECT_STATUS.md](./PROJECT_STATUS.md) | [QUICKSTART.md](./QUICKSTART.md)
 
 ---
 
 ## 📝 Checklist de Implementación
 
-### `/tokens/[id]`: ✅ COMPLETADO (Día 8)
+### `/tokens/[id]`: ✅ COMPLETADO (23 de Noviembre, 2025 - Día 8)
 - [x] Crear estructura de página
 - [x] Implementar sección de información principal
 - [x] Implementar sección de trazabilidad end-to-end (árbol interactivo)
@@ -224,8 +236,11 @@ Sin embargo, según `README.md`, estas páginas **están listadas como requerida
 - ✅ Muestra creación, envío, recepción y aceptación/rechazo de transferencias
 - ✅ Información del token en la línea superior de cada nodo
 - ✅ Formato optimizado (todo en una línea para ahorrar espacio vertical)
+- ✅ Hook `useTokenTraceability` para trazabilidad end-to-end completa
 
-### `/tokens/[id]/transfer`: ✅ COMPLETADO (Día 8)
+> **📚 Ver implementación**: `web/src/app/tokens/[id]/page.tsx` | [docs/fe/HOOKS.md - useTokenTraceability](./docs/fe/HOOKS.md#23-usetokentraceabilitytokenid-bigint--undefined)
+
+### `/tokens/[id]/transfer`: ✅ COMPLETADO (23 de Noviembre, 2025 - Día 8)
 - [x] Crear estructura de página
 - [x] Implementar card de información del token
 - [x] Implementar formulario de transferencia
@@ -235,5 +250,11 @@ Sin embargo, según `README.md`, estas páginas **están listadas como requerida
 - [x] Agregar link desde `/tokens/[id]`
 - [x] Testing y validación
 
-> **📋 Para el estado completo del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**
+> **📚 Ver implementación**: `web/src/app/tokens/[id]/transfer/page.tsx` | [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)
+
+---
+
+> **📋 Para el estado completo del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**  
+> **📚 Para documentación completa de hooks, consulta [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)**  
+> **📚 Para documentación completa de componentes, consulta [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)**
 

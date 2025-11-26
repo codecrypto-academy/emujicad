@@ -1,5 +1,7 @@
 # 📋 SupplyChain - Changelog & Improvements
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 **Estado**: 🎉 **TODAS LAS MEJORAS IMPLEMENTADAS EXITOSAMENTE** 🎉
 
 Este changelog consolida **toda la historia de mejoras** de los archivos originales: `MEJORAS_IMPLEMENTADAS.md`, `recomendaciones.md`, `limpieza_codigo.md`, `ANALISIS_TESTS_FALTANTES.md` y `TODO.md`.
@@ -54,13 +56,13 @@ Este changelog consolida **toda la historia de mejoras** de los archivos origina
 🧪 Total Tests: 96 (exploratorio) - Fase de investigación
 ```
 
-#### **Métricas FINALES (Consolidación - 73 tests):**
+#### **Métricas FINALES (Actualizado - 108 tests):**
 ```
-📏 Lines:      83.33% ✅ EXCELENTE (+5.11% mejora)
-📝 Statements: 80.09% ✅ ALTO (+6.88% mejora)
-🌿 Branches:   61.22% ✅ ALTO (+24.49% mejora!)
-⚡ Functions:  80.95% ✅ ALTO (+3.81% mejora)
-🧪 Total Tests: 73 (55 core + 18 edge cases óptimos) ✅ CONSOLIDADO
+📏 Lines:      85.60% ✅ EXCELENTE
+📝 Statements: 82.67% ✅ ALTO
+🌿 Branches:   72.15% ✅ ALTO
+⚡ Functions:  80.95% ✅ ALTO
+🧪 Total Tests: 108 (64 core + 44 edge cases) ✅ ACTUALIZADO
 ```
 
 #### **Documentación de Investigación Generada:**
@@ -321,7 +323,7 @@ function getUserTransfers(address userAddress) public view returns (uint[] memor
 | **Exploración Máxima** | 78 + 18 | 96 | 224% | Fase investigación (histórico) |
 | **Consolidación Final** | 55 + 18 | **73** | **170%** | **Configuración óptima** ✅ |
 
-> **Nota**: La fase de exploración (96 tests) permitió investigación científica. La consolidación a 73 tests óptimos mejoró coverage significativamente (83.33% lines).
+> **Nota**: La fase de exploración (96 tests) permitió investigación científica. El estado actual es 108 tests con 85.60% lines coverage y 72.15% branches coverage.
 
 #### **🎯 Metodología Científica Aplicada**
 

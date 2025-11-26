@@ -1,5 +1,7 @@
 # 🚀 Getting Started
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 Complete guide to get SupplyChain smart contract up and running.
 
 ---
@@ -71,9 +73,9 @@ forge test --match-test testCreateToken -vvv
 
 ### Expected Results
 ```
-✅ 73/73 tests passing
-   - SupplyChainTest: 55 tests
-   - EdgeCasesTest: 18 tests
+✅ 108/108 tests passing
+   - SupplyChainTest: 64 tests
+   - EdgeCasesTest: 44 tests
 ✅ 0 tests failing
 ```
 

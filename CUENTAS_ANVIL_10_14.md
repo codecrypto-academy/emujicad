@@ -1,9 +1,14 @@
 # 🔑 Private Keys de Cuentas Anvil 10-14
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**  
+> **📚 Para instrucciones de MetaMask, consulta [QUICKSTART.md](./QUICKSTART.md) o ejecuta `./deploy.sh metamask`**
+
 ## 📋 Información para Importar en MetaMask
 
 Anvil genera 15 cuentas usando el mnemonic determinístico:
 `test test test test test test test test test test test junk`
+
+> **📚 Nota**: Las cuentas #0-9 están documentadas en las instrucciones de MetaMask del script `deploy.sh` (ejecuta `./deploy.sh metamask`). Este documento contiene las cuentas #10-14 adicionales.
 
 ### ✅ Cuenta #10
 - **Dirección**: `0xbcd4042de499d14e55001ccbb24a551f3b954096`
@@ -71,5 +76,5 @@ Después de importar, verifica que:
 
 ---
 
-**Última actualización**: 25 de Noviembre, 2025
+**Última actualización**: 26 de Noviembre, 2025
 

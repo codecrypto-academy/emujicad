@@ -1384,11 +1384,13 @@ forge script script/Deploy.s.sol:DeploySupplyChain --rpc-url http://localhost:85
 ## 👨‍💻 Autor
 
 Proyecto académico PFM/TFM - Supply Chain Tracker  
-**Smart Contract**: SupplyChain.sol (971 lines, 80 tests passing, 83.33% lines, 64.41% branches)  
+**Smart Contract**: SupplyChain.sol (970+ lines, 108 tests passing, 85.60% lines, 72.15% branches)
+
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
 **Blockchain**: Ethereum Local (Anvil)  
-**Frontend**: 5/9 páginas implementadas (56%) | Diseño Moderno 2025 aplicado  
+**Frontend**: 9/9 páginas implementadas (100%) | Diseño Moderno 2025 aplicado  
 **Fecha límite**: 28 de noviembre, 2025  
-**Última actualización**: 21 de Noviembre, 2025 - Día 6
+**Última actualización**: 24 de Noviembre, 2025 - Día 8
 
 ---
 

@@ -1,5 +1,7 @@
 # 🌍 Plan de Implementación: Multilenguaje y Documentación
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 **Fecha**: 2025-01-XX  
 **Estado**: En Planificación
 

@@ -1,6 +1,10 @@
 # 🧭 Guía de Navegación - Páginas de Tokens
 
-> **📋 Esta guía explica cómo navegar entre las páginas de tokens. Para el estado completo del proyecto, consulta [PROJECT_STATUS.md](../PROJECT_STATUS.md)**
+> **📋 Esta guía explica cómo navegar entre las páginas de tokens. Para el estado completo del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**  
+> **📚 Para detalles de implementación de las páginas, consulta [PAGES_DETAILS.md](./PAGES_DETAILS.md)**  
+> **📚 Para documentación completa de componentes, consulta [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)**
+
+**Última actualización**: 26 de Noviembre, 2025
 
 ## 📍 Flujo de Navegación Completo
 
@@ -8,7 +12,7 @@
 
 1. **Desde el Header**: Haz clic en el botón **"My Tokens"** en la barra superior
 2. **Desde el Dashboard**: Haz clic en el botón **"My Tokens"** en el dashboard
-3. **URL directa**: `http://localhost:3000/tokens` (o tu IP: `http://192.168.178.107:3000/tokens`)
+3. **URL directa**: `http://localhost:3000/tokens` (o tu IP si accedes desde otro dispositivo)
 
 **Resultado**: Verás una lista de todas tus tarjetas de tokens (TokenCard o TokenCardModern)
 
@@ -23,12 +27,15 @@
 
 **Opción B: URL Directa**
 - Escribe en el navegador: `http://localhost:3000/tokens/1` (reemplaza `1` con el ID del token que quieres ver)
+- También puedes usar tu IP si accedes desde otro dispositivo
 
 **Resultado**: Verás la página de detalles del token con:
 - ✅ Información completa del token
 - ✅ Historial de transferencias
 - ✅ Estadísticas
-- ✅ Trazabilidad (si es Finished Product)
+- ✅ Trazabilidad end-to-end con árbol interactivo (si es Finished Product)
+
+> **📚 Ver detalles completos**: [PAGES_DETAILS.md](./PAGES_DETAILS.md#1-tokensid---página-de-detalles-del-token)
 
 ---
 
@@ -41,9 +48,12 @@
 
 **Resultado**: Verás el formulario de transferencia con:
 - ✅ Token pre-seleccionado (no editable)
-- ✅ Campo de cantidad
-- ✅ Selector de destinatario
+- ✅ Campo de cantidad con validaciones
+- ✅ Selector de destinatario (filtrado por rol)
 - ✅ Resumen antes de enviar
+- ✅ Validación de balance disponible
+
+> **📚 Ver detalles completos**: [PAGES_DETAILS.md](./PAGES_DETAILS.md#2-tokensidtransfer---página-de-transferencia-desde-detalles)
 
 ---
 
@@ -128,11 +138,15 @@ Las tarjetas de tokens tienen estas características:
 - ❌ No tienes balance del token (balance = 0)
 - ❌ Tu rol no permite transferir (Consumer no puede transferir)
 - ❌ El contrato está pausado
+- ❌ Tu usuario no está aprobado
 
 **Solución**: 
 - Verifica tu balance en la página de detalles
 - Si eres Consumer, solo puedes recibir transferencias
 - Si el contrato está pausado, espera a que se reactive
+- Verifica tu estado de usuario en el dashboard
+
+> **📚 Ver validaciones de transferencia**: [docs/fe/TRANSFER_PERMISSIONS.md](./docs/fe/TRANSFER_PERMISSIONS.md)
 
 ---
 
@@ -155,11 +169,15 @@ Las tarjetas de tokens tienen estas características:
 - ❌ Token ID inválido
 - ❌ Token no existe
 - ❌ Error de conexión con el contrato
+- ❌ Anvil no está corriendo
 
 **Solución**:
 - Verifica que el token ID sea correcto
-- Asegúrate de que el contrato esté desplegado
+- Asegúrate de que el contrato esté desplegado (`./deploy.sh status`)
 - Verifica que MetaMask esté conectado
+- Verifica que Anvil esté corriendo (`./deploy.sh status`)
+
+> **📚 Ver troubleshooting completo**: [docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATION.md#-troubleshooting)
 
 ---
 
@@ -190,13 +208,17 @@ Transfers → Ver transferencia → Click en Token ID (si está linkeado) → /t
    - ✅ **Visible**: Si tienes balance > 0 y puedes transferir
    - ❌ **Oculto**: Si no tienes balance o no puedes transferir
 
-2. **Sección de Trazabilidad**:
+2. **Sección de Trazabilidad End-to-End**:
    - ✅ **Visible**: Solo para Finished Products con parent token
    - ❌ **Oculta**: Para Raw Materials (no tienen parent)
+   - 🌳 **Características**: Árbol interactivo con expand/collapse, filtrado por dirección, resaltado de nodos
+
+> **📚 Ver detalles de trazabilidad**: [PAGES_DETAILS.md](./PAGES_DETAILS.md#sección-2-trazabilidad-completa-solo-para-finished-product)
 
 3. **Historial de Transferencias**:
    - ✅ **Visible**: Siempre (puede estar vacío)
-   - 📊 **Filtros**: Dropdown arriba a la derecha de la tabla
+   - 📊 **Filtros**: Por estado (All, Pending, Accepted, Rejected, Cancelled) y por dirección (From/To)
+   - 📈 **Estadísticas**: Total de transferencias, aceptadas, pendientes, total de tokens transferidos
 
 ---
 
@@ -205,29 +227,32 @@ Transfers → Ver transferencia → Click en Token ID (si está linkeado) → /t
 ### **Lista de Tokens**:
 ```
 http://localhost:3000/tokens
-http://192.168.178.107:3000/tokens
 ```
 
 ### **Detalles del Token #1**:
 ```
 http://localhost:3000/tokens/1
-http://192.168.178.107:3000/tokens/1
 ```
 
 ### **Transferir Token #1**:
 ```
 http://localhost:3000/tokens/1/transfer
-http://192.168.178.107:3000/tokens/1/transfer
 ```
+
+**Nota**: Si accedes desde otro dispositivo en la misma red, reemplaza `localhost` con la IP de tu máquina (ej: `http://192.168.1.100:3000/tokens`). Para verificar tu IP, ejecuta `ip addr` (Linux) o `ipconfig` (Windows).
 
 ---
 
 ## 💡 Tips de Navegación
 
 1. **Usa el botón "Back" del navegador**: Funciona normalmente
-2. **Mantén abierta la consola**: Para ver errores si algo no funciona
-3. **Verifica tu conexión**: Asegúrate de que MetaMask esté conectado
-4. **Recarga si es necesario**: Si algo no carga, recarga la página (F5)
+2. **Mantén abierta la consola**: Para ver errores si algo no funciona (F12)
+3. **Verifica tu conexión**: Asegúrate de que MetaMask esté conectado y en la red correcta (Anvil Local)
+4. **Recarga si es necesario**: Si algo no carga, recarga la página (F5 o Ctrl+R)
+5. **Usa los botones de navegación**: Los botones "Back to Tokens" y "Back to Token Details" son más confiables que el botón del navegador
+6. **Verifica el estado del sistema**: Usa `./deploy.sh status` para verificar que todos los servicios estén corriendo
+
+> **📚 Ver guía de troubleshooting**: [QUICKSTART.md - Troubleshooting Rápido](./QUICKSTART.md#-troubleshooting-rápido)
 
 ---
 
@@ -244,4 +269,11 @@ http://192.168.178.107:3000/tokens/1/transfer
 9. ✅ Verifica que volviste a `/tokens`
 
 Si todos estos pasos funcionan, ¡la navegación está perfecta! 🎉
+
+---
+
+> **📋 Para el estado completo del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**  
+> **📚 Para detalles de implementación, consulta [PAGES_DETAILS.md](./PAGES_DETAILS.md)**  
+> **📚 Para documentación de componentes, consulta [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)**  
+> **📚 Para guía rápida de inicio, consulta [QUICKSTART.md](./QUICKSTART.md)**
 

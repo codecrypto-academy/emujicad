@@ -1,5 +1,7 @@
 # 📖 API Reference - SupplyChain Contract
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 Complete API documentation for all functions, events, modifiers, and data structures.
 
 ---
@@ -613,6 +615,8 @@ function getTransfer(uint transferId) external view returns (Transfer memory)
 ```solidity
 event OwnershipTransferInitiated(address indexed previousOwner, address indexed newOwner);
 event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+event OwnershipTransferCancelledByOwner(address indexed owner, address indexed cancelledPendingOwner);
+event OwnershipTransferRejectedByPendingOwner(address indexed owner, address indexed rejectedPendingOwner);
 event AssignInitialContractOwner(address indexed initialOwner);
 ```
 

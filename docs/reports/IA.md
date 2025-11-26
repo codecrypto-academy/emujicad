@@ -43,7 +43,7 @@
 |-----------|--------|----------|
 | Diseño inicial del contrato | 1h | Estructuras de datos, enums, mappings |
 | Implementación core | 2h | 970+ líneas de código |
-| Testing exhaustivo | 2h | 90 tests, 85.60% coverage |
+| Testing exhaustivo | 2h | 108 tests, 85.60% coverage lines, 72.15% branches |
 | Validaciones críticas | 1.5h | Rol por tipo de token + usuario cancelado |
 | Nuevos tests validaciones | 0.5h | 8 tests para validaciones nuevas |
 | Deployment y configuración | 0.5h | Scripts de deployment, validación |
@@ -1342,14 +1342,14 @@ const recommendedWallets = allRecommendedWallets.filter(wallet => {
 - **Frontend**: Next.js 16 + React 19 + TypeScript 5.x
 - **Web3**: wagmi 2.12.0 + viem 2.21.0 + ethers 6.13.0
 - **UI**: Tailwind CSS 3.4.14 + Shadcn UI
-- **Testing**: Foundry (73 tests, 83.33% coverage)
+- **Testing**: Foundry (108 tests, 85.60% coverage lines, 72.15% branches)
 
 ### **Métricas del Proyecto (ACTUALIZADO DÍA 7)**
 - **Smart Contract**: 970+ líneas (100% completo + validaciones críticas)
 - **Frontend**: ~3,500+ líneas productivo (+2,300 desde Día 1)
 - **Tests**: 108 tests (100% passing, 85.60% coverage lines, 72.15% branches)
-- **Hooks**: 18 personalizados (12 originales + 3 admin + 3 tokens + 3 pausa)
-- **Componentes**: 21 (9 Shadcn + 12 personalizados)
+- **Hooks**: 22 personalizados (12 archivos)
+- **Componentes**: 26 (11 Shadcn + 15 personalizados)
 - **Páginas**: 9 de 9 (100% completadas)
 - **Tests Frontend**: 17 tests (14 unitarios + 3 E2E) pasando
 - **Documentación**: 13,000+ líneas (+1000 desde Día 1)

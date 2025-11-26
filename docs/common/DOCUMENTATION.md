@@ -1,7 +1,7 @@
 # 📚 Documentación Completa - Supply Chain Tracker
 
-**Fecha**: 24 Noviembre 2025  
-**Versión**: 1.3.0  
+**Última actualización**: 26 de Noviembre, 2025  
+**Versión**: 1.4.0  
 **Proyecto**: Supply Chain DApp (PFM Web3)
 
 > **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
@@ -48,8 +48,8 @@ Supply Chain Tracker es una DApp descentralizada para gestionar cadenas de sumin
 > **📋 Para métricas actualizadas, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 - **Smart Contract**: 970+ líneas de código
-- **Tests**: 90 tests (100% passing) - 55 core + 35 edge cases
-- **Coverage**: 85.60% líneas, 82.67% statements, 70.67% branches, 80.95% functions
+- **Tests**: 108 tests (100% passing) - 64 core + 44 edge cases
+- **Coverage**: 85.60% líneas, 82.67% statements, 72.15% branches, 80.95% functions
 - **Validaciones críticas**: 5 implementadas (100% completadas)
 - **Frontend**: ~4,000+ líneas de código productivo
 - **Hooks**: 22 hooks personalizados (12 archivos)
@@ -527,11 +527,14 @@ nohup npm run dev > logs/frontend.log 2>&1 &
 logs/
 ├── anvil.log              # Output completo de Anvil
 ├── anvil.pid              # PID del proceso Anvil
+├── anvil_state.json       # Estado persistente de Anvil (tokens, transferencias, usuarios)
 ├── frontend.log           # Output de Next.js dev server
 ├── frontend.pid           # PID del proceso Next.js
 ├── deploy.log             # Output del deployment Foundry
 └── contract_address.txt   # Dirección del contrato deployado
 ```
+
+**Nota sobre persistencia**: El archivo `anvil_state.json` contiene el estado completo de la blockchain local. Si lo eliminas (con `./deploy.sh clean`), Anvil iniciará con una blockchain limpia en el próximo `start`.
 
 ### **Gestión de Procesos**:
 
@@ -792,7 +795,7 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 
 ### **✅ Completado (Días 1-8 - 18-24 Nov 2025)**:
 
-- [x] Smart contract implementado y testeado (970+ líneas, 90 tests, 85.60% coverage)
+- [x] Smart contract implementado y testeado (970+ líneas, 108 tests, 85.60% coverage, 72.15% branches)
 - [x] Validaciones críticas del contrato (5 validaciones completadas)
 - [x] Frontend base con Next.js 16 + TypeScript + Tailwind
 - [x] Integración Web3 con wagmi + viem + ethers
@@ -824,7 +827,7 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - [x] Hook `useTokenTraceability` para árbol jerárquico ⭐ Día 8
 - [x] Componente `TraceabilityTimeline` con expand/collapse ⭐ Día 8
 - [x] Validaciones críticas del contrato (5 validaciones) ⭐ Día 7
-- [x] Tests adicionales (90 tests totales, 85.60% coverage) ⭐ Día 7
+- [x] Tests adicionales (108 tests totales, 85.60% coverage, 72.15% branches) ⭐ Día 7
 
 ### **✅ Día 4 (20 Nov)**: Dashboard y Optimizaciones ✅ COMPLETADO
 
@@ -918,7 +921,7 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 - [x] Validación: Rol por tipo de token en acceptTransfer()
 - [x] Validación: Rol por tipo de token en rejectTransfer()
 - [x] Tests adicionales (8 nuevos tests)
-- [x] Coverage mejorado (85.60% lines, 70.67% branches)
+- [x] Coverage mejorado (85.60% lines, 72.15% branches)
 
 #### **Día 8 (23 Nov)**: Panel Admin y Páginas Adicionales ✅ COMPLETADO
 - [x] Página `/admin` - Panel principal de administración
@@ -957,7 +960,7 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 ### **Smart Contract**:
 - **Líneas de código**: 971
 - **Tests**: 80 (100% passing)
-- **Coverage**: 83.33% lines, 64.41% branches
+- **Coverage**: 85.60% lines, 72.15% branches
 - **Funciones**: 42
 - **Eventos**: 6
 - **Modificadores**: 2

@@ -1,5 +1,7 @@
 # Transfer Permissions - Supply Chain Roles
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 ## 📋 Overview
 
 This document explains the transfer permissions for each role in the supply chain system, ensuring the frontend is aligned with the smart contract rules.

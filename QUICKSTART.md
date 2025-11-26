@@ -6,7 +6,8 @@
 
 ## 📊 Estado de Implementación del Frontend
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**  
+> **📚 Para documentación completa de páginas y componentes, consulta [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)**
 
 ### 📄 Páginas Implementadas (9/9 - 100%)
 
@@ -50,14 +51,21 @@ web/src/components/
 ├── ChangeRoleDialog.tsx       ✅ Diálogo cambiar rol con validación de pausa
 ├── UserProfileCard.tsx        ✅ Perfil de usuario
 ├── QuickActions.tsx           ✅ Acciones rápidas con validación de pausa
+├── CreateTransferForm.tsx     ✅ Formulario crear transferencias ⭐ Día 7
+├── UserTokenList.tsx          ✅ Lista tokens usuario ⭐ Día 7
+├── AddressDisplay.tsx         ✅ Direcciones con copy/tooltip ⭐ Día 7
+├── TraceabilityTimeline.tsx   ✅ Trazabilidad end-to-end ⭐ Día 8
 └── admin/
     ├── UserManagementTable.tsx  ✅ Tabla gestión usuarios con filtros + pausa
     ├── UserStatsCards.tsx       ✅ Cards estadísticas del sistema
-    └── PauseControl.tsx         ✅ Control de pausa del contrato
+    ├── PauseControl.tsx         ✅ Control de pausa del contrato
+    └── OwnershipTransfer.tsx    ✅ Gestión ownership transfer ⭐
 ```
 
-**Total componentes personalizados**: 26 implementados (incluye TokenCardModern, CreateTransferForm, UserTokenList, AddressDisplay, TraceabilityTimeline)
+**Total componentes personalizados**: 26 implementados  
 **Componentes Shadcn UI**: 11 componentes (button, card, input, label, select, table, badge, dialog, alert, skeleton, textarea)
+
+> **📚 Ver documentación completa**: [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)
 
 ### 🎨 Diseño Moderno 2025 ⭐ NUEVO
 **Características implementadas**:
@@ -76,24 +84,33 @@ web/src/components/
 - ✅ Transfers (`/transfers`) ⭐ Día 7
 - ✅ Admin Users (`/admin/users`)
 
-### 🪝 Hooks Personalizados (21 implementados)
+### 🪝 Hooks Personalizados
 
+> **📚 Para documentación completa de todos los hooks, consulta [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)**
+
+**Total**: 24 hooks personalizados (14 archivos) ✅
+
+**Archivos principales**:
 ```
 web/src/hooks/
-├── useContractReads.ts        ✅ 5 hooks lectura (userInfo, isAdmin, totals)
+├── useContractReads.ts        ✅ 6 hooks lectura (userInfo, isAdmin, totals, dashboard stats)
 ├── useRequestRole.ts          ✅ Solicitar rol de usuario
 ├── useCreateToken.ts          ✅ Crear tokens
 ├── useTransfer.ts             ✅ 4 hooks transferencias (transfer, accept, reject, cancel)
 ├── useAdminUsers.ts           ✅ 2 hooks admin (getAllUsers, changeUserStatus)
 ├── useContractOwner.ts        ✅ Verificar ownership del contrato
+├── usePendingOwner.ts         ✅ Obtener pendingOwner
+├── useOwnershipTransfer.ts    ✅ 3 funciones ownership (initiate, accept, reject)
 ├── useGetUserTokens.ts        ✅ 4 hooks tokens (getUserTokens, getToken, getTokenBalance, useGetAllTokens)
 ├── usePause.ts                ✅ 3 hooks pausa (isPaused, pause, unpause)
-├── useUserTokenStats.ts        ✅ 1 hook estadísticas por tipo ⭐ Día 7
-├── useGetUserTokensWithData.ts ✅ 1 hook tokens con datos completos ⭐ Día 7
-└── useGetUserTransfers.ts     ✅ 1 hook transferencias de usuario ⭐ Día 7
+├── useUserTokenStats.ts        ✅ Estadísticas por tipo ⭐ Día 7
+├── useGetUserTokensWithData.ts ✅ Tokens con datos completos ⭐ Día 7
+├── useGetUserTransfers.ts     ✅ Transferencias de usuario ⭐ Día 7
+├── useGetAllTransfers.ts      ✅ Todas las transferencias ⭐ Día 8
+└── useTokenTraceability.ts    ✅ Trazabilidad end-to-end ⭐ Día 8
 ```
 
-**Total**: 22 hooks personalizados (12 archivos) ✅ (incluye useTokenTraceability, useGetAllTransfers)
+> **📚 Ver lista completa y documentación detallada**: [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)
 
 ### 📁 Directorio `contexts/`
 
@@ -125,41 +142,82 @@ chmod +x deploy.sh
 
 ---
 
-## 📋 Comandos del Script
+## 📋 Comandos del Script `deploy.sh`
+
+> **📚 Para documentación completa del script, consulta [docs/common/DOCUMENTATION.md - Deployment Automatizado](./docs/common/DOCUMENTATION.md#-deployment-automatizado)**
+
+### Comandos Principales
 
 ```bash
-./deploy.sh start      # Iniciar todo el stack
+./deploy.sh start      # Iniciar todo el stack (Anvil + Contrato + Frontend)
 ./deploy.sh stop       # Detener todos los servicios
+./deploy.sh restart    # Reiniciar todo el stack
 ./deploy.sh status     # Ver estado de servicios
-./deploy.sh metamask   # Instrucciones MetaMask
-./deploy.sh restart    # Reiniciar todo
-./deploy.sh help       # Ayuda completa
+./deploy.sh metamask   # Instrucciones para configurar MetaMask
+./deploy.sh clean      # Limpiar estado persistente de Anvil (requiere Anvil detenido)
+./deploy.sh help       # Ayuda completa con todos los comandos
 ```
+
+### Comandos de Frontend (sin afectar Anvil/Contrato)
+
+```bash
+./deploy.sh frontend start    # Iniciar solo el frontend (requiere Anvil corriendo)
+./deploy.sh frontend stop     # Detener solo el frontend
+./deploy.sh frontend restart  # Reiniciar solo el frontend
+```
+
+**Uso típico**: Después de hacer cambios en el frontend, puedes reiniciar solo el frontend sin afectar Anvil ni el contrato desplegado.
+
+### Características del Script
+
+✅ **Persistencia de Estado**: Anvil guarda el estado de la blockchain entre reinicios  
+✅ **Detección Inteligente**: Detecta si servicios ya están corriendo antes de iniciarlos  
+✅ **Validación Automática**: Verifica que el contrato esté desplegado antes de iniciar frontend  
+✅ **Actualización Automática**: Actualiza ABI y dirección del contrato en el frontend automáticamente  
+✅ **Logs Organizados**: Todos los logs se guardan en `logs/`  
+✅ **Manejo de Errores**: Validaciones y mensajes de error claros
 
 ---
 
 ## 📖 Documentación Disponible
 
+> **📚 Para índice completo de documentación, consulta [INDEX.md](./INDEX.md)**
+
+### Documentación Principal
+- **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** ⭐ - Single source of truth del estado del proyecto
 - **[QUICKSTART.md](./QUICKSTART.md)** - Esta guía rápida
 - **[INDEX.md](./INDEX.md)** - Índice maestro de toda la documentación
-- **[IA.md](./IA.md)** ⭐ - Retrospectiva del uso de IA en el proyecto
-- **¿Necesitas entender la arquitectura?**
-→ [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)
-- **[docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md)** - Resumen del Día 1
+- **[docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)** - Guía técnica completa
+
+### Documentación Frontend
+- **[docs/fe/SETUP.md](./docs/fe/SETUP.md)** - Setup y configuración del frontend
+- **[docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)** - Documentación de componentes
+- **[docs/fe/HOOKS.md](./docs/fe/HOOKS.md)** - Documentación de hooks personalizados
+
+### Documentación Smart Contract
+- **[docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md)** - Arquitectura del contrato
+- **[docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md)** - Referencia completa de API
+
+### Reportes y Evaluaciones
 - **[docs/reports/ACADEMIC_ASSESSMENT.md](./docs/reports/ACADEMIC_ASSESSMENT.md)** - Evaluación académica
-- **[docs/fe/SETUP.md](./docs/fe/SETUP.md)** - Documentación del frontend (40KB)
+- **[docs/reports/IA.md](./docs/reports/IA.md)** ⭐ - Retrospectiva del uso de IA
+- **[docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md)** - Resumen del Día 1
 
 ---
 
 ## 🛠️ Stack Tecnológico
+
+> **📚 Para información detallada del stack, consulta [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)**
 
 ### Smart Contract
 - **Solidity** 0.8.30
 - **Foundry** (Forge + Anvil)
 - **OpenZeppelin** Contracts
 - **970+ líneas** de código
-- **90 tests** (85.60% lines, 70.67% branches, 82.67% statements, 80.95% functions)
+- **108 tests** (85.60% lines, 72.15% branches, 82.67% statements, 80.95% functions)
 - **Validaciones críticas**: 5 implementadas (100% completadas)
+
+> **📚 Ver documentación completa**: [docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md) | [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md)
 
 ### Frontend
 - **Next.js** 16.0.1
@@ -169,11 +227,13 @@ chmod +x deploy.sh
 - **Shadcn UI**
 - **wagmi** 2.12.0 + **viem** 2.21.0 + **ethers** 6.13.0
 
+> **📚 Ver documentación completa**: [docs/fe/SETUP.md](./docs/fe/SETUP.md) | [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) | [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)
+
 ### Blockchain Local
 - **Anvil** (Foundry)
 - **Chain ID**: 31337
 - **RPC**: http://127.0.0.1:8545
-- **10 cuentas** con 10,000 ETH cada una
+- **15 cuentas** con 10,000 ETH cada una
 
 ---
 
@@ -205,17 +265,20 @@ foundryup
 
 ## 📁 Estructura del Proyecto
 
+> **📚 Para estructura detallada, consulta [docs/common/DOCUMENTATION.md - Estructura del Proyecto](./docs/common/DOCUMENTATION.md#-estructura-del-proyecto)**
+
 ```
 emujicad/
 │
 ├── 🚀 deploy.sh                 # Script automatizado (650 líneas)
 ├── 📄 QUICKSTART.md             # Esta guía
+├── 📄 PROJECT_STATUS.md         # Estado actual del proyecto ⭐
+├── 📄 INDEX.md                  # Índice de docs
 ├── 📁 docs/                     # Toda la documentación
 │   ├── common/               # Doc general
-│   ├── sc/                   # 18 archivos SC
+│   ├── sc/                   # 18 archivos Smart Contract
 │   ├── fe/                   # 5 archivos frontend
-│   └── reports/              # 4 evaluaciones
-├── 📄 INDEX.md                  # Índice de docs
+│   └── reports/              # Reportes y evaluaciones
 │
 ├── 📁 sc/                       # Smart Contract
 │   ├── src/SupplyChain.sol
@@ -224,10 +287,10 @@ emujicad/
 │
 ├── 📁 web/                      # Frontend Next.js
 │   ├── src/
-│   │   ├── app/
-│   │   ├── components/
+│   │   ├── app/              # 9 páginas implementadas
+│   │   ├── components/       # 26 componentes
+│   │   ├── hooks/            # 24 hooks personalizados
 │   │   ├── contracts/
-│   │   ├── hooks/
 │   │   └── lib/
 │   └── package.json
 │
@@ -275,9 +338,14 @@ chmod +x deploy.sh
 
 # Desarrollar features...
 
+# Si solo cambias el frontend, puedes reiniciar solo el frontend
+./deploy.sh frontend restart
+
 # Al terminar el día
 ./deploy.sh stop
 ```
+
+**Tip**: Si solo estás trabajando en el frontend, usa `./deploy.sh frontend restart` para ahorrar tiempo (no redesplega el contrato).
 
 ### 4️⃣ Verificar Estado
 
@@ -288,7 +356,25 @@ chmod +x deploy.sh
 # Ver logs en tiempo real
 tail -f logs/anvil.log
 tail -f logs/frontend.log
+tail -f logs/deploy.log
 ```
+
+### 5️⃣ Limpiar Estado de Anvil (Opcional)
+
+Si necesitas empezar con una blockchain limpia (sin tokens, transferencias, usuarios):
+
+```bash
+# Detener Anvil primero
+./deploy.sh stop
+
+# Limpiar estado persistente
+./deploy.sh clean
+
+# Reiniciar todo con blockchain limpia
+./deploy.sh start
+```
+
+**Nota**: El script te preguntará confirmación antes de eliminar el estado. Si Anvil está corriendo, te ofrecerá detenerlo primero.
 
 ---
 
@@ -318,6 +404,13 @@ Después de `./deploy.sh start`, verifica:
    - Navegador: http://localhost:3000
    - Conectar MetaMask
    - Ver stats: 0 Tokens, 0 Users, 0 Transfers (estado inicial)
+
+5. **Verificar estado persistente** (si reinicias Anvil):
+   ```bash
+   # Si Anvil se reinició pero el estado persiste, verás:
+   ls -lh logs/anvil_state.json
+   # El archivo contiene el estado de la blockchain (tokens, transferencias, usuarios)
+   ```
 
 ---
 
@@ -369,7 +462,7 @@ Ver **[docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATI
 
 > **📋 Para información detallada y actualizada del estado del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**
 
-**Última actualización**: 24 de Noviembre, 2025
+**Última actualización**: 26 de Noviembre, 2025
 
 ### 🎯 Resumen Ejecutivo
 
@@ -377,25 +470,35 @@ Ver **[docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATI
 
 | Componente | Estado |
 |------------|--------|
-| **Smart Contract** | ✅ 4.0/4.0 (100%) - 90 tests, 85.60% coverage, validaciones críticas completadas |
-| **Frontend** | ✅ 3.0/3.0 (100%) - 9/9 páginas, 26 componentes, 22 hooks |
+| **Smart Contract** | ✅ 4.0/4.0 (100%) - 108 tests, 85.60% coverage, validaciones críticas completadas |
+| **Frontend** | ✅ 3.0/3.0 (100%) - 9/9 páginas, 26 componentes, 24 hooks |
 | **Extras** | ⚠️ 0.5/1.0 (50%) - deploy script validado |
 | **Video** | ❌ 0.0/1.5 (0%) - Pendiente |
 
 **Próximo paso**: Video Demo (Día 9) - +1.5 puntos
 
-Ver **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** para roadmap detallado y próximos pasos.
+> **📚 Ver roadmap detallado y próximos pasos**: [PROJECT_STATUS.md](./PROJECT_STATUS.md)
 
 ---
 
 ## 🔗 Links Útiles
 
 ### Documentación del Proyecto
+> **📚 Ver [INDEX.md](./INDEX.md) para índice completo**
+
+**Principales**:
+- [PROJECT_STATUS.md](./PROJECT_STATUS.md) ⭐ - Estado actual y próximos pasos
 - [INDEX.md](./INDEX.md) - Índice maestro de toda la documentación
-- [IA.md](./IA.md) - Retrospectiva del uso de IA
 - [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md) - Guía técnica completa
-- [docs/fe/SETUP.md](./docs/fe/SETUP.md) - Documentación del frontend
-- [docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md) - Resumen del Día 1
+
+**Frontend**:
+- [docs/fe/SETUP.md](./docs/fe/SETUP.md) - Setup y configuración
+- [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) - Componentes
+- [docs/fe/HOOKS.md](./docs/fe/HOOKS.md) - Hooks personalizados
+
+**Smart Contract**:
+- [docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md) - Arquitectura
+- [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md) - Referencia API
 
 ### Tecnologías
 - [Solidity Docs](https://docs.soliditylang.org/)
@@ -432,20 +535,28 @@ Ver **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** para roadmap detallado y próxi
 → `./deploy.sh help` y [docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATION.md#-troubleshooting)
 
 **¿Necesitas entender el código?**
-→ [DOCUMENTATION.md](./DOCUMENTATION.md)
+→ [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)
 
 **¿Trabajando en el frontend?**
-→ [docs/fe/SETUP.md](./docs/fe/SETUP.md) | [COMPONENTS.md](./docs/fe/COMPONENTS.md) | [HOOKS.md](./docs/fe/HOOKS.md)
+→ [docs/fe/SETUP.md](./docs/fe/SETUP.md) | [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) | [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)
+
+**¿Trabajando en el smart contract?**
+→ [docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md) | [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md)
 
 **¿Quieres ver el índice completo?**
 → [INDEX.md](./INDEX.md)
 
+**¿Estado actual del proyecto?**
+→ [PROJECT_STATUS.md](./PROJECT_STATUS.md) ⭐
+
 ---
 
 **Creado**: 18 de Noviembre, 2025  
-**Última actualización**: 24 de Noviembre, 2025  
-**Versión**: 1.4.0  
-**Estado**: ✅ 9/9 páginas completadas (100%), validaciones críticas del contrato implementadas
+**Última actualización**: 26 de Noviembre, 2025  
+**Versión**: 1.5.0  
+**Estado**: ✅ 9/9 páginas completadas (100%), 24 hooks implementados, validaciones críticas del contrato implementadas
+
+> **📋 Para el estado más actualizado, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**
 
 ---
 

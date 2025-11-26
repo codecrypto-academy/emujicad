@@ -1,7 +1,7 @@
 # 📚 Índice de Documentación - Supply Chain Tracker
 
 > **Guía completa de toda la documentación del proyecto**  
-> **Última actualización**: 24 de noviembre de 2025 | **Estructura profesional**: docs/
+> **Última actualización**: 26 de noviembre de 2025 | **Estructura profesional**: docs/
 
 ---
 
@@ -38,7 +38,8 @@ Si es tu primera vez con el proyecto, sigue este orden:
 **Propósito**: Guía rápida de inicio  
 **Contenido**:
 - Quick start con deployment automatizado (3 comandos)
-- Comandos del script (start/stop/status/restart/metamask/help)
+- Comandos del script (start/stop/status/restart/metamask/clean/help)
+- Comandos de frontend (frontend start/stop/restart)
 - Stack tecnológico
 - Estructura del proyecto
 - Troubleshooting rápido
@@ -60,7 +61,7 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 ### 4. [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)
 **Propósito**: Documentación técnica completa  
-**Contenido** (940+ líneas):
+**Contenido** (1,037+ líneas):
 - Resumen del proyecto y arquitectura
 - Smart contract (funciones, eventos, testing)
 - Frontend (estructura, hooks, componentes)
@@ -72,6 +73,8 @@ Si es tu primera vez con el proyecto, sigue este orden:
 - Métricas y changelog
 
 **Cuándo usarlo**: Necesitas entender cómo funciona todo el sistema
+
+> **📚 Última actualización**: 26 de Noviembre, 2025
 
 ---
 
@@ -169,26 +172,97 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 ---
 
+## 📄 Documentos de Referencia Rápida
+
+### 10. [PAGES_DETAILS.md](./PAGES_DETAILS.md) ⭐
+**Propósito**: Detalles de implementación de las páginas de tokens  
+**Contenido**:
+- Contenido implementado en `/tokens/[id]` y `/tokens/[id]/transfer`
+- Características de trazabilidad end-to-end
+- Checklist de implementación
+- Datos necesarios (hooks utilizados)
+
+**Cuándo usarlo**: Necesitas entender qué contiene cada página o cómo están implementadas
+
+---
+
+### 11. [NAVEGACION_GUIA.md](./NAVEGACION_GUIA.md) ⭐
+**Propósito**: Guía práctica de navegación entre páginas de tokens  
+**Contenido**:
+- Flujo de navegación paso a paso
+- Ejemplos prácticos completos
+- Problemas comunes y soluciones
+- Tips de navegación
+- Prueba rápida (2 minutos)
+
+**Cuándo usarlo**: Necesitas entender cómo navegar entre las páginas o resolver problemas de navegación
+
+---
+
+### 12. [PENDIENTES_FRONTEND.md](./PENDIENTES_FRONTEND.md)
+**Propósito**: Errores pendientes y tareas completadas del frontend  
+**Contenido**:
+- Errores de TypeScript pendientes
+- Hooks completados (usePendingOwner, useOwnershipTransfer)
+- Componentes completados (OwnershipTransfer)
+- Próximos pasos
+
+**Cuándo usarlo**: Verificar qué errores quedan por resolver o qué tareas están completadas
+
+---
+
+### 13. [VALIDACION_HOOKS_OWNERSHIP.md](./VALIDACION_HOOKS_OWNERSHIP.md)
+**Propósito**: Validación de hooks de ownership transfer  
+**Contenido**:
+- Análisis de compatibilidad con el contrato
+- Estado de implementación
+- Recomendaciones y mejoras
+
+**Cuándo usarlo**: Entender el estado de los hooks de ownership transfer
+
+---
+
+### 14. [VALIDACION_CONTRATO_FRONTEND.md](./VALIDACION_CONTRATO_FRONTEND.md)
+**Propósito**: Validación de funciones del contrato vs hooks del frontend  
+**Contenido**:
+- Mapeo completo de funciones del contrato a hooks
+- Estado de implementación de cada función
+- Referencias a documentación detallada
+
+**Cuándo usarlo**: Verificar qué funciones del contrato tienen hooks implementados
+
+---
+
 ## 🤖 Scripts y Herramientas
 
-### 10. [deploy.sh](./deploy.sh) ✅ VALIDADO 100%
+### 15. [deploy.sh](./deploy.sh) ✅ VALIDADO 100%
 **Propósito**: Script de deployment automatizado  
-**Contenido** (650 líneas):
-- Iniciar/detener Anvil
-- Desplegar smart contract
-- Actualizar configuración frontend
+**Contenido** (1,110 líneas):
+- Iniciar/detener Anvil (con persistencia de estado)
+- Desplegar smart contract automáticamente
+- Actualizar configuración frontend (ABI + dirección)
 - Iniciar/detener Next.js
-- Gestión de logs
+- Gestión de logs organizados
 - Instrucciones MetaMask
+- Comandos de frontend independientes
+- Limpieza de estado de Anvil
 
-**Comandos**:
+**Comandos principales**:
 ```bash
-./deploy.sh start      # Iniciar todo
+./deploy.sh start      # Iniciar todo (Anvil + Contrato + Frontend)
 ./deploy.sh stop       # Detener todo
-./deploy.sh status     # Ver estado
+./deploy.sh restart    # Reiniciar todo
+./deploy.sh status     # Ver estado de servicios
 ./deploy.sh metamask   # Instrucciones MetaMask
-./deploy.sh restart    # Reiniciar
+./deploy.sh clean      # Limpiar estado persistente de Anvil
 ./deploy.sh help       # Ayuda completa
+```
+
+**Comandos de frontend** (sin afectar Anvil/Contrato):
+```bash
+./deploy.sh frontend start    # Iniciar solo frontend
+./deploy.sh frontend stop     # Detener solo frontend
+./deploy.sh frontend restart  # Reiniciar solo frontend
 ```
 
 **Cuándo usarlo**: Iniciar/detener el proyecto completo
@@ -205,21 +279,23 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 **Archivos principales**:
 - `src/SupplyChain.sol` - Contrato principal (970+ líneas)
-- `test/SupplyChain.t.sol` - Tests core (55 tests)
-- `test/EdgeCasesTest.t.sol` - Tests edge cases (35 tests)
+- `test/SupplyChain.t.sol` - Tests core (64 tests)
+- `test/EdgeCasesTest.t.sol` - Tests edge cases (44 tests)
 - `script/SupplyChainDeploy.s.sol` - Script deployment
 
 **Documentación relacionada**:
 - [docs/common/DOCUMENTATION.md - Smart Contract](./docs/common/DOCUMENTATION.md#-smart-contract)
 - [docs/sc/](./docs/sc/) - 18 archivos de documentación SC
+- [docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md) - Arquitectura completa
+- [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md) - Referencia de API
 - Inline comments (NatSpec) en el código
 
 **Comandos útiles**:
 ```bash
 cd sc
 forge build     # Compilar
-forge test      # Tests
-forge coverage  # Coverage
+forge test      # Tests (108 tests totales)
+forge coverage  # Coverage (85.60% lines, 72.15% branches)
 ```
 
 ---
@@ -229,21 +305,19 @@ forge coverage  # Coverage
 #### Ubicación: `web/`
 
 **Archivos principales**:
-- `src/app/layout.tsx` - Layout root con providers
-- `src/app/page.tsx` - Landing page
-- `src/components/ConnectWallet.tsx` - Componente conexión
+- `src/app/` - 9 páginas implementadas (100%)
+- `src/components/` - 26 componentes personalizados
+- `src/hooks/` - 24 hooks personalizados (14 archivos)
 - `src/contracts/config.ts` - Config contrato + ABI
-- `src/hooks/useContractReads.ts` - Hooks lectura
-- `src/hooks/useRequestRole.ts` - Hook escritura (rol)
-- `src/hooks/useCreateToken.ts` - Hook escritura (token)
-- `src/hooks/useTransfer.ts` - Hook escritura (transferencias)
 - `src/lib/wagmi-config.ts` - Config Anvil
 
 **Documentación relacionada**:
 - [docs/fe/SETUP.md](./docs/fe/SETUP.md) - Documentación completa
-- [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) - Todos los componentes
-- [docs/fe/HOOKS.md](./docs/fe/HOOKS.md) - 12 hooks personalizados
+- [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) - Todos los componentes (26 componentes)
+- [docs/fe/HOOKS.md](./docs/fe/HOOKS.md) - 24 hooks personalizados (14 archivos)
 - [docs/fe/WEB3.md](./docs/fe/WEB3.md) - Integración Web3
+- [PAGES_DETAILS.md](./PAGES_DETAILS.md) - Detalles de implementación de páginas
+- [NAVEGACION_GUIA.md](./NAVEGACION_GUIA.md) - Guía de navegación
 - [docs/common/DOCUMENTATION.md - Frontend](./docs/common/DOCUMENTATION.md#-frontend)
 
 **Comandos útiles**:
@@ -262,6 +336,7 @@ npm run build  # Build producción
 **Archivos de log**:
 - `anvil.log` - Output de Anvil (blockchain local)
 - `anvil.pid` - PID del proceso Anvil
+- `anvil_state.json` - Estado persistente de Anvil (tokens, transferencias, usuarios)
 - `frontend.log` - Output de Next.js dev server
 - `frontend.pid` - PID del proceso Next.js
 - `deploy.log` - Output del deployment Foundry
@@ -295,7 +370,8 @@ grep -i error logs/*.log
 **Desarrollo diario**:
 1. `./deploy.sh start` - Iniciar servicios
 2. Desarrollar features
-3. `./deploy.sh stop` - Detener servicios
+3. `./deploy.sh frontend restart` - Reiniciar solo frontend (si solo cambias frontend)
+4. `./deploy.sh stop` - Detener servicios
 
 **Troubleshooting**:
 1. `./deploy.sh status` - Ver estado
@@ -357,12 +433,18 @@ grep -i error logs/*.log
 ├── 📄 README.md                    ⭐ README original del proyecto
 ├── 📄 QUICKSTART.md                ⭐ Quick start (INICIO AQUÍ)
 ├── 📄 INDEX.md                     ⭐ Este archivo (maestro)
+├── 📄 PROJECT_STATUS.md            ⭐ Single source of truth del estado
+├── 📄 PAGES_DETAILS.md             ⭐ Detalles de implementación de páginas
+├── 📄 NAVEGACION_GUIA.md           ⭐ Guía de navegación entre páginas
+├── 📄 PENDIENTES_FRONTEND.md       ⭐ Errores pendientes del frontend
+├── 📄 VALIDACION_HOOKS_OWNERSHIP.md ⭐ Validación de hooks de ownership
+├── 📄 VALIDACION_CONTRATO_FRONTEND.md ⭐ Validación contrato vs frontend
 ├── 📄 IA.md                        ⭐ Retrospectiva uso de IA
-├── 🚀 deploy.sh                    ⭐ Script automatizado
+├── 🚀 deploy.sh                    ⭐ Script automatizado (1,110 líneas)
 │
-├── 📁 docs/                        ⭐ Toda la documentación (30 archivos)
+├── 📁 docs/                        ⭐ Toda la documentación (36+ archivos)
 │   ├── common/                      (1 archivo)
-│   │   └── DOCUMENTATION.md         (940+ líneas completas)
+│   │   └── DOCUMENTATION.md         (1,037+ líneas completas)
 │   ├── sc/                          (10 archivos + subdirectorios)
 │   │   ├── API_REFERENCE.md
 │   │   ├── ARCHITECTURE.md
@@ -383,11 +465,13 @@ grep -i error logs/*.log
 │   │       ├── COVERAGE_ANALYSIS.md
 │   │       ├── MIGRATION_HISTORY.md
 │   │       └── SCRIPT_EVOLUTION.md
-│   ├── fe/                          (4 archivos frontend)
+│   ├── fe/                          (6 archivos frontend)
 │   │   ├── SETUP.md                 (40KB detallado)
-│   │   ├── COMPONENTS.md            (1800 líneas)
-│   │   ├── HOOKS.md                 (2200 líneas)
-│   │   └── WEB3.md                  (1400 líneas)
+│   │   ├── COMPONENTS.md            (1800+ líneas)
+│   │   ├── HOOKS.md                 (2200+ líneas)
+│   │   ├── WEB3.md                  (1400+ líneas)
+│   │   ├── PAUSABILITY.md           (Documentación de pausabilidad)
+│   │   └── TRANSFER_PERMISSIONS.md  (Permisos de transferencia)
 │   └── reports/                     (4 evaluaciones proyecto)
 │       ├── SUMMARY_DAY1.md
 │       ├── ACADEMIC_ASSESSMENT.md
@@ -411,8 +495,12 @@ grep -i error logs/*.log
 │
 └── 📁 logs/                        (Logs de ejecución)
     ├── anvil.log
+    ├── anvil.pid
+    ├── anvil_state.json            (Estado persistente de Anvil)
     ├── frontend.log
-    └── deploy.log
+    ├── frontend.pid
+    ├── deploy.log
+    └── contract_address.txt
 ```
 
 ---
@@ -442,7 +530,7 @@ Por frecuencia de uso:
 - Actualizar docs/fe/ cuando se modifique frontend
 - Actualizar docs/sc/ cuando se modifique smart contract
 
-**Última actualización**: 24 de Noviembre, 2025
+**Última actualización**: 26 de Noviembre, 2025
 
 ---
 
@@ -461,7 +549,19 @@ Por frecuencia de uso:
 → `./deploy.sh help` y [docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATION.md#-troubleshooting)
 
 **¿Trabajando en frontend?**
-→ [docs/fe/SETUP.md](./docs/fe/SETUP.md) | [COMPONENTS.md](./docs/fe/COMPONENTS.md) | [HOOKS.md](./docs/fe/HOOKS.md) | [WEB3.md](./docs/fe/WEB3.md)
+→ [docs/fe/SETUP.md](./docs/fe/SETUP.md) | [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) | [docs/fe/HOOKS.md](./docs/fe/HOOKS.md) | [docs/fe/WEB3.md](./docs/fe/WEB3.md)
+
+**¿Navegación entre páginas?**
+→ [NAVEGACION_GUIA.md](./NAVEGACION_GUIA.md) - Guía completa de navegación
+
+**¿Detalles de implementación de páginas?**
+→ [PAGES_DETAILS.md](./PAGES_DETAILS.md) - Contenido y características de cada página
+
+**¿Errores pendientes del frontend?**
+→ [PENDIENTES_FRONTEND.md](./PENDIENTES_FRONTEND.md) - Estado de errores y tareas completadas
+
+**¿Validación de hooks y contrato?**
+→ [VALIDACION_HOOKS_OWNERSHIP.md](./VALIDACION_HOOKS_OWNERSHIP.md) | [VALIDACION_CONTRATO_FRONTEND.md](./VALIDACION_CONTRATO_FRONTEND.md)
 
 **¿Qué se hizo hasta ahora?**
 → [docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md)
@@ -473,12 +573,12 @@ Por frecuencia de uso:
 → [docs/reports/TESTING_REPORT.md](./docs/reports/TESTING_REPORT.md)
 
 **¿Cómo se usó la IA?**
-→ [IA.md](./IA.md)
+→ [docs/reports/IA.md](./docs/reports/IA.md)
 
 ---
 
 **Índice creado**: 18 de Noviembre, 2025  
-**Última actualización**: 24 de Noviembre, 2025 - Día 7 (Validaciones Críticas)  
-**Versión**: 2.7.0 - Actualización Día 7: Validaciones críticas del contrato, 90 tests, 85.60% coverage  
-**Estado**: ✅ 9/9 páginas (100%) | 26 componentes | 22 hooks | 90 tests | Validaciones críticas completadas | Score: 7.4/9.5  
-**Nota**: Documentación consolidada - Redundancias eliminadas, referencias actualizadas, PROJECT_STATUS.md como fuente de verdad
+**Última actualización**: 26 de Noviembre, 2025  
+**Versión**: 3.0.0 - Actualización: Documentación completa del script deploy.sh (1,110 líneas), referencias a nuevos documentos, fechas actualizadas  
+**Estado**: ✅ 9/9 páginas (100%) | 26 componentes | 24 hooks (14 archivos) | 108 tests | Validaciones críticas completadas | Score: 7.4/9.5  
+**Nota**: Documentación consolidada - Redundancias eliminadas, referencias actualizadas, PROJECT_STATUS.md como fuente de verdad, todos los documentos principales actualizados al 26 de noviembre 2025

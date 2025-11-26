@@ -1,5 +1,7 @@
 # 📜 Migration History
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 **Complete history of code cleanup, refactoring, and script fixes**
 
 **📝 Historical Note:** This document records the historical evolution of the project. For clarity and consistency:
@@ -428,7 +430,7 @@ Week 4: Professional Organization
 └── Final validation
 
 Current: Production Ready ✅
-├── 73 tests passing (55 core + 18 edge cases)
+├── 108 tests passing (64 core + 44 edge cases) - Updated
 ├── Enterprise documentation
 └── Professional structure
 ```

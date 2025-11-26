@@ -1,5 +1,7 @@
 # 🚀 Deployment Guide
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 Complete deployment guide for the SupplyChain smart contract.
 
 ---
@@ -155,7 +157,7 @@ cast call <deployed_contract_address> \
 ⚠️ **CRITICAL**: Review all code thoroughly before mainnet deployment!
 
 **Pre-Deployment Checklist:**
-- [ ] All tests passing (73/73)
+- [ ] All tests passing (108/108)
 - [ ] Security audit completed
 - [ ] Gas optimization reviewed
 - [ ] Emergency procedures documented

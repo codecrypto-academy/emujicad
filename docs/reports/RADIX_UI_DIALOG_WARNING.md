@@ -1,5 +1,7 @@
 # Warning de Radix UI DialogContent - DialogTitle
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 ## Descripción del Warning
 
 **Warning:** `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.

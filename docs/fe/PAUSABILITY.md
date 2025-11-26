@@ -1,6 +1,8 @@
 # ⏸️ Sistema de Pausabilidad - Frontend
 
-> Documentación completa del sistema de pausabilidad integrado en el frontend
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
+Documentación completa del sistema de pausabilidad integrado en el frontend
 
 ---
 

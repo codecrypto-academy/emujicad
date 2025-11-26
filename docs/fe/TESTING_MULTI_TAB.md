@@ -1,5 +1,7 @@
 # 🧪 Guía de Pruebas - Sincronización Multi-Pestaña
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 > ⚠️ **ESTADO ACTUAL**: Solo sincronización de desconexiones implementada  
 > **Última actualización**: Día 2 - Feature completa POSTPONED
 

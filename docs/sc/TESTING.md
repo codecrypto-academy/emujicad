@@ -1,5 +1,7 @@
 # 🧪 Testing Guide
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 Comprehensive testing documentation for SupplyChain smart contract.
 
 ---
@@ -7,9 +9,9 @@ Comprehensive testing documentation for SupplyChain smart contract.
 ## 📊 Test Suite Overview
 
 ### Test Statistics
-- **Total Tests**: 73 (100% passing)
-  - Core Tests: 55 (SupplyChain.t.sol)
-  - Edge Cases: 18 (EdgeCasesTest.t.sol)
+- **Total Tests**: 108 (100% passing)
+  - Core Tests: 64 (SupplyChain.t.sol)
+  - Edge Cases: 44 (EdgeCasesTest.t.sol)
 - **Test Methodology**: Scientific 3-phase analysis ([see details](research/COVERAGE_ANALYSIS.md))
 - **Coverage**: Enterprise-grade (80%+ on critical metrics)
 - **Validation**: Automated with "Fail Fast, Fail Clear" principle ([see philosophy](research/SCRIPT_EVOLUTION.md))
@@ -85,10 +87,10 @@ forge coverage --match-path "test/SupplyChain.t.sol"
 
 | Metric | Coverage | Tested/Total | Status |
 |--------|----------|--------------|--------|
-| **Lines** | 83.33% | 180/216 | ✅ Excellent |
-| **Statements** | 80.09% | 185/231 | ✅ Excellent |
-| **Branches** | 61.22% | 30/49 | 🟡 Good |
-| **Functions** | 80.95% | 34/42 | ✅ Excellent |
+| **Lines** | 85.60% | Líneas cubiertas | ✅ Excellent |
+| **Statements** | 82.67% | Statements cubiertos | ✅ Excellent |
+| **Branches** | 72.15% | Branches cubiertos | 🟡 Good |
+| **Functions** | 80.95% | Funciones cubiertas | ✅ Excellent |
 
 ### Coverage Standards
 - **Lines**: 70% good, 80% excellent ✅
@@ -245,7 +247,7 @@ bash coverage-reporter.sh
 - Systematic branch coverage improvement
 
 ### Key Findings
-- ✅ Branch coverage 61.22% is acceptable for smart contracts
+- ✅ Branch coverage 72.15% is acceptable for smart contracts
 - ✅ Compound conditions generate multiple branches per line
 - ✅ ROI diminishes for additional branch-specific tests
 - ✅ Test quality more important than coverage percentage
@@ -360,4 +362,4 @@ Before considering testing complete:
 
 **Last Updated**: November 18, 2025  
 **Test Suite Version**: 1.1.0  
-**Status**: ✅ 73/73 tests passing
+**Status**: ✅ 108/108 tests passing

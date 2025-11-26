@@ -24,7 +24,7 @@
 #### 2. **Alto valor académico** 🎓
 - Demuestra conocimiento de testing profesional
 - Muestra que entiendes la importancia de calidad de código
-- Complementa perfectamente los 108 tests del smart contract
+- Complementa perfectamente los 108 tests del smart contract (64 core + 44 edge cases)
 - **Impacto visual**: Puedes mostrar en el video demo que tienes tests E2E
 
 #### 3. **Tiempo vs Impacto óptimo** ⏱️
@@ -208,7 +208,7 @@ test('Pausabilidad: Pausar contrato y verificar deshabilitación', async ({ page
 2. ✅ Alto valor académico
 3. ✅ Fácil de demostrar en video
 4. ✅ Mejor ROI (puntos por hora)
-5. ✅ Complementa perfectamente los 104 tests del smart contract
+5. ✅ Complementa perfectamente los 108 tests del smart contract (64 core + 44 edge cases)
 
 **Plan sugerido**:
 1. **Primero**: Completar Video Demo (crítico, +1.5 puntos)

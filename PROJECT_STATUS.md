@@ -1,7 +1,8 @@
 # 📊 PROJECT STATUS - Supply Chain Tracker
 
-> **Última actualización**: 24 de Noviembre, 2025  
-> **Propósito**: Single source of truth para estado del proyecto y próximos pasos
+> **Última actualización**: 26 de Noviembre, 2025  
+> **Propósito**: Single source of truth para estado del proyecto y próximos pasos  
+> **📚 Documentación relacionada**: [QUICKSTART.md](./QUICKSTART.md) | [INDEX.md](./INDEX.md) | [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)
 
 ---
 
@@ -35,6 +36,7 @@
 ✅ Documentación completa (18 archivos en docs/sc/)
 ✅ Sistema de pausabilidad implementado (pause/unpause)
 ✅ Control de pausa por roles (Pauser role)
+✅ Ownership transfer implementado (initiate, accept, reject)
 ✅ Validaciones críticas completadas (5 validaciones):
    - Usuario cancelado no puede registrar
    - Longitud mínima nombre (2 chars)
@@ -42,6 +44,8 @@
    - Rol por tipo de token en acceptTransfer()
    - Rol por tipo de token en rejectTransfer()
 ```
+
+> **📚 Ver documentación completa**: [docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md) | [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md) | [docs/sc/TESTING.md](./docs/sc/TESTING.md)
 
 ### Frontend (3.0/3.0 puntos - 100%)
 ```
@@ -81,12 +85,14 @@
     - badge, button, card, input, label
     - select, alert, table, dialog, skeleton, textarea
 
-✅ 21+ hooks personalizados (11 archivos):
-    - useContractReads.ts (5 hooks lectura)
+✅ 24 hooks personalizados (14 archivos):
+    - useContractReads.ts (6 hooks lectura: userInfo, isAdmin, totals, dashboard stats)
     - useRequestRole.ts (1 hook escritura)
     - useCreateToken.ts (1 hook escritura)
-    - useTransfer.ts (4 hooks escritura)
+    - useTransfer.ts (4 hooks escritura: transfer, accept, reject, cancel)
     - useContractOwner.ts (1 hook lectura)
+    - usePendingOwner.ts (1 hook lectura) - ✅ Ownership Transfer
+    - useOwnershipTransfer.ts (1 hook con 3 funciones: initiate, accept, reject) - ✅ Ownership Transfer
     - useAdminUsers.ts (2 hooks: getAllUsers + changeUserStatus)
     - useGetUserTokens.ts (4 hooks: getUserTokens, getToken, getTokenBalance, useGetAllTokens)
     - usePause.ts (3 hooks: isPaused, pause, unpause)
@@ -96,11 +102,19 @@
     - useGetAllTransfers.ts (1 hook: todas las transferencias del sistema) - ✅ Día 8
     - useTokenTraceability.ts (1 hook: trazabilidad end-to-end con árbol jerárquico) - ✅ Día 8
 
+> **📚 Ver documentación completa**: [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)
+
 ✅ Componentes admin implementados:
     - UserManagementTable.tsx (tabla + filtros + acciones + pausa)
     - UserStatsCards.tsx (estadísticas de usuarios)
     - ChangeRoleDialog.tsx (cambiar rol usuario)
     - PauseControl.tsx (control de pausa del contrato) - ✅ NUEVO
+    - OwnershipTransfer.tsx (gestión ownership transfer) - ✅ NUEVO
+
+> **📚 Ver documentación completa**: [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)
+    - OwnershipTransfer.tsx (gestión ownership transfer) - ✅ NUEVO
+
+> **📚 Ver documentación completa**: [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)
 
 ✅ Componentes adicionales:
     - RegisterForm.tsx (registro con validación de pausa)
@@ -140,13 +154,20 @@
 ✅ 36+ archivos .md (13,000+ líneas)
 ✅ INDEX.md (guía maestra)
 ✅ QUICKSTART.md (quick start)
+✅ PROJECT_STATUS.md (single source of truth) ⭐
 ✅ docs/reports/IA.md (retrospectiva IA)
 ✅ docs/sc/ - 18 archivos Smart Contract
 ✅ docs/fe/ - 6 archivos Frontend
 ✅ docs/reports/ - 5 evaluaciones
-✅ deploy.sh - 650 líneas (100% validado)
+✅ deploy.sh - 1,110 líneas (100% validado, versión 2.0.0)
 ✅ Sistema de backups: .archive/
 ```
+
+> **📚 Ver índice completo**: [INDEX.md](./INDEX.md) | [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)  
+> **📚 Documentación Smart Contract**: [docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md) | [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md)  
+> **📚 Documentación Frontend**: [docs/fe/SETUP.md](./docs/fe/SETUP.md) | [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) | [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)
+
+> **📚 Ver índice completo**: [INDEX.md](./INDEX.md) | [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)
 
 ---
 
@@ -187,22 +208,26 @@
 
 **Progreso**: 6/6 componentes (100%) ⭐ Día 7
 
-### 🚨 PRIORIDAD 3: Hooks Adicionales (10/10 implementados)
+### 🚨 PRIORIDAD 3: Hooks Adicionales (12/12 implementados)
 **Necesarios para las páginas**:
 ```
-✅ useGetUserTokens(address)               - IMPLEMENTADO (3 hooks: getUserTokens, getToken, getTokenBalance)
+✅ useGetUserTokens(address)               - IMPLEMENTADO (4 hooks: getUserTokens, getToken, getTokenBalance, useGetAllTokens)
 ✅ useIsPaused()                           - IMPLEMENTADO
 ✅ usePause()                              - IMPLEMENTADO
 ✅ useUnpause()                            - IMPLEMENTADO
 ✅ useGetAllUsers()                        - IMPLEMENTADO (admin)
 ✅ useChangeUserStatus()                   - IMPLEMENTADO (aprobar/rechazar usuarios)
 ✅ useContractOwner()                      - IMPLEMENTADO (verificar admin)
+✅ usePendingOwner()                       - IMPLEMENTADO (ownership transfer) ⭐
+✅ useOwnershipTransfer()                   - IMPLEMENTADO (ownership transfer: initiate, accept, reject) ⭐
 ✅ useGetAllTokens()                       - IMPLEMENTADO (todos los tokens) ⭐ Día 5
 ✅ useGetUserTransfers(address)            - IMPLEMENTADO (transferencias de un usuario) ⭐ Día 7
 ✅ useGetAllTransfers()                    - IMPLEMENTADO (todas las transferencias del sistema) ⭐ Día 8
 ```
 
-**Progreso**: 10/10 hooks necesarios (100%) ⭐ Día 8
+**Progreso**: 12/12 hooks necesarios (100%) ⭐
+
+> **📚 Ver documentación completa**: [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)
 
 ### 🚨 PRIORIDAD 4: Video Demo (Falta +1.5 puntos)
 **Tiempo estimado**: 3-4 horas
@@ -215,7 +240,10 @@
 
 ---
 
-## 📅 ROADMAP DETALLADO (4 días para 9.5/10)
+## 📅 ROADMAP DETALLADO
+
+> **📚 Para roadmap actualizado y próximos pasos, consulta [docs/reports/PROXIMOS_PASOS.md](./docs/reports/PROXIMOS_PASOS.md)**  
+> **Nota**: El roadmap detallado día por día se mantiene aquí para referencia histórica. Para próximos pasos actualizados, ver PROXIMOS_PASOS.md.
 
 ### **🗓️ Día 5 - Viernes 21 Nov (Tokens - Lista)** ✅ COMPLETADO
 **Tiempo**: 4-5 horas | **Impacto**: +0.1 puntos
@@ -371,7 +399,7 @@ Completado:
 ├── ✅ Tokens page (lista) (100%) - ✅ Día 5
 ├── ✅ Tokens Create page (100%) - ✅ Día 6
 ├── ✅ Transfers page (100%) - ✅ Día 7
-├── ✅ 20+ Hooks (100% de los necesarios)
+├── ✅ 24 Hooks (100% de los necesarios)
 ├── ✅ 11 Componentes UI Shadcn (100%)
 ├── ✅ 6 Componentes específicos (100%)
 │   ├── ConnectWallet
@@ -429,11 +457,13 @@ Completado:
 
 ## 🔧 COMANDOS RÁPIDOS
 
+> **📚 Para comandos detallados y troubleshooting, consulta [QUICKSTART.md](./QUICKSTART.md) y [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)**
+
 ### Verificar estado actual:
 ```bash
 # Smart Contract
 cd sc/
-forge test                    # 80 tests deben pasar
+forge test                    # 108 tests deben pasar
 forge coverage --match-path "test/*"  # Verificar coverage
 
 # Frontend
@@ -469,6 +499,12 @@ ls -la src/app/               # Ver páginas implementadas
   - Deshabilitación automática de funciones críticas
   - Mensajes informativos en toda la UI
   - Persistencia de preferencias de tema por usuario
+- ✅ **Ownership transfer implementado**:
+  - Hooks `usePendingOwner` y `useOwnershipTransfer` implementados
+  - Componente `OwnershipTransfer.tsx` para gestión de ownership
+  - Estados separados para cada operación (initiate, accept, reject)
+
+> **📚 Ver documentación técnica**: [docs/fe/HOOKS.md](./docs/fe/HOOKS.md) | [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) | [VALIDACION_HOOKS_OWNERSHIP.md](./VALIDACION_HOOKS_OWNERSHIP.md) | [VALIDACION_CONTRATO_FRONTEND.md](./VALIDACION_CONTRATO_FRONTEND.md)
 
 ### Dependencias Críticas:
 - Next.js 16.0.1 (params como Promise)
@@ -489,7 +525,7 @@ ls -la src/app/               # Ver páginas implementadas
 ```
 Smart Contract:
 [x] Implementado y funcional
-[x] 80 tests pasando 100%
+[x] 108 tests pasando 100%
 [x] Coverage > 80%
 [x] Desplegado en Anvil
 [x] Documentado
@@ -533,6 +569,9 @@ Video:
 ---
 
 ## 📋 CHANGELOG RECIENTE
+
+> **📚 Para changelog completo del smart contract, consulta [docs/sc/CHANGELOG.md](./docs/sc/CHANGELOG.md)**  
+> **Nota**: Este changelog refleja cambios recientes del frontend. Para cambios históricos del smart contract, ver CHANGELOG.md.
 
 ### Día 8 - Sesión Actual (23 Nov, 2025) ✅ COMPLETADO
 ```
@@ -723,5 +762,12 @@ Issues resueltos en Día 4:
 
 ---
 
-**Última modificación**: 24 Nov 2025  
+**Última modificación**: Noviembre 2025  
 **Próxima actualización**: Después de completar Video Demo (Día 9)
+
+> **📚 Documentación relacionada**:
+> - [QUICKSTART.md](./QUICKSTART.md) - Guía rápida de inicio
+> - [docs/reports/PROXIMOS_PASOS.md](./docs/reports/PROXIMOS_PASOS.md) - Roadmap detallado
+> - [docs/fe/HOOKS.md](./docs/fe/HOOKS.md) - Documentación completa de hooks
+> - [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) - Documentación completa de componentes
+> - [docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md) - Arquitectura del smart contract

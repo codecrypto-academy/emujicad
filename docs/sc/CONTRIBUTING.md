@@ -278,7 +278,7 @@ Use `flat-square` style for compact, professional look:
 
 ```markdown
 [![Solidity](https://img.shields.io/badge/Solidity-v0.8.30-blue?style=flat-square&logo=solidity)](https://soliditylang.org/)
-[![Coverage](https://img.shields.io/badge/Lines-78.22%25-yellow?style=flat-square&logo=codecov)](/)
+[![Coverage](https://img.shields.io/badge/Lines-85.60%25-brightgreen?style=flat-square&logo=codecov)](/)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square&logo=github)](LICENSE)
 ```
 
@@ -301,14 +301,14 @@ Include scientific/academic badges:
 
 **Testing Metrics:**
 ```markdown
-![Total Tests](https://img.shields.io/badge/Total%20Tests-73-brightgreen?style=for-the-badge&logo=checkmarx)
-![Core Tests](https://img.shields.io/badge/Core%20Tests-55-success?style=for-the-badge)
-![Edge Cases](https://img.shields.io/badge/Edge%20Cases-18-orange?style=for-the-badge)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-108-brightgreen?style=for-the-badge&logo=checkmarx)
+![Core Tests](https://img.shields.io/badge/Core%20Tests-64-success?style=for-the-badge)
+![Edge Cases](https://img.shields.io/badge/Edge%20Cases-44-orange?style=for-the-badge)
 ```
 
 **Coverage Metrics:**
 ```markdown
-![Lines](https://img.shields.io/badge/Coverage%20Lines-78.22%25-yellow?style=for-the-badge&logo=codecov)
+![Lines](https://img.shields.io/badge/Coverage%20Lines-85.60%25-brightgreen?style=for-the-badge&logo=codecov)
 ![Functions](https://img.shields.io/badge/Coverage%20Functions-77.14%25-orange?style=for-the-badge&logo=codecov)
 ```
 

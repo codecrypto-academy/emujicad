@@ -1,6 +1,8 @@
 # 🎨 Componentes del Frontend
 
-> Documentación de todos los componentes React implementados en el proyecto
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
+Documentación de todos los componentes React implementados en el proyecto
 
 ---
 

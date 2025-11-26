@@ -1,5 +1,7 @@
 # 🔬 Scientific Coverage Analysis
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+
 **Comprehensive scientific analysis of test coverage optimization efforts**
 
 > **⚠️ HISTORICAL DOCUMENT - November 2025**  
@@ -7,12 +9,13 @@
 > 
 > **Important Context:**
 > - **Historical test count references**: This document mentions "96 tests" during intermediate development phases when exploring multiple edge case strategies
-> - **Final consolidated result**: **73 tests** (55 core in SupplyChain.t.sol + 18 edge cases in EdgeCasesTest.t.sol)
+> - **Historical consolidated result**: **73 tests** (55 core + 18 edge cases) - This was the state after consolidation phase
+> - **Current state (updated)**: **108 tests** (64 core + 44 edge cases) with **85.60% lines coverage** and **72.15% branches coverage**
 > - **Test file evolution**: Files mentioned (EdgeCasesTestLimpio.t.sol, EdgeCasesFase3Test.t.sol) were consolidated into EdgeCasesTest.t.sol
-> - **Coverage improvement**: Initial ~73% → Final **83.33%** lines coverage through strategic consolidation
+> - **Coverage improvement**: Initial ~73% → Historical **83.33%** → Current **85.60%** lines coverage
 > 
 > The analysis methodology and findings remain scientifically valid. For **current** test structure, see [TESTING.md](../TESTING.md).  
-> This document is preserved as evidence of the **scientific research process** that led to the optimal 73-test configuration.
+> This document is preserved as evidence of the **scientific research process** that led to the optimal test configuration.
 
 ---
 
@@ -459,14 +462,19 @@ The SupplyChain contract achieves enterprise-grade test coverage with scientific
 - Lines: 78.22%, Functions: 77.14%, Statements: 73.21%, Branches: 36.73%
 - Explored multiple edge case strategies across 3 phases
 
-**Final Consolidated (73 tests):**
+**Final Consolidated (73 tests - Historical):**
 - Lines: **83.33%**, Statements: **80.09%**, Functions: **80.95%**, Branches: **61.22%**
 - Optimal test subset selected through scientific analysis
 - **Significant improvement** while maintaining full critical path validation
 
-The branch coverage of 61.22% is excellent in the context of:
-- Superior lines (83.33%) and functions (80.95%) coverage
-- Comprehensive test suite (**73 passing tests** - optimal configuration)
+**Current State (108 tests - Updated):**
+- Lines: **85.60%**, Statements: **82.67%**, Functions: **80.95%**, Branches: **72.15%**
+- Further improvements achieved through additional edge case testing
+- **108 passing tests** (64 core + 44 edge cases) with enhanced coverage
+
+The branch coverage of 72.15% (current) is excellent in the context of:
+- Superior lines (85.60%) and functions (80.95%) coverage
+- Comprehensive test suite (**108 passing tests** - current optimal configuration)
 - Thorough critical path validation
 - Smart contract complexity considerations
 
@@ -477,6 +485,7 @@ Further branch coverage optimization would yield diminishing returns and is not 
 **Research Period:** November 2025  
 **Methodology:** Scientific A/B/C Testing with Strategic Consolidation  
 **Development Tests Explored:** 96 tests (55 core + 41 edge cases across phases)  
-**Final Production Tests:** **73 tests** (55 core + 18 optimal edge cases)  
+**Historical Production Tests:** **73 tests** (55 core + 18 optimal edge cases)  
+**Current Production Tests:** **108 tests** (64 core + 44 edge cases)  
 **Documentation:** Complete research artifacts preserved  
-**Status:** ✅ Analysis Complete - Production Ready - **Optimized Configuration**
+**Status:** ✅ Analysis Complete - Production Ready - **Current: 108 tests with 85.60% lines, 72.15% branches**
