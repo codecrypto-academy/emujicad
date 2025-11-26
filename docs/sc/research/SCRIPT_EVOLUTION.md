@@ -1,10 +1,15 @@
 # 🔧 Script Evolution - Critical Coverage Scripts Improvements
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../../PROJECT_STATUS.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../../INDEX.md)**  
+> **📚 Para documentación completa de scripts, consulta [../SCRIPTS.md](../SCRIPTS.md)**  
+> **📚 Para arquitectura de scripts, consulta [../SCRIPTS_ARCHITECTURE.md](../SCRIPTS_ARCHITECTURE.md)**
 
 **Document Type**: Technical History & Design Philosophy  
-**Date**: November 18, 2025  
-**Version**: 1.0.0  
+**Fecha**: 26 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
+**Version**: 1.1.0  
 **Status**: ✅ Implemented and Validated  
 **Category**: Research Documentation
 
@@ -33,10 +38,12 @@ Scripts had **hardcoded fallback values** that were displayed when `forge covera
 # ❌ BEFORE: If forge fails, shows obsolete values
 if [ -z "$COVERAGE_OUTPUT" ]; then
     echo "⚠️ Using known metrics from last execution:"
-    COVERAGE_OUTPUT="| src/pfm/SupplyChain.sol | 78.22% (158/202) | ... |"
+    COVERAGE_OUTPUT="| src/SupplyChain.sol | 78.22% (158/202) | ... |"
     # Continues executing with potentially obsolete data
 fi
 ```
+
+> **📚 Nota**: Este es un ejemplo histórico del problema. El script actual (`coverage-reporter.sh`) ya no tiene este comportamiento.
 
 **Problem**: A user could see **incorrect or obsolete metrics** and make decisions based on false information.
 
@@ -64,16 +71,18 @@ if [ -z "$COVERAGE_OUTPUT" ]; then
     echo ""
     echo "Possible causes:"
     echo "  • Foundry not installed correctly"
-    echo "  • Tests are failing (run: forge test --match-path 'test/pfm/*')"
+    echo "  • Tests are failing (run: forge test --match-path \"test/*\")"
     echo "  • Compilation errors (run: forge build)"
-    echo "  • SupplyChain.sol does not exist in src/pfm/"
+    echo "  • SupplyChain.sol does not exist in src/"
     echo ""
     echo "To diagnose, run manually:"
-    echo "  forge coverage --match-path 'test/pfm/*'"
+    echo "  forge coverage --match-path \"test/*\""
     echo ""
-    exit 1  # ← FAILS EXPLICITLY
+    return 1  # ← FAILS EXPLICITLY (o exit 1 en scripts no-funciones)
 fi
 ```
+
+> **📚 Nota**: El script actual (`coverage-reporter.sh`) implementa este comportamiento correcto. Para detalles, consulta [../SCRIPTS.md](../SCRIPTS.md)
 
 ### ✅ Benefits Achieved
 
@@ -86,21 +95,24 @@ fi
 
 ## 📋 Scripts Modified
 
-### 1. `coverage-reporter-simple.sh`
+### 1. `coverage-reporter.sh`
+
+> **📚 Nota**: El script `coverage-reporter-simple.sh` mencionado en versiones anteriores ya no existe. El script actual es `coverage-reporter.sh` que soporta modo interactivo y automático (`--auto`).
 
 **Changes**:
-- ✅ Fails with `exit 1` if cannot obtain coverage
-- ✅ Fails with `exit 1` if cannot parse output
+- ✅ Fails with `return 1` if cannot obtain coverage
+- ✅ Fails with `return 1` if cannot parse output
 - ✅ Shows clear diagnostic of possible causes
 - ✅ Suggests commands for debugging
-
-**Lines modified**: 26-38, 53-63
+- ✅ Supports interactive and auto modes
 
 **Key Improvement**:
 ```bash
 # Before: Silent failure with fallback
 # After: Explicit failure with diagnosis
 ```
+
+> **📚 Para documentación completa del script actual, consulta [../SCRIPTS.md](../SCRIPTS.md)**
 
 ### 2. `coverage-reporter.sh`
 
@@ -187,18 +199,20 @@ Production-grade scripts:
 
 #### ❌ Before:
 ```bash
-$ ./coverage-reporter-simple.sh
+$ bash coverage-reporter.sh --auto
 
 📊 COVERAGE METRICS
-Lines Coverage: 78.22%        ← OBSOLETE
-Statements: 73.21%            ← OBSOLETE
-Branches: 36.73%              ← OBSOLETE
+Lines Coverage: 78.22%        ← OBSOLETE (ejemplo histórico)
+Statements: 73.21%            ← OBSOLETE (ejemplo histórico)
+Branches: 36.73%              ← OBSOLETE (ejemplo histórico)
 
 ✅ Recommendation: READY TO DEPLOY  ← FALSE!
 
 $ echo $?
 0  ← Script indicates SUCCESS incorrectly
 ```
+
+> **📚 Nota**: Estos valores son ejemplos históricos del problema. Las métricas actuales (26 Nov 2025) son: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions. Consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../../ESTADO_CONTRATO_INTELIGENTE.md)
 
 **Problems**:
 - ❌ User sees outdated metrics
@@ -208,7 +222,7 @@ $ echo $?
 
 #### ✅ Now:
 ```bash
-$ ./coverage-reporter-simple.sh
+$ bash coverage-reporter.sh --auto
 
 ❌ ERROR: Unable to obtain coverage information
 
@@ -217,7 +231,7 @@ Possible causes:
   • Compilation errors
 
 To diagnose, run manually:
-  forge coverage --match-path 'test/pfm/*'
+  forge coverage --match-path "test/*"
 
 $ echo $?
 1  ← Script FAILS correctly
@@ -236,11 +250,11 @@ $ echo $?
 ### Test 1: Forge Functional (Normal Operation)
 
 ```bash
-$ ./coverage-reporter-simple.sh
+$ bash coverage-reporter.sh --auto
 ✅ Metrics obtained successfully
-📏 Lines Coverage: 85.60% (current: updated from 83.33%)
-📝 Statements Coverage: 82.67% (current: updated from 80.09%)
-🌿 Branches Coverage: 72.15% (current: updated from 61.22%)
+📏 Lines Coverage: 85.60%
+📝 Statements Coverage: 82.67%
+🌿 Branches Coverage: 72.15%
 ⚡ Functions Coverage: 80.95%
 ✅ Recommendation: READY TO DEPLOY
 
@@ -248,13 +262,15 @@ $ echo $?
 0  ← Exit code 0 = Success
 ```
 
+> **📚 Nota**: Métricas actuales (26 Nov 2025): 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions. Para métricas actualizadas, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../../ESTADO_CONTRATO_INTELIGENTE.md)
+
 **Result**: ✅ Works as expected
 
 ### Test 2: Forge Fails (Error Condition)
 
 ```bash
 $ # Simulate forge not available
-$ PATH="" ./coverage-reporter-simple.sh
+$ PATH="" bash coverage-reporter.sh --auto
 ❌ ERROR: Unable to obtain coverage information
 Possible causes:
   • Foundry not installed correctly
@@ -276,7 +292,7 @@ Output received:
 [corrupted output]
 
 Expected format:
-| src/pfm/SupplyChain.sol | XX.XX% (N/M) | ...
+| src/SupplyChain.sol | XX.XX% (N/M) | ...
 
 $ echo $?
 1  ← Exit code 1 = Failure
@@ -292,8 +308,8 @@ $ echo $?
 ```yaml
 # ❌ Pipeline passed even with broken coverage
 - name: Check Coverage
-  run: ./coverage-reporter-simple.sh
-  # Always exit 0, even with errors
+  run: bash coverage-reporter.sh --auto
+  # Always exit 0, even with errors (BEFORE - now fixed)
 ```
 
 **Problems**:
@@ -306,7 +322,7 @@ $ echo $?
 ```yaml
 # ✅ Pipeline fails if coverage has problems
 - name: Check Coverage
-  run: ./coverage-reporter-simple.sh
+  run: bash coverage-reporter.sh --auto
   # Exit 1 if errors → Pipeline stops
 ```
 
@@ -351,11 +367,11 @@ To diagnose, run manually:
 **Scenario**: Tests broken after refactoring
 
 ```bash
-$ ./coverage-reporter-simple.sh
+$ bash coverage-reporter.sh --auto
 ❌ ERROR: Unable to obtain coverage information
 
 Possible causes:
-  • Tests are failing (run: forge test --match-path 'test/pfm/*')
+  • Tests are failing (run: forge test --match-path "test/*")
 ```
 
 **Action**: 
@@ -371,12 +387,14 @@ Possible causes:
 **Scenario**: Compilation fails on server
 
 ```bash
-$ ./validate-all.sh
+$ bash validate-all.sh
 ...
 [13] 🔍 Verifying Lines coverage (>80%)...
 ❌ FAILED - Could not obtain coverage from forge
-Check: forge coverage --match-path 'test/pfm/*'
+Check: forge coverage --match-path "test/*"
 ```
+
+> **📚 Nota**: El script `validate-all.sh` ahora valida 26+ checks en 8 fases. Para detalles, consulta [../SCRIPTS_ARCHITECTURE.md](../SCRIPTS_ARCHITECTURE.md)
 
 **Action**:
 1. Pipeline stops
@@ -391,7 +409,7 @@ Check: forge coverage --match-path 'test/pfm/*'
 **Scenario**: Foundry not installed
 
 ```bash
-$ ./coverage-reporter-simple.sh
+$ bash coverage-reporter.sh --auto
 ❌ Error: Foundry is not installed
 ```
 
@@ -423,10 +441,12 @@ All requirements validated:
 
 As part of this improvement:
 
-- ✅ `VALIDATION_REPORT.md`: Updated with new behavior
 - ✅ Scripts commented with new logic
 - ✅ This document for historical reference
 - ✅ `SCRIPTS.md`: References this document
+- ✅ `SCRIPTS_ARCHITECTURE.md`: Documents current script architecture
+
+> **📚 Para documentación completa de scripts actuales, consulta [../SCRIPTS.md](../SCRIPTS.md) y [../SCRIPTS_ARCHITECTURE.md](../SCRIPTS_ARCHITECTURE.md)**
 
 ---
 
@@ -464,8 +484,11 @@ As part of this improvement:
 - Original issue: Script coverage fallback behavior
 - Related documents:
   - [SCRIPTS.md](../SCRIPTS.md) - Script usage documentation
-  - [TESTING.md](../TESTING.md) - Testing guidelines
+  - [SCRIPTS_ARCHITECTURE.md](../SCRIPTS_ARCHITECTURE.md) - Script architecture and design
+  - [TESTING.md](../TESTING.md) - Testing guidelines (108 tests: 64 core + 44 edge cases)
   - [DEPLOYMENT.md](../DEPLOYMENT.md) - Deployment procedures
+  - [ESTADO_CONTRATO_INTELIGENTE.md](../../../ESTADO_CONTRATO_INTELIGENTE.md) - Current contract metrics
+  - [PROJECT_STATUS.md](../../../PROJECT_STATUS.md) - Current project status
 
 ---
 
@@ -474,11 +497,15 @@ As part of this improvement:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0.0 | 2025-11-18 | Validation System | Initial documentation of script improvements |
+| 1.1.0 | 2025-11-26 | Documentation Update | Updated script references, dates, and cross-references |
 
 ---
 
 **Author**: Automated Validation System  
-**Reviewed**: 2025-11-18  
+**Reviewed**: 26 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
 **Status**: ✅ Implemented and Validated  
 **Backward Compatibility**: Scripts work the same when forge is available  
 **Category**: Research / Technical History
+
+> **📚 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../../PROJECT_STATUS.md)**

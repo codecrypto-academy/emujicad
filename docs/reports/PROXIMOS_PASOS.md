@@ -1,10 +1,14 @@
 # 🎯 Próximos Pasos - Supply Chain Tracker
 
-**Fecha de actualización**: 24 de Noviembre, 2025  
-**Estado actual**: 7.4/9.5 ✅ APROBATORIO  
-**Objetivo**: 9.5/10 (Faltan +2.1 puntos)
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**  
+> Este documento refleja el plan histórico del 24 de Noviembre, 2025. Para el estado actual y próximos pasos, ver PROJECT_STATUS.md.
 
-> **📋 Fuente de verdad**: [PROJECT_STATUS.md](../../PROJECT_STATUS.md)
+**Fecha de actualización**: 24 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
+**Estado actual**: 7.4/9.5 ✅ APROBATORIO (histórico)  
+**Objetivo**: 9.5/10 (Faltan +2.1 puntos)
 
 ---
 
@@ -12,9 +16,11 @@
 
 ### ✅ Completado (100%)
 - ✅ **Smart Contract**: 4.0/4.0 puntos (108 tests, 85.60% coverage lines, 72.15% coverage branches, 5 validaciones críticas)
-- ✅ **Frontend**: 3.0/3.0 puntos (9/9 páginas, 26 componentes, 22 hooks)
+- ✅ **Frontend**: 3.0/3.0 puntos (9/9 páginas, 26 componentes, **24 hooks actuales**)
 - ✅ **Extras**: 0.5/1.0 puntos (deploy script validado)
 - ✅ **Validaciones críticas**: 5/5 completadas (usuario cancelado, longitud nombre, rol por tipo de token)
+
+> **📚 Para estado actual completo, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ### ❌ Pendiente (Crítico para 9.5/10)
 - ❌ **Video Demo**: 0.0/1.5 puntos (Falta +1.5 puntos)
@@ -93,7 +99,7 @@
 4. **Arquitectura (1m)**
    - Mostrar estructura del proyecto
    - Mostrar documentación (INDEX.md, PROJECT_STATUS.md)
-   - Mencionar: 26 componentes, 22 hooks, 9 páginas
+   - Mencionar: 26 componentes, 24 hooks, 9 páginas
    - Mostrar scripts de deployment (`deploy.sh`)
 
 5. **Cierre (30s)**
@@ -212,7 +218,7 @@
 ### Documentación
 - [ ] INDEX.md actualizado
 - [ ] PROJECT_STATUS.md actualizado
-- [ ] IA.md completo
+- [ ] [IA.md](../../IA.md) completo
 - [ ] Documentación técnica completa
 
 ### Video
@@ -280,7 +286,7 @@
 ## 🎓 Notas Finales
 
 1. **El Video Demo es crítico**: Representa +1.5 puntos (16% de la nota total)
-2. **Todas las funcionalidades están completas**: 9/9 páginas, 26 componentes, 22 hooks
+2. **Todas las funcionalidades están completas**: 9/9 páginas, 26 componentes, 24 hooks
 3. **Smart Contract está en excelente estado**: 108 tests, 85.60% coverage lines, 72.15% coverage branches, validaciones críticas
 4. **Documentación está completa**: 36+ archivos .md, 13,000+ líneas
 
@@ -288,6 +294,23 @@
 
 ---
 
-**Última actualización**: 24 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
 **Próxima revisión**: Después de completar Video Demo
+
+---
+
+## 📚 Referencias Relacionadas
+
+**Documentación del Proyecto**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual del proyecto (single source of truth)
+- [INDEX.md](../../INDEX.md) - Índice completo de documentación
+- [QUICKSTART.md](../../QUICKSTART.md) - Guía rápida de inicio
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Estado y métricas del contrato inteligente
+
+**Reportes Relacionados**:
+- [RECOMENDACIONES_EXTRAS.md](./RECOMENDACIONES_EXTRAS.md) - Recomendaciones para extras adicionales
+- [TESTING_IMPLEMENTATION.md](./TESTING_IMPLEMENTATION.md) - Estado actual de tests frontend
+- [TASK_STATUS_REAL.md](./TASK_STATUS_REAL.md) - Estado real de tareas completadas
+
+> **📚 Nota**: Este documento refleja el plan histórico del 24 de Noviembre, 2025. Para el estado actual del proyecto y próximos pasos actualizados, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)
 

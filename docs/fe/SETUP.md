@@ -950,7 +950,7 @@ SUPPLY_CHAIN_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
 
 #### Semana 2 (Nov 25-28):
 - [ ] **E2E testing** con Anvil (Nov 25)
-- [ ] **Documentación IA.md** (Nov 25-26): IAs usadas, tiempo, errores, chats
+- [x] **Documentación [IA.md](../../IA.md)** (Nov 25-26): IAs usadas, tiempo, errores, chats ✅ COMPLETADO
 - [ ] **Video demo** 5 min (Nov 27): Arquitectura, tests, frontend, admin
 - [ ] **Entrega final** (Nov 28): Checklist completo
 

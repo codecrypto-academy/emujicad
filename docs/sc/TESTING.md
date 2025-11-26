@@ -1,6 +1,8 @@
 # 🧪 Testing Guide
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**
 
 Comprehensive testing documentation for SupplyChain smart contract.
 
@@ -19,9 +21,11 @@ Comprehensive testing documentation for SupplyChain smart contract.
 ### Test Files
 ```
 test/
-├── SupplyChain.t.sol        # Core functionality tests (55 tests)
-└── EdgeCasesTest.t.sol      # Edge cases and boundary conditions (18 tests)
+├── SupplyChain.t.sol        # Core functionality tests (64 tests)
+└── EdgeCasesTest.t.sol      # Edge cases and boundary conditions (44 tests)
 ```
+
+> **📚 Para métricas actualizadas de cobertura, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 ---
 
@@ -85,12 +89,14 @@ forge coverage --match-path "test/SupplyChain.t.sol"
 
 ### Current Coverage Metrics
 
-| Metric | Coverage | Tested/Total | Status |
-|--------|----------|--------------|--------|
-| **Lines** | 85.60% | Líneas cubiertas | ✅ Excellent |
-| **Statements** | 82.67% | Statements cubiertos | ✅ Excellent |
-| **Branches** | 72.15% | Branches cubiertos | 🟡 Good |
-| **Functions** | 80.95% | Funciones cubiertas | ✅ Excellent |
+> **📚 Para métricas actualizadas y detalladas, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
+
+| Metric | Coverage | Status | Standard |
+|--------|----------|--------|----------|
+| **Lines** | 85.60% | ✅ Excellent | >70% Good, >80% Excellent |
+| **Statements** | 82.67% | ✅ Excellent | >70% Good, >80% Excellent |
+| **Branches** | 72.15% | 🟡 Good | >60% Good, >75% Excellent |
+| **Functions** | 80.95% | ✅ Excellent | >75% Good, >85% Excellent |
 
 ### Coverage Standards
 - **Lines**: 70% good, 80% excellent ✅
@@ -129,12 +135,13 @@ forge coverage --match-path "test/SupplyChain.t.sol"
 - ✅ Owner controls
 - ✅ Invalid state transitions
 
-### 5. Edge Cases (18 tests)
+### 5. Edge Cases (44 tests)
 - ✅ Boundary conditions
 - ✅ Zero values
 - ✅ Invalid inputs
 - ✅ State conflicts
 - ✅ Race conditions
+- ✅ Scientific 3-phase analysis approach
 
 ### 6. Events Tests (6 tests)
 - ✅ UserRoleRequested emission
@@ -169,9 +176,9 @@ bash validate-all.sh
 - ✅ forge build successful
 
 **FASE 3: Tests** (3/3)
-- ✅ Core tests (55) passing
-- ✅ Edge case tests (18) passing
-- ✅ Total tests (73) passing
+- ✅ Core tests (64) passing
+- ✅ Edge case tests (44) passing
+- ✅ Total tests (108) passing
 
 **FASE 4: Scripts** (2/2)
 - ✅ SupplyChainDeploy.s.sol functional
@@ -353,13 +360,23 @@ Before considering testing complete:
 
 ## 🔗 Related Documentation
 
+**Smart Contract Documentation**:
 - [Getting Started](GETTING_STARTED.md) - Setup and installation
 - [Architecture](ARCHITECTURE.md) - System design
 - [API Reference](API_REFERENCE.md) - Contract interface
 - [Coverage Analysis](research/COVERAGE_ANALYSIS.md) - Scientific methodology
+- [Security](SECURITY.md) - Security considerations
+- [Deployment](DEPLOYMENT.md) - Deployment guide
+
+**Project Documentation**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Current project status
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Contract status and metrics
+- [INDEX.md](../../INDEX.md) - Complete documentation index
+- [QUICKSTART.md](../../QUICKSTART.md) - Quick start guide
 
 ---
 
-**Last Updated**: November 18, 2025  
-**Test Suite Version**: 1.1.0  
-**Status**: ✅ 108/108 tests passing
+**Última actualización**: 26 de Noviembre, 2025  
+**Test Suite Version**: 1.2.0  
+**Status**: ✅ 108/108 tests passing (64 core + 44 edge cases)  
+**Coverage**: ✅ Enterprise-grade (85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions)

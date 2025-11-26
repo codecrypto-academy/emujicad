@@ -260,7 +260,7 @@ reports/
 
 ### Estado: ✅ **RETROSPECTIVA COMPLETA - DÍAS 1-4 DOCUMENTADOS**
 
-#### ✅ IA.md Actualizado (1632 líneas - Nov 21, 2025)
+#### ✅ [IA.md](../../IA.md) Actualizado (1834 líneas - Nov 26, 2025)
 
 **Contenido Completo:**
 ```markdown

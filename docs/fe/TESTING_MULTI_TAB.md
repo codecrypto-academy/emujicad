@@ -7,7 +7,7 @@
 
 ## 📋 Objetivo
 
-Verificar que la **sincronización de desconexiones** funciona correctamente entre pestañas. La reconexión automática está POSTPONED (ver `docs/reports/IA.md` - Error 12).
+Verificar que la **sincronización de desconexiones** funciona correctamente entre pestañas. La reconexión automática está POSTPONED (ver `IA.md` - Error 12).
 
 ## ✅ Prerrequisitos
 

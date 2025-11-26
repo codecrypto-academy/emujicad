@@ -1,12 +1,14 @@
-# 📝 Resumen de lo Implementado - Supply Chain Tracker
-
-**Fecha**: 18-19 de Noviembre, 2025  
-**Días**: 1-2 del proyecto  
-**Estado**: ✅ Fase de Setup + Documentación Completada
+# 📝 Resumen de lo Implementado - Días 1-2 - Supply Chain Tracker
 
 > **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
 > **⚠️ HISTORICAL DOCUMENT - November 2025**  
-> Este documento refleja el estado del Día 1-2. Para el estado actual, ver PROJECT_STATUS.md.
+> Este documento refleja el estado histórico del Día 1-2 (18-19 Nov 2025). Para el estado actual, ver PROJECT_STATUS.md.
+
+**Fecha**: 18-19 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
+**Días**: 1-2 del proyecto  
+**Estado**: ✅ Fase de Setup + Documentación Completada
 
 ---
 
@@ -15,12 +17,18 @@
 Se completó exitosamente la fase inicial del proyecto Supply Chain Tracker, incluyendo:
 
 ### Día 1 (18 Nov):
-1. ✅ Smart contract completo y testeado (934 líneas, 73 tests, 83.33% coverage)
+1. ✅ Smart contract completo y testeado (934 líneas históricas, **actual: 970+ líneas**)
+   - **Tests históricos**: 73 tests (100% passing)
+   - **Tests actuales**: 108 tests (64 core + 44 edge cases) - 100% passing
+   - **Coverage histórico**: 83.33% lines, 61.22% branches
+   - **Coverage actual**: 85.60% lines, 72.15% branches, 82.67% statements, 80.95% functions
 2. ✅ Frontend funcional con Next.js 16 + Web3 integration
-3. ✅ Script de deployment completamente automatizado
+3. ✅ Script de deployment completamente automatizado (v1.0.0 → **v2.0.0 actual**)
 4. ✅ Documentación exhaustiva de TODO el proyecto
 5. ✅ Conexión MetaMask funcionando
 6. ✅ Sistema listo para desarrollo de features
+
+> **📚 Nota**: Las métricas mostradas son históricas del Día 1-2. Para métricas actuales, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md) y [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)
 
 ### Día 2 (19 Nov):
 7. ✅ **IA.md completado** (500+ líneas) - Retrospectiva completa del uso de IA
@@ -66,7 +74,7 @@ Antes:                          Después:
 
 ### 🤖 Día 1 (18 Nov): Script de Deployment Automatizado
 
-**Archivo**: `deploy.sh` (650 líneas)
+**Archivo**: `deploy.sh` (650 líneas históricas, **actual: 1,110 líneas v2.0.0**)
 
 **Funcionalidades**:
 - ✅ Levanta Anvil en background con nohup
@@ -81,7 +89,7 @@ Antes:                          Después:
 - ✅ Manejo robusto de errores
 - ✅ Colores y formato user-friendly
 
-**Comandos disponibles**:
+**Comandos disponibles** (v1.0.0 histórico):
 ```bash
 ./deploy.sh start      # Iniciar todo
 ./deploy.sh stop       # Detener todo
@@ -91,20 +99,25 @@ Antes:                          Después:
 ./deploy.sh help       # Ayuda
 ```
 
+> **📚 Nota**: En v2.0.0 se agregaron comandos adicionales (`clean`, `frontend start/stop/restart`). Para detalles completos, consulta [QUICKSTART.md](../../QUICKSTART.md) o ejecuta `./deploy.sh help`
+
 **Logs generados**:
 ```
 logs/
 ├── anvil.log              # Output de Anvil
 ├── anvil.pid              # PID proceso Anvil
+├── anvil_state.json       # Estado persistente de Anvil (v2.0.0)
 ├── frontend.log           # Output de Next.js
 ├── frontend.pid           # PID proceso Next.js
 ├── deploy.log             # Output del deployment
 └── contract_address.txt   # Dirección del contrato
 ```
 
+> **📚 Nota**: En v2.0.0 se agregó persistencia de estado de Anvil. Para detalles, consulta [QUICKSTART.md](../../QUICKSTART.md)
+
 ### 📚 Documentación Completa
 
-**Archivo**: `docs/common/DOCUMENTATION.md` (940+ líneas)
+**Archivo**: `docs/common/DOCUMENTATION.md` (940+ líneas históricas, **actual: 1,037+ líneas**)
 
 **Secciones**:
 1. ✅ Resumen del proyecto
@@ -147,20 +160,30 @@ logs/
 ### ✅ COMPLETADO (Día 1):
 
 #### Smart Contract:
-- [x] **SupplyChain.sol** (934 líneas)
+- [x] **SupplyChain.sol** (934 líneas históricas, **actual: 970+ líneas**)
   - Sistema de usuarios con 4 roles
   - Sistema de tokens (RowMaterial, FinishedProduct)
   - Sistema de transferencias con estados
   - Funciones administrativas (pause, ownership)
-  - 6 eventos principales
-  - Errores personalizados
+  - Ownership transfer implementado (initiate, accept, reject)
+  - 6 eventos principales + eventos de ownership transfer
+  - Errores personalizados completos
+  - 5 validaciones críticas implementadas
+
+> **📚 Para detalles completos, consulta [docs/sc/API_REFERENCE.md](../sc/API_REFERENCE.md) y [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 #### Testing:
-- [x] **73 tests** (100% passing)
+- [x] **73 tests históricos** (100% passing)
   - 55 tests core (SupplyChain.t.sol)
   - 18 tests edge cases (EdgeCasesTest.t.sol)
-  - Coverage: 83.33% lines, 61.22% branches
+  - Coverage histórico: 83.33% lines, 61.22% branches
+- [x] **108 tests actuales** (100% passing) ✅
+  - 64 tests core (SupplyChain.t.sol)
+  - 44 tests edge cases (EdgeCasesTest.t.sol)
+  - Coverage actual: 85.60% lines, 72.15% branches, 82.67% statements, 80.95% functions
   - Todas las categorías cubiertas
+
+> **📚 Para detalles completos de tests, consulta [docs/sc/TESTING.md](../sc/TESTING.md) y [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 #### Frontend:
 - [x] **Next.js 16.0.1** con App Router
@@ -220,10 +243,15 @@ logs/
 
 #### Deployment:
 - [x] **Script automatizado** (deploy.sh)
-  - 650 líneas de bash
-  - 5 comandos principales
+  - 650 líneas históricas (v1.0.0)
+  - **1,110 líneas actuales (v2.0.0)** ✅
+  - 5 comandos principales (v1.0.0) → **9 comandos totales (v2.0.0)**
   - Gestión completa de procesos
   - Logs centralizados
+  - **Persistencia de estado de Anvil (v2.0.0)**
+  - **Gestión independiente del frontend (v2.0.0)**
+
+> **📚 Para detalles completos de deploy.sh v2.0.0, consulta [QUICKSTART.md](../../QUICKSTART.md) o ejecuta `./deploy.sh help`**
 
 #### Documentación:
 - [x] **docs/common/DOCUMENTATION.md** (940+ líneas)
@@ -262,20 +290,27 @@ logs/
 - ✅ Roadmap para los próximos 11 días
 
 ### 🧪 Calidad:
-- ✅ 73 tests pasando (100%)
-- ✅ 83.33% coverage del contrato
+- ✅ 73 tests históricos pasando (100%)
+- ✅ **108 tests actuales pasando (100%)** ✅
+- ✅ 83.33% coverage histórico del contrato
+- ✅ **85.60% lines, 72.15% branches coverage actual** ✅
 - ✅ TypeScript sin errores
 - ✅ Build exitoso de Next.js
 - ✅ Validación de puertos
 - ✅ Manejo de errores robusto
 
+> **📚 Para métricas actualizadas, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
+
 ### 🚀 Automatización:
 - ✅ Un solo comando para iniciar TODO
-- ✅ Script con 650 líneas de lógica
+- ✅ Script con 650 líneas históricas (v1.0.0)
+- ✅ **Script con 1,110 líneas actuales (v2.0.0)** ✅
 - ✅ Validaciones automáticas
 - ✅ Logs centralizados
 - ✅ Gestión de procesos
 - ✅ Instrucciones de MetaMask integradas
+- ✅ **Persistencia de estado de Anvil (v2.0.0)**
+- ✅ **Gestión independiente del frontend (v2.0.0)**
 
 ### 📖 Organización Documental (Día 2):
 - ✅ **Estructura profesional docs/** implementada
@@ -299,15 +334,16 @@ logs/
 
 ## 📈 Métricas
 
-### Líneas de Código:
-- Smart Contract: 934 líneas
-- Tests: 400+ líneas (73 tests)
-- Frontend: 500+ líneas
-- Script deployment: 650 líneas
+### Líneas de Código (Históricas - Día 1-2):
+- Smart Contract: 934 líneas (histórico) → **970+ líneas actuales**
+- Tests: 400+ líneas (73 tests históricos) → **108 tests actuales**
+- Frontend: 500+ líneas (histórico) → **~3,500+ líneas actuales**
+- Script deployment: 650 líneas (v1.0.0) → **1,110 líneas (v2.0.0)**
 - Documentación (Día 1): 2800+ líneas
 - **IA.md (Día 2): 500+ líneas** ⭐
-- **Documentación total: 12,000+ líneas**
-- **Total: 15,784+ líneas**
+- **Documentación total: 12,000+ líneas (histórico) → 13,000+ líneas actuales**
+
+> **📚 Para métricas actualizadas, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ### Archivos:
 - Día 1: 15 archivos creados
@@ -331,7 +367,9 @@ logs/
 
 ---
 
-## 🗺️ Próximos Pasos (Días 3-12)
+## 🗺️ Próximos Pasos (Histórico - Días 3-12)
+
+> **⚠️ NOTA HISTÓRICA**: Esta sección refleja el plan original. Muchas tareas ya están completadas. Para el estado actual, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)
 
 ### Día 2 (19 Nov): ✅ COMPLETADO
 - [x] **IA.md creado** (500+ líneas - requisito README cumplido)
@@ -339,51 +377,41 @@ logs/
 - [x] **30 archivos organizados** en docs/ (12,000+ líneas)
 - [x] **Cero redundancia** implementado
 
-### Día 3 (20 Nov): Dashboard Usuario
-- [ ] Página `/dashboard`
-- [ ] Perfil del usuario
-- [ ] Solicitud de rol
-- [ ] Lista de tokens propios
+### Día 3-4 (20-21 Nov): ✅ COMPLETADO
+- [x] **Dashboard Usuario** (`/dashboard`) - ✅ COMPLETADO
+- [x] **Sistema de pausabilidad** - ✅ COMPLETADO
+- [x] **Gestión Tokens** - ✅ COMPLETADO (página `/tokens`)
+- [x] **Formulario crear token** - ✅ COMPLETADO (`/tokens/create`)
 
-### Día 3-4 (20-21 Nov): Gestión Tokens
-- [ ] Tabla de todos los tokens
-- [ ] Formulario crear token
-- [ ] Filtros y búsqueda
-- [ ] Validaciones
+### Día 5-7 (22-24 Nov): ✅ COMPLETADO
+- [x] **Transferencias** - ✅ COMPLETADO (`/transfers`)
+- [x] **Panel Admin** - ✅ COMPLETADO (`/admin/users`, `/admin`)
+- [x] **Páginas de detalles** - ✅ COMPLETADO (`/tokens/[id]`, `/tokens/[id]/transfer`)
+- [x] **Perfil usuario** - ✅ COMPLETADO (`/profile`)
 
-### Día 5-6 (22-23 Nov): Transferencias
-- [ ] Lista de transferencias
-- [ ] Filtros (enviadas/recibidas)
-- [ ] Acciones (accept/reject/cancel)
-- [ ] Actualizaciones en tiempo real
+### Día 8 (25 Nov): ✅ COMPLETADO
+- [x] **Tests del smart contract** - ✅ 108 tests (100% passing)
+- [x] **Tests del frontend** - ✅ 24 tests (14 unitarios + 10 E2E)
+- [x] **Cobertura** - ✅ 85.60% lines, 72.15% branches
 
-### Día 7 (24 Nov): Panel Admin
-- [ ] Gestión de usuarios
-- [ ] Aprobar/rechazar/suspender
-- [ ] Estadísticas globales
-- [ ] Protección (solo owner)
-
-### Día 8 (25 Nov): E2E Testing
-- [ ] Tests de flujos completos
-- [ ] Scripts automatizados
-- [ ] Cobertura > 80%
-
-### Días 9-10 (25-26 Nov): Refinamiento y Testing
+### Días 9-10 (25-26 Nov): ✅ COMPLETADO
 - [x] ✅ **IA.md completado** (adelantado al Día 2)
-- [ ] Testing adicional de componentes
-- [ ] Optimización de performance
-- [ ] Refinamiento de UX/UI
+- [x] ✅ **Testing adicional de componentes** - ✅ COMPLETADO
+- [x] ✅ **Optimización de performance** - ✅ COMPLETADO (useDashboardStats)
+- [x] ✅ **Refinamiento de UX/UI** - ✅ COMPLETADO (Diseño Moderno 2025)
 
-### Día 11 (27 Nov): Video Demo
+### Día 11 (27 Nov): ⏳ PENDIENTE
 - [ ] Script del video (5 min)
 - [ ] Grabación con OBS
 - [ ] Edición
 
-### Día 12 (28 Nov): Entrega
+### Día 12 (28 Nov): ⏳ PENDIENTE
 - [ ] Verificación final
 - [ ] Backup
 - [ ] Push a GitHub
 - [ ] **ENTREGA** 🚀
+
+> **📚 Para el estado actual completo del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ---
 
@@ -425,12 +453,18 @@ logs/
 - [x] Roadmap
 - [x] docs/reports/TESTING_REPORT.md (10/10 tests del script)
 
-### Comparación con Estructura de Referencia:
+### Comparación con Estructura de Referencia (Histórico - Día 1):
 - [x] Infraestructura superior (wagmi > contexto manual)
-- [x] 12 hooks implementados vs 0 en referencia
+- [x] 12 hooks históricos implementados vs 0 en referencia
+- [x] **24 hooks actuales implementados (14 archivos)** ✅
 - [x] 10 componentes UI vs 4 en referencia
-- [ ] 1/7 páginas implementadas
-- [ ] 1/5 componentes específicos implementados
+- [x] **26 componentes actuales (11 Shadcn + 15 personalizados)** ✅
+- [ ] 1/7 páginas históricas implementadas
+- [x] **9/9 páginas actuales implementadas (100%)** ✅
+- [ ] 1/5 componentes específicos históricos implementados
+- [x] **6/6 componentes específicos actuales implementados (100%)** ✅
+
+> **📚 Para estado actual completo, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ---
 
@@ -456,40 +490,51 @@ logs/
 - 🔗 **Enlaces relativos requieren actualización al reorganizar**
 - 🤖 **Retrospectiva de IA mejor hacerla temprano**
 
-### Próximos desafíos:
-- 🔄 Implementar flujos completos de usuario
-- 🎨 Mejorar UX/UI del frontend
-- 🧪 Aumentar coverage de tests
-- 📱 Responsive design
-- ⚡ Optimización de performance
+### Próximos desafíos (Histórico - Día 1-2):
+- 🔄 Implementar flujos completos de usuario → ✅ **COMPLETADO** (9/9 páginas)
+- 🎨 Mejorar UX/UI del frontend → ✅ **COMPLETADO** (Diseño Moderno 2025)
+- 🧪 Aumentar coverage de tests → ✅ **COMPLETADO** (108 tests, 85.60% coverage)
+- 📱 Responsive design → ✅ **COMPLETADO** (responsive en todas las páginas)
+- ⚡ Optimización de performance → ✅ **COMPLETADO** (useDashboardStats con batch reads)
+
+> **📚 Para desafíos actuales, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ---
 
 ## 📞 Recursos Importantes
 
-### Archivos de Referencia:
-- [../common/DOCUMENTATION.md](../common/DOCUMENTATION.md) - Guía completa
-- [../../INDEX.md](../../INDEX.md) - Índice maestro
-- [../../QUICKSTART.md](../../QUICKSTART.md) - Quick start
-- [../fe/SETUP.md](../fe/SETUP.md) - Frontend detallado
-- [ACADEMIC_ASSESSMENT.md](./ACADEMIC_ASSESSMENT.md) - Evaluación (7.0/10)
-- [TESTING_REPORT.md](./TESTING_REPORT.md) - Validación deploy.sh
-- [PROYECTO_EVALUACION_COMPLETA.md](./PROYECTO_EVALUACION_COMPLETA.md) - Evaluación exhaustiva (9.5/10)
-
-### Scripts:
-- `./deploy.sh` - Deployment automatizado
-- `cd sc && forge test` - Tests del contrato
-- `cd web && npm run dev` - Frontend desarrollo
-
-### Logs:
-- `logs/anvil.log` - Blockchain local
-- `logs/frontend.log` - Next.js
-- `logs/deploy.log` - Deployment
-- `logs/contract_address.txt` - Dirección contrato
+> **📚 Todas las referencias están ahora en la sección "Referencias Relacionadas" arriba. Para información completa de scripts y comandos, consulta [QUICKSTART.md](../../QUICKSTART.md) y [docs/common/DOCUMENTATION.md](../common/DOCUMENTATION.md)**
 
 ---
 
 **Resumen preparado**: 18-19 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
 **Estado**: ✅ Días 1-2 Completados (Setup + Documentación)  
-**Próxima fase**: Dashboard + Token Management (Días 3-5)  
+**Estado actual del proyecto**: ✅ 9/9 páginas completadas (100%), 24 hooks, 108 tests, 85.60% coverage  
 **Logro destacado**: IA.md completado (adelantado 7 días al plan original)
+
+---
+
+## 📚 Referencias Relacionadas
+
+**Documentación del Proyecto**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual del proyecto (single source of truth)
+- [INDEX.md](../../INDEX.md) - Índice completo de documentación
+- [QUICKSTART.md](../../QUICKSTART.md) - Guía rápida de inicio
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Estado y métricas del contrato inteligente
+
+**Documentación Técnica**:
+- [docs/common/DOCUMENTATION.md](../common/DOCUMENTATION.md) - Documentación técnica completa
+- [docs/fe/SETUP.md](../fe/SETUP.md) - Setup del frontend
+- [docs/fe/HOOKS.md](../fe/HOOKS.md) - Documentación completa de hooks (24 hooks)
+- [docs/fe/COMPONENTS.md](../fe/COMPONENTS.md) - Documentación completa de componentes
+- [docs/sc/TESTING.md](../sc/TESTING.md) - Documentación completa de tests (108 tests)
+- [docs/sc/API_REFERENCE.md](../sc/API_REFERENCE.md) - Referencia completa de API
+
+**Reportes Históricos**:
+- [SUMMARY_DAY4.md](./SUMMARY_DAY4.md) - Resumen del Día 4 (Dashboard + Pausabilidad)
+- [TESTING_REPORT.md](./TESTING_REPORT.md) - Reporte de pruebas de deploy.sh
+- [ACADEMIC_ASSESSMENT.md](./ACADEMIC_ASSESSMENT.md) - Evaluación académica histórica
+- [IA.md](../../IA.md) - Retrospectiva completa del uso de IA
+
+> **📚 Nota**: Este documento refleja el estado histórico del Día 1-2. Para el estado actual completo del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)

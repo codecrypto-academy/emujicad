@@ -1,9 +1,14 @@
 # 🔄 Análisis: Patrón Proxy vs Persistencia de Estado
 
-**Fecha**: 25 de Noviembre, 2025  
-**Objetivo**: Evaluar opciones para actualizar el contrato sin perder el estado de Anvil
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **📚 Para documentación completa de deploy.sh, consulta [QUICKSTART.md](../../QUICKSTART.md) o ejecuta `./deploy.sh help`**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**  
+> Este documento refleja el análisis histórico del 25 de Noviembre, 2025. La Opción 1 (Persistencia de Estado) ya está implementada en deploy.sh v2.0.0.
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+**Fecha**: 25 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
+**Objetivo**: Evaluar opciones para actualizar el contrato sin perder el estado de Anvil
 
 ---
 
@@ -345,5 +350,29 @@ El patrón Proxy es útil si planeas:
 
 ---
 
-**Última actualización**: 25 de Noviembre, 2025
+**Última actualización**: 26 de Noviembre, 2025
+
+---
+
+## 📚 Referencias Relacionadas
+
+**Documentación del Proyecto**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual del proyecto (single source of truth)
+- [INDEX.md](../../INDEX.md) - Índice completo de documentación
+- [QUICKSTART.md](../../QUICKSTART.md) - Guía rápida de inicio (incluye documentación de deploy.sh)
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Estado y métricas del contrato inteligente
+
+**Scripts y Deployment**:
+- [deploy.sh](../../deploy.sh) - Script de deployment automatizado (v2.0.0 con persistencia de estado)
+- [docs/common/DOCUMENTATION.md](../common/DOCUMENTATION.md) - Documentación técnica completa (incluye deploy.sh)
+
+**Documentación Técnica del Contrato**:
+- [docs/sc/API_REFERENCE.md](../sc/API_REFERENCE.md) - Referencia completa de API
+- [docs/sc/TESTING.md](../sc/TESTING.md) - Documentación completa de tests (108 tests)
+- [docs/sc/ARCHITECTURE.md](../sc/ARCHITECTURE.md) - Arquitectura del contrato
+
+**Reportes Relacionados**:
+- [RECOMENDACIONES_OPTIMIZACION_CONTRATO.md](./RECOMENDACIONES_OPTIMIZACION_CONTRATO.md) - Recomendaciones de optimización del contrato
+
+> **📚 Nota**: La Opción 1 (Persistencia de Estado) está implementada en deploy.sh v2.0.0. Para usar la persistencia, ejecuta `./deploy.sh start`. Para limpiar el estado, ejecuta `./deploy.sh clean`. Para más detalles, consulta [QUICKSTART.md](../../QUICKSTART.md) o ejecuta `./deploy.sh help`
 

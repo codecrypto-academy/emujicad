@@ -63,11 +63,10 @@
 - **Decisión**: Mantener ambos (diferentes propósitos)
 - **Acción**: Marcar `SUMMARY_DAY1.md` como histórico
 
-#### 3. `FULL_VERIFICATION_REPORT.md` vs `VALIDATION_SUMMARY.md`
-- **`FULL_VERIFICATION_REPORT.md`**: Reporte completo consolidado
-- **`VALIDATION_SUMMARY.md`**: Resumen ejecutivo
-- **Decisión**: Mantener ambos (diferentes niveles de detalle)
-- **Acción**: Ambos deben referenciar `PROJECT_STATUS.md`
+#### 3. `FULL_VERIFICATION_REPORT.md` (Consolidado)
+- **`FULL_VERIFICATION_REPORT.md`**: Reporte completo consolidado (fuente única de verdad)
+- **Decisión**: Consolidado - contiene toda la información de verificaciones
+- **Acción**: Debe referenciar `PROJECT_STATUS.md`
 
 ---
 
@@ -87,9 +86,9 @@ Estos archivos documentan estados intermedios del proyecto y deben mantenerse pa
    - **Estado**: Histórico (Día 4)
    - **Acción**: Verificar si existe, marcar como histórico
 
-4. **`IA.md`**
+4. **`IA.md`** (ubicado en raíz del proyecto)
    - **Estado**: Retrospectiva completa (Días 1-7)
-   - **Acción**: Actualizar métricas finales, mantener histórico
+   - **Acción**: Actualizado con referencias cruzadas y fecha 26 Nov 2025
 
 5. **`COMPARISON_COMMIT_29cca6e.md`**
    - **Estado**: Análisis específico de un commit
@@ -102,19 +101,17 @@ Estos archivos documentan estados intermedios del proyecto y deben mantenerse pa
 Estos archivos tienen propósitos específicos y no son redundantes:
 
 1. **`ACCESSIBILITY_IMPLEMENTATION.md`** - Implementación de accesibilidad
-2. **`ADDITIONAL_VALIDATIONS.md`** - Validaciones adicionales del frontend
-3. **`AUTOMATED_VERIFICATION_REPORT.md`** - Reporte de verificación automatizada
-4. **`FRONTEND_PAGES_QUALITY_REVIEW.md`** - Revisión de calidad de páginas
-5. **`HOW_TO_REVIEW_IMPLEMENTATION.md`** - Guía de revisión manual
-6. **`PERFORMANCE_OPTIMIZATION.md`** - Optimización de performance
-7. **`PLAN_IMPLEMENTACION_OPTIMIZACIONES.md`** - Plan de optimizaciones del contrato
-8. **`RECOMENDACIONES_EXTRAS.md`** - Recomendaciones de extras
-9. **`RECOMENDACIONES_OPTIMIZACION_CONTRATO.md`** - Recomendaciones de optimización
-10. **`TESTING_IMPLEMENTATION.md`** - Implementación de tests frontend
-11. **`TESTING_REPORT.md`** - Reporte de testing del deploy script
-12. **`VALIDACIONES_PENDIENTES_CONTRATO.md`** - Validaciones pendientes (actualizado)
-13. **`VALIDATION_SUMMARY.md`** - Resumen de validaciones
-14. **`TASK_STATUS_REAL.md`** - Estado de tareas (verificar si existe)
+2. **`FRONTEND_PAGES_QUALITY_REVIEW.md`** - Revisión de calidad de páginas (histórico)
+3. **`FULL_VERIFICATION_REPORT.md`** - Reporte completo consolidado de verificaciones (fuente única)
+4. **`HOW_TO_REVIEW_IMPLEMENTATION.md`** - Guía de revisión manual
+5. **`PERFORMANCE_OPTIMIZATION.md`** - Optimización de performance
+6. **`PLAN_IMPLEMENTACION_OPTIMIZACIONES.md`** - Plan de optimizaciones del contrato
+7. **`RECOMENDACIONES_EXTRAS.md`** - Recomendaciones de extras
+8. **`RECOMENDACIONES_OPTIMIZACION_CONTRATO.md`** - Recomendaciones de optimización
+9. **`TESTING_IMPLEMENTATION.md`** - Implementación de tests frontend
+10. **`TESTING_REPORT.md`** - Reporte de testing del deploy script
+11. **`VALIDACIONES_PENDIENTES_CONTRATO.md`** - Validaciones pendientes (actualizado)
+12. **`TASK_STATUS_REAL.md`** - Estado de tareas (verificar si existe)
 
 ---
 

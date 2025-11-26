@@ -80,9 +80,10 @@ Los siguientes archivos documentan estados intermedios y están marcados como hi
    - Header histórico agregado
    - Referencia a `PROJECT_STATUS.md`
 
-8. **`IA.md`**
+8. **`IA.md`** (ubicado en raíz del proyecto)
    - Métricas finales actualizadas
    - Mantiene retrospectiva completa (Días 1-7)
+   - Actualizado con referencias cruzadas y fecha 26 Nov 2025
 
 ---
 
@@ -99,13 +100,10 @@ Todos los archivos ahora incluyen al inicio:
 - ✅ `PROXIMOS_PASOS.md`
 - ✅ `PROYECTO_EVALUACION_COMPLETA.md`
 - ✅ `VALIDACIONES_PENDIENTES_CONTRATO.md`
-- ✅ `VALIDATION_SUMMARY.md`
-- ✅ `FULL_VERIFICATION_REPORT.md`
+- ✅ `FULL_VERIFICATION_REPORT.md` (consolida verificaciones)
 - ✅ `PLAN_IMPLEMENTACION_OPTIMIZACIONES.md`
 - ✅ `RECOMENDACIONES_OPTIMIZACION_CONTRATO.md`
 - ✅ `ACCESSIBILITY_IMPLEMENTATION.md`
-- ✅ `ADDITIONAL_VALIDATIONS.md`
-- ✅ `AUTOMATED_VERIFICATION_REPORT.md`
 - ✅ `COMPARISON_COMMIT_29cca6e.md`
 - ✅ `FRONTEND_PAGES_QUALITY_REVIEW.md`
 - ✅ `HOW_TO_REVIEW_IMPLEMENTATION.md`
@@ -136,10 +134,7 @@ Todos los archivos ahora incluyen al inicio:
 - `RECOMENDACIONES_EXTRAS.md` - ✅ Recomendaciones extras
 
 **Reportes de Verificación:**
-- `VALIDATION_SUMMARY.md` - ✅ Resumen validaciones
-- `FULL_VERIFICATION_REPORT.md` - ✅ Reporte completo
-- `AUTOMATED_VERIFICATION_REPORT.md` - ✅ Reporte automatizado
-- `ADDITIONAL_VALIDATIONS.md` - ✅ Validaciones adicionales
+- `FULL_VERIFICATION_REPORT.md` - ✅ Reporte completo consolidado (fuente única de verdad)
 - `TESTING_REPORT.md` - ✅ Reporte testing deploy script
 
 **Guías y Análisis:**

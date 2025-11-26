@@ -1,6 +1,9 @@
 # 🤖 Scripts Documentation
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **📚 Para deployment automatizado completo, consulta [deploy.sh](../../deploy.sh) o [QUICKSTART.md](../../QUICKSTART.md)**
 
 Complete documentation for all automation scripts in the project.
 
@@ -27,20 +30,52 @@ This project includes comprehensive automation scripts for deployment, testing, 
 | Category | Scripts | Purpose |
 |----------|---------|---------|
 | **Deployment** | `SupplyChainDeploy.s.sol` | Contract deployment automation |
+| **Deployment (Full Stack)** | `deploy.sh` | Complete stack automation (Anvil + Contract + Frontend) |
 | **Demo** | `SupplyChainInteractions.s.sol` | End-to-end workflow demonstration |
 | **Validation** | `validate-all.sh` | Comprehensive validation suite |
-| **Coverage** | `coverage.sh` | Code coverage analysis |
-| **Testing** | Foundry tests | Automated testing suite |
+| **Coverage** | `coverage-reporter.sh`, `coverage-reporter-simple.sh` | Code coverage analysis |
+| **Testing** | Foundry tests | Automated testing suite (108 tests) |
+
+> **📚 Para usar el script de deployment automatizado completo, consulta [deploy.sh](../../deploy.sh) o [QUICKSTART.md](../../QUICKSTART.md)**
 
 ---
 
 ## 🚀 Deployment Scripts
+
+### deploy.sh (Recomendado para desarrollo local)
+
+**Location:** `deploy.sh` (root directory)
+
+**Purpose:** Script completo de automatización para Anvil + Smart Contract + Frontend.
+
+> **📚 Para documentación completa de `deploy.sh`, consulta [QUICKSTART.md](../../QUICKSTART.md) o ejecuta `./deploy.sh help`**
+
+**Comandos disponibles:**
+- `./deploy.sh start` - Inicia todo el stack (Anvil + Contrato + Frontend)
+- `./deploy.sh stop` - Detiene todos los servicios
+- `./deploy.sh restart` - Reinicia todo el stack
+- `./deploy.sh status` - Muestra estado de servicios
+- `./deploy.sh frontend start/stop/restart` - Gestión independiente del frontend
+- `./deploy.sh clean` - Limpia estado persistente de Anvil
+- `./deploy.sh metamask` - Instrucciones para configurar MetaMask
+- `./deploy.sh help` - Ayuda completa
+
+**Características:**
+- ✅ Persistencia de estado de Anvil (`logs/anvil_state.json`)
+- ✅ Detección inteligente de procesos en ejecución
+- ✅ Logs organizados en directorio `logs/`
+- ✅ Actualización automática de configuración del frontend
+- ✅ Gestión independiente del frontend sin afectar Anvil/Contrato
+
+---
 
 ### SupplyChainDeploy.s.sol
 
 **Location:** `script/SupplyChainDeploy.s.sol`
 
 **Purpose:** Automated deployment of SupplyChain contract to any network.
+
+> **📚 Nota**: Para desarrollo local, se recomienda usar `deploy.sh`. Este script es útil para deployment manual o en testnets/mainnet.
 
 #### Features
 - ✅ Environment-based configuration
@@ -137,9 +172,15 @@ Contract owner: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 - Transfer rejection scenario
 - Transfer cancellation scenario
 
-**Phase 5: Final Verification**
+**Phase 5: Ownership Transfer** ✅ (Implementado)
+- Ownership transfer initiation
+- Ownership transfer acceptance
+- Ownership transfer rejection (opcional)
+
+**Phase 6: Final Verification**
 - All balances validated
 - System state confirmed
+- Ownership verified
 
 #### Usage
 
@@ -201,12 +242,20 @@ Owner: 0x9f7cF1d1F558E57ef88a59ac3D47214eF25B6A06
 🚫 Transfer 5: Canceled by Producer
   Tokens returned to Producer: 50
 
+=== PHASE 5: OWNERSHIP TRANSFER ===
+✅ Ownership transfer initiated to: 0x9999...
+✅ Pending owner: 0x9999...
+✅ Ownership transfer accepted!
+✅ New owner: 0x9999...
+✅ Pending owner cleared
+
 === FINAL STATUS ===
 Next Token ID: 3
 Next Transfer ID: 6
 ✅ Producer balance (token 1): 600
 ✅ Factory balance (token 1): 500  
 ✅ Consumer balance (token 2): 50
+✅ Owner: 0x9999...
 
 ✅ Demo completed successfully!
 ```
@@ -230,10 +279,12 @@ Next Transfer ID: 6
 
 | File | Tests | Focus |
 |------|-------|-------|
-| `SupplyChain.t.sol` | 55 | Core functionality |
-| `EdgeCasesTest.t.sol` | 18 | Edge cases & branch coverage |
+| `SupplyChain.t.sol` | 64 | Core functionality |
+| `EdgeCasesTest.t.sol` | 44 | Edge cases & branch coverage |
 
-**Total: 108 tests** (all passing consistently)
+**Total: 108 tests** (64 core + 44 edge cases) - all passing consistently
+
+> **📚 Para documentación completa de tests, consulta [TESTING.md](TESTING.md)**
 
 #### Running Tests
 
@@ -253,10 +304,10 @@ forge test -vvv
 # Gas report
 forge test --gas-report
 
-# Only core tests (55 tests)
+# Only core tests (64 tests)
 forge test --match-contract SupplyChain
 
-# Only edge cases (18 tests)
+# Only edge cases (44 tests)
 forge test --match-path test/EdgeCasesTest.t.sol
 ```
 
@@ -389,9 +440,11 @@ Report saved to: `docs/reports/VALIDATION_RESULTS.md`
 
 ## 📊 Coverage Scripts
 
-### coverage.sh (if exists)
+### coverage-reporter.sh y coverage-reporter-simple.sh
 
-**Purpose:** Generate detailed coverage reports.
+**Location:** `sc/coverage-reporter.sh` y `sc/coverage-reporter-simple.sh`
+
+**Purpose:** Generate detailed coverage reports with analysis and recommendations.
 
 #### Usage
 
@@ -420,6 +473,8 @@ Current project metrics:
 - **Statements**: 82.67%
 - **Branches**: 72.15%
 - **Functions**: 80.95%
+
+> **📚 Para métricas actualizadas y detalladas, consulta [TESTING.md](TESTING.md) y [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 #### Interpreting Coverage
 
@@ -613,13 +668,27 @@ fi
 
 ## 📚 Additional Resources
 
-- [Deployment Guide](DEPLOYMENT.md)
-- [Testing Guide](TESTING.md)
-- [Getting Started](GETTING_STARTED.md)
-- [API Reference](API_REFERENCE.md)
+**Smart Contract Documentation**:
+- [Deployment Guide](DEPLOYMENT.md) - Deployment procedures
+- [Testing Guide](TESTING.md) - Test coverage and validation (108 tests)
+- [Getting Started](GETTING_STARTED.md) - Setup and installation
+- [API Reference](API_REFERENCE.md) - Contract interface
+- [Architecture](ARCHITECTURE.md) - System design
+- [Security](SECURITY.md) - Security considerations
+
+**Project Documentation**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Current project status
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Contract status and metrics
+- [INDEX.md](../../INDEX.md) - Complete documentation index
+- [QUICKSTART.md](../../QUICKSTART.md) - Quick start guide
+- [deploy.sh](../../deploy.sh) - Full stack deployment automation
+
+**Scripts Documentation**:
+- [sc/script/README_SCRIPTS.md](../../sc/script/README_SCRIPTS.md) - Detailed scripts documentation
 
 ---
 
-**Last Updated:** November 18, 2025  
-**Project Version:** 1.1.0  
-**Script Count:** 5+ automation scripts
+**Última actualización**: 26 de Noviembre, 2025  
+**Project Version**: 1.2.0  
+**Script Count**: 6+ automation scripts (including deploy.sh)  
+**Test Suite**: 108 tests (64 core + 44 edge cases) - 100% passing

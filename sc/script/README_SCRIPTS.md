@@ -1,6 +1,10 @@
 # 📜 Scripts Documentation
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para documentación completa de scripts, consulta [docs/sc/SCRIPTS.md](../../docs/sc/SCRIPTS.md)**  
+> **📚 Para deployment automatizado, consulta [deploy.sh](../../deploy.sh) o [QUICKSTART.md](../../QUICKSTART.md)**
+
+**Última actualización**: 26 de Noviembre, 2025
 
 <div align="center">
 
@@ -26,6 +30,8 @@
 
 Este directorio contiene scripts de Foundry para automatizar el deployment y demostración completa del contrato SupplyChain.
 
+> **📚 Nota**: Para deployment automatizado completo (Anvil + Contrato + Frontend), usa el script `deploy.sh` en la raíz del proyecto. Estos scripts de Foundry son útiles para testing manual y demostraciones específicas.
+
 ## 📁 Archivos Disponibles
 
 ### 1. `SupplyChainDeploy.s.sol` - Script de Deployment
@@ -49,20 +55,32 @@ Este directorio contiene scripts de Foundry para automatizar el deployment y dem
 ## 🚀 Instrucciones de Uso
 
 ### Prerequisitos
+
+> **📚 Para setup completo del proyecto, consulta [QUICKSTART.md](../../QUICKSTART.md) o [docs/fe/SETUP.md](../../docs/fe/SETUP.md)**
+
 ```bash
 # Instalar Foundry
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 
 # Variables de entorno requeridas
-export PRIVATE_KEY="0x..."           # Admin/Deployer private key
+export PRIVATE_KEY="0x..."           # Admin/Deployer private key (Account #0 de Anvil: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80)
 export ACCEPTOR_PRIVATE_KEY="0x..."  # Para accepting transfers
 export REJECTOR_PRIVATE_KEY="0x..."  # Para rejecting transfers  
 export RPC_URL="http://localhost:8545"  # Anvil local o testnet
+
+# Nota: Si usas deploy.sh, las variables de entorno se configuran automáticamente
 ```
 
 ### 1. Deployment
+
+> **📚 Alternativa automatizada**: El script `deploy.sh` en la raíz del proyecto automatiza todo el proceso (Anvil + Deployment + Frontend). Ver [QUICKSTART.md](../../QUICKSTART.md) o ejecutar `./deploy.sh start`.
+
 ```bash
+# Opción A: Usar deploy.sh (recomendado)
+./deploy.sh start  # Inicia Anvil, despliega contrato y frontend automáticamente
+
+# Opción B: Deployment manual con Foundry
 # Start Anvil local blockchain
 anvil
 
@@ -147,8 +165,10 @@ Contract address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
 - ✅ PHASE 2: Creación de tokens (Raw Material y Finished Product)
 - ✅ PHASE 3: Transferencias entre roles
 - ✅ PHASE 4: Rechazo y cancelación de transfers
-- ✅ PHASE 5: Transferencia de ownership (ya implementado)
+- ✅ PHASE 5: Transferencia de ownership (initiate, accept, reject) - ✅ Implementado
 - 🔄 Agregar escenarios de pause/unpause (opcional)
+
+> **📚 Para documentación completa de todas las funciones del contrato, consulta [docs/sc/API_REFERENCE.md](../../docs/sc/API_REFERENCE.md)**
 
 ## ⚠️ Notas Importantes
 
@@ -156,7 +176,19 @@ Contract address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
 2. **Testing**: Usar Anvil para testing local seguro
 3. **Production**: Validar todas las addresses antes de mainnet
 4. **Gas**: Considerar gas costs en testnets reales
+5. **Deployment Automatizado**: Para uso diario, preferir `deploy.sh` que automatiza todo el proceso
+
+## 🔗 Referencias Relacionadas
+
+- **Deployment Automatizado**: [deploy.sh](../../deploy.sh) - Script completo de deployment (1,110 líneas)
+- **Quick Start**: [QUICKSTART.md](../../QUICKSTART.md) - Guía rápida de inicio
+- **Documentación Scripts**: [docs/sc/SCRIPTS.md](../../docs/sc/SCRIPTS.md) - Documentación técnica completa
+- **Documentación Deployment**: [docs/sc/DEPLOYMENT.md](../../docs/sc/DEPLOYMENT.md) - Guía de deployment
+- **Estado del Proyecto**: [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual y próximos pasos
+- **Cuentas Anvil**: [CUENTAS_ANVIL_10_14.md](../../CUENTAS_ANVIL_10_14.md) - Private keys de cuentas adicionales
 
 ---
+
+**Última actualización**: 26 de Noviembre, 2025
 
 **Estos scripts demuestran la funcionalidad completa del contrato SupplyChain y proporcionan una base sólida para presentación académica y deployment en producción.**

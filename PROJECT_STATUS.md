@@ -155,7 +155,7 @@
 ✅ INDEX.md (guía maestra)
 ✅ QUICKSTART.md (quick start)
 ✅ PROJECT_STATUS.md (single source of truth) ⭐
-✅ docs/reports/IA.md (retrospectiva IA)
+✅ IA.md (retrospectiva IA)
 ✅ docs/sc/ - 18 archivos Smart Contract
 ✅ docs/fe/ - 6 archivos Frontend
 ✅ docs/reports/ - 5 evaluaciones

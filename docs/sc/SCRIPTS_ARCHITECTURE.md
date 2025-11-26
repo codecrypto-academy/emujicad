@@ -1,8 +1,12 @@
 # 📊 Arquitectura de Scripts de Validación
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **📚 Para documentación completa de scripts, consulta [SCRIPTS.md](SCRIPTS.md)**
 
-**Fecha:** 2025-11-18  
+**Fecha:** 26 de Noviembre, 2025  
+**Última actualización:** 26 de Noviembre, 2025  
 **Proyecto:** SupplyChain Smart Contract  
 
 ---
@@ -27,7 +31,7 @@ audit-documentation.sh (Orquestador)
     └── Genera reportes de auditoría detallados
 
 validate-all.sh (Ejecutor)
-    ├── 26 validaciones pass/fail
+    ├── 26+ validaciones pass/fail (8 fases)
     ├── Retorna exit codes (CI/CD ready)
     └── Genera VALIDATION_RESULTS_{date}.md
 ```
@@ -44,7 +48,7 @@ sc/
 │   ├── Funciones inline:
 │   │   ├── extract_coverage_metrics()   # Extrae métricas de forge
 │   │   └── evaluate_threshold()        # Valida umbrales
-│   ├── 26 validaciones (8 fases)
+│   ├── 26+ validaciones (8 fases)
 │   ├── Tiempo: ~2-3 minutos
 │   ├── Uso: Pre-commit, CI/CD, verificación rápida
 │   └── Salida: VALIDATION_RESULTS_{date}.md
@@ -70,6 +74,8 @@ sc/
 ```
 
 **Arquitectura:** 3 scripts **independientes** sin dependencias entre sí
+
+> **📚 Para documentación completa de scripts, consulta [SCRIPTS.md](SCRIPTS.md)**
 
 ---
 
@@ -170,11 +176,13 @@ COVERAGE_OUTPUT=$(forge coverage ...)  # Captura independiente para reportes
 
 **Salida:**
 ```
-Total de pruebas: 26
-✅ Passed: 26
+Total de pruebas: 26+
+✅ Passed: 26+
 ❌ Failed: 0
 🎯 Porcentaje de éxito: 100%
-📝 Reporte generado: docs/reports/VALIDATION_RESULTS_2025-11-18.md
+📝 Reporte generado: docs/sc/reports/VALIDATION_RESULTS_YYYY-MM-DD.md
+
+> **📚 Para detalles de las validaciones, consulta [SCRIPTS.md](SCRIPTS.md#validation-scripts)**
 ```
 
 ---
@@ -201,11 +209,13 @@ Total de pruebas: 26
 
 **Salida:**
 ```
-📂 Reportes generados en: docs/reports/
-├── DOCUMENTATION_AUDIT_2025-11-18.md
-├── TEST_INTEGRITY_AUDIT_2025-11-18.md
-├── COVERAGE_REPORT_2025-11-18.md
-└── VALIDATION_RESULTS_2025-11-18.md
+📂 Reportes generados en: docs/sc/reports/
+├── DOCUMENTATION_AUDIT_YYYY-MM-DD.md
+├── TEST_INTEGRITY_AUDIT_YYYY-MM-DD.md
+├── COVERAGE_REPORT_YYYY-MM-DD.md
+└── VALIDATION_RESULTS_YYYY-MM-DD.md
+
+> **📚 Para ubicación exacta de reportes, consulta [SCRIPTS.md](SCRIPTS.md#validation-scripts)**
 ```
 
 ---
@@ -232,10 +242,10 @@ forge test -vv
 ./audit-documentation.sh
 
 # Revisar reportes generados
-cat docs/reports/DOCUMENTATION_AUDIT_$(date +%Y-%m-%d).md
+cat docs/sc/reports/DOCUMENTATION_AUDIT_$(date +%Y-%m-%d).md
 
 # Verificar inconsistencias detectadas
-grep "⚠️" docs/reports/DOCUMENTATION_AUDIT_*.md
+grep "⚠️" docs/sc/reports/DOCUMENTATION_AUDIT_*.md
 ```
 
 ### Pre-Release
@@ -248,10 +258,10 @@ grep "⚠️" docs/reports/DOCUMENTATION_AUDIT_*.md
 ./validate-all.sh
 
 # 3. Generar reporte de coverage para incluir en release notes
-./coverage-reporter.sh --auto
+bash coverage-reporter.sh --auto
 
 # 4. Revisar todos los reportes del día
-ls -lt docs/reports/*$(date +%Y-%m-%d).md
+ls -lt docs/sc/reports/*$(date +%Y-%m-%d).md
 ```
 
 ---
@@ -263,17 +273,21 @@ ls -lt docs/reports/*$(date +%Y-%m-%d).md
 | Métrica | Umbral Mínimo | Estado Actual |
 |---------|--------------|---------------|
 | **Lines** | 80% | 85.60% ✅ |
-| **Statements** | 75% | 80.09% ✅ |
+| **Statements** | 75% | 82.67% ✅ |
 | **Functions** | 75% | 80.95% ✅ |
 | **Branches** | 50% | 72.15% ✅ |
+
+> **📚 Para métricas actualizadas, consulta [TESTING.md](TESTING.md) y [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 ### Umbrales de Tests
 
 | Métrica | Umbral Mínimo | Estado Actual |
 |---------|--------------|---------------|
-| **Tests Totales** | 70 | 73 ✅ |
-| **Tests Core** | 50 | 55 ✅ |
-| **Tests Edge Cases** | 15 | 18 ✅ |
+| **Tests Totales** | 70 | 108 ✅ |
+| **Tests Core** | 50 | 64 ✅ |
+| **Tests Edge Cases** | 15 | 44 ✅ |
+
+> **📚 Para detalles de tests, consulta [TESTING.md](TESTING.md)**
 
 ---
 
@@ -281,9 +295,9 @@ ls -lt docs/reports/*$(date +%Y-%m-%d).md
 
 ### ✅ Separación de Responsabilidades
 
-- **validate-all.sh:** "¿El código funciona?" (pass/fail rápido, 26 validaciones)
+- **validate-all.sh:** "¿El código funciona?" (pass/fail rápido, 26+ validaciones en 8 fases)
 - **audit-documentation.sh:** "¿La documentación está actualizada?" (análisis profundo)
-- **coverage-reporter.sh:** "¿Cuál es la cobertura?" (reportes detallados)
+- **coverage-reporter.sh:** "¿Cuál es la cobertura?" (reportes detallados con análisis)
 
 ### ✅ Independencia y Simplicidad (KISS)
 
@@ -342,9 +356,13 @@ ls -lt docs/reports/*$(date +%Y-%m-%d).md
 
 ## 📚 Referencias
 
-- **validate-all.sh:** Validación integral del proyecto (26 validaciones, ~400 líneas)
-- **audit-documentation.sh:** Auditoría de documentación y tests (~570 líneas)
+- **validate-all.sh:** Validación integral del proyecto (26+ validaciones en 8 fases, ~410 líneas)
+- **audit-documentation.sh:** Auditoría de documentación y tests (~600 líneas)
 - **coverage-reporter.sh:** Generador de reportes de coverage (~280 líneas)
+
+> **Nota**: El script `coverage-reporter.sh` soporta modo interactivo y modo automático (`--auto`) para diferentes casos de uso.
+
+> **📚 Para documentación completa de scripts, consulta [SCRIPTS.md](SCRIPTS.md)**
 
 ---
 
@@ -361,3 +379,23 @@ Los scripts están **óptimamente diseñados** para ser **independientes** y **s
 ✅ **Principio aplicado:** "La duplicación es mejor que la abstracción incorrecta"
 
 **Recomendación:** ✅ **Mantener arquitectura actual** (3 scripts independientes)
+
+---
+
+## 🔗 Referencias Relacionadas
+
+**Smart Contract Documentation**:
+- [SCRIPTS.md](SCRIPTS.md) - Documentación completa de todos los scripts
+- [TESTING.md](TESTING.md) - Test coverage y validación (108 tests)
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Estado del contrato y métricas
+
+**Project Documentation**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual del proyecto
+- [INDEX.md](../../INDEX.md) - Índice completo de documentación
+- [QUICKSTART.md](../../QUICKSTART.md) - Guía rápida de inicio
+
+---
+
+**Última actualización**: 26 de Noviembre, 2025  
+**Estado**: ✅ Arquitectura estable y optimizada  
+**Scripts**: 3 scripts independientes (validate-all.sh, audit-documentation.sh, coverage-reporter.sh)

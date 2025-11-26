@@ -1,6 +1,12 @@
 # Warning de Radix UI DialogContent - DialogTitle
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**  
+> Este documento documenta un warning conocido de Radix UI. El warning no afecta la funcionalidad y es solo de desarrollo.
+
+**Fecha de documentación**: Noviembre 2025  
+**Última actualización**: 26 de Noviembre, 2025
 
 ## Descripción del Warning
 
@@ -69,7 +75,26 @@ El warning parece ser un problema conocido de Radix UI relacionado con el timing
 - [Radix UI Dialog Documentation](https://radix-ui.com/primitives/docs/components/dialog)
 - Warning origin: `node_modules/@radix-ui/react-dialog/src/dialog.tsx (520:30)`
 
-## Fecha de Documentación
+---
 
-Documentado el: $(date +%Y-%m-%d)
+## 📚 Referencias Relacionadas
+
+**Documentación del Proyecto**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual del proyecto (single source of truth)
+- [INDEX.md](../../INDEX.md) - Índice completo de documentación
+- [QUICKSTART.md](../../QUICKSTART.md) - Guía rápida de inicio
+
+**Documentación Técnica Frontend**:
+- [docs/fe/COMPONENTS.md](../fe/COMPONENTS.md) - Documentación completa de componentes (incluye ConnectWallet)
+- [docs/fe/SETUP.md](../fe/SETUP.md) - Setup del frontend
+
+**Reportes Relacionados**:
+- [HOW_TO_REVIEW_IMPLEMENTATION.md](./HOW_TO_REVIEW_IMPLEMENTATION.md) - Guía para revisar la implementación
+- [FULL_VERIFICATION_REPORT.md](./FULL_VERIFICATION_REPORT.md) - Reporte completo de verificación
+
+**Referencias Externas**:
+- [Radix UI Dialog Documentation](https://radix-ui.com/primitives/docs/components/dialog)
+- Warning origin: `node_modules/@radix-ui/react-dialog/src/dialog.tsx (520:30)`
+
+> **📚 Nota**: Este warning es conocido y no afecta la funcionalidad. La accesibilidad está correctamente implementada. Para más detalles sobre componentes, consulta [docs/fe/COMPONENTS.md](../fe/COMPONENTS.md)
 

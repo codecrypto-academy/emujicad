@@ -200,7 +200,7 @@ chmod +x deploy.sh
 
 ### Reportes y Evaluaciones
 - **[docs/reports/ACADEMIC_ASSESSMENT.md](./docs/reports/ACADEMIC_ASSESSMENT.md)** - Evaluación académica
-- **[docs/reports/IA.md](./docs/reports/IA.md)** ⭐ - Retrospectiva del uso de IA
+- **[IA.md](./IA.md)** ⭐ - Retrospectiva del uso de IA
 - **[docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md)** - Resumen del Día 1
 
 ---

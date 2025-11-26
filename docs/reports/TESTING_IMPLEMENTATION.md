@@ -1,9 +1,12 @@
 # 🧪 Implementación de Tests - Supply Chain Tracker
 
-**Fecha**: 21 de Noviembre, 2025  
-**Estado**: ✅ **IMPLEMENTADO**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para documentación completa de tests del smart contract, consulta [docs/sc/TESTING.md](../../docs/sc/TESTING.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+**Fecha**: 26 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
+**Estado**: ✅ **IMPLEMENTADO**
 
 ---
 
@@ -25,6 +28,7 @@ Implementar una suite completa de tests para asegurar la calidad y confiabilidad
 #### Playwright (E2E)
 - ✅ `playwright.config.ts`: Configuración de Playwright
 - ✅ `e2e/home.spec.ts`: Tests E2E básicos para la página principal
+- ✅ `e2e/tokens.spec.ts`: Tests E2E para la página de tokens (7 tests)
 
 ---
 
@@ -58,6 +62,17 @@ Implementar una suite completa de tests para asegurar la calidad y confiabilidad
 - ✅ Muestra el título principal
 - ✅ Muestra botón de conectar wallet cuando no está conectado
 - ✅ Navega correctamente (estructura básica)
+
+#### Tokens Page (`e2e/tokens.spec.ts`)
+- ✅ Muestra la página de tokens con header
+- ✅ Muestra sección de filtros
+- ✅ Input de búsqueda accesible
+- ✅ Select de filtro accesible
+- ✅ Muestra estado de carga inicial
+- ✅ Redirige a home si no está autenticado
+- ✅ Layout responsive
+
+**Total**: 10 tests E2E ✅
 
 ---
 
@@ -113,8 +128,8 @@ npm run test:e2e:ui
 |-----------|-------|--------|
 | Componentes UI | 4 | ✅ |
 | Validación | 10 | ✅ |
-| E2E | 3 | ✅ |
-| **Total** | **17** | ✅ |
+| E2E | 10 | ✅ |
+| **Total** | **24** | ✅ |
 
 ---
 
@@ -133,7 +148,8 @@ web/
 │       ├── setup.ts
 │       └── utils.tsx
 ├── e2e/
-│   └── home.spec.ts
+│   ├── home.spec.ts
+│   └── tokens.spec.ts
 ├── vitest.config.ts
 └── playwright.config.ts
 ```
@@ -156,10 +172,13 @@ web/
 - [ ] `useCreateToken.test.tsx`: Creación de tokens
 
 ### E2E (Prioridad Media)
+- [x] `tokens.spec.ts`: Página de tokens ✅ **IMPLEMENTADO**
 - [ ] `dashboard.spec.ts`: Navegación al dashboard
 - [ ] `admin.spec.ts`: Panel de administración
 - [ ] `wallet-connection.spec.ts`: Conexión de wallet
 - [ ] `token-creation.spec.ts`: Creación de tokens
+- [ ] `token-detail.spec.ts`: Página de detalle de token
+- [ ] `transfer.spec.ts`: Flujo de transferencias
 
 ---
 
@@ -178,7 +197,7 @@ web/
 - ✅ Vitest configurado y funcionando
 - ✅ Playwright configurado
 - ✅ 14 tests unitarios pasando
-- ✅ 3 tests E2E básicos
+- ✅ 10 tests E2E (home + tokens)
 - ✅ Helpers y utilities para tests
 - ✅ Scripts NPM configurados
 
@@ -186,6 +205,26 @@ web/
 
 ---
 
-**Última actualización**: 21 Nov 2025  
+**Última actualización**: 26 de Noviembre, 2025  
 **Estado**: ✅ Implementado y funcionando
+
+---
+
+## 📚 Referencias Relacionadas
+
+**Documentación del Proyecto**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual del proyecto
+- [INDEX.md](../../INDEX.md) - Índice completo de documentación
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Estado y métricas del contrato inteligente
+
+**Documentación de Testing**:
+- [docs/sc/TESTING.md](../../docs/sc/TESTING.md) - Documentación completa de tests del smart contract (108 tests: 64 core + 44 edge cases)
+- [docs/sc/ARCHITECTURE.md](../../docs/sc/ARCHITECTURE.md) - Arquitectura del sistema
+
+**Recursos Externos**:
+- [Vitest Documentation](https://vitest.dev/) - Framework de testing unitario
+- [React Testing Library](https://testing-library.com/react) - Utilidades para testing de React
+- [Playwright Documentation](https://playwright.dev/) - Framework de testing E2E
+
+> **📚 Nota**: Este documento se enfoca en tests del frontend. Para tests del smart contract, consulta [docs/sc/TESTING.md](../../docs/sc/TESTING.md)
 

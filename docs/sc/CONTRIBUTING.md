@@ -1,6 +1,13 @@
 # 🤝 Contributing to SupplyChain
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **📚 Para guía rápida de inicio, consulta [QUICKSTART.md](../../QUICKSTART.md)**
+
 Thank you for your interest in contributing to the SupplyChain smart contract project!
+
+**Última actualización**: 26 de Noviembre, 2025
 
 ## 📋 Table of Contents
 
@@ -68,15 +75,23 @@ git checkout -b fix/your-bug-fix
 
 ### 3. Test Your Changes
 ```bash
-# Run all tests
+# Run all tests (should pass 108/108)
 forge test
+
+# Run with verbosity for debugging
+forge test -vvv
 
 # Check coverage
 forge coverage
 
-# Run validation
+# Run validation (26+ checks in 8 phases)
 bash validate-all.sh
+
+# Generate detailed coverage report
+bash coverage-reporter.sh --auto
 ```
+
+> **📚 Para detalles de validación, consulta [SCRIPTS.md](SCRIPTS.md) y [SCRIPTS_ARCHITECTURE.md](SCRIPTS_ARCHITECTURE.md)**
 
 ### 4. Commit
 ```bash
@@ -138,12 +153,16 @@ function createToken(
 
 ## 🧪 Testing Requirements
 
+> **📚 Para documentación completa de tests, consulta [TESTING.md](TESTING.md)**
+
 ### Test Coverage
 All contributions must maintain or improve test coverage:
-- Lines: >80%
-- Statements: >80%
-- Functions: >80%
-- Branches: >60%
+- Lines: >80% (Current: 85.60%)
+- Statements: >80% (Current: 82.67%)
+- Functions: >80% (Current: 80.95%)
+- Branches: >60% (Current: 72.15%)
+
+> **📚 Para detalles de coverage actual, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) y [TESTING.md](TESTING.md)**
 
 ### Writing Tests
 ```solidity
@@ -171,10 +190,14 @@ contract YourFeatureTest is Test {
 ### Test Checklist
 - [ ] Positive test cases
 - [ ] Negative test cases (reverts)
-- [ ] Edge cases
+- [ ] Edge cases (see [TESTING.md](TESTING.md) for methodology)
 - [ ] Event emissions
 - [ ] Gas optimization
 - [ ] Access control
+
+**Current Test Suite**: 108 tests (64 core + 44 edge cases) - 100% passing
+
+> **📚 Para metodología de testing y ejemplos, consulta [TESTING.md](TESTING.md)**
 
 ---
 
@@ -183,8 +206,13 @@ contract YourFeatureTest is Test {
 ### Documentation Requirements
 - Update README.md if adding new features
 - Add NatSpec comments to all public functions
-- Update ARCHITECTURE.md if changing design
+- Update [ARCHITECTURE.md](ARCHITECTURE.md) if changing design
+- Update [API_REFERENCE.md](API_REFERENCE.md) if adding/changing functions
+- Update [TESTING.md](TESTING.md) if adding new tests
+- Update [PROJECT_STATUS.md](../../PROJECT_STATUS.md) if changing project metrics
 - Add examples to relevant docs
+
+> **📚 Para estructura completa de documentación, consulta [INDEX.md](../../INDEX.md)**
 
 ### Documentation Style
 - Clear and concise
@@ -208,9 +236,11 @@ Brief description of changes
 - [ ] Documentation update
 
 ## Testing
-- [ ] All tests passing
-- [ ] New tests added
-- [ ] Coverage maintained/improved
+- [ ] All tests passing (108/108: 64 core + 44 edge cases)
+- [ ] New tests added for new functionality
+- [ ] Coverage maintained/improved (Lines: 85.60%, Statements: 82.67%, Branches: 72.15%, Functions: 80.95%)
+- [ ] Edge cases considered
+- [ ] Validation script (`validate-all.sh`) passes
 
 ## Checklist
 - [ ] Code follows style guidelines
@@ -255,6 +285,25 @@ Include:
 
 ---
 
+## 📚 Additional Resources
+
+**Smart Contract Documentation**:
+- [Getting Started Guide](GETTING_STARTED.md) - Setup and installation
+- [Architecture Documentation](ARCHITECTURE.md) - System design
+- [API Reference](API_REFERENCE.md) - Contract interface and functions
+- [Testing Guide](TESTING.md) - Test coverage and validation (108 tests)
+- [Security Guide](SECURITY.md) - Security features and best practices
+- [Deployment Guide](DEPLOYMENT.md) - Deployment procedures
+- [Scripts Documentation](SCRIPTS.md) - Automation scripts
+
+**Project Documentation**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Current project status
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Contract status and metrics
+- [INDEX.md](../../INDEX.md) - Complete documentation index
+- [QUICKSTART.md](../../QUICKSTART.md) - Quick start guide
+
+---
+
 ## 🎨 Visual Style Guide
 
 ### Documentation Badges
@@ -269,7 +318,7 @@ Use `for-the-badge` style for prominent, eye-catching badges:
 ```markdown
 ![Solidity](https://img.shields.io/badge/Solidity-v0.8.30-blue?style=for-the-badge&logo=solidity)
 ![Foundry](https://img.shields.io/badge/Foundry-Tested-green?style=for-the-badge&logo=ethereum)
-![Tests](https://img.shields.io/badge/Tests-73%20Passing-brightgreen?style=for-the-badge&logo=checkmarx)
+![Tests](https://img.shields.io/badge/Tests-108%20Passing-brightgreen?style=for-the-badge&logo=checkmarx)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)
 ```
 
@@ -309,8 +358,12 @@ Include scientific/academic badges:
 **Coverage Metrics:**
 ```markdown
 ![Lines](https://img.shields.io/badge/Coverage%20Lines-85.60%25-brightgreen?style=for-the-badge&logo=codecov)
-![Functions](https://img.shields.io/badge/Coverage%20Functions-77.14%25-orange?style=for-the-badge&logo=codecov)
+![Statements](https://img.shields.io/badge/Coverage%20Statements-82.67%25-brightgreen?style=for-the-badge&logo=codecov)
+![Branches](https://img.shields.io/badge/Coverage%20Branches-72.15%25-yellow?style=for-the-badge&logo=codecov)
+![Functions](https://img.shields.io/badge/Coverage%20Functions-80.95%25-brightgreen?style=for-the-badge&logo=codecov)
 ```
+
+> **📚 Para métricas actualizadas, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 **Project Status:**
 ```markdown
@@ -365,5 +418,9 @@ For documentation headers, use consistent banner style:
 - **Color Reference**: [Shields.io Color List](https://shields.io/#colors)
 
 ---
+
+**Última actualización**: 26 de Noviembre, 2025  
+**Test Suite**: 108 tests (64 core + 44 edge cases) - 100% passing  
+**Coverage**: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
 
 **Thank you for contributing!** 🎉

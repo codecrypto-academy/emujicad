@@ -160,13 +160,14 @@ Si es tu primera vez con el proyecto, sigue este orden:
 
 **Cuándo usarlo**: Evaluación completa del estado del proyecto y planificación
 
-### 9.1. [docs/reports/VALIDATION_SUMMARY.md](./docs/reports/VALIDATION_SUMMARY.md) ⭐ **NUEVO**
-**Propósito**: Resumen de todos los scripts de verificación automatizada  
+### 9.1. [docs/reports/FULL_VERIFICATION_REPORT.md](./docs/reports/FULL_VERIFICATION_REPORT.md) ⭐ **CONSOLIDADO**
+**Propósito**: Reporte completo consolidado de todas las verificaciones automatizadas  
 **Contenido**:
-- Descripción de 5 scripts de verificación
+- Resultados de 4 scripts de verificación
 - Estadísticas consolidadas (141/143 verificaciones - 98.6%)
-- Uso rápido de cada script
-- Referencias a reportes detallados
+- Detalles de animaciones, accesibilidad, tests, performance
+- Validaciones adicionales (integridad, hooks, rutas, etc.)
+- Uso de scripts y referencias relacionadas
 
 **Cuándo usarlo**: Entender qué scripts de verificación están disponibles y cómo usarlos
 
@@ -515,7 +516,7 @@ Por frecuencia de uso:
 4. **[docs/reports/FULL_VERIFICATION_REPORT.md](./docs/reports/FULL_VERIFICATION_REPORT.md)** ⭐ **NUEVO** - Estado completo de verificaciones
 5. **[docs/fe/SETUP.md](./docs/fe/SETUP.md)** - Frontend (desarrollo)
 6. **[docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)** - Referencia técnica
-7. **[docs/reports/VALIDATION_SUMMARY.md](./docs/reports/VALIDATION_SUMMARY.md)** ⭐ **NUEVO** - Resumen de scripts de verificación
+7. **[docs/reports/FULL_VERIFICATION_REPORT.md](./docs/reports/FULL_VERIFICATION_REPORT.md)** ⭐ **CONSOLIDADO** - Reporte completo de verificaciones
 8. **[docs/reports/TESTING_REPORT.md](./docs/reports/TESTING_REPORT.md)** ⭐ - Validación del script
 9. **[IA.md](./IA.md)** ⭐ - Retrospectiva del uso de IA en el proyecto
 
@@ -573,7 +574,7 @@ Por frecuencia de uso:
 → [docs/reports/TESTING_REPORT.md](./docs/reports/TESTING_REPORT.md)
 
 **¿Cómo se usó la IA?**
-→ [docs/reports/IA.md](./docs/reports/IA.md)
+→ [IA.md](./IA.md)
 
 ---
 

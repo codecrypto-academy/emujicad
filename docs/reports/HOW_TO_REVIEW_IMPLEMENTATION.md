@@ -1,12 +1,16 @@
 # 🔍 Guía para Revisar la Implementación
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**  
+> Esta guía refleja el estado histórico del 21 de Noviembre, 2025. Para el estado actual, ver PROJECT_STATUS.md.
+
 **Fecha**: 21 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
 **Objetivo**: Verificar que todas las mejoras implementadas funcionan correctamente  
 **Estado**: ✅ Todas las tareas completadas (ErrorBoundary, Validación, Performance, Tests, Accesibilidad, Animaciones)
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
-
-> **Nota**: Esta guía es específica para revisión manual. Para verificación automatizada, usar los scripts en `scripts/`. Ver [VALIDATION_SUMMARY.md](./VALIDATION_SUMMARY.md) para resumen completo.
+> **Nota**: Esta guía es específica para revisión manual. Para verificación automatizada, usar los scripts en `scripts/`. Ver [FULL_VERIFICATION_REPORT.md](./FULL_VERIFICATION_REPORT.md) para resumen completo de verificaciones.
 
 ---
 
@@ -466,6 +470,37 @@ Después de todas las verificaciones, deberías tener:
 
 ---
 
-**Última actualización**: 21 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
 **Versión**: 1.0.0
+
+---
+
+## 📚 Referencias Relacionadas
+
+**Documentación del Proyecto**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual del proyecto (single source of truth)
+- [INDEX.md](../../INDEX.md) - Índice completo de documentación
+- [QUICKSTART.md](../../QUICKSTART.md) - Guía rápida de inicio
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Estado y métricas del contrato inteligente
+
+**Documentación Técnica Frontend**:
+- [docs/fe/COMPONENTS.md](../fe/COMPONENTS.md) - Documentación completa de componentes (26 componentes)
+- [docs/fe/HOOKS.md](../fe/HOOKS.md) - Documentación completa de hooks (24 hooks)
+- [docs/fe/SETUP.md](../fe/SETUP.md) - Setup del frontend
+
+**Reportes Relacionados**:
+- [FULL_VERIFICATION_REPORT.md](./FULL_VERIFICATION_REPORT.md) - Reporte completo de verificación automatizada
+- [FULL_VERIFICATION_REPORT.md](./FULL_VERIFICATION_REPORT.md) - Reporte completo consolidado de verificaciones
+- [TASK_STATUS_REAL.md](./TASK_STATUS_REAL.md) - Estado real de tareas completadas
+- [TESTING_IMPLEMENTATION.md](./TESTING_IMPLEMENTATION.md) - Estado actual de tests frontend (24 tests: 14 unitarios + 10 E2E)
+- [RADIX_UI_DIALOG_WARNING.md](./RADIX_UI_DIALOG_WARNING.md) - Documentación de warning conocido de Radix UI
+
+**Scripts de Verificación**:
+- `scripts/verify-all-tasks.sh` - Verificación completa (recomendado)
+- `scripts/verify-implementation.sh` - Verificación de implementación
+- `scripts/verify-code-quality.sh` - Verificación de calidad de código
+- `scripts/verify-low-priority-tasks.sh` - Verificación de tareas de baja prioridad
+- `scripts/verify-additional-checks.sh` - Validaciones adicionales
+
+> **📚 Nota**: Esta guía refleja el estado histórico del 21 de Noviembre, 2025. Para el estado actual del proyecto y verificación actualizada, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md) y [FULL_VERIFICATION_REPORT.md](./FULL_VERIFICATION_REPORT.md)
 

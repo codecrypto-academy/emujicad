@@ -19,7 +19,7 @@
 - ✅ `docs/common/DOCUMENTATION.md` - Actualizado (90 → 108)
 - ✅ `docs/reports/PROXIMOS_PASOS.md` - Ya estaba actualizado
 - ✅ `docs/reports/RECOMENDACIONES_EXTRAS.md` - Actualizado (104 → 108)
-- ✅ `docs/reports/IA.md` - Actualizado (73/90 → 108)
+- ✅ `IA.md` (raíz) - Actualizado (73/90 → 108)
 - ✅ `ESTADO_CONTRATO_INTELIGENTE.md` - Actualizado (104 → 108)
 - ✅ `PROJECT_STATUS.md` - Actualizado (80 → 108)
 
@@ -34,7 +34,7 @@
 
 #### Componentes y Hooks: Actualizado
 - ✅ `docs/fe/HOOKS.md` - Actualizado (25 hooks → 22 hooks)
-- ✅ `docs/reports/IA.md` - Actualizado (18/21 → 22/26)
+- ✅ `IA.md` (raíz) - Actualizado (18/21 → 22/26)
 
 ---
 
@@ -83,7 +83,7 @@ Los siguientes archivos son reportes históricos y se mantienen como están (sna
 **Reportes:**
 - ✅ `docs/reports/PROXIMOS_PASOS.md` - Ya estaba actualizado
 - ✅ `docs/reports/RECOMENDACIONES_EXTRAS.md` - Actualizado
-- ✅ `docs/reports/IA.md` - Actualizado
+- ✅ `IA.md` (raíz) - Actualizado
 
 **Validaciones:**
 - ✅ `ESTADO_CONTRATO_INTELIGENTE.md` - Actualizado

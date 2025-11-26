@@ -179,7 +179,7 @@ El componente `Web3Provider` implementa 5 efectos principales:
 - ⏸️ Caché de datos del usuario entre pestañas
 - ⏸️ Notificaciones visuales de cambios en otras pestañas
 
-**Razón del POSTPONED**: La implementación completa causó múltiples bugs y estados inconsistentes. Se decidió priorizar estabilidad sobre features avanzadas. Ver `docs/reports/IA.md` - Error 12 para más detalles.
+**Razón del POSTPONED**: La implementación completa causó múltiples bugs y estados inconsistentes. Se decidió priorizar estabilidad sobre features avanzadas. Ver `IA.md` - Error 12 para más detalles.
 
 ## 📚 Referencias
 

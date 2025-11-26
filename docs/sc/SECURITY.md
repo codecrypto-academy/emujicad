@@ -1,6 +1,8 @@
 # 🔒 Security Policy
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**
 
 ## 🛡️ Security Overview
 
@@ -15,6 +17,9 @@ This document outlines the security considerations, audit status, and vulnerabil
 - ✅ **Admin Approval Required** - User registration requires owner approval
 - ✅ **Function-Level Permissions** - `onlyOwner`, `onlyApprovedUser` modifiers
 - ✅ **Ownable Pattern** - Secure ownership management with two-step transfer
+- ✅ **Ownership Transfer** - Two-step ownership transfer (initiate, accept/reject) implemented
+
+> **📚 Para detalles de ownership transfer, consulta [API_REFERENCE.md](API_REFERENCE.md#ownership-transfer-functions)**
 
 ### Attack Prevention
 - ✅ **ReentrancyGuard** - Protection against reentrancy attacks on all state-changing functions
@@ -44,9 +49,12 @@ For production deployment, we recommend audits from:
 
 ### Self-Assessment Results
 - ✅ **Static Analysis**: No critical issues (Slither, Mythril)
-- ✅ **Test Coverage**: 80%+ on critical metrics
+- ✅ **Test Coverage**: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
+- ✅ **Test Suite**: 108 tests (64 core + 44 edge cases) - 100% passing
 - ✅ **Best Practices**: Follows OpenZeppelin patterns
 - ✅ **Gas Optimization**: Optimized for cost efficiency
+
+> **📚 Para métricas detalladas de cobertura, consulta [TESTING.md](TESTING.md) y [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 ---
 
@@ -57,7 +65,10 @@ For production deployment, we recommend audits from:
    - `getUserTokens()` and `getUserTransfers()` iterate over arrays
    - **Risk**: High gas cost for users with many tokens/transfers
    - **Mitigation**: Functions marked as `view`, recommend off-chain indexing
-   - **Status**: Documented in NatSpec
+   - **Status**: Documented in NatSpec and API Reference
+   - **Note**: Consider using pagination or off-chain indexing for production use
+
+> **📚 Para detalles de estas funciones y advertencias de gas, consulta [API_REFERENCE.md](API_REFERENCE.md#gas-limitations)**
 
 2. **Centralization Risk**
    - Owner has significant control (approve users, pause contract)
@@ -75,13 +86,15 @@ For production deployment, we recommend audits from:
 
 ### Pre-Deployment
 - [ ] Complete professional security audit
-- [ ] Review all access control patterns
-- [ ] Verify ReentrancyGuard on all external functions
-- [ ] Test pause/unpause functionality
-- [ ] Test ownership transfer
-- [ ] Review and test all error conditions
-- [ ] Gas optimization review
-- [ ] Event emission verification
+- [x] Review all access control patterns ✅
+- [x] Verify ReentrancyGuard on all external functions ✅
+- [x] Test pause/unpause functionality ✅
+- [x] Test ownership transfer ✅ (implemented and tested)
+- [x] Review and test all error conditions ✅
+- [x] Gas optimization review ✅
+- [x] Event emission verification ✅
+
+> **📚 Para detalles de implementación, consulta [TESTING.md](TESTING.md) y [ARCHITECTURE.md](ARCHITECTURE.md)**
 
 ### Deployment
 - [ ] Use multi-sig wallet for owner
@@ -198,7 +211,13 @@ bash validate-all.sh
 
 ## 📝 Security Updates
 
-### Version 1.1.0 (Current)
+### Version 1.2.0 (Current - 26 Nov 2025)
+- ✅ Ownership transfer implemented (initiate, accept, reject)
+- ✅ Enhanced access control with pending owner pattern
+- ✅ Comprehensive test coverage (108 tests, 85.60% lines)
+- ✅ All security features tested and validated
+
+### Version 1.1.0
 - ✅ ReentrancyGuard on all external functions
 - ✅ Custom errors for gas efficiency
 - ✅ Comprehensive input validation
@@ -211,12 +230,22 @@ bash validate-all.sh
 
 ## 🔗 Related Documentation
 
+**Smart Contract Documentation**:
 - [Architecture](ARCHITECTURE.md) - System design and security architecture
-- [Testing](TESTING.md) - Test coverage and validation
+- [Testing](TESTING.md) - Test coverage and validation (108 tests, 85.60% coverage)
+- [API Reference](API_REFERENCE.md) - Contract interface and security considerations
 - [Contributing](CONTRIBUTING.md) - Security in development process
+- [Deployment](DEPLOYMENT.md) - Secure deployment practices
+
+**Project Documentation**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Current project status and security features
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Contract status and validation results
+- [INDEX.md](../../INDEX.md) - Complete documentation index
+- [QUICKSTART.md](../../QUICKSTART.md) - Quick start guide
 
 ---
 
-**Last Security Review**: November 18, 2025  
-**Next Planned Review**: Before Production Deployment  
-**Status**: ✅ Development Complete - Awaiting Professional Audit
+**Última revisión de seguridad**: 26 de Noviembre, 2025  
+**Próxima revisión planificada**: Antes del deployment a producción  
+**Estado**: ✅ Desarrollo Completo - Esperando Auditoría Profesional  
+**Test Coverage**: ✅ 108/108 tests pasando (85.60% lines, 72.15% branches)

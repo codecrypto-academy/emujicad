@@ -1,8 +1,14 @@
 # 📖 API Reference - SupplyChain Contract
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **📚 Para documentación completa de tests, consulta [TESTING.md](TESTING.md)**  
+> **📚 Para documentación de arquitectura, consulta [ARCHITECTURE.md](ARCHITECTURE.md)**
 
 Complete API documentation for all functions, events, modifiers, and data structures.
+
+**Última actualización**: 26 de Noviembre, 2025
 
 ---
 
@@ -180,21 +186,68 @@ function initiateOwnershipTransfer(address newOwner) external onlyOwner
 
 ---
 
-### **`acceptOwnership()`**
+### **`acceptOwnershipTransfer()`**
 Completes ownership transfer by allowing pending owner to accept.
 
 **Requirements:**
 - Caller must be the `pendingOwner`
+- Caller must never have requested a user role (owner cannot be part of supply chain)
+- Contract must not be paused
+
+**Behavior:**
+- Transfers ownership from current owner to pending owner
+- Clears `pendingOwner` to `address(0)`
+- Validates that new owner has never been a registered user
 
 **Events Emitted:**
 - `OwnershipTransferred(address indexed previousOwner, address indexed newOwner)`
 
 **Errors:**
 - `Unauthorized()`: Caller is not the pending owner
+- `UserExists()`: New owner has previously requested a user role
 
 ```solidity
-function acceptOwnership() external
+function acceptOwnershipTransfer() external whenNotPaused
 ```
+
+---
+
+### **`rejectOwnershipTransfer()`**
+Allows owner or pending owner to reject/cancel the ownership transfer.
+
+**Requirements:**
+- Caller must be the current `owner` OR the `pendingOwner`
+- Contract must not be paused
+
+**Behavior:**
+- If called by owner: Cancels the transfer (owner changed mind)
+- If called by pending owner: Rejects the transfer (pending owner doesn't want it)
+- Clears `pendingOwner` to `address(0)`
+
+**Events Emitted:**
+- `OwnershipTransferCancelledByOwner(...)`: If called by owner
+- `OwnershipTransferRejectedByPendingOwner(...)`: If called by pending owner
+
+**Errors:**
+- `Unauthorized()`: Caller is neither owner nor pending owner
+
+```solidity
+function rejectOwnershipTransfer() external whenNotPaused
+```
+
+---
+
+### **`getPendingOwner()`**
+Returns the address of the pending owner (if any ownership transfer is in progress).
+
+**Returns:**
+- `address`: Address of pending owner, or `address(0)` if no transfer pending
+
+```solidity
+function getPendingOwner() public view returns (address)
+```
+
+> **📚 Para más detalles sobre el flujo completo de ownership transfer, consulta [ARCHITECTURE.md](ARCHITECTURE.md)**
 
 ---
 
@@ -295,7 +348,7 @@ Approves, rejects, or cancels user requests.
 - User must exist
 
 **Events Emitted:**
-- `UserStatusChanged(address indexed user, UserStatus newStatus)`
+- `UserStatusChanged(address indexed user, UserStatus oldStatus, UserStatus newStatus)`
 
 **Errors:**
 - `NoOwner()`: Caller is not owner
@@ -369,10 +422,40 @@ Returns all transfers involving the user (as sender or receiver).
 - `userAddress`: Address to query
 
 **Returns:**
-- `Transfer[] memory`: Array of all related transfers
+- `uint[] memory`: Array of transfer IDs related to the user
 
 ```solidity
-function getUserTransfers(address userAddress) external view returns (Transfer[] memory)
+function getUserTransfers(address userAddress) external view returns (uint[] memory)
+```
+
+---
+
+### **`getTotalUsers()`**
+Returns the total number of registered users in the system.
+
+**Returns:**
+- `uint`: Total count of registered users
+
+```solidity
+function getTotalUsers() public view returns (uint)
+```
+
+---
+
+### **`isAdmin(address userAddress)`**
+Checks if an address is the contract owner (admin).
+
+**Parameters:**
+- `userAddress`: Address to check
+
+**Returns:**
+- `bool`: `true` if address is owner, `false` otherwise
+
+**Errors:**
+- `InvalidAddress()`: Address is zero address
+
+```solidity
+function isAdmin(address userAddress) public view returns (bool)
 ```
 
 ---
@@ -400,7 +483,7 @@ Creates a new token (raw material or finished product).
 - Creator receives full `totalSupply` in their balance
 
 **Events Emitted:**
-- `TokenCreated(uint256 indexed tokenId, address indexed creator, TokenType tokenType, uint256 totalSupply)`
+- `TokenCreated(uint256 indexed tokenId, address indexed creator, string name, TokenType tokenType, uint256 totalSupply, uint256 parentId)`
 
 **Errors:**
 - `Unauthorized()`: Caller not authorized to create tokens
@@ -448,10 +531,23 @@ Queries a user's balance for a specific token.
 - `uint256`: Token balance for that user
 
 **Errors:**
+- `InvalidAddress()`: userAddress is zero address
 - `TokenDoesNotExist()`: Invalid token ID
 
 ```solidity
-function getTokenBalance(uint tokenId, address userAddress) external view returns (uint256)
+function getTokenBalance(uint tokenId, address userAddress) public view returns (uint)
+```
+
+---
+
+### **`getTotalTokens()`**
+Returns the total number of tokens created in the system.
+
+**Returns:**
+- `uint`: Total count of tokens
+
+```solidity
+function getTotalTokens() public view returns (uint)
 ```
 
 ---
@@ -609,6 +705,30 @@ function getTransfer(uint transferId) external view returns (Transfer memory)
 
 ---
 
+### **`getTotalTransfers()`**
+Returns the total number of transfers created in the system.
+
+**Returns:**
+- `uint`: Total count of transfers
+
+```solidity
+function getTotalTransfers() public view returns (uint)
+```
+
+---
+
+### **`isPaused()`**
+Checks if the contract is currently paused.
+
+**Returns:**
+- `bool`: `true` if contract is paused, `false` otherwise
+
+```solidity
+function isPaused() public view returns (bool)
+```
+
+---
+
 ## 📡 Events
 
 ### Ownership Events
@@ -624,12 +744,13 @@ event AssignInitialContractOwner(address indexed initialOwner);
 ```solidity
 event Paused(address account);
 event Unpaused(address account);
+event PauseRoleChanged(address indexed account, PauseRole role);
 ```
 
 ### User Management Events
 ```solidity
 event UserRoleRequested(address indexed user, UserRole role, uint256 userId);
-event UserStatusChanged(address indexed user, UserStatus newStatus);
+event UserStatusChanged(address indexed user, UserStatus oldStatus, UserStatus newStatus);
 ```
 
 ### Token Events
@@ -637,8 +758,10 @@ event UserStatusChanged(address indexed user, UserStatus newStatus);
 event TokenCreated(
     uint256 indexed tokenId, 
     address indexed creator, 
+    string name,
     TokenType tokenType, 
-    uint256 totalSupply
+    uint256 totalSupply,
+    uint256 parentId
 );
 ```
 
@@ -665,16 +788,20 @@ error NoOwner();
 error NoPauser();
 error Unauthorized();
 error InvalidAddress();
+error InvalidUserId();
 error UserDoesNotExist();
+error UserExists();
 error UserStatusNotAllowedToRequestRole();
 error UserStatusNotAllowedToReceiveTransfers();
 error TokenDoesNotExist();
 error ParentTokenDoesNotExist();
 error NoTransfersAllowed();
-error InsufficientBalance();
+error InsufficientBalance(uint256 available, uint256 required);
 error InvalidAmount();
 error InvalidTransferStatus();
 error TransferDoesNotExist();
+error EnforcedPause();
+error ExpectedPause();
 ```
 
 **Benefits:**
@@ -712,13 +839,25 @@ For production deployments, implement:
 
 ## 📚 Additional Resources
 
-- [Getting Started Guide](GETTING_STARTED.md)
-- [Architecture Documentation](ARCHITECTURE.md)
-- [Testing Guide](TESTING.md)
-- [Deployment Guide](DEPLOYMENT.md)
+**Smart Contract Documentation**:
+- [Getting Started Guide](GETTING_STARTED.md) - Setup and installation
+- [Architecture Documentation](ARCHITECTURE.md) - System architecture and design
+- [Testing Guide](TESTING.md) - Test coverage and validation (108 tests)
+- [Security Guide](SECURITY.md) - Security features and best practices
+- [Deployment Guide](DEPLOYMENT.md) - Deployment procedures
+- [Scripts Documentation](SCRIPTS.md) - Automation scripts
+- [Changelog](CHANGELOG.md) - Project evolution and improvements
+
+**Project Documentation**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Current project status
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Contract status and metrics
+- [INDEX.md](../../INDEX.md) - Complete documentation index
+- [QUICKSTART.md](../../QUICKSTART.md) - Quick start guide
 
 ---
 
-**Last Updated:** November 18, 2025  
-**Contract Version:** 1.1.0  
-**Solidity Version:** 0.8.30
+**Última actualización**: 26 de Noviembre, 2025  
+**Contract Version**: 1.2.0  
+**Solidity Version**: 0.8.30  
+**Test Suite**: 108 tests (64 core + 44 edge cases) - 100% passing  
+**Coverage**: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions

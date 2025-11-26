@@ -1,8 +1,13 @@
 # 🤖 Retrospectiva del Uso de IA - Supply Chain Tracker
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](./INDEX.md)**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**  
+> Este documento refleja la retrospectiva histórica del uso de IA durante el desarrollo del proyecto (Días 1-7). Para el estado actual del proyecto, ver PROJECT_STATUS.md.
+
 **Proyecto**: Supply Chain Tracker DApp  
 **Fecha de inicio**: 18 de Noviembre, 2025  
-**Fecha de última actualización**: 24 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
 **Duración total**: 7 días (Días 1-4 completados + Validaciones críticas Día 7)
 
 ---
@@ -429,6 +434,23 @@ const availableConnectors = connectors.some(c => c.id === 'injected') &&
 **Frecuencia**: 1 ocurrencia (Día 2)  
 **Contexto**: MetaMask aparecía en "Top 5" aunque estuviera instalada
 
+```typescript
+// ❌ Problema: No filtraba MetaMask instalada
+const recommendedWallets = allWallets // Mostraba todo
+
+// ✅ Solución: Filtrado específico
+const recommendedWallets = allRecommendedWallets.filter(wallet => {
+  if (wallet.name === 'MetaMask' && isMetaMaskInstalled) {
+    return false // No mostrar si está instalada
+  }
+  return true
+})
+```
+
+**Impacto**: UX confusa, MetaMask duplicada visualmente  
+**Tiempo de resolución**: ~20 minutos  
+**Lección aprendida**: Filtrar explícitamente wallets instaladas de recomendados
+
 ---
 
 ### **🔵 Errores y Desafíos del Día 3 (Admin Panel)**
@@ -688,28 +710,11 @@ const [theme, setTheme] = useState(() => {
 4. docs/fe/COMPONENTS.md - Faltaban 6 componentes
 5. docs/fe/HOOKS.md - Faltaban 3 hooks
 6. docs/reports/ACADEMIC_ASSESSMENT.md - Score desactualizado
-7. docs/reports/IA.md - Sin info Día 3
+7. IA.md - Sin info Día 3
 
 **Impacto**: Documentación inconsistente con código  
 **Tiempo de resolución**: ~2 horas (actualización sistemática)  
 **Lección aprendida**: Documentar mientras desarrollas, no después
-
-```typescript
-// ❌ Problema: No filtraba MetaMask instalada
-const recommendedWallets = allWallets // Mostraba todo
-
-// ✅ Solución: Filtrado específico
-const recommendedWallets = allRecommendedWallets.filter(wallet => {
-  if (wallet.name === 'MetaMask' && isMetaMaskInstalled) {
-    return false // No mostrar si está instalada
-  }
-  return true
-})
-```
-
-**Impacto**: UX confusa, MetaMask duplicada visualmente  
-**Tiempo de resolución**: ~20 minutos  
-**Lección aprendida**: Filtrar explícitamente wallets instaladas de recomendados
 
 ---
 
@@ -972,7 +977,7 @@ Debido a las limitaciones de almacenamiento de GitHub Copilot, **no se generan a
 - `docs/fe/COMPONENTS.md`
 - `docs/fe/HOOKS.md`
 - `docs/reports/ACADEMIC_ASSESSMENT.md`
-- `docs/reports/IA.md`
+- `IA.md`
 - Single source of truth
 - Actualización de todos los enlaces
 
@@ -1418,10 +1423,10 @@ const recommendedWallets = allRecommendedWallets.filter(wallet => {
 ---
 
 **Documento generado**: 19 de Noviembre, 2025  
-**Última actualización**: 21 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
 **Autor**: GitHub Copilot (Claude Sonnet 4.5)  
-**Proyecto**: Supply Chain Tracker - Días 1-4 Completados  
-**Estado**: ✅ Documentación completamente actualizada con Día 4
+**Proyecto**: Supply Chain Tracker - Días 1-7 Completados  
+**Estado**: ✅ Documentación completamente actualizada con Día 7
 
 ---
 
@@ -1628,7 +1633,7 @@ Durante las 5 sesiones de desarrollo, se gestionó eficientemente el contexto:
 - `QUICKSTART.md`
 - `docs/reports/ACADEMIC_ASSESSMENT.md`
 - `docs/reports/PROYECTO_EVALUACION_COMPLETA.md`
-- `docs/reports/IA.md` (este archivo)
+- `IA.md` (este archivo)
 
 ---
 
@@ -1797,3 +1802,32 @@ Durante las 5 sesiones de desarrollo, se gestionó eficientemente el contexto:
 ---
 
 *Fin del documento IA.md - Actualizado Día 7 (24 Nov 2025)*
+
+---
+
+## 📚 Referencias Relacionadas
+
+**Documentación del Proyecto**:
+- [PROJECT_STATUS.md](./PROJECT_STATUS.md) - Estado actual del proyecto (single source of truth)
+- [INDEX.md](./INDEX.md) - Índice completo de documentación
+- [QUICKSTART.md](./QUICKSTART.md) - Guía rápida de inicio
+- [ESTADO_CONTRATO_INTELIGENTE.md](./ESTADO_CONTRATO_INTELIGENTE.md) - Estado y métricas del contrato inteligente
+
+**Reportes Históricos Relacionados**:
+- [docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md) - Resumen ejecutivo Día 1
+- [docs/reports/SUMMARY_DAY4.md](./docs/reports/SUMMARY_DAY4.md) - Resumen ejecutivo Día 4
+- [docs/reports/ACADEMIC_ASSESSMENT.md](./docs/reports/ACADEMIC_ASSESSMENT.md) - Evaluación académica completa
+- [docs/reports/PROYECTO_EVALUACION_COMPLETA.md](./docs/reports/PROYECTO_EVALUACION_COMPLETA.md) - Evaluación completa del proyecto
+
+**Documentación Técnica**:
+- [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md) - Documentación técnica completa
+- [docs/sc/TESTING.md](./docs/sc/TESTING.md) - Documentación completa de tests (108 tests)
+- [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md) - Referencia completa de API
+- [docs/fe/HOOKS.md](./docs/fe/HOOKS.md) - Documentación completa de hooks (24 hooks)
+- [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) - Documentación completa de componentes (26 componentes)
+
+**Scripts y Deployment**:
+- [deploy.sh](./deploy.sh) - Script de deployment automatizado (v2.0.0)
+- [docs/reports/TESTING_REPORT.md](./docs/reports/TESTING_REPORT.md) - Reporte de pruebas del script deploy.sh
+
+> **📚 Nota**: Este documento refleja la retrospectiva histórica del uso de IA durante el desarrollo. Para el estado actual del proyecto, métricas actualizadas y próximos pasos, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)

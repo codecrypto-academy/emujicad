@@ -1,8 +1,14 @@
 # 🚀 Deployment Guide
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **📚 Para guía rápida de inicio, consulta [QUICKSTART.md](../../QUICKSTART.md)**  
+> **📚 Para deployment automatizado completo, consulta [deploy.sh](../../deploy.sh)**
 
 Complete deployment guide for the SupplyChain smart contract.
+
+**Última actualización**: 26 de Noviembre, 2025
 
 ---
 
@@ -56,7 +62,30 @@ export ETHERSCAN_API_KEY=<your_etherscan_api_key>
 
 ## 🚀 Quick Deployment
 
-### Local Development (Anvil)
+### Option 0: Full Stack Automated Deployment (Recommended)
+
+**Use `deploy.sh` for complete automation:**
+
+```bash
+# Start everything (Anvil + Contract + Frontend)
+./deploy.sh start
+
+# Check status
+./deploy.sh status
+
+# Stop everything
+./deploy.sh stop
+
+# For more details, see:
+# - [QUICKSTART.md](../../QUICKSTART.md)
+# - [deploy.sh](../../deploy.sh)
+```
+
+> **📚 Para deployment automatizado completo, consulta [QUICKSTART.md](../../QUICKSTART.md) o ejecuta `./deploy.sh help`**
+
+---
+
+### Option 1: Local Development (Anvil - Manual)
 
 **Step 1: Start Local Blockchain**
 ```bash
@@ -110,7 +139,7 @@ forge script script/SupplyChainInteractions.s.sol \
 
 ---
 
-### Testnet Deployment (Sepolia)
+### Option 2: Testnet Deployment (Sepolia)
 
 **Step 1: Configure Environment**
 ```bash
@@ -152,18 +181,20 @@ cast call <deployed_contract_address> \
 
 ---
 
-### Mainnet Deployment (Production)
+### Option 3: Mainnet Deployment (Production)
 
 ⚠️ **CRITICAL**: Review all code thoroughly before mainnet deployment!
 
 **Pre-Deployment Checklist:**
-- [ ] All tests passing (108/108)
-- [ ] Security audit completed
+- [ ] All tests passing (108/108: 64 core + 44 edge cases)
+- [ ] Security audit completed (see [SECURITY.md](SECURITY.md))
 - [ ] Gas optimization reviewed
 - [ ] Emergency procedures documented
 - [ ] Backup deployer key secured
 - [ ] Sufficient ETH for deployment (~0.5 ETH recommended)
 - [ ] Post-deployment monitoring ready
+
+> **📚 Para detalles de tests, consulta [TESTING.md](TESTING.md)**
 
 **Deployment Steps:**
 ```bash
@@ -196,9 +227,40 @@ echo "Contract deployed at: <address>" > deployment.txt
 
 ## 📜 Deployment Scripts
 
+### deploy.sh - Full Stack Automation (Recommended)
+
+**Location**: `deploy.sh` (root directory)
+
+**Purpose**: Complete automation for Anvil + Smart Contract + Frontend.
+
+> **📚 Para documentación completa de `deploy.sh`, consulta [QUICKSTART.md](../../QUICKSTART.md) o ejecuta `./deploy.sh help`**
+
+**Comandos disponibles:**
+- `./deploy.sh start` - Inicia todo el stack (Anvil + Contrato + Frontend)
+- `./deploy.sh stop` - Detiene todos los servicios
+- `./deploy.sh restart` - Reinicia todo el stack
+- `./deploy.sh status` - Muestra estado de servicios
+- `./deploy.sh frontend start/stop/restart` - Gestión independiente del frontend
+- `./deploy.sh clean` - Limpia estado persistente de Anvil
+- `./deploy.sh metamask` - Instrucciones para configurar MetaMask
+- `./deploy.sh help` - Ayuda completa
+
+**Características:**
+- ✅ Persistencia de estado de Anvil (`logs/anvil_state.json`)
+- ✅ Detección inteligente de procesos en ejecución
+- ✅ Logs organizados en directorio `logs/`
+- ✅ Actualización automática de configuración del frontend
+- ✅ Gestión independiente del frontend sin afectar Anvil/Contrato
+
+---
+
 ### SupplyChainDeploy.s.sol - Main Deployment Script
 
+**Location**: `script/SupplyChainDeploy.s.sol`
+
 **Purpose**: Automated, reproducible contract deployment for any network.
+
+> **📚 Nota**: Para desarrollo local, se recomienda usar `deploy.sh`. Este script es útil para deployment manual o en testnets/mainnet.
 
 **What it does:**
 1. ✅ Reads private key from environment
@@ -259,13 +321,17 @@ Contract owner: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 - 👥 4 users: Producer, Factory, Retailer, Consumer
 - 🪙 2 tokens: Raw Cotton, Cotton Fabric
 - 🔄 5 transfers: 3 accepted, 1 rejected, 1 canceled
+- 👑 Ownership transfer: Initiate, accept, reject scenarios
 
 **Full workflow phases:**
 1. **User Registration**: All 4 users request roles and get approved
 2. **Token Creation**: Producer and Factory create their products
 3. **Supply Chain**: Transfers flow through the chain
 4. **Edge Cases**: Rejection and cancellation scenarios
-5. **Final Verification**: All balances validated
+5. **Ownership Transfer** ✅ (Implementado): Initiate, accept, reject ownership transfer
+6. **Final Verification**: All balances validated, ownership verified
+
+> **📚 Para detalles de ownership transfer, consulta [API_REFERENCE.md](API_REFERENCE.md#ownership-transfer-functions)**
 
 **Usage:**
 ```bash
@@ -382,7 +448,7 @@ cast code <address> --rpc-url <network_url>
 cast call <address> "owner()(address)" --rpc-url <network_url>
 
 # Check if paused
-cast call <address> "paused()(bool)" --rpc-url <network_url>
+cast call <address> "isPaused()(bool)" --rpc-url <network_url>
 ```
 
 ---
@@ -400,15 +466,25 @@ cast code $CONTRACT_ADDRESS --rpc-url $RPC_URL
 cast call $CONTRACT_ADDRESS "owner()(address)" --rpc-url $RPC_URL
 ```
 
-**2. Optional: Assign Pauser Role:**
+**2. Optional: Pause/Unpause Contract:**
 ```bash
+# Pause contract (only owner)
 cast send $CONTRACT_ADDRESS \
-    "setPauseRole(address,uint8)" \
-    <pauser_address> \
-    1 \
+    "pause()" \
     --rpc-url $RPC_URL \
     --private-key $PRIVATE_KEY
+
+# Unpause contract (only owner)
+cast send $CONTRACT_ADDRESS \
+    "unpause()" \
+    --rpc-url $RPC_URL \
+    --private-key $PRIVATE_KEY
+
+# Check if paused
+cast call $CONTRACT_ADDRESS "isPaused()(bool)" --rpc-url $RPC_URL
 ```
+
+> **📚 Nota**: Las funciones `pause()` y `unpause()` solo pueden ser llamadas por el owner del contrato. Para más detalles, consulta [API_REFERENCE.md](API_REFERENCE.md).
 
 **3. Monitor Contract:**
 - Set up event monitoring for critical operations
@@ -490,14 +566,24 @@ cast run <tx_hash> --rpc-url $RPC_URL
 
 ## 📚 Additional Resources
 
-- [Getting Started Guide](GETTING_STARTED.md)
-- [Architecture Documentation](ARCHITECTURE.md)
-- [API Reference](API_REFERENCE.md)
-- [Testing Guide](TESTING.md)
-- [Scripts Documentation](SCRIPTS.md)
+**Smart Contract Documentation**:
+- [Getting Started Guide](GETTING_STARTED.md) - Setup and installation
+- [Architecture Documentation](ARCHITECTURE.md) - System design
+- [API Reference](API_REFERENCE.md) - Contract interface and functions
+- [Testing Guide](TESTING.md) - Test coverage and validation (108 tests)
+- [Security Guide](SECURITY.md) - Security features and best practices
+- [Scripts Documentation](SCRIPTS.md) - Automation scripts
+
+**Project Documentation**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Current project status
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Contract status and metrics
+- [INDEX.md](../../INDEX.md) - Complete documentation index
+- [QUICKSTART.md](../../QUICKSTART.md) - Quick start guide
+- [deploy.sh](../../deploy.sh) - Full stack deployment automation
 
 ---
 
-**Last Updated:** November 18, 2025  
-**Contract Version:** 1.1.0  
-**Network Support:** Anvil, Sepolia, Ethereum Mainnet
+**Última actualización**: 26 de Noviembre, 2025  
+**Contract Version**: 1.2.0  
+**Network Support**: Anvil (Local), Sepolia (Testnet), Ethereum Mainnet  
+**Test Suite**: 108 tests (64 core + 44 edge cases) - 100% passing

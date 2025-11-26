@@ -1,10 +1,14 @@
 # 💡 Recomendaciones para Extras Adicionales
 
-**Fecha**: 24 de Noviembre, 2025  
-**Estado del Proyecto**: 7.4/9.5 ✅ APROBATORIO  
-**Objetivo**: Llegar a 9.5/9.5 (+2.1 puntos)
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**  
+> Este documento refleja recomendaciones históricas del 24 de Noviembre, 2025. Para el estado actual, ver PROJECT_STATUS.md.
 
-> **📋 Análisis basado en el estado actual del proyecto**
+**Fecha**: 24 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
+**Estado del Proyecto**: 7.4/9.5 ✅ APROBATORIO (histórico)  
+**Objetivo**: Llegar a 9.5/9.5 (+2.1 puntos)
 
 ---
 
@@ -17,9 +21,12 @@
 #### 1. **Infraestructura ya configurada** ✅
 - ✅ Playwright ya instalado y configurado (`playwright.config.ts`)
 - ✅ Vitest ya instalado y configurado (`vitest.config.ts`)
-- ✅ Tests básicos ya existen (20 tests: 10 unitarios + 10 E2E)
+- ✅ Tests básicos ya existen (20 tests históricos: 10 unitarios + 10 E2E)
+- ✅ **Tests actuales: 24 tests (14 unitarios + 10 E2E)** ✅
 - ✅ Scripts NPM listos (`test`, `test:e2e`, `test:coverage`)
 - **Ahorro de tiempo**: No necesitas configurar nada, solo escribir tests
+
+> **📚 Para estado actual de tests frontend, consulta [docs/reports/TESTING_IMPLEMENTATION.md](./TESTING_IMPLEMENTATION.md)**
 
 #### 2. **Alto valor académico** 🎓
 - Demuestra conocimiento de testing profesional
@@ -217,5 +224,21 @@ test('Pausabilidad: Pausar contrato y verificar deshabilitación', async ({ page
 
 ---
 
-**Última actualización**: 24 de Noviembre, 2025
+**Última actualización**: 26 de Noviembre, 2025
+
+---
+
+## 📚 Referencias Relacionadas
+
+**Documentación del Proyecto**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual del proyecto (single source of truth)
+- [INDEX.md](../../INDEX.md) - Índice completo de documentación
+- [QUICKSTART.md](../../QUICKSTART.md) - Guía rápida de inicio
+
+**Reportes Relacionados**:
+- [PROXIMOS_PASOS.md](./PROXIMOS_PASOS.md) - Plan de acción y próximos pasos
+- [TESTING_IMPLEMENTATION.md](./TESTING_IMPLEMENTATION.md) - Estado actual de tests frontend (24 tests)
+- [TASK_STATUS_REAL.md](./TASK_STATUS_REAL.md) - Estado real de tareas completadas
+
+> **📚 Nota**: Este documento refleja recomendaciones históricas. Para el estado actual del proyecto y recomendaciones actualizadas, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)
 

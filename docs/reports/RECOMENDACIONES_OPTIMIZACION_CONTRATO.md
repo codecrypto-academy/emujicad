@@ -1,11 +1,16 @@
 # 🔍 Recomendaciones de Optimización - Contrato SupplyChain
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**  
+> Este documento contiene recomendaciones históricas de optimización. Para el estado actual del contrato, ver ESTADO_CONTRATO_INTELIGENTE.md.
+
 **Fecha de análisis**: 24 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
 **Contrato analizado**: `sc/src/SupplyChain.sol`  
 **Versión Solidity**: 0.8.30  
 **Estado**: ✅ Fase 3 completada (25 Nov 2025)
-
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ---
 
@@ -619,8 +624,12 @@ function transfer(...) external ... {
 - ✅ Considerar agregar `@param` y `@return` en todas las funciones públicas
 
 ### 6.2. **Testing** 🧪
-- ✅ El contrato tiene buena cobertura de tests (108 tests, 85.60% lines, 72.15% branches)
+- ✅ El contrato tiene excelente cobertura de tests (108 tests, 85.60% lines, 72.15% branches)
+- ✅ **Tests actuales**: 108 tests (64 core + 44 edge cases) - 100% passing
+- ✅ **Coverage actual**: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
 - ✅ Considerar agregar tests de gas para validar optimizaciones
+
+> **📚 Para detalles completos de tests, consulta [docs/sc/TESTING.md](../sc/TESTING.md) y [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 ### 6.3. **Eventos** 📢
 - ✅ Los eventos están bien definidos
@@ -661,4 +670,24 @@ El contrato `SupplyChain.sol` está **bien estructurado** y sigue **buenas prác
 ---
 
 **Nota**: Todas las recomendaciones deben ser **probadas exhaustivamente** antes de implementarse en producción. Considerar usar herramientas como `forge snapshot` para comparar el gas antes y después de las optimizaciones.
+
+---
+
+## 📚 Referencias Relacionadas
+
+**Documentación del Proyecto**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual del proyecto (single source of truth)
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Estado y métricas del contrato inteligente
+- [INDEX.md](../../INDEX.md) - Índice completo de documentación
+
+**Documentación Técnica del Contrato**:
+- [docs/sc/API_REFERENCE.md](../sc/API_REFERENCE.md) - Referencia completa de API
+- [docs/sc/TESTING.md](../sc/TESTING.md) - Documentación completa de tests (108 tests)
+- [docs/sc/ARCHITECTURE.md](../sc/ARCHITECTURE.md) - Arquitectura del contrato
+- [docs/sc/SECURITY.md](../sc/SECURITY.md) - Política de seguridad
+
+**Reportes Relacionados**:
+- [PLAN_IMPLEMENTACION_OPTIMIZACIONES.md](./PLAN_IMPLEMENTACION_OPTIMIZACIONES.md) - Plan de implementación de estas optimizaciones
+
+> **📚 Nota**: Este documento contiene recomendaciones históricas de optimización. Para el estado actual del contrato y métricas actualizadas, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)
 

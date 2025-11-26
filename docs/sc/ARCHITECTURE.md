@@ -1,4 +1,4 @@
-# 
+# 🏗️ Architecture Documentation
 
 <div align="center">
 
@@ -21,7 +21,10 @@
 [![Functions](https://img.shields.io/badge/Coverage%20Functions-80.95%25-brightgreen?style=flat-square&logo=codecov)]()
 [![Branches](https://img.shields.io/badge/Coverage%20Branches-72.15%25-brightgreen?style=flat-square&logo=codecov)]()
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **📚 Para documentación completa de tests, consulta [TESTING.md](TESTING.md)**
 
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square&logo=github)](LICENSE)
 [![Academic](https://img.shields.io/badge/Academic-PFM%20Project-purple?style=flat-square&logo=academic)](/)
@@ -31,7 +34,8 @@
 
 ---
 
-**Estado**: 🎉 **DOCUMENTACIÓN TÉCNICA DE NIVEL ENTERPRISE** 🎉
+**Estado**: 🎉 **DOCUMENTACIÓN TÉCNICA DE NIVEL ENTERPRISE** 🎉  
+**Última actualización**: 26 de Noviembre, 2025
 
 
 ## 🧭 Resumen Ejecutivo / Executive Summary
@@ -40,13 +44,17 @@
 ### En Español
 ## 🧭 Resumen Ejecutivo
 
-Este proyecto presenta el diseño e implementación de un sistema integral de trazabilidad en una cadena de suministro utilizando tecnología blockchain, desarrollado en Solidity como parte del Proyecto de Fin de Máster (PFM). El contrato inteligente `SupplyChain.sol` implementa un modelo completo de gestión de usuarios, creación y transferencia de tokens, y control de roles con enfoque en seguridad, eficiencia y mantenibilidad. El desarrollo incluye pruebas exhaustivas mediante Foundry (55 tests con cobertura total), asegurando fiabilidad y consistencia en todos los flujos de negocio. La documentación técnica, el control de versiones y la automatización del despliegue consolidan una solución orientada a la excelencia técnica y a la aplicación práctica de conceptos avanzados de Web3 y blockchain empresarial.
+Este proyecto presenta el diseño e implementación de un sistema integral de trazabilidad en una cadena de suministro utilizando tecnología blockchain, desarrollado en Solidity como parte del Proyecto de Fin de Máster (PFM). El contrato inteligente `SupplyChain.sol` implementa un modelo completo de gestión de usuarios, creación y transferencia de tokens, y control de roles con enfoque en seguridad, eficiencia y mantenibilidad. El desarrollo incluye pruebas exhaustivas mediante Foundry (108 tests: 64 core + 44 edge cases con metodología científica), asegurando fiabilidad y consistencia en todos los flujos de negocio. La documentación técnica, el control de versiones y la automatización del despliegue consolidan una solución orientada a la excelencia técnica y a la aplicación práctica de conceptos avanzados de Web3 y blockchain empresarial.
+
+> **📚 Para detalles completos de tests, consulta [TESTING.md](TESTING.md)**
 
 
 ### In English
 ## 🧭 Executive Summary
 
-The **SupplyChain Smart Contract Project** demonstrates a fully functional, secure, and optimized blockchain-based supply chain management system built with Solidity. It integrates advanced role management, token traceability, ownership control, and emergency pause mechanisms, following enterprise-grade security and gas optimization standards. With over 55 comprehensive Foundry tests achieving 100% coverage, this project showcases strong skills in smart contract engineering, quality assurance, and blockchain architecture design. It serves as both an educational reference and a professional-grade implementation of a transparent, decentralized supply chain solution.
+The **SupplyChain Smart Contract Project** demonstrates a fully functional, secure, and optimized blockchain-based supply chain management system built with Solidity. It integrates advanced role management, token traceability, ownership control, and emergency pause mechanisms, following enterprise-grade security and gas optimization standards. With **108 comprehensive Foundry tests (64 core + 44 edge cases)** achieving **85.60% lines coverage**, **82.67% statements coverage**, **72.15% branches coverage**, and **80.95% functions coverage**, this project showcases strong skills in smart contract engineering, quality assurance, and blockchain architecture design. It serves as both an educational reference and a professional-grade implementation of a transparent, decentralized supply chain solution.
+
+> **📚 For complete test details, see [TESTING.md](TESTING.md)**
 
 
 ---
@@ -274,11 +282,14 @@ graph TB
 - **Documentación Profesional**: Suite completa de documentos técnicos de nivel enterprise
 
 #### ✅ **Testing de Clase Mundial**
-- **55 Tests Implementados**: Suite comprehensiva que supera estándares industriales
-  - 43 tests originales planificados (100% implementados)
-  - 12 tests de seguridad adicionales avanzados
+- **108 Tests Implementados**: Suite comprehensiva que supera estándares industriales
+  - 64 tests core (funcionalidad principal)
+  - 44 tests edge cases (metodología científica)
 - **100% de Tests Pasando**: Calidad y robustez verificadas
-- **Cobertura Total**: Cada función, rol, permiso y caso edge probado
+- **Cobertura Excepcional**: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
+- **Metodología Científica**: Análisis sistemático de branches no cubiertos
+
+> **📚 Para detalles completos de tests y metodología, consulta [TESTING.md](TESTING.md) y [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 #### ✅ **Contrato Principal (`SupplyChain.sol`) - PERFECCIÓN TÉCNICA**
 
@@ -307,16 +318,14 @@ graph TB
 
 #### 🏅 **Testing Excellence**
 ```
-✅ 55/55 Tests (100% pasando)
-✅ 7 Tests de Gestión de Usuarios  
-✅ 8 Tests de Creación de Tokens
-✅ 8 Tests de Transferencias
-✅ 6 Tests de Validaciones
-✅ 5 Tests de Casos Edge
-✅ 6 Tests de Eventos
-✅ 3 Tests de Flujos Completos
-✅ 12 Tests de Seguridad Adicional
+✅ 108/108 Tests (100% pasando)
+✅ 64 Tests Core (funcionalidad principal)
+✅ 44 Tests Edge Cases (metodología científica)
+✅ Cobertura: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
+✅ Metodología: Análisis sistemático de branches no cubiertos
 ```
+
+> **📚 Para detalles completos, consulta [TESTING.md](TESTING.md)**
 
 #### 📊 **Métricas de Cobertura Automatizadas (Forge Coverage)**
 
@@ -339,12 +348,15 @@ pie title Code Coverage Metrics - SupplyChain.sol
 ##### **✅ Fortalezas Identificadas:**
 - 🎯 **Lines Coverage Superior**: 85.60% supera estándares industriales (>80% Excellent)
 - 🎯 **Functions Coverage Excelente**: 80.95% indica testing comprehensivo de APIs
-- 🎯 **Statements Coverage Excelente**: 80.09% demuestra lógica bien probada
+- 🎯 **Statements Coverage Excelente**: 82.67% demuestra lógica bien probada
+- 🎯 **Branch Coverage Bueno**: 72.15% alcanzado con metodología científica de edge cases
 
 ##### **🔍 Áreas de Optimización:**
-- 🟢 **Branch Coverage**: 72.15% - Buen nivel, alcanzado con suite de edge cases
-- 🔶 **Casos condicionales avanzados**: Algunos flujos complejos pueden expandirse
-- 🔶 **Error paths específicos**: Validaciones de error en escenarios extremos
+- 🟢 **Branch Coverage**: 72.15% - Buen nivel, alcanzado con suite de edge cases científicamente dirigidos
+- 🔶 **Casos condicionales avanzados**: Algunos flujos complejos pueden expandirse (opcional)
+- 🔶 **Error paths específicos**: Validaciones de error en escenarios extremos (opcional)
+
+> **📚 Para análisis detallado de coverage, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) y [TESTING.md](TESTING.md)**
 
 ##### **📊 Comparación con Estándares Industriales:**
 
@@ -375,8 +387,10 @@ forge coverage --match-path "test/*" --report lcov
 ##### **📋 Interpretación Ejecutiva:**
 - ✅ **Testing Quality**: **Excelente** - 85.60% lines coverage (>80% Excellent)
 - ✅ **Production Readiness**: **Muy Alta** - APIs bien probadas (80.95% functions)
-- ✅ **Risk Assessment**: **Bajo** - Branch coverage en nivel Good (61.22%)
+- ✅ **Risk Assessment**: **Bajo** - Branch coverage en nivel Good (72.15%)
 - ✅ **Recomendación**: **Deploy Ready - Producción Aprobado**
+
+> **📚 Para métricas actualizadas, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 #### 🏅 **Calidad de Código**
 ```
@@ -663,8 +677,10 @@ Se emiten eventos para cada acción significativa:
 - **Gestión de usuarios**: `UserRoleRequested`, `UserStatusChanged`
 - **Tokens**: `TokenCreated`
 - **Transferencias**: `TransferRequested`, `TransferAccepted`, `TransferRejected`, `TransferCanceled`
-- **Ownership**: `OwnershipTransferInitiated`, `OwnershipTransferred`
-- **Pausa**: `Paused`, `Unpaused`
+- **Ownership**: `OwnershipTransferInitiated`, `OwnershipTransferred`, `OwnershipTransferCancelledByOwner`, `OwnershipTransferRejectedByPendingOwner`, `AssignInitialContractOwner`
+- **Pausa**: `Paused`, `Unpaused`, `PauseRoleChanged`
+
+> **📚 Para detalles completos de eventos, consulta [API_REFERENCE.md](API_REFERENCE.md)**
 
 ### **6. ⚠️ Limitaciones de Gas IMPORTANTES**
 
@@ -692,24 +708,29 @@ Se emiten eventos para cada acción significativa:
 
 #### **✅ Suite de Tests Excepcional**
 ```
-✅ 55 Tests Totales Implementados
+✅ 108 Tests Totales Implementados (64 core + 44 edge cases)
 ✅ 100% de Tests Pasando Exitosamente  
-✅ Cobertura Total de Funcionalidades
+✅ Cobertura Excepcional: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
 ✅ Testing de Seguridad Avanzado
-✅ Casos Edge Comprehensivos
+✅ Casos Edge Comprehensivos con Metodología Científica
 ```
 
+> **📚 Para detalles completos de tests, consulta [TESTING.md](TESTING.md)**
+
 #### **✅ Categorías Completas Testadas**
-| Categoría | Tests | Estado |
-|-----------|-------|--------|
-| **Gestión de Usuarios** | 7 | ✅ 100% |
-| **Creación de Tokens** | 8 | ✅ 100% |
-| **Transferencias** | 8 | ✅ 100% |
-| **Validaciones** | 6 | ✅ 100% |
-| **Casos Edge** | 5 | ✅ 100% |
-| **Eventos** | 6 | ✅ 100% |
-| **Flujos Completos** | 3 | ✅ 100% |
-| **Seguridad Adicional** | 12 | ✅ 100% |
+| Categoría | Tests Core | Edge Cases | Total | Estado |
+|-----------|------------|------------|-------|--------|
+| **Gestión de Usuarios** | 7 | + | 7+ | ✅ 100% |
+| **Creación de Tokens** | 8 | + | 8+ | ✅ 100% |
+| **Transferencias** | 8 | + | 8+ | ✅ 100% |
+| **Validaciones** | 6 | + | 6+ | ✅ 100% |
+| **Casos Edge** | 5 | 44 | 49 | ✅ 100% |
+| **Eventos** | 6 | + | 6+ | ✅ 100% |
+| **Flujos Completos** | 3 | + | 3+ | ✅ 100% |
+| **Seguridad Adicional** | 12 | + | 12+ | ✅ 100% |
+| **TOTAL** | **55** | **44** | **108** | ✅ **100%** |
+
+> **📚 Para desglose completo de tests, consulta [TESTING.md](TESTING.md)**
 
 ### **📋 Plan de Pruebas Detallado**
 
@@ -894,28 +915,34 @@ function test_CompleteTransferFlow() public {
 #### **✅ Comandos que USAMOS Diariamente**
 
 ```bash
-# ✅ USADO DIARIAMENTE - Ejecutar todos nuestros 55 tests
-forge test --match-path test/pfm/SupplyChain.t.sol
+# ✅ USADO DIARIAMENTE - Ejecutar todos nuestros 108 tests (64 core + 44 edge cases)
+forge test --match-path "test/*"
 
 # ✅ USADO PARA DEBUGGING - Verbosidad para análisis detallado
-forge test --match-path test/pfm/SupplyChain.t.sol -vvv
+forge test --match-path "test/*" -vvv
 
 # ✅ USADO PARA TESTS ESPECÍFICOS - Ejecutar test individual
 forge test --match-test test_ProducerCanCreateToken
 
 # ✅ USADO PARA CATEGORÍAS - Tests por contrato
 forge test --match-contract SupplyChainTest
+forge test --match-contract EdgeCasesTest
 
 # ✅ USADO PARA VERIFICACIÓN - Compilación limpia
 forge build
 ```
 
+> **📚 Para documentación completa de tests, consulta [TESTING.md](TESTING.md)**
+
 #### **🏆 Resultados que CONSEGUIMOS Consistentemente**
 ```
-✅ Running 55 tests for test/pfm/SupplyChain.t.sol:SupplyChainTest
-✅ [PASS] (55/55 tests passed)
-✅ Suite result: ok. 55 passed; 0 failed; 0 skipped;
+✅ Running 108 tests for test/*:SupplyChainTest + EdgeCasesTest
+✅ [PASS] (108/108 tests passed)
+✅ Suite result: ok. 108 passed; 0 failed; 0 skipped;
+✅ Coverage: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
 ```
+
+> **📚 Para detalles de ejecución, consulta [TESTING.md](TESTING.md)**
 
 ---
 
@@ -932,15 +959,20 @@ forge build --force
 
 ### **Testing**
 ```bash
-# Ejecutar todos los tests
+# Ejecutar todos los tests (108 tests: 64 core + 44 edge cases)
 forge test
 
-# Tests específicos del proyecto
-forge test --match-path test/pfm/SupplyChain.t.sol
+# Tests específicos del contrato principal
+forge test --match-path test/SupplyChain.t.sol
+
+# Tests de edge cases
+forge test --match-path test/EdgeCasesTest.t.sol
 
 # Con información detallada
-forge test --match-path test/pfm/SupplyChain.t.sol -vvv
+forge test --match-path "test/*" -vvv
 ```
+
+> **📚 Para documentación completa de tests, consulta [TESTING.md](TESTING.md)**
 
 ### **Deploy Local (Anvil)**
 ```bash
@@ -982,7 +1014,7 @@ cast send 0x[CONTRACT_ADDRESS] \
 ```bash
 # Solución: Verificar compilación
 forge build
-forge test --match-path test/pfm/SupplyChain.t.sol
+forge test --match-path "test/*"
 ```
 
 #### **"Tests failing"**
@@ -1028,13 +1060,16 @@ Los diagramas Mermaid incluidos en esta documentación son compatibles con:
 
 #### **Herramientas de Calidad Automatizadas**
 ```bash
-# Coverage Reporter Empresarial 
-./src/pfm/coverage-reporter-simple.sh
+# Coverage Reporter Empresarial (modo interactivo)
+bash coverage-reporter.sh
 
-# Plan de Edge Cases para Mejorar Branch Coverage
-cat src/pfm/EDGE_CASES_PLAN.md
+# Coverage Reporter Empresarial (modo automático)
+bash coverage-reporter.sh --auto
 
-# Forge Coverage Completo (todos los tests)
+# Validación completa (26+ checks en 8 fases)
+bash validate-all.sh
+
+# Forge Coverage Completo (todos los tests: 108 tests)
 forge coverage --match-path "test/*"
 
 # Análisis detallado por función
@@ -1044,11 +1079,17 @@ forge coverage --match-path "test/*" --report debug
 forge coverage --match-path test/SupplyChain.t.sol
 ```
 
-#### **📊 Plan de Mejora de Coverage (36.73% → 65%+)**
-- **🔴 FASE 1**: Edge Cases 1-8 (Validación básica) 
-- **🟡 FASE 2**: Edge Cases 9-16 (Estados y autorización)
-- **🟢 FASE 3**: Edge Cases 17-23 (Casos complejos)
-- **📋 Archivo**: `src/pfm/EDGE_CASES_PLAN.md` con implementación detallada
+> **📚 Para documentación completa de scripts, consulta [SCRIPTS.md](SCRIPTS.md) y [SCRIPTS_ARCHITECTURE.md](SCRIPTS_ARCHITECTURE.md)**
+
+#### **📊 Estado Actual de Coverage (Actualizado - 26 Nov 2025)**
+- ✅ **Lines Coverage**: 85.60% (Excelente - >80%)
+- ✅ **Statements Coverage**: 82.67% (Excelente - >80%)
+- ✅ **Branches Coverage**: 72.15% (Bueno - >60%)
+- ✅ **Functions Coverage**: 80.95% (Excelente - >80%)
+- ✅ **Metodología Científica**: Análisis sistemático de branches no cubiertos implementado
+- ✅ **108 Tests**: 64 core + 44 edge cases con 100% passing
+
+> **📚 Para análisis histórico de evolución de coverage, consulta [CHANGELOG.md](CHANGELOG.md). Para métricas actuales, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 #### **Beneficios para Auditores**
 - 🔍 **Comprensión Visual Rápida**: Arquitectura clara de un vistazo
@@ -1074,7 +1115,32 @@ Esta documentación técnica consolida **todo el conocimiento crítico** de los 
 
 - ✅ **Context completo** del proyecto (de `project_context.md`)
 - ✅ **API Reference total** (de `SupplyChain_NatSpec_Documentation.md`)  
-- ✅ **Testing comprehensivo** (de `test_foundry.md` + `test_propuestos.md`)
+- ✅ **Testing comprehensivo** (108 tests: 64 core + 44 edge cases con metodología científica)
 - ✅ **Procedimientos de deploy** y troubleshooting
 
 **Resultado**: Documentación técnica **enterprise-grade** que permite a cualquier desarrollador entender, usar y mantener el proyecto con **excelencia técnica**.
+
+---
+
+## 📚 **Referencias Relacionadas**
+
+**Smart Contract Documentation**:
+- [Getting Started Guide](GETTING_STARTED.md) - Setup and installation
+- [API Reference](API_REFERENCE.md) - Contract interface and functions
+- [Testing Guide](TESTING.md) - Test coverage and validation (108 tests)
+- [Security Guide](SECURITY.md) - Security features and best practices
+- [Deployment Guide](DEPLOYMENT.md) - Deployment procedures
+- [Scripts Documentation](SCRIPTS.md) - Automation scripts
+- [Changelog](CHANGELOG.md) - Project evolution and improvements
+
+**Project Documentation**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Current project status
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Contract status and metrics
+- [INDEX.md](../../INDEX.md) - Complete documentation index
+- [QUICKSTART.md](../../QUICKSTART.md) - Quick start guide
+
+---
+
+**Última actualización**: 26 de Noviembre, 2025  
+**Test Suite**: 108 tests (64 core + 44 edge cases) - 100% passing  
+**Coverage**: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions

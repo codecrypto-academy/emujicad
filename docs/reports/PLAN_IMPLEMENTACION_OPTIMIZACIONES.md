@@ -1,11 +1,16 @@
 # 📋 Plan de Implementación - Optimizaciones del Contrato SupplyChain
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **⚠️ HISTORICAL DOCUMENT - November 2025**  
+> Este documento refleja el plan histórico de implementación de optimizaciones. Para el estado actual del contrato, ver ESTADO_CONTRATO_INTELIGENTE.md.
+
 **Fecha de creación**: 24 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
 **Contrato**: `sc/src/SupplyChain.sol`  
 **Enfoque**: Incremental, seguro, probado en cada paso  
 **Estado**: ✅ Fase 3 completada (25 Nov 2025)
-
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
 
 ---
 
@@ -108,10 +113,12 @@ function _onlyTransfersAllowed() internal view {
 ```
 
 **Validación**:
-- ✅ Todos los tests pasan (104/104)
-- ✅ Cobertura se mantiene o mejora
+- ✅ Todos los tests pasan (108/108 actuales)
+- ✅ Cobertura se mantiene o mejora (≥85.60% lines, ≥72.15% branches)
 - ✅ No hay errores de compilación
 - ✅ Frontend sigue funcionando
+
+> **📚 Nota**: El documento original mencionaba 104 tests. El estado actual es 108 tests (64 core + 44 edge cases). Para métricas actualizadas, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)
 
 ---
 
@@ -160,7 +167,7 @@ function acceptOwnershipTransfer() external whenNotPaused {
 
 **Validación**:
 - ✅ Tests de ownership pasan
-- ✅ Todos los tests pasan (104/104)
+- ✅ Todos los tests pasan (108/108 actuales)
 - ✅ No hay regresiones
 
 ---
@@ -215,7 +222,7 @@ function rejectOwnershipTransfer() external whenNotPaused {
 
 **Validación**:
 - ✅ Tests de ownership pasan
-- ✅ Todos los tests pasan (104/104)
+- ✅ Todos los tests pasan (108/108 actuales)
 - ✅ No hay regresiones
 
 ---
@@ -293,7 +300,7 @@ function transfer(address to, uint tokenId, uint amount) external whenNotPaused 
 
 **Validación**:
 - ✅ Tests de transfer pasan
-- ✅ Todos los tests pasan (104/104)
+- ✅ Todos los tests pasan (108/108 actuales)
 - ✅ Frontend sigue funcionando
 - ✅ No hay regresiones
 
@@ -370,7 +377,7 @@ function acceptTransfer(uint transferId) external whenNotPaused onlyReceiverAllo
 
 **Validación**:
 - ✅ Tests de acceptTransfer pasan
-- ✅ Todos los tests pasan (104/104)
+- ✅ Todos los tests pasan (108/108 actuales)
 - ✅ Frontend sigue funcionando
 - ✅ No hay regresiones
 
@@ -395,11 +402,13 @@ git tag -a v1.1.0-optimized -m "Optimizaciones de caché de storage - Fase 1"
 ```
 
 **Checklist Final**:
-- ✅ Todos los tests pasan (104/104)
+- ✅ Todos los tests pasan (108/108 actuales)
 - ✅ Cobertura se mantiene o mejora (≥85.60% lines, ≥72.15% branches)
 - ✅ Frontend funciona correctamente
 - ✅ No hay errores de compilación
 - ✅ Documentación actualizada
+
+> **📚 Para métricas actualizadas, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 ---
 
@@ -837,13 +846,15 @@ forge test -vvv
 ```
 
 **Checklist Final**:
-- ✅ Todos los tests pasan (104/104)
+- ✅ Todos los tests pasan (108/108 actuales)
 - ✅ Cobertura ≥85.60% lines, ≥72.15% branches
 - ✅ Frontend funciona correctamente
 - ✅ No hay errores de compilación
 - ✅ No hay warnings de linting
 - ✅ Documentación actualizada
 - ✅ Ahorro de gas validado (usar `forge snapshot`)
+
+> **📚 Para métricas actualizadas, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**
 
 ---
 

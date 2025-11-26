@@ -1,9 +1,12 @@
 # ⚡ Optimización de Performance - Batch Reads
 
-**Fecha**: 21 de Noviembre, 2025  
-**Estado**: ✅ **IMPLEMENTADO**
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**  
+> **📚 Para documentación completa de hooks, consulta [docs/fe/HOOKS.md](../fe/HOOKS.md)**
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+**Fecha**: 26 de Noviembre, 2025  
+**Última actualización**: 26 de Noviembre, 2025  
+**Estado**: ✅ **IMPLEMENTADO**
 
 ---
 
@@ -268,6 +271,26 @@ const { data: users } = useReadContracts({
 
 ---
 
-**Última actualización**: 21 Nov 2025  
+**Última actualización**: 26 de Noviembre, 2025  
 **Estado**: ✅ Implementado y verificado
+
+---
+
+## 📚 Referencias Relacionadas
+
+**Documentación del Proyecto**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual del proyecto (single source of truth)
+- [INDEX.md](../../INDEX.md) - Índice completo de documentación
+- [QUICKSTART.md](../../QUICKSTART.md) - Guía rápida de inicio
+
+**Documentación Técnica Frontend**:
+- [docs/fe/HOOKS.md](../fe/HOOKS.md) - Documentación completa de hooks (24 hooks, incluye useDashboardStats)
+- [docs/fe/COMPONENTS.md](../fe/COMPONENTS.md) - Documentación completa de componentes
+- [docs/fe/SETUP.md](../fe/SETUP.md) - Setup del frontend
+
+**Reportes Relacionados**:
+- [TASK_STATUS_REAL.md](./TASK_STATUS_REAL.md) - Estado real de tareas completadas (incluye optimización de performance)
+- [TESTING_IMPLEMENTATION.md](./TESTING_IMPLEMENTATION.md) - Estado actual de tests frontend
+
+> **📚 Nota**: Esta optimización está implementada y funcionando. Para detalles del hook `useDashboardStats`, consulta [docs/fe/HOOKS.md](../fe/HOOKS.md)
 

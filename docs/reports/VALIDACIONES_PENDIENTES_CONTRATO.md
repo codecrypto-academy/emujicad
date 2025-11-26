@@ -1,10 +1,14 @@
 # 📋 Validaciones Pendientes en el Contrato Inteligente
 
+> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**  
+> **📚 Para estado del contrato inteligente, consulta [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md)**  
+> **📚 Para documentación completa de API, consulta [docs/sc/API_REFERENCE.md](../../docs/sc/API_REFERENCE.md)**  
+> **📚 Para documentación completa de tests, consulta [docs/sc/TESTING.md](../../docs/sc/TESTING.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](../../INDEX.md)**
+
 **Fecha**: 24 de Noviembre, 2025  
 **Estado**: Documentación de validaciones implementadas en Frontend y Contrato  
-**Última actualización**: 25 de Noviembre, 2025 - Verificación completa: TODAS las validaciones críticas implementadas ✅
-
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+**Última actualización**: 26 de Noviembre, 2025 - Verificación completa: TODAS las validaciones críticas implementadas ✅
 
 ---
 
@@ -12,7 +16,7 @@
 
 Este documento identifica las validaciones que se implementaron en el **Frontend** y su estado de implementación en el **Contrato Inteligente**. 
 
-**✅ ESTADO ACTUAL (25 Nov 2025)**: Todas las validaciones críticas y recomendadas están implementadas en el contrato.
+**✅ ESTADO ACTUAL (26 Nov 2025)**: Todas las validaciones críticas y recomendadas están implementadas en el contrato.
 
 Estas validaciones son críticas porque:
 
@@ -44,8 +48,9 @@ Estas validaciones son críticas porque:
    - **Riesgo**: Alto (mitigado)
    - **Prioridad**: Alta ✅
    - **Estado**: ✅ **IMPLEMENTADO** (24 Nov 2025)
-   - **Implementación**: Validación agregada en `transfer()` (líneas 765-773)
+   - **Implementación**: Validación agregada en `transfer()` usando función helper `_validateRoleForTokenType()`
    - **Nota**: Previene transferencias inválidas que rompen la lógica de la cadena de suministro
+   - **Referencia**: Consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md) para detalles actuales de implementación
 
 2. **Validación de rol por tipo de token en `acceptTransfer()`** ✅ **COMPLETADO**
    - **Problema**: No valida que el rol del receptor sea compatible con el tipo de token
@@ -55,8 +60,9 @@ Estas validaciones son críticas porque:
    - **Riesgo**: Alto (mitigado)
    - **Prioridad**: Alta ✅
    - **Estado**: ✅ **IMPLEMENTADO** (24 Nov 2025)
-   - **Implementación**: Validación agregada en `acceptTransfer()` (líneas 804-812)
+   - **Implementación**: Validación agregada en `acceptTransfer()` usando función helper `_validateRoleForTokenType()`
    - **Nota**: Previene que roles incorrectos acepten transferencias
+   - **Referencia**: Consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md) para detalles actuales de implementación
 
 3. **Validación de rol por tipo de token en `rejectTransfer()`** ✅ **COMPLETADO**
    - **Problema**: No valida que el rol del receptor sea compatible con el tipo de token
@@ -66,22 +72,25 @@ Estas validaciones son críticas porque:
    - **Riesgo**: Alto (mitigado)
    - **Prioridad**: Alta ✅
    - **Estado**: ✅ **IMPLEMENTADO** (24 Nov 2025)
-   - **Implementación**: Validación agregada en `rejectTransfer()` (líneas 878-886)
+   - **Implementación**: Validación agregada en `rejectTransfer()` usando función helper `_validateRoleForTokenType()`
    - **Nota**: Previene que roles incorrectos rechacen transferencias
+   - **Referencia**: Consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md) para detalles actuales de implementación
 
-#### ✅ Validaciones que SÍ están en el contrato (verificadas 25 Nov 2025):
+#### ✅ Validaciones que SÍ están en el contrato (verificadas 26 Nov 2025):
 
 1. **Validación de formato de dirección**
    - **Frontend**: Usa `isAddress(to)` de viem para validar formato hexadecimal válido
-   - **Contrato**: ✅ Valida `to != address(0)` en `transfer()` (línea 899)
+   - **Contrato**: ✅ Valida `to != address(0)` en `transfer()`
    - **Nota**: Solidity rechaza automáticamente direcciones inválidas, por lo que validar formato explícitamente es redundante
+   - **Referencia**: Consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md) para detalles actuales
    - **Estado**: ✅ **IMPLEMENTADO** (suficiente para seguridad)
    - **Prioridad**: Baja (no requiere cambios)
 
 2. **Validación de tokenId > 0**
    - **Frontend**: Valida `tokenIdNum > 0` antes de enviar
-   - **Contrato**: ✅ Valida explícitamente `tokenId == 0 || tokenId >= nextTokenId` en `getToken()` (línea 861)
+   - **Contrato**: ✅ Valida explícitamente `tokenId == 0 || tokenId >= nextTokenId` en `getToken()`
    - **Estado**: ✅ **IMPLEMENTADO** (early validation)
+   - **Referencia**: Consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md) para detalles actuales
    - **Prioridad**: Baja (ya implementado)
 
 ---
@@ -96,7 +105,7 @@ Estas validaciones son críticas porque:
 - ✅ Contrato no pausado (`whenNotPaused`)
 - ✅ Usuario autorizado para crear tokens (`onlyTokenCreators`)
 
-#### ✅ Validaciones Verificadas en el Contrato (25 Nov 2025):
+#### ✅ Validaciones Verificadas en el Contrato (26 Nov 2025):
 
 1. **Longitud mínima del nombre** ✅ **COMPLETADO**
    - **Frontend**: Valida `name.trim().length >= 2`
@@ -120,9 +129,10 @@ Estas validaciones son críticas porque:
 
 3. **Validación de balance del parent token antes de crear FinishedProduct**
    - **Frontend**: Valida que `parentBalance > 0` antes de permitir crear FinishedProduct
-   - **Contrato**: ✅ **SÍ valida** el balance suficiente en `_validateAndConsumeParentToken()` (líneas 804-806)
+   - **Contrato**: ✅ **SÍ valida** el balance suficiente en `_validateAndConsumeParentToken()`
    - **Validación**: `if (userParentBalance < parentAmount) revert InsufficientBalance(...)`
-   - **Estado**: ✅ **IMPLEMENTADO** (verificado 25 Nov 2025)
+   - **Referencia**: Consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md) para detalles actuales
+   - **Estado**: ✅ **IMPLEMENTADO** (verificado 26 Nov 2025)
    - **Nota**: El frontend hace una validación adicional para mejor UX, pero el contrato ya lo valida completamente
 
 ---
@@ -136,7 +146,7 @@ Estas validaciones son críticas porque:
 - ✅ Usuario no tiene el mismo rol pendiente (`!userWithExistingRole`)
 - ✅ Contrato no pausado (`whenNotPaused`)
 
-#### ✅ Validaciones Verificadas en el Contrato (25 Nov 2025):
+#### ✅ Validaciones Verificadas en el Contrato (26 Nov 2025):
 
 1. **Validación de usuario cancelado** ✅ **COMPLETADO**
    - **Frontend**: Bloquea completamente el registro si `userStatus == Canceled`
@@ -159,9 +169,10 @@ Estas validaciones son críticas porque:
 
 2. **Validación de cambio de rol al mismo rol**
    - **Frontend**: Valida que `selectedRole !== currentRoleName` antes de enviar
-   - **Contrato**: ✅ **SÍ valida** explícitamente en `_updateExistingUserRole()` (línea 610)
+   - **Contrato**: ✅ **SÍ valida** explícitamente en `_updateExistingUserRole()`
    - **Validación**: `if (uint(role) == uint(user.role)) revert UserWithExistingRole();`
-   - **Estado**: ✅ **IMPLEMENTADO** (verificado 25 Nov 2025)
+   - **Referencia**: Consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md) para detalles actuales
+   - **Estado**: ✅ **IMPLEMENTADO** (verificado 26 Nov 2025)
    - **Prioridad**: Baja (ya implementado)
 
 ---
@@ -182,16 +193,17 @@ Estas validaciones son críticas porque:
    - **Impacto**: Seguridad y lógica de negocio crítica
    - **Riesgo**: Alto (permite transferencias inválidas en la cadena de suministro)
    - **Esfuerzo**: ✅ Completado (Fase 3 de optimizaciones)
-   - **Estado**: ✅ **IMPLEMENTADO** (verificado 25 Nov 2025)
+   - **Estado**: ✅ **IMPLEMENTADO** (verificado 26 Nov 2025)
    - **Implementación**:
-     - ✅ Función helper `_validateRoleForTokenType()` creada (línea 725)
-     - ✅ Validación en `transfer()` (línea 909) - Valida rol del emisor
-     - ✅ Validación en `acceptTransfer()` (línea 956) - Valida rol del receptor
-     - ✅ Validación en `rejectTransfer()` (línea 1038) - Valida rol del receptor
+     - ✅ Función helper `_validateRoleForTokenType()` creada - Centraliza la lógica de validación
+     - ✅ Validación en `transfer()` - Valida rol del emisor usando helper
+     - ✅ Validación en `acceptTransfer()` - Valida rol del receptor usando helper
+     - ✅ Validación en `rejectTransfer()` - Valida rol del receptor usando helper
    - **Reglas implementadas**:
      - ✅ Raw Material: Solo Producer puede transferir, solo Factory puede aceptar/rechazar
      - ✅ Finished Product: Solo Factory/Retailer pueden transferir, solo Retailer/Consumer pueden aceptar/rechazar
-   - **Error personalizado**: `InvalidRoleForTokenType()` (línea 106)
+   - **Error personalizado**: `InvalidRoleForTokenType()`
+   - **Nota**: Consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md#custom-errors) para detalles completos de errores personalizados.
 
 ### ✅ Media Prioridad - COMPLETADO
 
@@ -208,14 +220,14 @@ Estas validaciones son críticas porque:
 1. **Validación de formato de dirección en `transfer()`** ✅ **IMPLEMENTADO**
    - **Impacto**: Mínimo (Solidity ya valida automáticamente)
    - **Riesgo**: Bajo
-   - **Estado**: ✅ **IMPLEMENTADO** - Valida `to != address(0)` en `transfer()` (línea 899)
+   - **Estado**: ✅ **IMPLEMENTADO** - Valida `to != address(0)` en `transfer()`
    - **Recomendación**: ✅ Ya implementado (suficiente, validación de formato explícita es redundante)
 
 2. **Validación de tokenId > 0 en `transfer()` y `getToken()`** ✅ **IMPLEMENTADO**
    - **Impacto**: Mínimo (ya validado explícitamente)
    - **Riesgo**: Bajo
-   - **Estado**: ✅ **IMPLEMENTADO** - Valida `tokenId == 0 || tokenId >= nextTokenId` en `getToken()` (línea 861)
-   - **Nota**: En `transfer()` se valida que `token.id != 0` (línea 903), lo cual es equivalente
+   - **Estado**: ✅ **IMPLEMENTADO** - Valida `tokenId == 0 || tokenId >= nextTokenId` en `getToken()`
+   - **Nota**: En `transfer()` se valida que `token.id != 0`, lo cual es equivalente
    - **Recomendación**: ✅ Ya implementado (early validation en getToken, validación implícita en transfer)
 
 3. **Validación de formato JSON en `createToken()`** ⚠️ **NO RECOMENDADO**
@@ -228,7 +240,7 @@ Estas validaciones son críticas porque:
 
 ## 📝 Recomendaciones de Implementación
 
-> **⚠️ NOTA HISTÓRICA**: Esta sección documenta las recomendaciones originales. Todas las validaciones críticas y recomendadas ya están implementadas (verificado 25 Nov 2025).
+> **⚠️ NOTA HISTÓRICA**: Esta sección documenta las recomendaciones originales. Todas las validaciones críticas y recomendadas ya están implementadas (verificado 26 Nov 2025).
 
 ### ✅ 1. Error Personalizado - IMPLEMENTADO
 
@@ -361,7 +373,7 @@ function rejectTransfer(uint transferId) external whenNotPaused onlyReceiverAllo
 2. ✅ **Usuario autorizado** - Ya implementado
 3. ✅ **Contrato no pausado** - Ya implementado
 4. ✅ **Usuario cancelado** - **IMPLEMENTADO** (24 Nov 2025) ✅
-5. ✅ **Rol por tipo de token en transferencias** - **IMPLEMENTADO** (25 Nov 2025) ✅
+5. ✅ **Rol por tipo de token en transferencias** - **IMPLEMENTADO** (24 Nov 2025, verificado 26 Nov 2025) ✅
 
 ### Validaciones que son NICE-TO-HAVE:
 
@@ -400,19 +412,22 @@ function rejectTransfer(uint transferId) external whenNotPaused onlyReceiverAllo
 
 #### ✅ Validación de Alta Prioridad - Usuario Cancelado
 - **Error `UserCanceled()` agregado** en `sc/src/SupplyChain.sol`  
-- **Validación implementada** en `requestUserRole()` (líneas 532-535)  
+- **Validación implementada** en `requestUserRole()`  
 - **Test agregado**: `testCanceledUserCannotRequestRole()` en `EdgeCasesTest.t.sol`
+- **Nota**: Consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md) y [TESTING.md](../../docs/sc/TESTING.md) para detalles actuales.
 
 #### ✅ Validación de Media Prioridad - Longitud Mínima del Nombre
-- **Validación implementada** en `createToken()` (línea 656)  
+- **Validación implementada** en `createToken()`  
 - **Test agregado**: `testCreateTokenSingleCharacterName()` en `EdgeCasesTest.t.sol`
+- **Nota**: Consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md) y [TESTING.md](../../docs/sc/TESTING.md) para detalles actuales.
 
 #### ✅ Validaciones de Alta Prioridad - Rol por Tipo de Token
-- **Error `InvalidRoleForTokenType()` agregado** en `sc/src/SupplyChain.sol` (línea 106)
-- **Función helper `_validateRoleForTokenType()` creada** (línea 725) - Centraliza la lógica de validación
-- **Validación en `transfer()`** (línea 909) - Valida rol del emisor usando helper
-- **Validación en `acceptTransfer()`** (línea 956) - Valida rol del receptor usando helper
-- **Validación en `rejectTransfer()`** (línea 1038) - Valida rol del receptor usando helper
+- **Error `InvalidRoleForTokenType()` agregado** en `sc/src/SupplyChain.sol`
+- **Función helper `_validateRoleForTokenType()` creada** - Centraliza la lógica de validación
+- **Validación en `transfer()`** - Valida rol del emisor usando helper
+- **Validación en `acceptTransfer()`** - Valida rol del receptor usando helper
+- **Validación en `rejectTransfer()`** - Valida rol del receptor usando helper
+- **Nota**: Consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md) para detalles completos de implementación.
 - **Tests agregados**: 8 nuevos tests en `EdgeCasesTest.t.sol` para cubrir todas las combinaciones inválidas
 - **Tests corregidos**: `testFinishedProductWithNonRowMaterialParent()` y `testConsumerCannotTransfer()` actualizados
 
@@ -424,7 +439,7 @@ function rejectTransfer(uint transferId) external whenNotPaused onlyReceiverAllo
 
 ---
 
-### ✅ Verificación Completa (25 Nov 2025)
+### ✅ Verificación Completa (26 Nov 2025)
 
 **Todas las validaciones mencionadas han sido verificadas en el contrato:**
 
@@ -438,5 +453,27 @@ function rejectTransfer(uint transferId) external whenNotPaused onlyReceiverAllo
 
 ---
 
-**Última actualización**: 25 de Noviembre, 2025 (Verificación completa)
+**Última actualización**: 26 de Noviembre, 2025 (Verificación completa)
+
+---
+
+## 📚 Referencias Relacionadas
+
+**Documentación del Contrato Inteligente**:
+- [API Reference](../../docs/sc/API_REFERENCE.md) - Documentación completa de funciones, eventos y errores personalizados
+- [Testing Guide](../../docs/sc/TESTING.md) - Documentación completa de tests (108 tests: 64 core + 44 edge cases)
+- [Security Policy](../../docs/sc/SECURITY.md) - Política de seguridad y mejores prácticas
+- [Architecture](../../docs/sc/ARCHITECTURE.md) - Arquitectura del sistema
+
+**Documentación del Proyecto**:
+- [PROJECT_STATUS.md](../../PROJECT_STATUS.md) - Estado actual del proyecto
+- [ESTADO_CONTRATO_INTELIGENTE.md](../../ESTADO_CONTRATO_INTELIGENTE.md) - Estado y métricas del contrato
+- [INDEX.md](../../INDEX.md) - Índice completo de documentación
+
+**Errores Personalizados Documentados**:
+- `UserCanceled()` - Usuario cancelado no puede solicitar roles
+- `InvalidRoleForTokenType()` - Rol inválido para tipo de token en transferencias
+- `InvalidName()` - Nombre de token inválido (menos de 2 caracteres)
+
+> **📚 Para detalles completos de errores personalizados, consulta [API_REFERENCE.md](../../docs/sc/API_REFERENCE.md#custom-errors)**
 
