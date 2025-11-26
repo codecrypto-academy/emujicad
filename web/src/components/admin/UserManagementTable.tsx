@@ -28,7 +28,7 @@ import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 export function UserManagementTable() {
   const { users, isLoading, refetch } = useGetAllUsers()
-  const { changeStatus, isPending, isSuccess, error, hash } = useChangeUserStatus()
+  const { changeStatus, isPending, isConfirming, isSuccess, error, hash } = useChangeUserStatus()
   const { data: isPaused } = useIsPaused()
   const { connector } = useAccount()
   const [filterStatus, setFilterStatus] = useState<string>('all')
@@ -407,10 +407,10 @@ export function UserManagementTable() {
                 </AlertDescription>
               </Alert>
             )}
-            {isPending && (
+            {(isPending || isConfirming) && (
               <Alert className="mb-4 rounded-xl bg-blue-50/80 dark:bg-blue-900/30 backdrop-blur border-blue-200 dark:border-blue-800">
                 <AlertDescription className="text-blue-700 dark:text-blue-300">
-                  ⏳ Procesando transacción... Confirma en MetaMask.
+                  ⏳ {isPending ? 'Procesando transacción... Confirma en MetaMask.' : 'Esperando confirmación de la transacción...'}
                 </AlertDescription>
               </Alert>
             )}
@@ -508,10 +508,11 @@ export function UserManagementTable() {
                           <div className="flex gap-2 justify-end">
                             {actions.map((action) => {
                               // Determinar si esta acción específica está siendo procesada
-                              const isThisActionProcessing = isPending && 
+                              const isThisActionProcessing = (isPending || isConfirming) && 
                                                              processingAction?.userAddress === user.userAddress && 
                                                              processingAction?.action === action.value
-                              const isAnyProcessing = isPending && processingAction !== null && processingAction.userAddress === user.userAddress
+                              // Deshabilitar TODOS los botones si hay alguna transacción pendiente o confirmando
+                              const isAnyTransactionPending = isPending || isConfirming
                               
                               return (
                                 <Button
@@ -519,9 +520,9 @@ export function UserManagementTable() {
                                   size="sm"
                                   className={`${action.color} ${useModernDesign ? 'rounded-xl' : ''}`}
                                   onClick={() => handleStatusChange(user.userAddress, action.value)}
-                                  disabled={isAnyProcessing || isPaused === true}
+                                  disabled={isAnyTransactionPending || isPaused === true}
                                   aria-label={`${action.label} user ${user.userAddress.slice(0, 6)}...${user.userAddress.slice(-4)}`}
-                                  aria-disabled={isAnyProcessing || isPaused === true}
+                                  aria-disabled={isAnyTransactionPending || isPaused === true}
                                 >
                                   {isThisActionProcessing ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -587,10 +588,10 @@ export function UserManagementTable() {
               </AlertDescription>
             </Alert>
           )}
-          {isPending && (
+          {(isPending || isConfirming) && (
             <Alert className="mb-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
               <AlertDescription className="text-blue-700 dark:text-blue-300">
-                ⏳ Procesando transacción... Confirma en MetaMask.
+                ⏳ {isPending ? 'Procesando transacción... Confirma en MetaMask.' : 'Esperando confirmación de la transacción...'}
               </AlertDescription>
             </Alert>
           )}
@@ -658,10 +659,11 @@ export function UserManagementTable() {
                             <div className="flex gap-2 justify-end">
                               {actions.map((action) => {
                                 // Determinar si esta acción específica está siendo procesada
-                                const isThisActionProcessing = isPending && 
+                                const isThisActionProcessing = (isPending || isConfirming) && 
                                                                processingAction?.userAddress === user.userAddress && 
                                                                processingAction?.action === action.value
-                                const isAnyProcessing = isPending && processingAction !== null && processingAction.userAddress === user.userAddress
+                                // Deshabilitar TODOS los botones si hay alguna transacción pendiente o confirmando
+                                const isAnyTransactionPending = isPending || isConfirming
                                 
                                 return (
                                   <Button
@@ -669,9 +671,9 @@ export function UserManagementTable() {
                                     size="sm"
                                     className={action.color}
                                     onClick={() => handleStatusChange(user.userAddress, action.value)}
-                                    disabled={isAnyProcessing || isPaused === true}
+                                    disabled={isAnyTransactionPending || isPaused === true}
                                     aria-label={`${action.label} user ${user.userAddress.slice(0, 6)}...${user.userAddress.slice(-4)}`}
-                                    aria-disabled={isAnyProcessing || isPaused === true}
+                                    aria-disabled={isAnyTransactionPending || isPaused === true}
                                   >
                                     {isThisActionProcessing ? (
                                       <Loader2 className="h-4 w-4 animate-spin" />
