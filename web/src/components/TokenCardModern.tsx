@@ -91,12 +91,20 @@ export function TokenCardModern({ tokenId, showBalance = false, onClick }: Token
   const tokenType = Number(displayTokenData.tokenType) as TokenType
   const isRowMaterial = tokenType === TokenType.RowMaterial
 
-  // Formatear fecha
+  // Formatear fecha y hora completa
   const dateCreated = displayTokenData.createdAt
     ? new Date(Number(displayTokenData.createdAt) * 1000)
     : null
   const formattedDate = dateCreated
-    ? dateCreated.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
+    ? dateCreated.toLocaleString('en-US', { 
+        month: '2-digit', 
+        day: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      })
     : 'N/A'
 
 
@@ -126,9 +134,8 @@ export function TokenCardModern({ tokenId, showBalance = false, onClick }: Token
               </h3>
             </div>
             <div className="flex items-center gap-2">
-              <Hash className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-sm font-mono text-slate-500 dark:text-slate-400">
-                #{tokenId.toString()}
+              <span className="text-sm text-slate-500 dark:text-slate-400">
+                Token ID: <span className="font-mono">{tokenId.toString()}</span>
               </span>
             </div>
           </div>

@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { TokenType, UserRole, UserStatus } from '@/contracts/config'
 import { ArrowLeft, Loader2, AlertTriangle, Pause, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 function CreateTokenPageContent() {
   const router = useRouter()
@@ -298,7 +299,8 @@ function CreateTokenPageContent() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
         <Header />
 
-        <main className="container mx-auto px-4 py-12 max-w-2xl">
+        <main className="container mx-auto px-4 py-12 max-w-2xl relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+          <DebugLabel component="CreateTokenPage" section="MainContent" props={{ useModernDesign: true, tokenType: tokenType === TokenType.RowMaterial ? 'RowMaterial' : 'FinishedProduct' }} position="bottom-right" offset={4} />
           <div className="mb-6">
             <Link href="/tokens">
               <Button variant="ghost" className="mb-4 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">
@@ -308,10 +310,11 @@ function CreateTokenPageContent() {
             </Link>
           </div>
 
-          <div className="group relative overflow-hidden rounded-3xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
+          <div className="group relative overflow-hidden rounded-3xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-2xl" style={DEBUG_MODE ? { outline: '3px solid rgba(0, 0, 255, 0.6)', outlineOffset: '0px' } : {}}>
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative p-8">
-              <div className="mb-6">
+              <div className="mb-6 relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+                <DebugLabel component="CreateTokenPage" section="TitleSection" props={{ useModernDesign: true, tokenType: tokenType === TokenType.RowMaterial ? 'RowMaterial' : 'FinishedProduct' }} position="top-right" offset={4} />
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-2">
                   {tokenType === TokenType.RowMaterial ? 'Create Raw Material Token' : 'Create Finished Product Token'}
                 </h1>
@@ -350,7 +353,8 @@ function CreateTokenPageContent() {
                 </Alert>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6 relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 128, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+                <DebugLabel component="CreateTokenPage" section="FormSection" props={{ useModernDesign: true, tokenType: tokenType === TokenType.RowMaterial ? 'RowMaterial' : 'FinishedProduct', hasParentToken: tokenType === TokenType.FinishedProduct }} position="top-right" offset={4} />
                 {/* Token Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-slate-700 dark:text-slate-300 font-medium">
@@ -506,29 +510,6 @@ function CreateTokenPageContent() {
                   </p>
                 </div>
 
-              {/* Total Supply - MOVED AFTER Parent Token */}
-              <div className="space-y-2">
-                <Label htmlFor="totalSupply">
-                  Total Supply <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="totalSupply"
-                  type="number"
-                  min="1"
-                  value={totalSupply}
-                  onChange={(e) => setTotalSupply(e.target.value)}
-                  placeholder="e.g., 1000"
-                  disabled={isFormDisabled}
-                  className={formErrors.totalSupply ? 'border-red-500' : ''}
-                />
-                {formErrors.totalSupply && (
-                  <p className="text-sm text-red-500">{formErrors.totalSupply}</p>
-                )}
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  The total amount of finished product tokens to create. Must be greater than 0.
-                </p>
-              </div>
-
                 {/* Features */}
                 <div className="space-y-2">
                   <Label htmlFor="features" className="text-slate-700 dark:text-slate-300 font-medium">
@@ -602,7 +583,8 @@ function CreateTokenPageContent() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <main className="container mx-auto px-4 py-8 max-w-2xl relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+        <DebugLabel component="CreateTokenPage" section="MainContent" props={{ useModernDesign: false, tokenType: tokenType === TokenType.RowMaterial ? 'RowMaterial' : 'FinishedProduct' }} position="bottom-right" offset={4} />
         <div className="mb-6">
           <Link href="/tokens">
             <Button variant="ghost" className="mb-4">
@@ -612,8 +594,9 @@ function CreateTokenPageContent() {
           </Link>
         </div>
 
-        <Card className="border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg">
-          <CardHeader>
+        <Card className="border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg" style={DEBUG_MODE ? { outline: '3px solid rgba(0, 0, 255, 0.6)', outlineOffset: '0px' } : {}}>
+          <CardHeader className="relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+            <DebugLabel component="CreateTokenPage" section="TitleSection" props={{ useModernDesign: false, tokenType: tokenType === TokenType.RowMaterial ? 'RowMaterial' : 'FinishedProduct' }} position="top-right" offset={4} />
             <CardTitle className="text-2xl">
               {tokenType === TokenType.RowMaterial ? 'Create Raw Material Token' : 'Create Finished Product Token'}
             </CardTitle>
@@ -656,7 +639,8 @@ function CreateTokenPageContent() {
               </Alert>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 128, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
+              <DebugLabel component="CreateTokenPage" section="FormSection" props={{ useModernDesign: false, tokenType: tokenType === TokenType.RowMaterial ? 'RowMaterial' : 'FinishedProduct', hasParentToken: tokenType === TokenType.FinishedProduct }} position="top-right" offset={4} />
               {/* Token Name */}
               <div className="space-y-2">
                 <Label htmlFor="name">
@@ -796,6 +780,29 @@ function CreateTokenPageContent() {
                   )}
                 </>
               )}
+
+              {/* Total Supply */}
+              <div className="space-y-2">
+                <Label htmlFor="totalSupply">
+                  Total Supply <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="totalSupply"
+                  type="number"
+                  min="1"
+                  value={totalSupply}
+                  onChange={(e) => setTotalSupply(e.target.value)}
+                  placeholder="e.g., 1000"
+                  disabled={isFormDisabled}
+                  className={formErrors.totalSupply ? 'border-red-500' : ''}
+                />
+                {formErrors.totalSupply && (
+                  <p className="text-sm text-red-500">{formErrors.totalSupply}</p>
+                )}
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  The total amount of tokens to create. Must be greater than 0.
+                </p>
+              </div>
 
               {/* Features (JSON) */}
               <div className="space-y-2">

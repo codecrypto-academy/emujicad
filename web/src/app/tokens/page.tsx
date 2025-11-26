@@ -144,7 +144,7 @@ export default function TokensPage() {
   const filteredTokens = useMemo(() => {
     if (!tokens || tokens.length === 0) return []
 
-    return tokens.filter((token) => {
+    const filtered = tokens.filter((token) => {
       // Filtro por tipo según rol
       // Producer: solo materia prima (ya está filtrado por el estado inicial, pero por seguridad)
       if (isProducer && Number(token.tokenType) !== TokenType.RowMaterial) {
@@ -165,17 +165,33 @@ export default function TokensPage() {
       }
 
       // Filtro por búsqueda (nombre) - aplica solo si hay query
-      if (searchQuery.trim()) {
-        const query = normalizeString(searchQuery)
-        const tokenName = normalizeString(token.name || '')
+      if (searchQuery && searchQuery.trim().length > 0) {
+        const trimmedQuery = searchQuery.trim()
+        const query = normalizeString(trimmedQuery)
+        // Asegurar que token.name existe y es string
+        const tokenName = token.name && typeof token.name === 'string' 
+          ? normalizeString(token.name) 
+          : ''
         // Búsqueda más flexible: incluye coincidencias parciales y maneja acentos
-        if (!tokenName.includes(query)) {
+        if (!tokenName || tokenName.length === 0 || !tokenName.includes(query)) {
           return false
         }
       }
 
       return true
     })
+
+    // Debug: Log para verificar el filtrado (solo en desarrollo)
+    if (process.env.NODE_ENV === 'development' && searchQuery && searchQuery.trim().length > 0) {
+      console.log('[TokensPage] 🔍 Filtro de búsqueda:', {
+        searchQuery: searchQuery.trim(),
+        totalTokens: tokens.length,
+        filteredCount: filtered.length,
+        filteredNames: filtered.map(t => ({ id: t.tokenId?.toString() || t.id?.toString(), name: t.name }))
+      })
+    }
+
+    return filtered
   }, [tokens, filterType, searchQuery, isProducer, isFactory, isRetailer, isConsumer])
 
   // Paginación
@@ -243,7 +259,7 @@ export default function TokensPage() {
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-6 py-6 text-base font-medium"
                 >
                   <Plus className="h-5 w-5 mr-2" />
-                  Create New Token
+                  {totalTokens === 0 ? 'Create First Token' : 'Create New Token'}
                 </Button>
               </Link>
             )}
@@ -411,15 +427,6 @@ export default function TokensPage() {
                     "You don't own any tokens yet. Create or receive tokens to see them here."
                   )}
                 </p>
-                {userInfo && 
-                 (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
-                 Number(userInfo.status) === UserStatus.Approved && (
-                  <Link href={Number(userInfo.role) === UserRole.Producer ? "/tokens/create?type=raw" : "/tokens/create?type=product"}>
-                    <Button className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-8 py-6 text-base font-medium">
-                      {totalTokens === 0 ? 'Create First Token' : 'Create New Token'}
-                    </Button>
-                  </Link>
-                )}
               </CardContent>
             </Card>
           )}
@@ -502,7 +509,7 @@ export default function TokensPage() {
         <div className="relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
           <DebugLabel component="TokensPage" section="TokenTypeStatsSection" props={{ useModernDesign: true }} position="top-right" offset={4} />
           <TokenTypeStatsSection 
-            tokens={tokens}
+            tokens={filteredTokens}
             isLoading={isLoading || isLoadingStats}
             statsError={statsError}
             rowMaterial={rowMaterial}
@@ -556,7 +563,7 @@ export default function TokensPage() {
                 className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Create New Token
+                {totalTokens === 0 ? 'Create First Token' : 'Create New Token'}
               </Button>
             </Link>
           )}
@@ -697,7 +704,7 @@ export default function TokensPage() {
         <div className="relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
           <DebugLabel component="TokensPage" section="TokenTypeStatsSection" props={{ useModernDesign: false }} position="top-right" offset={4} />
           <TokenTypeStatsSection 
-            tokens={tokens}
+            tokens={filteredTokens}
             isLoading={isLoading || isLoadingStats}
             statsError={statsError}
             rowMaterial={rowMaterial}
@@ -768,16 +775,6 @@ export default function TokensPage() {
                   'You don\'t own any tokens yet. Create or receive tokens to see them here.'
                 )}
               </p>
-              {/* Solo Producer y Factory aprobados pueden crear tokens (según el contrato) */}
-              {userInfo && 
-               (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
-               Number(userInfo.status) === UserStatus.Approved && (
-                <Link href={Number(userInfo.role) === UserRole.Producer ? "/tokens/create?type=raw" : "/tokens/create?type=product"}>
-                  <Button className="mt-2">
-                    {totalTokens === 0 ? 'Create First Token' : 'Create New Token'}
-                  </Button>
-                </Link>
-              )}
             </CardContent>
           </Card>
         )}
@@ -897,9 +894,9 @@ function TokenTypeStatsSection({
     return tokens.filter(token => Number(token.tokenType) === TokenType.FinishedProduct)
   }, [tokens])
 
-  // Only show rows that have tokens
-  const hasRowMaterial = rowMaterial && (rowMaterial.tokenCount > 0 || (rowMaterial.totalBalance && rowMaterial.totalBalance > BigInt(0)))
-  const hasFinishedProduct = finishedProduct && (finishedProduct.tokenCount > 0 || (finishedProduct.totalBalance && finishedProduct.totalBalance > BigInt(0)))
+  // Only show rows that have tokens (tanto en las estadísticas como en los tokens filtrados)
+  const hasRowMaterial = rowMaterial && (rowMaterial.tokenCount > 0 || (rowMaterial.totalBalance && rowMaterial.totalBalance > BigInt(0))) && rawMaterialTokens.length > 0
+  const hasFinishedProduct = finishedProduct && (finishedProduct.tokenCount > 0 || (finishedProduct.totalBalance && finishedProduct.totalBalance > BigInt(0))) && finishedProductTokens.length > 0
   const hasAnyTokens = hasRowMaterial || hasFinishedProduct
 
   if (statsError) {
@@ -958,9 +955,6 @@ function TokenTypeStatsSection({
                   </div>
                   <div className="flex items-center gap-6 text-sm">
                     <span className="text-slate-600 dark:text-slate-400">
-                      Total Balance: <span className="font-bold text-slate-800 dark:text-slate-200">{rowMaterial?.totalBalance?.toString() || '0'}</span>
-                    </span>
-                    <span className="text-slate-600 dark:text-slate-400">
                       Count: <span className="font-bold text-slate-800 dark:text-slate-200">{rowMaterial?.tokenCount || 0}</span>
                     </span>
                   </div>
@@ -1005,9 +999,6 @@ function TokenTypeStatsSection({
                     </span>
                   </div>
                   <div className="flex items-center gap-6 text-sm">
-                    <span className="text-slate-600 dark:text-slate-400">
-                      Total Balance: <span className="font-bold text-slate-800 dark:text-slate-200">{finishedProduct?.totalBalance?.toString() || '0'}</span>
-                    </span>
                     <span className="text-slate-600 dark:text-slate-400">
                       Count: <span className="font-bold text-slate-800 dark:text-slate-200">{finishedProduct?.tokenCount || 0}</span>
                     </span>

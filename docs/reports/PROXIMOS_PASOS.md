@@ -167,6 +167,29 @@
 
 ---
 
+## 🔮 Mejoras Futuras de UX (Post-Entrega)
+
+**Prioridad**: Baja (mejoras opcionales para futuras versiones)  
+**Estado**: 📝 Documentado para implementación futura
+
+### Mejoras de Búsqueda y Filtrado
+
+#### 1. Selector de Tipo de Filtro de Búsqueda
+- **Ubicación**: `/tokens` - Filtro de búsqueda por nombre (elemento #3)
+- **Descripción**: Permitir al usuario seleccionar el tipo de búsqueda:
+  - **`includes`** (actual): Busca la cadena en cualquier parte del nombre (ej: "A" encuentra "Algodon", "Acero", "Madera")
+  - **`startsWith`**: Busca solo al inicio del nombre (ej: "A" encuentra solo "Algodon" y "Acero")
+- **Implementación sugerida**:
+  - Agregar un toggle o selector junto al input de búsqueda
+  - Opciones: "Contiene" (includes) / "Comienza con" (startsWith)
+  - Guardar preferencia en `localStorage` para persistencia
+- **Beneficio**: Mayor control y precisión en la búsqueda según el caso de uso
+- **Tiempo estimado**: 1-2 horas
+
+**Nota**: Actualmente el filtro usa `includes` por defecto, que es el comportamiento más flexible y común en búsquedas.
+
+---
+
 ## 📋 Checklist de Entrega Final (Día 12)
 
 ### Repositorio

@@ -103,7 +103,15 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
 
   const { id, name, tokenType, totalSupply, creator, parentToken, createdAt, features } = displayTokenData;
   const isRawMaterial = Number(tokenType) === 0;
-  const formattedDate = new Date(Number(createdAt) * 1000).toLocaleDateString();
+  const formattedDate = new Date(Number(createdAt) * 1000).toLocaleString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
 
   return (
     <Card
@@ -130,7 +138,7 @@ export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardPr
             <span className="text-lg truncate">{name}</span>
           </div>
           <Badge variant="outline" className="ml-2">
-            #{id.toString()}
+            Token ID: <span className="font-mono">{id.toString()}</span>
           </Badge>
         </CardTitle>
       </CardHeader>
