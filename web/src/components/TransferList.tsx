@@ -53,6 +53,8 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
   const [filterTo, setFilterTo] = useState<FilterAddress>('all')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
   const [lastSuccessHash, setLastSuccessHash] = useState<string | null>(null)
+  // Rastrear qué transferencia específica y qué acción se está procesando
+  const [processingAction, setProcessingAction] = useState<{ transferId: bigint; action: 'accept' | 'reject' | 'cancel' } | null>(null)
   
   // Activar diseño moderno si está habilitado
   const useModernDesign: boolean = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
@@ -154,11 +156,19 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
       const timer = setTimeout(() => {
         console.log('✅ Transacción exitosa (accept/reject/cancel), recargando transferencias...')
         setLastSuccessHash(hash)
+        setProcessingAction(null) // Limpiar la acción de transferencia procesada
         refetchTransfers()
       }, 2000)
       return () => clearTimeout(timer)
     }
   }, [isSuccess, hash, lastSuccessHash, refetchTransfers])
+  
+  // Limpiar processingAction cuando la transacción falla o se cancela
+  useEffect(() => {
+    if (actionError && processingAction !== null) {
+      setProcessingAction(null)
+    }
+  }, [actionError, processingAction])
 
   // Escuchar evento cuando se crea una nueva transferencia
   useEffect(() => {
@@ -313,16 +323,19 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
 
   const handleAccept = (transferId: bigint) => {
     if (isPaused) return
+    setProcessingAction({ transferId, action: 'accept' })
     acceptTransfer(transferId)
   }
 
   const handleReject = (transferId: bigint) => {
     if (isPaused) return
+    setProcessingAction({ transferId, action: 'reject' })
     rejectTransfer(transferId)
   }
 
   const handleCancel = (transferId: bigint) => {
     if (isPaused) return
+    setProcessingAction({ transferId, action: 'cancel' })
     cancelTransfer(transferId)
   }
 
@@ -609,8 +622,11 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
                           onAccept={handleAccept}
                           onReject={handleReject}
                           onCancel={handleCancel}
-                          isPending={isPending}
-                          isConfirming={isConfirming}
+                          isProcessingAccept={isPending && processingAction?.transferId === transfer.id && processingAction?.action === 'accept'}
+                          isProcessingReject={isPending && processingAction?.transferId === transfer.id && processingAction?.action === 'reject'}
+                          isProcessingCancel={isPending && processingAction?.transferId === transfer.id && processingAction?.action === 'cancel'}
+                          isConfirming={isConfirming && processingAction?.transferId === transfer.id}
+                          isAnyProcessing={isPending && processingAction?.transferId === transfer.id}
                           formatAddress={formatAddress}
                           formatDate={formatDate}
                           getStatusBadge={getStatusBadge}
@@ -672,8 +688,11 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
                           onAccept={handleAccept}
                           onReject={handleReject}
                           onCancel={handleCancel}
-                          isPending={isPending}
-                          isConfirming={isConfirming}
+                          isProcessingAccept={isPending && processingAction?.transferId === transfer.id && processingAction?.action === 'accept'}
+                          isProcessingReject={isPending && processingAction?.transferId === transfer.id && processingAction?.action === 'reject'}
+                          isProcessingCancel={isPending && processingAction?.transferId === transfer.id && processingAction?.action === 'cancel'}
+                          isConfirming={isConfirming && processingAction?.transferId === transfer.id}
+                          isAnyProcessing={isPending && processingAction?.transferId === transfer.id}
                           formatAddress={formatAddress}
                           formatDate={formatDate}
                           getStatusBadge={getStatusBadge}
@@ -743,8 +762,11 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
                       onAccept={handleAccept}
                       onReject={handleReject}
                       onCancel={handleCancel}
-                      isPending={isPending}
-                      isConfirming={isConfirming}
+                      isProcessingAccept={isPending && processingAction?.transferId === transfer.id && processingAction?.action === 'accept'}
+                      isProcessingReject={isPending && processingAction?.transferId === transfer.id && processingAction?.action === 'reject'}
+                      isProcessingCancel={isPending && processingAction?.transferId === transfer.id && processingAction?.action === 'cancel'}
+                      isConfirming={isConfirming && processingAction?.transferId === transfer.id}
+                      isAnyProcessing={isPending && processingAction?.transferId === transfer.id}
                       formatAddress={formatAddress}
                       formatDate={formatDate}
                       getStatusBadge={getStatusBadge}
@@ -772,8 +794,11 @@ interface TransferRowProps {
   onAccept: (id: bigint) => void
   onReject: (id: bigint) => void
   onCancel: (id: bigint) => void
-  isPending: boolean
+  isProcessingAccept: boolean
+  isProcessingReject: boolean
+  isProcessingCancel: boolean
   isConfirming: boolean
+  isAnyProcessing: boolean // Si cualquier acción está en proceso, deshabilitar otros botones
   formatAddress: (addr: string) => string
   formatDate: (timestamp: bigint) => string
   getStatusBadge: (status: TransferStatus) => React.ReactElement
@@ -789,8 +814,11 @@ function TransferRow({
   onAccept,
   onReject,
   onCancel,
-  isPending,
+  isProcessingAccept,
+  isProcessingReject,
+  isProcessingCancel,
   isConfirming,
+  isAnyProcessing,
   formatAddress,
   formatDate,
   getStatusBadge,
@@ -820,10 +848,10 @@ function TransferRow({
             <Button
               size="sm"
               onClick={() => onAccept(transfer.id)}
-              disabled={isPending || isConfirming}
+              disabled={isAnyProcessing || isConfirming}
               className="bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 text-white"
             >
-              {isPending || isConfirming ? (
+              {isProcessingAccept || isConfirming ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 '✅ Aceptar'
@@ -834,10 +862,10 @@ function TransferRow({
             <Button
               size="sm"
               onClick={() => onReject(transfer.id)}
-              disabled={isPending || isConfirming}
+              disabled={isAnyProcessing || isConfirming}
               className="bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-600 text-white"
             >
-              {isPending || isConfirming ? (
+              {isProcessingReject || isConfirming ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 '❌ Rechazar'
@@ -848,10 +876,10 @@ function TransferRow({
             <Button
               size="sm"
               onClick={() => onCancel(transfer.id)}
-              disabled={isPending || isConfirming}
+              disabled={isAnyProcessing || isConfirming}
               className="bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white"
             >
-              {isPending || isConfirming ? (
+              {isProcessingCancel || isConfirming ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-1" />
                   Cancelando...
