@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useAccount } from 'wagmi'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -22,6 +23,22 @@ export function PauseControl() {
   const { data: isPaused, isLoading: isLoadingStatus } = useIsPaused()
   const { pause, isPending: isPausing, isConfirming: isConfirmingPause, isSuccess: pauseSuccess, error: pauseError } = usePause()
   const { unpause, isPending: isUnpausing, isConfirming: isConfirmingUnpause, isSuccess: unpauseSuccess, error: unpauseError } = useUnpause()
+  const { connector } = useAccount()
+  
+  // Obtener el nombre de la billetera conectada
+  const getWalletName = () => {
+    if (!connector) return 'your wallet'
+    
+    // Si es injected y MetaMask está instalado, mostrar MetaMask
+    if (connector.id === 'injected' && typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
+      return 'MetaMask'
+    }
+    
+    // Usar el nombre del conector
+    return connector.name || 'your wallet'
+  }
+  
+  const walletName = getWalletName()
   
   const [showPauseDialog, setShowPauseDialog] = useState(false)
   const [confirmationText, setConfirmationText] = useState('')
@@ -155,7 +172,36 @@ export function PauseControl() {
                   {unpauseError && (
                     <Alert className="rounded-xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur border-red-200 dark:border-red-800">
                       <AlertDescription className="text-red-700 dark:text-red-300">
-                        ❌ Error: {unpauseError.message}
+                        {(() => {
+                          const errorAny = unpauseError as any
+                          const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                          const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                          const errorMsg = unpauseError.message || String(unpauseError) || ''
+                          const errorStr = errorMsg.toLowerCase()
+                          const errorNameStr = errorName.toLowerCase()
+                          
+                          const isUserCancelled = 
+                            errorCode === 4001 ||
+                            errorNameStr.includes('userrejected') ||
+                            errorStr.includes('user rejected') ||
+                            errorStr.includes('user denied') ||
+                            errorStr.includes('user cancelled') ||
+                            errorStr.includes('transaction cancelled') ||
+                            errorStr.includes('cancelled by user')
+                          
+                          if (isUserCancelled) {
+                            return (
+                              <div>
+                                <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                                <p className="text-sm">
+                                  You cancelled the transaction in {walletName}. No changes were made.
+                                </p>
+                              </div>
+                            )
+                          }
+                          
+                          return `❌ Error: ${errorMsg}`
+                        })()}
                       </AlertDescription>
                     </Alert>
                   )}
@@ -193,7 +239,36 @@ export function PauseControl() {
                   {pauseError && (
                     <Alert className="rounded-xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur border-red-200 dark:border-red-800">
                       <AlertDescription className="text-red-700 dark:text-red-300">
-                        ❌ Error: {pauseError.message}
+                        {(() => {
+                          const errorAny = pauseError as any
+                          const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                          const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                          const errorMsg = pauseError.message || String(pauseError) || ''
+                          const errorStr = errorMsg.toLowerCase()
+                          const errorNameStr = errorName.toLowerCase()
+                          
+                          const isUserCancelled = 
+                            errorCode === 4001 ||
+                            errorNameStr.includes('userrejected') ||
+                            errorStr.includes('user rejected') ||
+                            errorStr.includes('user denied') ||
+                            errorStr.includes('user cancelled') ||
+                            errorStr.includes('transaction cancelled') ||
+                            errorStr.includes('cancelled by user')
+                          
+                          if (isUserCancelled) {
+                            return (
+                              <div>
+                                <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                                <p className="text-sm">
+                                  You cancelled the transaction in {walletName}. No changes were made.
+                                </p>
+                              </div>
+                            )
+                          }
+                          
+                          return `❌ Error: ${errorMsg}`
+                        })()}
                       </AlertDescription>
                     </Alert>
                   )}
@@ -377,7 +452,36 @@ export function PauseControl() {
               {unpauseError && (
                 <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
                   <AlertDescription className="text-red-700 dark:text-red-300">
-                    ❌ Error: {unpauseError.message}
+                    {(() => {
+                      const errorAny = unpauseError as any
+                      const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                      const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                      const errorMsg = unpauseError.message || String(unpauseError) || ''
+                      const errorStr = errorMsg.toLowerCase()
+                      const errorNameStr = errorName.toLowerCase()
+                      
+                      const isUserCancelled = 
+                        errorCode === 4001 ||
+                        errorNameStr.includes('userrejected') ||
+                        errorStr.includes('user rejected') ||
+                        errorStr.includes('user denied') ||
+                        errorStr.includes('user cancelled') ||
+                        errorStr.includes('transaction cancelled') ||
+                        errorStr.includes('cancelled by user')
+                      
+                      if (isUserCancelled) {
+                        return (
+                          <div>
+                            <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                            <p className="text-sm">
+                              You cancelled the transaction in MetaMask. No changes were made.
+                            </p>
+                          </div>
+                        )
+                      }
+                      
+                      return `❌ Error: ${errorMsg}`
+                    })()}
                   </AlertDescription>
                 </Alert>
               )}
@@ -416,7 +520,36 @@ export function PauseControl() {
               {pauseError && (
                 <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
                   <AlertDescription className="text-red-700 dark:text-red-300">
-                    ❌ Error: {pauseError.message}
+                    {(() => {
+                      const errorAny = pauseError as any
+                      const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                      const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                      const errorMsg = pauseError.message || String(pauseError) || ''
+                      const errorStr = errorMsg.toLowerCase()
+                      const errorNameStr = errorName.toLowerCase()
+                      
+                      const isUserCancelled = 
+                        errorCode === 4001 ||
+                        errorNameStr.includes('userrejected') ||
+                        errorStr.includes('user rejected') ||
+                        errorStr.includes('user denied') ||
+                        errorStr.includes('user cancelled') ||
+                        errorStr.includes('transaction cancelled') ||
+                        errorStr.includes('cancelled by user')
+                      
+                      if (isUserCancelled) {
+                        return (
+                          <div>
+                            <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                            <p className="text-sm">
+                              You cancelled the transaction in MetaMask. No changes were made.
+                            </p>
+                          </div>
+                        )
+                      }
+                      
+                      return `❌ Error: ${errorMsg}`
+                    })()}
                   </AlertDescription>
                 </Alert>
               )}

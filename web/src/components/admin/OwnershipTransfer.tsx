@@ -23,7 +23,22 @@ import { AddressDisplay } from '@/components/AddressDisplay'
 import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 export function OwnershipTransfer() {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, connector } = useAccount()
+  
+  // Obtener el nombre de la billetera conectada
+  const getWalletName = () => {
+    if (!connector) return 'your wallet'
+    
+    // Si es injected y MetaMask está instalado, mostrar MetaMask
+    if (connector.id === 'injected' && typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
+      return 'MetaMask'
+    }
+    
+    // Usar el nombre del conector
+    return connector.name || 'your wallet'
+  }
+  
+  const walletName = getWalletName()
   const { owner, isLoading: isLoadingOwner } = useContractOwner(isConnected)
   const { pendingOwner, isLoading: isLoadingPending } = usePendingOwner(isConnected)
   const { 
@@ -269,7 +284,36 @@ export function OwnershipTransfer() {
                 <Alert className="rounded-xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur border-red-200 dark:border-red-800">
                   <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                   <AlertDescription className="text-red-700 dark:text-red-300">
-                    ❌ Error al iniciar transferencia: {errorInitiate.message}
+                    {(() => {
+                      const errorAny = errorInitiate as any
+                      const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                      const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                      const errorMsg = errorInitiate.message || String(errorInitiate) || ''
+                      const errorStr = errorMsg.toLowerCase()
+                      const errorNameStr = errorName.toLowerCase()
+                      
+                      const isUserCancelled = 
+                        errorCode === 4001 ||
+                        errorNameStr.includes('userrejected') ||
+                        errorStr.includes('user rejected') ||
+                        errorStr.includes('user denied') ||
+                        errorStr.includes('user cancelled') ||
+                        errorStr.includes('transaction cancelled') ||
+                        errorStr.includes('cancelled by user')
+                      
+                      if (isUserCancelled) {
+                        return (
+                          <div>
+                            <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                            <p className="text-sm">
+                              You cancelled the transaction in {walletName}. No changes were made.
+                            </p>
+                          </div>
+                        )
+                      }
+                      
+                      return `❌ Error al iniciar transferencia: ${errorMsg}`
+                    })()}
                   </AlertDescription>
                 </Alert>
               )}
@@ -288,7 +332,36 @@ export function OwnershipTransfer() {
                 <Alert className="rounded-xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur border-red-200 dark:border-red-800">
                   <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                   <AlertDescription className="text-red-700 dark:text-red-300">
-                    ❌ Error al aceptar ownership: {errorAccept.message}
+                    {(() => {
+                      const errorAny = errorAccept as any
+                      const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                      const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                      const errorMsg = errorAccept.message || String(errorAccept) || ''
+                      const errorStr = errorMsg.toLowerCase()
+                      const errorNameStr = errorName.toLowerCase()
+                      
+                      const isUserCancelled = 
+                        errorCode === 4001 ||
+                        errorNameStr.includes('userrejected') ||
+                        errorStr.includes('user rejected') ||
+                        errorStr.includes('user denied') ||
+                        errorStr.includes('user cancelled') ||
+                        errorStr.includes('transaction cancelled') ||
+                        errorStr.includes('cancelled by user')
+                      
+                      if (isUserCancelled) {
+                        return (
+                          <div>
+                            <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                            <p className="text-sm">
+                              You cancelled the transaction in {walletName}. No changes were made.
+                            </p>
+                          </div>
+                        )
+                      }
+                      
+                      return `❌ Error al aceptar ownership: ${errorMsg}`
+                    })()}
                   </AlertDescription>
                 </Alert>
               )}
@@ -307,7 +380,36 @@ export function OwnershipTransfer() {
                 <Alert className="rounded-xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur border-red-200 dark:border-red-800">
                   <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                   <AlertDescription className="text-red-700 dark:text-red-300">
-                    ❌ Error al {isOwner ? 'cancelar' : 'rechazar'} transferencia: {errorReject.message}
+                    {(() => {
+                      const errorAny = errorReject as any
+                      const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                      const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                      const errorMsg = errorReject.message || String(errorReject) || ''
+                      const errorStr = errorMsg.toLowerCase()
+                      const errorNameStr = errorName.toLowerCase()
+                      
+                      const isUserCancelled = 
+                        errorCode === 4001 ||
+                        errorNameStr.includes('userrejected') ||
+                        errorStr.includes('user rejected') ||
+                        errorStr.includes('user denied') ||
+                        errorStr.includes('user cancelled') ||
+                        errorStr.includes('transaction cancelled') ||
+                        errorStr.includes('cancelled by user')
+                      
+                      if (isUserCancelled) {
+                        return (
+                          <div>
+                            <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                            <p className="text-sm">
+                              You cancelled the transaction in {walletName}. No changes were made.
+                            </p>
+                          </div>
+                        )
+                      }
+                      
+                      return `❌ Error al ${isOwner ? 'cancelar' : 'rechazar'} transferencia: ${errorMsg}`
+                    })()}
                   </AlertDescription>
                 </Alert>
               )}
@@ -671,7 +773,36 @@ export function OwnershipTransfer() {
             <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
               <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <AlertDescription className="text-red-700 dark:text-red-300">
-                ❌ Error al iniciar transferencia: {errorInitiate.message}
+                {(() => {
+                  const errorAny = errorInitiate as any
+                  const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                  const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                  const errorMsg = errorInitiate.message || String(errorInitiate) || ''
+                  const errorStr = errorMsg.toLowerCase()
+                  const errorNameStr = errorName.toLowerCase()
+                  
+                  const isUserCancelled = 
+                    errorCode === 4001 ||
+                    errorNameStr.includes('userrejected') ||
+                    errorStr.includes('user rejected') ||
+                    errorStr.includes('user denied') ||
+                    errorStr.includes('user cancelled') ||
+                    errorStr.includes('transaction cancelled') ||
+                    errorStr.includes('cancelled by user')
+                  
+                  if (isUserCancelled) {
+                    return (
+                      <div>
+                        <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                        <p className="text-sm">
+                          You cancelled the transaction in MetaMask. No changes were made.
+                        </p>
+                      </div>
+                    )
+                  }
+                  
+                  return `❌ Error al iniciar transferencia: ${errorMsg}`
+                })()}
               </AlertDescription>
             </Alert>
           )}
@@ -689,7 +820,36 @@ export function OwnershipTransfer() {
             <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
               <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <AlertDescription className="text-red-700 dark:text-red-300">
-                ❌ Error al aceptar ownership: {errorAccept.message}
+                {(() => {
+                  const errorAny = errorAccept as any
+                  const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                  const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                  const errorMsg = errorAccept.message || String(errorAccept) || ''
+                  const errorStr = errorMsg.toLowerCase()
+                  const errorNameStr = errorName.toLowerCase()
+                  
+                  const isUserCancelled = 
+                    errorCode === 4001 ||
+                    errorNameStr.includes('userrejected') ||
+                    errorStr.includes('user rejected') ||
+                    errorStr.includes('user denied') ||
+                    errorStr.includes('user cancelled') ||
+                    errorStr.includes('transaction cancelled') ||
+                    errorStr.includes('cancelled by user')
+                  
+                  if (isUserCancelled) {
+                    return (
+                      <div>
+                        <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                        <p className="text-sm">
+                          You cancelled the transaction in MetaMask. No changes were made.
+                        </p>
+                      </div>
+                    )
+                  }
+                  
+                  return `❌ Error al aceptar ownership: ${errorMsg}`
+                })()}
               </AlertDescription>
             </Alert>
           )}
@@ -707,7 +867,36 @@ export function OwnershipTransfer() {
             <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
               <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <AlertDescription className="text-red-700 dark:text-red-300">
-                ❌ Error al {isOwner ? 'cancelar' : 'rechazar'} transferencia: {errorReject.message}
+                {(() => {
+                  const errorAny = errorReject as any
+                  const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                  const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                  const errorMsg = errorReject.message || String(errorReject) || ''
+                  const errorStr = errorMsg.toLowerCase()
+                  const errorNameStr = errorName.toLowerCase()
+                  
+                  const isUserCancelled = 
+                    errorCode === 4001 ||
+                    errorNameStr.includes('userrejected') ||
+                    errorStr.includes('user rejected') ||
+                    errorStr.includes('user denied') ||
+                    errorStr.includes('user cancelled') ||
+                    errorStr.includes('transaction cancelled') ||
+                    errorStr.includes('cancelled by user')
+                  
+                  if (isUserCancelled) {
+                    return (
+                      <div>
+                        <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                        <p className="text-sm">
+                          You cancelled the transaction in MetaMask. No changes were made.
+                        </p>
+                      </div>
+                    )
+                  }
+                  
+                  return `❌ Error al ${isOwner ? 'cancelar' : 'rechazar'} transferencia: ${errorMsg}`
+                })()}
               </AlertDescription>
             </Alert>
           )}

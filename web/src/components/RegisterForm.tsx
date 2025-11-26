@@ -26,9 +26,24 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onRegistrationSuccess, userInfo, onShowSuccessChange, onRoleSubmitted }: RegisterFormProps = {}) {
   const [selectedRole, setSelectedRole] = useState<RoleType>('')
-  const { address } = useAccount()
+  const { address, connector } = useAccount()
   const { data: isPaused } = useIsPaused()
   const { requestRole, isPending: isTransactionPending, isConfirming, isSuccess, error, hash } = useRequestRole()
+  
+  // Obtener el nombre de la billetera conectada
+  const getWalletName = () => {
+    if (!connector) return 'your wallet'
+    
+    // Si es injected y MetaMask está instalado, mostrar MetaMask
+    if (connector.id === 'injected' && typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
+      return 'MetaMask'
+    }
+    
+    // Usar el nombre del conector
+    return connector.name || 'your wallet'
+  }
+  
+  const walletName = getWalletName()
   
   // CRÍTICO: Si el usuario está cancelado, NO puede solicitar un nuevo rol
   // Solo el administrador puede cambiar el estado de Canceled a Pending
@@ -288,7 +303,7 @@ export function RegisterForm({ onRegistrationSuccess, userInfo, onShowSuccessCha
                         <div>
                           <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
                           <p className="text-sm mb-2">
-                            You cancelled the transaction in MetaMask. No changes were made.
+                            You cancelled the transaction in {walletName}. No changes were made.
                           </p>
                           <p className="text-sm">
                             You can try again by clicking "Submit Registration" below.

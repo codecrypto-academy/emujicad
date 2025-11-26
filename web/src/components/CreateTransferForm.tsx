@@ -27,7 +27,22 @@ export function CreateTransferForm() {
   const { transfer, isPending, isConfirming, isSuccess, error: transferError, hash } = useTransfer()
   const { data: isPaused } = useIsPaused()
   const { userInfo, isAdmin } = useAuth()
-  const { address } = useAccount()
+  const { address, connector } = useAccount()
+  
+  // Obtener el nombre de la billetera conectada
+  const getWalletName = () => {
+    if (!connector) return 'your wallet'
+    
+    // Si es injected y MetaMask está instalado, mostrar MetaMask
+    if (connector.id === 'injected' && typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
+      return 'MetaMask'
+    }
+    
+    // Usar el nombre del conector
+    return connector.name || 'your wallet'
+  }
+  
+  const walletName = getWalletName()
   
   // Obtener usuarios filtrados por rol según el flujo de la cadena de suministro
   const { users: availableUsers, isLoading: isLoadingUsers, error: usersError, targetRole } = useUsersByRole(userInfo?.role)
@@ -401,10 +416,101 @@ export function CreateTransferForm() {
         )}
 
         {transferError && (
-          <Alert variant="destructive" className="mt-4">
-            <XCircle className="h-4 w-4" />
-            <AlertDescription>
-              Error: {transferError.message.split(':')[0]}
+          <Alert variant="destructive" className="mt-4 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+            <AlertDescription className="text-red-700 dark:text-red-300">
+              {(() => {
+                // Detectar error de cancelación de MetaMask de forma más robusta
+                const errorAny = transferError as any
+                const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                const errorMsg = transferError.message || String(transferError) || ''
+                const errorStr = errorMsg.toLowerCase()
+                const errorNameStr = errorName.toLowerCase()
+                
+                // Usuario canceló en MetaMask (código 4001 o UserRejectedRequestError)
+                const isUserCancelled = 
+                  errorCode === 4001 ||
+                  errorNameStr.includes('userrejected') ||
+                  errorStr.includes('user rejected') ||
+                  errorStr.includes('user denied') ||
+                  errorStr.includes('user cancelled') ||
+                  errorStr.includes('transaction cancelled') ||
+                  errorStr.includes('cancelled by user')
+                
+                if (isUserCancelled) {
+                  return (
+                    <div>
+                      <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                      <p className="text-sm">
+                        You cancelled the transaction in {walletName}. No changes were made.
+                      </p>
+                    </div>
+                  )
+                }
+                
+                // Errores del contrato
+                if (errorStr.includes('insufficient funds') || errorStr.includes('insufficient balance')) {
+                  return (
+                    <div>
+                      <p className="font-semibold mb-2">Insufficient Balance</p>
+                      <p className="text-sm">
+                        You don't have enough tokens to complete this transfer.
+                      </p>
+                    </div>
+                  )
+                }
+                
+                if (errorStr.includes('paused') || errorStr.includes('Paused')) {
+                  return (
+                    <div>
+                      <p className="font-semibold mb-2">Contract Paused</p>
+                      <p className="text-sm">
+                        The contract is currently paused. Please try again later.
+                      </p>
+                    </div>
+                  )
+                }
+                
+                // Error genérico de ejecución revertida
+                if (errorStr.includes('execution reverted') || errorStr.includes('reverted')) {
+                  return (
+                    <div>
+                      <p className="font-semibold mb-2">Transaction Rejected</p>
+                      <p className="text-sm">
+                        The transaction was rejected by the contract. This may happen if the recipient is invalid, the amount exceeds your balance, or the contract is paused.
+                      </p>
+                    </div>
+                  )
+                }
+                
+                // Error de dropped/rejected de MetaMask (pero no cancelación)
+                if (errorStr.includes('dropped') || (errorStr.includes('rejected') && !isUserCancelled)) {
+                  return (
+                    <div>
+                      <p className="font-semibold mb-2">Transaction Failed</p>
+                      <p className="text-sm">
+                        The transaction was dropped or rejected. Please check your balance and try again.
+                      </p>
+                    </div>
+                  )
+                }
+                
+                // Mostrar el mensaje completo solo en desarrollo
+                if (process.env.NODE_ENV === 'development') {
+                  return `Error: ${errorMsg}`
+                }
+                
+                // En producción, mostrar mensaje genérico
+                return (
+                  <div>
+                    <p className="font-semibold mb-2">Transaction Error</p>
+                    <p className="text-sm">
+                      An error occurred while creating the transfer. Please try again or contact support if the problem persists.
+                    </p>
+                  </div>
+                )
+              })()}
             </AlertDescription>
           </Alert>
         )}

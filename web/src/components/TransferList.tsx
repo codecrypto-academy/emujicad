@@ -40,7 +40,22 @@ interface TransferListProps {
 }
 
 export function TransferList({ userAddress }: TransferListProps): React.ReactElement {
-  const { address: connectedAddress } = useAccount()
+  const { address: connectedAddress, connector } = useAccount()
+  
+  // Obtener el nombre de la billetera conectada
+  const getWalletName = () => {
+    if (!connector) return 'your wallet'
+    
+    // Si es injected y MetaMask está instalado, mostrar MetaMask
+    if (connector.id === 'injected' && typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
+      return 'MetaMask'
+    }
+    
+    // Usar el nombre del conector
+    return connector.name || 'your wallet'
+  }
+  
+  const walletName = getWalletName()
   const addressToUse: `0x${string}` | undefined = userAddress || connectedAddress
   
   const { transfers, isLoading, error, totalTransfers, refetch: refetchTransfers } = useGetUserTransfers(addressToUse)
@@ -515,15 +530,29 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
               const errorMessage = actionError.message || String(actionError) || 'Unknown error occurred'
               
               // Detectar si el usuario rechazó la transacción en MetaMask
-              if (errorMessage.includes('User rejected') || 
-                  errorMessage.includes('User denied') || 
-                  errorMessage.includes('user rejected') ||
-                  errorMessage.includes('denied transaction')) {
+              const errorAny = actionError as any
+              const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+              const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+              const errorNameStr = errorName.toLowerCase()
+              
+              const isUserCancelled = 
+                errorCode === 4001 ||
+                errorNameStr.includes('userrejected') ||
+                errorMessage.includes('User rejected') || 
+                errorMessage.includes('User denied') || 
+                errorMessage.includes('user rejected') ||
+                errorMessage.includes('user denied') ||
+                errorMessage.includes('user cancelled') ||
+                errorMessage.includes('transaction cancelled') ||
+                errorMessage.includes('cancelled by user') ||
+                errorMessage.includes('denied transaction')
+              
+              if (isUserCancelled) {
                 return (
                   <div>
-                    <strong>Transaction Cancelled</strong>
+                    <strong>⚠️ Transaction Cancelled</strong>
                     <p className="mt-1 text-sm">
-                      You cancelled the transaction in MetaMask. No changes were made to the transfer.
+                      You cancelled the transaction in {walletName}. No changes were made.
                     </p>
                   </div>
                 )

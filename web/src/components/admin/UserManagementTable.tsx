@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useAccount } from 'wagmi'
 import { useGetAllUsers, useChangeUserStatus, UserStatus, UserRole, type User } from '@/hooks/useAdminUsers'
 import { useIsPaused } from '@/hooks/usePause'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -29,8 +30,24 @@ export function UserManagementTable() {
   const { users, isLoading, refetch } = useGetAllUsers()
   const { changeStatus, isPending, isSuccess, error, hash } = useChangeUserStatus()
   const { data: isPaused } = useIsPaused()
+  const { connector } = useAccount()
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [lastSuccessHash, setLastSuccessHash] = useState<string | null>(null)
+  
+  // Obtener el nombre de la billetera conectada
+  const getWalletName = () => {
+    if (!connector) return 'your wallet'
+    
+    // Si es injected y MetaMask está instalado, mostrar MetaMask
+    if (connector.id === 'injected' && typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
+      return 'MetaMask'
+    }
+    
+    // Usar el nombre del conector
+    return connector.name || 'your wallet'
+  }
+  
+  const walletName = getWalletName()
   
   // Activar diseño moderno si está habilitado
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
@@ -398,7 +415,37 @@ export function UserManagementTable() {
             {error && (
               <Alert className="mb-4 rounded-xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur border-red-200 dark:border-red-800">
                 <AlertDescription className="text-red-700 dark:text-red-300">
-                  ❌ Error: {error.message}
+                  {(() => {
+                    // Detectar error de cancelación de MetaMask
+                    const errorAny = error as any
+                    const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
+                    const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
+                    const errorMsg = error.message || String(error) || ''
+                    const errorStr = errorMsg.toLowerCase()
+                    const errorNameStr = errorName.toLowerCase()
+                    
+                    const isUserCancelled = 
+                      errorCode === 4001 ||
+                      errorNameStr.includes('userrejected') ||
+                      errorStr.includes('user rejected') ||
+                      errorStr.includes('user denied') ||
+                      errorStr.includes('user cancelled') ||
+                      errorStr.includes('transaction cancelled') ||
+                      errorStr.includes('cancelled by user')
+                    
+                    if (isUserCancelled) {
+                      return (
+                        <div>
+                          <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
+                          <p className="text-sm">
+                            You cancelled the transaction in {walletName}. No changes were made.
+                          </p>
+                        </div>
+                      )
+                    }
+                    
+                    return `❌ Error: ${errorMsg}`
+                  })()}
                 </AlertDescription>
               </Alert>
             )}
