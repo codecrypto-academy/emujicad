@@ -2,8 +2,8 @@
 .archive/
 
 # Dependencies
-node_modules/
-*/node_modules/
+#node_modules/
+#*/node_modules/
 
 # Build outputs
 dist/
