@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Pause } from 'lucide-react'
+import { Pause, Loader2 } from 'lucide-react'
 import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 export function UserManagementTable() {
@@ -33,6 +33,8 @@ export function UserManagementTable() {
   const { connector } = useAccount()
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [lastSuccessHash, setLastSuccessHash] = useState<string | null>(null)
+  // Rastrear qué usuario y qué acción se está procesando
+  const [processingAction, setProcessingAction] = useState<{ userAddress: string; action: UserStatus } | null>(null)
   
   // Obtener el nombre de la billetera conectada
   const getWalletName = () => {
@@ -68,10 +70,18 @@ export function UserManagementTable() {
         console.log('✅ Transacción exitosa, recargando usuarios...')
         refetch()
         setLastSuccessHash(hash)
+        setProcessingAction(null) // Limpiar la acción procesada
       }, 2000) // Esperar 2s para que se confirme en blockchain
       return () => clearTimeout(timer)
     }
   }, [isSuccess, hash, lastSuccessHash, refetch])
+  
+  // Limpiar processingAction cuando la transacción falla o se cancela
+  useEffect(() => {
+    if (error && processingAction !== null) {
+      setProcessingAction(null)
+    }
+  }, [error, processingAction])
 
   // Filtrar usuarios por estado
   const filteredUsers = filterStatus === 'all' 
@@ -147,6 +157,7 @@ export function UserManagementTable() {
   }
 
   const handleStatusChange = (userAddress: string, newStatus: UserStatus) => {
+    setProcessingAction({ userAddress, action: newStatus })
     changeStatus(userAddress, newStatus)
   }
 
@@ -495,19 +506,31 @@ export function UserManagementTable() {
                           </span>
                         ) : (
                           <div className="flex gap-2 justify-end">
-                            {actions.map((action) => (
-                              <Button
-                                key={action.value}
-                                size="sm"
-                                className={`${action.color} ${useModernDesign ? 'rounded-xl' : ''}`}
-                                onClick={() => handleStatusChange(user.userAddress, action.value)}
-                                disabled={isPending || isPaused === true}
-                                aria-label={`${action.label} user ${user.userAddress.slice(0, 6)}...${user.userAddress.slice(-4)}`}
-                                aria-disabled={isPending || isPaused === true}
-                              >
-                                {action.label}
-                              </Button>
-                            ))}
+                            {actions.map((action) => {
+                              // Determinar si esta acción específica está siendo procesada
+                              const isThisActionProcessing = isPending && 
+                                                             processingAction?.userAddress === user.userAddress && 
+                                                             processingAction?.action === action.value
+                              const isAnyProcessing = isPending && processingAction !== null && processingAction.userAddress === user.userAddress
+                              
+                              return (
+                                <Button
+                                  key={action.value}
+                                  size="sm"
+                                  className={`${action.color} ${useModernDesign ? 'rounded-xl' : ''}`}
+                                  onClick={() => handleStatusChange(user.userAddress, action.value)}
+                                  disabled={isAnyProcessing || isPaused === true}
+                                  aria-label={`${action.label} user ${user.userAddress.slice(0, 6)}...${user.userAddress.slice(-4)}`}
+                                  aria-disabled={isAnyProcessing || isPaused === true}
+                                >
+                                  {isThisActionProcessing ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    action.label
+                                  )}
+                                </Button>
+                              )
+                            })}
                           </div>
                         )}
                       </TableCell>
@@ -633,19 +656,31 @@ export function UserManagementTable() {
                             </span>
                           ) : (
                             <div className="flex gap-2 justify-end">
-                              {actions.map((action) => (
-                                <Button
-                                  key={action.value}
-                                  size="sm"
-                                  className={action.color}
-                                  onClick={() => handleStatusChange(user.userAddress, action.value)}
-                                  disabled={isPending || isPaused === true}
-                                  aria-label={`${action.label} user ${user.userAddress.slice(0, 6)}...${user.userAddress.slice(-4)}`}
-                                  aria-disabled={isPending || isPaused === true}
-                                >
-                                  {action.label}
-                                </Button>
-                              ))}
+                              {actions.map((action) => {
+                                // Determinar si esta acción específica está siendo procesada
+                                const isThisActionProcessing = isPending && 
+                                                               processingAction?.userAddress === user.userAddress && 
+                                                               processingAction?.action === action.value
+                                const isAnyProcessing = isPending && processingAction !== null && processingAction.userAddress === user.userAddress
+                                
+                                return (
+                                  <Button
+                                    key={action.value}
+                                    size="sm"
+                                    className={action.color}
+                                    onClick={() => handleStatusChange(user.userAddress, action.value)}
+                                    disabled={isAnyProcessing || isPaused === true}
+                                    aria-label={`${action.label} user ${user.userAddress.slice(0, 6)}...${user.userAddress.slice(-4)}`}
+                                    aria-disabled={isAnyProcessing || isPaused === true}
+                                  >
+                                    {isThisActionProcessing ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      action.label
+                                    )}
+                                  </Button>
+                                )
+                              })}
                             </div>
                           )}
                         </TableCell>
