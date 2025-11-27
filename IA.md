@@ -1,9 +1,9 @@
 # 🤖 Retrospectiva del Uso de IA - Supply Chain Tracker
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**  
+> **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](./STATUS.md)**  
 > **📚 Para índice completo de documentación, consulta [INDEX.md](./INDEX.md)**  
 > **⚠️ HISTORICAL DOCUMENT - November 2025**  
-> Este documento refleja la retrospectiva histórica del uso de IA durante el desarrollo del proyecto (Días 1-7). Para el estado actual del proyecto, ver PROJECT_STATUS.md.
+> Este documento refleja la retrospectiva histórica del uso de IA durante el desarrollo del proyecto (Días 1-7). Para el estado actual del proyecto, ver STATUS.md.
 
 **Proyecto**: Supply Chain Tracker DApp  
 **Fecha de inicio**: 18 de Noviembre, 2025  
@@ -1629,7 +1629,7 @@ Durante las 5 sesiones de desarrollo, se gestionó eficientemente el contexto:
 - Métricas actualizadas en todos los docs
 
 **Archivos de referencia**:
-- `PROJECT_STATUS.md`
+- `STATUS.md`
 - `QUICKSTART.md`
 - `docs/reports/ACADEMIC_ASSESSMENT.md`
 - `docs/reports/PROYECTO_EVALUACION_COMPLETA.md`
@@ -1808,10 +1808,9 @@ Durante las 5 sesiones de desarrollo, se gestionó eficientemente el contexto:
 ## 📚 Referencias Relacionadas
 
 **Documentación del Proyecto**:
-- [PROJECT_STATUS.md](./PROJECT_STATUS.md) - Estado actual del proyecto (single source of truth)
+- [STATUS.md](./STATUS.md) - Estado actual del proyecto (single source of truth)
 - [INDEX.md](./INDEX.md) - Índice completo de documentación
 - [QUICKSTART.md](./QUICKSTART.md) - Guía rápida de inicio
-- [ESTADO_CONTRATO_INTELIGENTE.md](./ESTADO_CONTRATO_INTELIGENTE.md) - Estado y métricas del contrato inteligente
 
 **Reportes Históricos Relacionados**:
 - [docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md) - Resumen ejecutivo Día 1
@@ -1821,13 +1820,11 @@ Durante las 5 sesiones de desarrollo, se gestionó eficientemente el contexto:
 
 **Documentación Técnica**:
 - [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) - Documentación técnica completa
-- [docs/sc/TESTING.md](./docs/sc/TESTING.md) - Documentación completa de tests (108 tests)
-- [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md) - Referencia completa de API
-- [docs/fe/HOOKS.md](./docs/fe/HOOKS.md) - Documentación completa de hooks (24 hooks)
-- [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) - Documentación completa de componentes (26 componentes)
+- [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md) - Documentación completa del smart contract (108 tests)
+- [docs/FRONTEND.md](./docs/FRONTEND.md) - Documentación completa del frontend (24 hooks, 26 componentes)
 
 **Scripts y Deployment**:
 - [deploy.sh](./deploy.sh) - Script de deployment automatizado (v2.0.0)
 - [docs/reports/TESTING_REPORT.md](./docs/reports/TESTING_REPORT.md) - Reporte de pruebas del script deploy.sh
 
-> **📚 Nota**: Este documento refleja la retrospectiva histórica del uso de IA durante el desarrollo. Para el estado actual del proyecto, métricas actualizadas y próximos pasos, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)
+> **📚 Nota**: Este documento refleja la retrospectiva histórica del uso de IA durante el desarrollo. Para el estado actual del proyecto, métricas actualizadas y próximos pasos, consulta [STATUS.md](./STATUS.md)

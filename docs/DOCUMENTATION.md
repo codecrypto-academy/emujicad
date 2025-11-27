@@ -45,7 +45,7 @@ Supply Chain Tracker es una DApp descentralizada para gestionar cadenas de sumin
 
 ### **Métricas del Proyecto**:
 
-> **📋 Para métricas actualizadas, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para métricas actualizadas, consulta [STATUS.md](../STATUS.md)**
 
 - **Smart Contract**: 970+ líneas de código
 - **Tests**: 108 tests (100% passing) - 64 core + 44 edge cases

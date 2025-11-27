@@ -65,7 +65,7 @@ web/src/components/
 **Total componentes personalizados**: 26 implementados  
 **Componentes Shadcn UI**: 11 componentes (button, card, input, label, select, table, badge, dialog, alert, skeleton, textarea)
 
-> **📚 Ver documentación completa**: [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)
+> **📚 Ver documentación completa**: [docs/FRONTEND.md](./docs/FRONTEND.md)
 
 ### 🎨 Diseño Moderno 2025 ⭐ NUEVO
 **Características implementadas**:
@@ -86,7 +86,7 @@ web/src/components/
 
 ### 🪝 Hooks Personalizados
 
-> **📚 Para documentación completa de todos los hooks, consulta [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)**
+> **📚 Para documentación completa de todos los hooks, consulta [docs/FRONTEND.md](./docs/FRONTEND.md)**
 
 **Total**: 24 hooks personalizados (14 archivos) ✅
 
@@ -110,7 +110,7 @@ web/src/hooks/
 └── useTokenTraceability.ts    ✅ Trazabilidad end-to-end ⭐ Día 8
 ```
 
-> **📚 Ver lista completa y documentación detallada**: [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)
+> **📚 Ver lista completa y documentación detallada**: [docs/FRONTEND.md](./docs/FRONTEND.md)
 
 ### 📁 Directorio `contexts/`
 
@@ -487,13 +487,10 @@ Ver **[docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-trouble
 - [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) - Guía técnica completa
 
 **Frontend**:
-- [docs/fe/SETUP.md](./docs/fe/SETUP.md) - Setup y configuración
-- [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) - Componentes
-- [docs/fe/HOOKS.md](./docs/fe/HOOKS.md) - Hooks personalizados
+- [docs/FRONTEND.md](./docs/FRONTEND.md) - Documentación completa del frontend
 
 **Smart Contract**:
-- [docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md) - Arquitectura
-- [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md) - Referencia API
+- [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md) - Documentación completa del smart contract
 
 ### Tecnologías
 - [Solidity Docs](https://docs.soliditylang.org/)
