@@ -10,7 +10,7 @@ Complete documentation of the Supply Chain Tracker project frontend, developed w
 
 ## 📋 Table of Contents
 
-1. [Setup y Configuración](#setup-y-configuración)
+1. [Setup and Configuration](#setup-and-configuration)
 2. [Web3 Architecture](#web3-architecture)
 3. [Components](#components)
 4. [Custom Hooks](#custom-hooks)

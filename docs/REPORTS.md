@@ -290,22 +290,22 @@ The project is in an EXCEPTIONAL state for the smart contract part (blockchain b
 - ✅ Accesibilidad WCAG 2.1 AA
 - ✅ Animaciones y transiciones suaves
 
-#### Métricas de Calidad
+#### Quality Metrics
 
-| Aspecto | Home | Dashboard | Admin Users | Promedio |
-|---------|------|-----------|-------------|----------|
-| **Código** | 7.0 | 8.0 | 7.5 | **7.5** |
+| Aspect | Home | Dashboard | Admin Users | Average |
+|--------|------|-----------|-------------|---------|
+| **Code** | 7.0 | 8.0 | 7.5 | **7.5** |
 | **UX** | 7.5 | 8.5 | 7.0 | **7.7** |
-| **Seguridad** | 8.0 | 8.5 | 8.5 | **8.3** |
+| **Security** | 8.0 | 8.5 | 8.5 | **8.3** |
 | **Performance** | 7.5 | 8.0 | 7.0 | **7.5** |
-| **Manejo Errores** | 8.0 | 8.5 | 8.0 | **8.2** |
+| **Error Handling** | 8.0 | 8.5 | 8.0 | **8.2** |
 | **TypeScript** | 8.5 | 8.5 | 8.0 | **8.3** |
-| **Accesibilidad** | 7.5 | 8.0 | 7.5 | **7.7** |
-| **Documentación** | 7.0 | 7.0 | 7.0 | **7.0** |
+| **Accessibility** | 7.5 | 8.0 | 7.5 | **7.7** |
+| **Documentation** | 7.0 | 7.0 | 7.0 | **7.0** |
 
-**Puntuación General**: **8.0/10** ⬆️
+**Overall Score**: **8.0/10** ⬆️
 
-**Referencia**: Para información detallada sobre páginas y navegación, consulta [docs/FRONTEND.md](./FRONTEND.md)
+**Reference**: For detailed information about pages and navigation, see [docs/FRONTEND.md](./FRONTEND.md)
 
 ---
 

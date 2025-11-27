@@ -65,7 +65,7 @@ Supply Chain Tracker is a decentralized DApp for managing supply chains through 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    USUARIOS (MetaMask)                      │
+│                    USERS (MetaMask)                      │
 └─────────────────────┬───────────────────────────────────────┘
                       │
                       │ HTTP
@@ -232,7 +232,7 @@ Functions:  80.95% (34/42)
 ```bash
 cd sc
 
-# Todos los tests
+# All tests
 forge test
 
 # Con verbosidad
@@ -257,12 +257,12 @@ forge coverage
 web/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx          # Root layout con providers
-│   │   ├── page.tsx            # Landing page con stats
-│   │   ├── globals.css         # Estilos globales
+│   │   ├── layout.tsx          # Root layout with providers
+│   │   ├── page.tsx            # Landing page with stats
+│   │   ├── globals.css         # Global styles
 │   │   └── admin/
 │   │       └── users/
-│   │           └── page.tsx    # Admin panel - gestión usuarios
+│   │           └── page.tsx    # Admin panel - user management
 │   │
 │   ├── components/
 │   │   ├── ui/                 # Shadcn UI components (9)
@@ -276,47 +276,47 @@ web/
 │   │   │   ├── dialog.tsx
 │   │   │   └── alert.tsx
 │   │   │
-│   │   ├── admin/              # Componentes admin
-│   │   │   ├── UserManagementTable.tsx  # Tabla + filtros + acciones
-│   │   │   └── UserStatsCards.tsx       # Cards estadísticas
+│   │   ├── admin/              # Admin components
+│   │   │   ├── UserManagementTable.tsx  # Table + filters + actions
+│   │   │   └── UserStatsCards.tsx       # Statistics cards
 │   │   │
-│   │   ├── ConnectWallet.tsx   # Conexión wallet
-│   │   ├── Header.tsx          # Navegación unificada + branding
-│   │   ├── ThemeToggle.tsx     # Modo claro/oscuro
-│   │   ├── RegisterForm.tsx    # Formulario registro usuarios
-│   │   └── ChangeRoleDialog.tsx # Diálogo cambiar rol
+│   │   ├── ConnectWallet.tsx   # Wallet connection
+│   │   ├── Header.tsx          # Unified navigation + branding
+│   │   ├── ThemeToggle.tsx     # Light/dark mode
+│   │   ├── RegisterForm.tsx    # User registration form
+│   │   └── ChangeRoleDialog.tsx # Change role dialog
 │   │
 │   ├── contexts/
 │   │   └── Web3Context.tsx     # Multi-tab sync
 │   │
 │   ├── contracts/
-│   │   ├── config.ts           # Dirección + ABI + Enums
-│   │   └── SupplyChain.json    # ABI del contrato
+│   │   ├── config.ts           # Address + ABI + Enums
+│   │   └── SupplyChain.json    # Contract ABI
 │   │
 │   ├── hooks/
-│   │   ├── useContractReads.ts    # 5 hooks de lectura
-│   │   ├── useRequestRole.ts      # Solicitar rol
-│   │   ├── useCreateToken.ts      # Crear token
-│   │   ├── useTransfer.ts         # 4 hooks transferencias
-│   │   ├── useAdminUsers.ts       # 2 hooks admin (getAllUsers, changeStatus)
-│   │   ├── useContractOwner.ts    # Verificar ownership
-│   │   ├── useGetUserTokens.ts    # 4 hooks tokens (getUserTokens, getToken, getTokenBalance, useGetAllTokens)
-│   │   ├── usePause.ts            # 3 hooks pausa (isPaused, pause, unpause)
-│   │   ├── useUserTokenStats.ts   # Estadísticas por tipo
-│   │   ├── useGetUserTokensWithData.ts # Tokens con datos completos
-│   │   └── useGetUserTransfers.ts # Transferencias de un usuario
+│   │   ├── useContractReads.ts    # 5 read hooks
+│   │   ├── useRequestRole.ts      # Request role
+│   │   ├── useCreateToken.ts      # Create token
+│   │   ├── useTransfer.ts         # 4 transfer hooks
+│   │   ├── useAdminUsers.ts       # 2 admin hooks (getAllUsers, changeStatus)
+│   │   ├── useContractOwner.ts    # Verify ownership
+│   │   ├── useGetUserTokens.ts    # 4 token hooks (getUserTokens, getToken, getTokenBalance, useGetAllTokens)
+│   │   ├── usePause.ts            # 3 pause hooks (isPaused, pause, unpause)
+│   │   ├── useUserTokenStats.ts   # Statistics by type
+│   │   ├── useGetUserTokensWithData.ts # Tokens with complete data
+│   │   └── useGetUserTransfers.ts # User transfers
 │   │
 │   └── lib/
 │       ├── utils.ts            # cn() helper
 │       └── wagmi-config.ts     # Config Anvil
 │
-├── public/                     # Assets estáticos
+├── public/                     # Static assets
 ├── package.json                # Dependencias
 ├── tsconfig.json               # TypeScript config
 ├── tailwind.config.js          # Tailwind config
 ├── next.config.ts              # Next.js config
 ├── components.json             # Shadcn config
-└── README.md                   # Documentación frontend
+└── README.md                   # Frontend documentation
 ```
 
 ### **Web3 Configuration**:
@@ -338,13 +338,13 @@ export const config = createConfig({
 
 #### **contracts/config.ts**:
 ```typescript
-// Dirección del contrato (actualizada automáticamente por deploy.sh)
+// Contract address (automatically updated by deploy.sh)
 export const SUPPLY_CHAIN_ADDRESS = '0x5FbDB...' as `0x${string}`
 
-// ABI importado
+// Imported ABI
 export const SUPPLY_CHAIN_ABI = SupplyChainArtifact.abi
 
-// Enums (deben coincidir exactamente con Solidity)
+// Enums (must match exactly with Solidity)
 export enum UserRole { Producer = 0, Manufacturer = 1, ... }
 export enum UserStatus { Pending = 0, Approved = 1, ... }
 export enum TokenType { RowMaterial = 0, FinishedProduct = 1 }
@@ -367,27 +367,27 @@ useTotalUsers() → { data: bigint, isLoading, error }
 useTotalTransfers() → { data: bigint, isLoading, error }
 ```
 
-#### **useRequestRole.ts** (Escritura):
+#### **useRequestRole.ts** (Write):
 ```typescript
 const { requestRole, isPending, isConfirming, isSuccess, hash } = useRequestRole()
 
-// Uso
+// Usage
 requestRole(UserRole.Producer)
 ```
 
-#### **useCreateToken.ts** (Escritura):
+#### **useCreateToken.ts** (Write):
 ```typescript
 const { createToken, isPending, isConfirming, isSuccess } = useCreateToken()
 
-// Uso
+// Usage
 createToken('Madera', TokenType.RowMaterial, BigInt(1000), '{}', BigInt(0))
 ```
 
-#### **useTransfer.ts** (Escritura):
+#### **useTransfer.ts** (Write):
 ```typescript
 const { transfer, acceptTransfer, rejectTransfer, cancelTransfer, isPending } = useTransfer()
 
-// Uso
+// Usage
 transfer('0x123...', BigInt(1), BigInt(100))
 acceptTransfer(BigInt(5))
 ```
@@ -406,10 +406,10 @@ acceptTransfer(BigInt(5))
 ```
 
 #### **Landing Page (page.tsx)**:
-- Header con título + ConnectWallet
-- Stats cards (tokens, users, transfers) cuando está conectado
-- Mensaje de bienvenida dinámico
-- Diseño responsive (Tailwind)
+- Header with title + ConnectWallet
+- Stats cards (tokens, users, transfers) when connected
+- Dynamic welcome message
+- Responsive design (Tailwind)
 
 ---
 
@@ -431,7 +431,7 @@ Complete bash script that automates the ENTIRE deployment process.
 # Ver estado
 ./deploy.sh status
 
-# Instrucciones MetaMask
+# MetaMask instructions
 ./deploy.sh metamask
 
 # Detener todo
@@ -443,94 +443,94 @@ Complete bash script that automates the ENTIRE deployment process.
 
 ### **Flow of `./deploy.sh start`**:
 
-#### **PASO 1: Iniciar Anvil**
+#### **STEP 1: Start Anvil**
 ```bash
-# El script ejecuta:
+# The script executes:
 nohup anvil \
     --host 127.0.0.1 \
     --port 8545 \
     --chain-id 31337 \
     > logs/anvil.log 2>&1 &
 
-# Guarda PID en logs/anvil.pid
-# Espera a que el puerto 8545 esté disponible
-# Verifica que Anvil esté corriendo
+# Saves PID in logs/anvil.pid
+# Waits for port 8545 to be available
+# Verifies that Anvil is running
 ```
 
-**Resultado**:
-- ✅ Anvil corriendo en `http://127.0.0.1:8545`
-- ✅ 10 cuentas con 10,000 ETH cada una
+**Result**:
+- ✅ Anvil running at `http://127.0.0.1:8545`
+- ✅ 10 accounts with 10,000 ETH each
 - ✅ Chain ID: 31337
-- ✅ Logs en `logs/anvil.log`
+- ✅ Logs in `logs/anvil.log`
 
-#### **PASO 2: Desplegar Contrato**
+#### **STEP 2: Deploy Contract**
 ```bash
-# El script ejecuta:
+# The script executes:
 cd sc
 PRIVATE_KEY=0xac097... forge script \
     script/SupplyChainDeploy.s.sol:SupplyChainDeployScript \
     --rpc-url http://127.0.0.1:8545 \
     --broadcast
 
-# Extrae la dirección del contrato del output
-# Guarda en logs/contract_address.txt
+# Extracts contract address from output
+# Saves in logs/contract_address.txt
 ```
 
-**Resultado**:
-- ✅ Contrato desplegado en dirección `0x5FbDB...`
+**Result**:
+- ✅ Contract deployed at address `0x5FbDB...`
 - ✅ Owner: `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`
-- ✅ Logs en `logs/deploy.log`
+- ✅ Logs in `logs/deploy.log`
 
-#### **PASO 3: Actualizar Frontend Config**
+#### **STEP 3: Update Frontend Config**
 ```bash
-# El script ejecuta:
-# 1. Hace backup de config.ts
+# The script executes:
+# 1. Makes backup of config.ts
 cp web/src/contracts/config.ts web/src/contracts/config.ts.backup
 
-# 2. Actualiza SUPPLY_CHAIN_ADDRESS con sed
+# 2. Updates SUPPLY_CHAIN_ADDRESS with sed
 sed -i "s/0x[a-fA-F0-9]\{40\}/$contract_address/" config.ts
 
-# 3. Verifica que se actualizó correctamente
+# 3. Verifies that it was updated correctly
 ```
 
-**Resultado**:
-- ✅ `config.ts` actualizado con nueva dirección
-- ✅ Backup guardado en `config.ts.backup`
+**Result**:
+- ✅ `config.ts` updated with new address
+- ✅ Backup saved in `config.ts.backup`
 
-#### **PASO 4: Iniciar Frontend**
+#### **STEP 4: Start Frontend**
 ```bash
-# El script ejecuta:
+# The script executes:
 cd web
 nohup npm run dev > logs/frontend.log 2>&1 &
 
-# Guarda PID en logs/frontend.pid
-# Espera a que el puerto 3000 esté disponible
-# Verifica que Next.js esté corriendo
+# Save PID in logs/frontend.pid
+# Waits for port 3000 to be available
+# Verifies that Next.js is running
 ```
 
-**Resultado**:
-- ✅ Frontend corriendo en `http://localhost:3000`
-- ✅ Logs en `logs/frontend.log`
+**Result**:
+- ✅ Frontend running at `http://localhost:3000`
+- ✅ Logs in `logs/frontend.log`
 
-#### **PASO 5: Mostrar Instrucciones**
+#### **STEP 5: Show Instructions**
 ```bash
-# El script muestra:
-# - URLs de acceso (Anvil + Frontend)
-# - Dirección del contrato
-# - Instrucciones de MetaMask
-# - Comandos útiles (status, stop)
+# The script shows:
+# - Access URLs (Anvil + Frontend)
+# - Contract address
+# - MetaMask instructions
+# - Useful commands (status, stop)
 ```
 
 ### **Logs Structure**:
 
 ```
 logs/
-├── anvil.log              # Output completo de Anvil
-├── anvil.pid              # PID del proceso Anvil
-├── anvil_state.json       # Estado persistente de Anvil (tokens, transferencias, usuarios)
-├── frontend.log           # Output de Next.js dev server
-├── frontend.pid           # PID del proceso Next.js
-├── deploy.log             # Output del deployment Foundry
+├── anvil.log              # Complete Anvil output
+├── anvil.pid              # Anvil process PID
+├── anvil_state.json       # Persistent Anvil state (tokens, transfers, users)
+├── frontend.log           # Next.js dev server output
+├── frontend.pid           # Next.js process PID
+├── deploy.log             # Foundry deployment output
 └── contract_address.txt   # Dirección del contrato deployado
 ```
 
@@ -741,7 +741,7 @@ The script manages processes intelligently:
 - **PIDs persistentes**: Guarda PIDs para detener servicios correctamente
 - **Logs separados**: Cada servicio tiene su propio archivo de log
 - **Graceful shutdown**: Intenta SIGTERM primero, luego SIGKILL si es necesario
-- **Validación de estado**: Espera a que los servicios estén listos antes de continuar
+- **State validation**: Waits for services to be ready before continuing
 
 ---
 
@@ -770,11 +770,11 @@ The script manages processes intelligently:
 - Private Key: `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`
 - Balance: 10,000 ETH
 
-**Pasos**:
-1. Clic en icono de cuenta (arriba derecha)
+**Steps**:
+1. Click on account icon (top right)
 2. "Import Account"
-3. Seleccionar "Private Key"
-4. Pegar el private key de arriba
+3. Select "Private Key"
+4. Paste the private key from above
 5. "Import"
 
 ⚠️ **IMPORTANTE**: Este private key es SOLO para desarrollo local. NUNCA usar en mainnet.
@@ -858,7 +858,7 @@ Anvil genera 15 cuentas usando el mnemonic determinístico. Las cuentas #0-9 est
 ```bash
 cd sc
 
-# Todos los tests
+# All tests
 forge test
 
 # Con verbosidad
@@ -952,7 +952,7 @@ PRIVATE_KEY=0xac09... forge script script/SupplyChainDeploy.s.sol --rpc-url http
 
 **Solutions**:
 ```bash
-# 1. Verificar que MetaMask esté en red Anvil Local (Chain ID: 31337)
+# 1. Verify that MetaMask is on Anvil Local network (Chain ID: 31337)
 # 2. Refrescar la página (F5)
 # 3. Ver logs del frontend
 cat logs/frontend.log
@@ -1032,63 +1032,63 @@ This is **NORMAL** at the start. The newly deployed contract doesn't have:
 - [x] Frontend base con Next.js 16 + TypeScript + Tailwind
 - [x] Integración Web3 con wagmi + viem + ethers
 - [x] Componentes UI con Shadcn (9 componentes)
-- [x] 15 hooks personalizados (5 lectura + 7 escritura + 3 admin)
-- [x] Script de deployment automatizado (`deploy.sh`)
-- [x] Documentación completa del proyecto
-- [x] Conexión MetaMask funcionando
-- [x] Landing page con stats en tiempo real
-- [x] Header unificado con navegación y branding
-- [x] Theme toggle (modo claro/oscuro) con persistencia por usuario ⭐ Día 4
-- [x] Admin panel completo (gestión de usuarios)
-- [x] Formulario de registro con validaciones
-- [x] Multi-tab synchronization (parcial: solo desconexiones, reconexión automática POSTPONED)
-- [x] Seguridad: restricciones por rol y estado
-- [x] Dashboard completo con perfil, tokens y acciones ⭐ Día 4
-- [x] Sistema de pausabilidad completo integrado ⭐ Día 4
-- [x] AuthContext optimizado para redirecciones rápidas ⭐ Día 4
-- [x] Página de Tokens (lista) con filtros y búsqueda ⭐ Día 5
-- [x] Página de Crear Token con validaciones ⭐ Día 6
-- [x] Diseño Moderno 2025 aplicado a 6 páginas ⭐ Día 6-7
-- [x] Página de Transferencias completa con CreateTransferForm ⭐ Día 7
-- [x] Componentes nuevos: CreateTransferForm, UserTokenList, AddressDisplay ⭐ Día 7
-- [x] Hooks nuevos: useGetUserTransfers, useUserTokenStats, useGetUserTokensWithData ⭐ Día 7
-- [x] Panel Admin principal (`/admin`) ⭐ Día 8
-- [x] Página de Detalles de Token (`/tokens/[id]`) con trazabilidad end-to-end ⭐ Día 8
-- [x] Página de Transferir desde Detalles (`/tokens/[id]/transfer`) ⭐ Día 8
-- [x] Hook `useGetAllTransfers` para estadísticas del sistema ⭐ Día 8
-- [x] Hook `useTokenTraceability` para árbol jerárquico ⭐ Día 8
-- [x] Componente `TraceabilityTimeline` con expand/collapse ⭐ Día 8
-- [x] Validaciones críticas del contrato (5 validaciones) ⭐ Día 7
-- [x] Tests adicionales (108 tests totales, 85.60% coverage, 72.15% branches) ⭐ Día 7
+- [x] 15 custom hooks (5 read + 7 write + 3 admin)
+- [x] Automated deployment script (`deploy.sh`)
+- [x] Complete project documentation
+- [x] MetaMask connection working
+- [x] Landing page with real-time stats
+- [x] Unified header with navigation and branding
+- [x] Theme toggle (light/dark mode) with per-user persistence ⭐ Day 4
+- [x] Complete admin panel (user management)
+- [x] Registration form with validations
+- [x] Multi-tab synchronization (partial: only disconnections, automatic reconnection POSTPONED)
+- [x] Security: role and status restrictions
+- [x] Complete dashboard with profile, tokens and actions ⭐ Day 4
+- [x] Complete integrated pausability system ⭐ Day 4
+- [x] AuthContext optimized for fast redirects ⭐ Day 4
+- [x] Tokens page (list) with filters and search ⭐ Day 5
+- [x] Create Token page with validations ⭐ Day 6
+- [x] Modern Design 2025 applied to 6 pages ⭐ Day 6-7
+- [x] Complete Transfers page with CreateTransferForm ⭐ Day 7
+- [x] New components: CreateTransferForm, UserTokenList, AddressDisplay ⭐ Day 7
+- [x] New hooks: useGetUserTransfers, useUserTokenStats, useGetUserTokensWithData ⭐ Day 7
+- [x] Main Admin panel (`/admin`) ⭐ Day 8
+- [x] Token Details page (`/tokens/[id]`) with end-to-end traceability ⭐ Day 8
+- [x] Transfer from Details page (`/tokens/[id]/transfer`) ⭐ Day 8
+- [x] `useGetAllTransfers` hook for system statistics ⭐ Day 8
+- [x] `useTokenTraceability` hook for hierarchical tree ⭐ Day 8
+- [x] `TraceabilityTimeline` component with expand/collapse ⭐ Day 8
+- [x] Critical contract validations (5 validations) ⭐ Day 7
+- [x] Additional tests (108 total tests, 85.60% coverage, 72.15% branches) ⭐ Day 7
 
-### **✅ Día 4 (20 Nov)**: Dashboard y Optimizaciones ✅ COMPLETADO
+### **✅ Day 4 (Nov 20)**: Dashboard and Optimizations ✅ COMPLETED
 
-- [x] Dashboard completo con UserProfileCard, QuickActions, TokenCard
-- [x] Sistema de pausabilidad completo (PauseControl, validaciones)
-- [x] ErrorBoundary global implementado
-- [x] Validación completa de datos (validation.ts)
-- [x] Optimización de performance (useDashboardStats con batch reads)
-- [x] Tests implementados (Vitest + Playwright, 17 tests pasando)
-- [x] Accesibilidad (ARIA labels, WCAG AA)
-- [x] Animaciones (transiciones suaves, hover effects)
+- [x] Complete dashboard with UserProfileCard, QuickActions, TokenCard
+- [x] Complete pausability system (PauseControl, validations)
+- [x] Global ErrorBoundary implemented
+- [x] Complete data validation (validation.ts)
+- [x] Performance optimization (useDashboardStats with batch reads)
+- [x] Tests implemented (Vitest + Playwright, 17 tests passing)
+- [x] Accessibility (ARIA labels, WCAG AA)
+- [x] Animations (smooth transitions, hover effects)
 
-### **✅ Día 5 (21 Nov)**: Tokens - Lista ✅ COMPLETADO
+### **✅ Day 5 (Nov 21)**: Tokens - List ✅ COMPLETED
 
-- [x] Página `/tokens` completa con filtros y búsqueda
-- [x] Hook `useGetAllTokens()` optimizado con batch reads
-- [x] Filtros por tipo de token (condicionales por rol)
-- [x] Búsqueda en tiempo real con normalización de acentos
-- [x] Paginación (12 tokens por página)
-- [x] Diseño Moderno 2025 aplicado
+- [x] Complete `/tokens` page with filters and search
+- [x] `useGetAllTokens()` hook optimized with batch reads
+- [x] Token type filters (conditional by role)
+- [x] Real-time search with accent normalization
+- [x] Pagination (12 tokens per page)
+- [x] Modern Design 2025 applied
 
-### **✅ Día 6 (21 Nov)**: Tokens - Crear + Diseño Moderno ✅ COMPLETADO
+### **✅ Day 6 (Nov 21)**: Tokens - Create + Modern Design ✅ COMPLETED
 
-- [x] Página `/tokens/create` completa con validaciones
-- [x] Validación en tiempo real de balance de parent token
-- [x] Restricciones de input basadas en balance disponible
-- [x] Diseño Moderno 2025 aplicado a todas las páginas principales
-- [x] TokenCardModern.tsx creado (glassmorphism, gradientes)
-- [x] PauseControl actualizado con diseño moderno
+- [x] Complete `/tokens/create` page with validations
+- [x] Real-time validation of parent token balance
+- [x] Input restrictions based on available balance
+- [x] Modern Design 2025 applied to all main pages
+- [x] TokenCardModern.tsx created (glassmorphism, gradients)
+- [x] PauseControl updated with modern design
 
 ### **🔄 Pending (Days 5-7 - Nov 22-24, 2025)**:
 - [x] Página `/dashboard`
@@ -1100,102 +1100,102 @@ This is **NORMAL** at the start. The newly deployed contract doesn't have:
 - [x] Estadísticas (solo admin ve "Total Users")
 - [x] Redirección inmediata para usuarios no autenticados
 
-#### **Día 5 (21 Nov)**: Gestión de Tokens - Lista ✅ COMPLETADO
-- [x] Página `/tokens` ✅
-- [x] Tabla de todos los tokens ✅
-- [x] Hook `useGetAllTokens()` implementado ✅
-- [x] Filtros por tipo (RowMaterial/FinishedProduct) ✅
-- [x] Búsqueda por nombre (con normalización de acentos) ✅
-- [x] Paginación (12 tokens por página) ✅
-- [x] Diseño Moderno 2025 aplicado ✅
+#### **Day 5 (Nov 21)**: Token Management - List ✅ COMPLETED
+- [x] `/tokens` page ✅
+- [x] Table of all tokens ✅
+- [x] `useGetAllTokens()` hook implemented ✅
+- [x] Type filters (RowMaterial/FinishedProduct) ✅
+- [x] Name search (with accent normalization) ✅
+- [x] Pagination (12 tokens per page) ✅
+- [x] Modern Design 2025 applied ✅
 
-#### **Día 6 (21 Nov)**: Crear Token ✅ COMPLETADO
-- [x] Página `/tokens/create` ✅
-- [x] Formulario con validaciones ✅
-- [x] Select para tipo de token ✅
-- [x] Input para supply con validación ✅
-- [x] Textarea para features (JSON) ✅
-- [x] Select para parent token (si aplica) ✅
-- [x] Validación en tiempo real de balance de parent token ✅
-- [x] Loading states durante creación ✅
-- [x] Alert de éxito/error ✅
-- [x] Diseño Moderno 2025 aplicado ✅
+#### **Day 6 (Nov 21)**: Create Token ✅ COMPLETED
+- [x] `/tokens/create` page ✅
+- [x] Form with validations ✅
+- [x] Select for token type ✅
+- [x] Input for supply with validation ✅
+- [x] Textarea for features (JSON) ✅
+- [x] Select for parent token (if applicable) ✅
+- [x] Real-time validation of parent token balance ✅
+- [x] Loading states during creation ✅
+- [x] Success/error alert ✅
+- [x] Modern Design 2025 applied ✅
 
-#### **Día 6 (21 Nov)**: Diseño Moderno 2025 ✅ COMPLETADO
-- [x] TokenCardModern.tsx creado (glassmorphism) ✅
-- [x] Diseño moderno aplicado a 5 páginas principales ✅
-- [x] PauseControl con diseño moderno ✅
-- [x] Variable de entorno NEXT_PUBLIC_MODERN_DESIGN ✅
+#### **Day 6 (Nov 21)**: Modern Design 2025 ✅ COMPLETED
+- [x] TokenCardModern.tsx created (glassmorphism) ✅
+- [x] Modern design applied to 5 main pages ✅
+- [x] PauseControl with modern design ✅
+- [x] Environment variable NEXT_PUBLIC_MODERN_DESIGN ✅
 
-#### **Pendiente**: Detalles de Token
-- [ ] Página `/tokens/[id]`
-- [ ] Información completa del token
-- [ ] Historial de transferencias
-- [ ] Botón para transferir (si aplica)
-- [ ] Gráfico de supply chain
+#### **Pending**: Token Details
+- [ ] `/tokens/[id]` page
+- [ ] Complete token information
+- [ ] Transfer history
+- [ ] Transfer button (if applicable)
+- [ ] Supply chain graph
 
-#### **✅ Día 7 (22 Nov)**: Transferencias ✅ COMPLETADO
-- [x] Página `/transfers` ✅
-- [x] Tabla de transferencias con separación sent/received (Factory/Retailer) ✅
-- [x] Filtros: Enviadas/Recibidas/Pending/Accepted/Rejected por rol ✅
-- [x] Botones de acción (Accept/Reject/Cancel) con estilo uniforme ✅
-- [x] CreateTransferForm con validaciones y dropdowns filtrados ✅
-- [x] Componente AddressDisplay para direcciones clickeables ✅
-- [x] Loading states y actualizaciones automáticas ✅
-- [x] Estadísticas separadas (sent/received) en dashboard ✅
-- [x] Mejoras en dashboard: "My Tokens by Type" simplificado ✅
-- [x] Mejoras en /tokens: "My Tokens by Type" con tarjetas completas ✅
+#### **✅ Day 7 (Nov 22)**: Transfers ✅ COMPLETED
+- [x] `/transfers` page ✅
+- [x] Transfer table with sent/received separation (Factory/Retailer) ✅
+- [x] Filters: Sent/Received/Pending/Accepted/Rejected by role ✅
+- [x] Action buttons (Accept/Reject/Cancel) with uniform style ✅
+- [x] CreateTransferForm with validations and filtered dropdowns ✅
+- [x] AddressDisplay component for clickable addresses ✅
+- [x] Loading states and automatic updates ✅
+- [x] Separate statistics (sent/received) in dashboard ✅
+- [x] Dashboard improvements: "My Tokens by Type" simplified ✅
+- [x] /tokens improvements: "My Tokens by Type" with complete cards ✅
 
-#### **Día 7 (24 Nov)**: Validaciones Críticas del Contrato ✅ COMPLETADO
-- [x] Validación: Usuario cancelado no puede registrar
-- [x] Validación: Longitud mínima nombre (2 chars)
-- [x] Validación: Rol por tipo de token en transfer()
-- [x] Validación: Rol por tipo de token en acceptTransfer()
-- [x] Validación: Rol por tipo de token en rejectTransfer()
-- [x] Tests adicionales (8 nuevos tests)
-- [x] Coverage mejorado (85.60% lines, 72.15% branches)
+#### **Day 7 (Nov 24)**: Critical Contract Validations ✅ COMPLETED
+- [x] Validation: Canceled user cannot register
+- [x] Validation: Minimum name length (2 chars)
+- [x] Validation: Role by token type in transfer()
+- [x] Validation: Role by token type in acceptTransfer()
+- [x] Validation: Role by token type in rejectTransfer()
+- [x] Additional tests (8 new tests)
+- [x] Improved coverage (85.60% lines, 72.15% branches)
 
-#### **Día 8 (23 Nov)**: Panel Admin y Páginas Adicionales ✅ COMPLETADO
-- [x] Página `/admin` - Panel principal de administración
-- [x] Página `/tokens/[id]` - Detalles con trazabilidad end-to-end
-- [x] Página `/tokens/[id]/transfer` - Transferir desde detalles
-- [x] Hook `useGetAllTransfers` para estadísticas del sistema
-- [x] Hook `useTokenTraceability` para árbol jerárquico
-- [x] Componente `TraceabilityTimeline` con expand/collapse
+#### **Day 8 (Nov 23)**: Admin Panel and Additional Pages ✅ COMPLETED
+- [x] `/admin` page - Main administration panel
+- [x] `/tokens/[id]` page - Details with end-to-end traceability
+- [x] `/tokens/[id]/transfer` page - Transfer from details
+- [x] `useGetAllTransfers` hook for system statistics
+- [x] `useTokenTraceability` hook for hierarchical tree
+- [x] `TraceabilityTimeline` component with expand/collapse
 
 ### **🎯 Week 2 (Nov 25-28, 2025)**:
 
-#### **Día 9 (24 Nov)**: Video Demo (PRÓXIMO)
-- [ ] Script del video (5 minutos)
-- [ ] Grabación con OBS/Loom:
-  - Arquitectura del proyecto
-  - Demo de tests pasando
-  - Demo de frontend completo
-  - Demo de panel admin
-  - Flujo E2E completo
-- [ ] Edición básica
-- [ ] Upload a plataforma
+#### **Day 9 (Nov 24)**: Video Demo (NEXT)
+- [ ] Video script (5 minutes)
+- [ ] Recording with OBS/Loom:
+  - Project architecture
+  - Demo of passing tests
+  - Complete frontend demo
+  - Admin panel demo
+  - Complete E2E flow
+- [ ] Basic editing
+- [ ] Upload to platform
 
-#### **Día 12 (28 Nov)**: Entrega Final
-- [ ] Verificar checklist completo
-- [ ] Backup del proyecto
-- [ ] Push final a GitHub
-- [ ] Verificar que todo compile
-- [ ] Verificar que todos los tests pasen
-- [ ] Documentación final revisada
-- [ ] **ENTREGA** 🚀
+#### **Day 12 (Nov 28)**: Final Delivery
+- [ ] Verify complete checklist
+- [ ] Project backup
+- [ ] Final push to GitHub
+- [ ] Verify everything compiles
+- [ ] Verify all tests pass
+- [ ] Final documentation reviewed
+- [ ] **DELIVERY** 🚀
 
 ---
 
 ## 📊 Project Metrics
 
 ### **Smart Contract**:
-- **Líneas de código**: 971
+- **Lines of code**: 971
 - **Tests**: 80 (100% passing)
 - **Coverage**: 85.60% lines, 72.15% branches
-- **Funciones**: 42
-- **Eventos**: 6
-- **Modificadores**: 2
+- **Functions**: 42
+- **Events**: 6
+- **Modifiers**: 2
 
 ### **Frontend**:
 - **Lines of code**: ~4,000+
@@ -1207,16 +1207,16 @@ This is **NORMAL** at the start. The newly deployed contract doesn't have:
 - **Features**: Theme toggle, Multi-tab sync, Complete admin panel, Modern Design 2025
 
 ### **Development Time**:
-- **Smart Contract**: ~6 horas (Día 1)
-- **Frontend Setup**: ~2 horas (Día 1)
-- **Deployment Script**: ~1 hora (Día 1)
-- **Documentación**: ~1 hora (Día 1)
-- **Admin Panel**: ~6 horas (Día 2-3)
-- **UI/UX Refinements**: ~4 horas (Día 3)
-- **Dashboard y Optimizaciones**: ~8 horas (Día 4)
-- **Tokens (Lista + Crear)**: ~8 horas (Día 5-6)
-- **Diseño Moderno 2025**: ~4 horas (Día 6)
-- **Total Días 1-6**: ~40 horas
+- **Smart Contract**: ~6 hours (Day 1)
+- **Frontend Setup**: ~2 hours (Day 1)
+- **Deployment Script**: ~1 hour (Day 1)
+- **Documentation**: ~1 hour (Day 1)
+- **Admin Panel**: ~6 hours (Day 2-3)
+- **UI/UX Refinements**: ~4 hours (Day 3)
+- **Dashboard and Optimizations**: ~8 hours (Day 4)
+- **Tokens (List + Create)**: ~8 hours (Day 5-6)
+- **Modern Design 2025**: ~4 hours (Day 6)
+- **Total Days 1-6**: ~40 hours
 
 ---
 
