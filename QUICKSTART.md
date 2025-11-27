@@ -1357,7 +1357,27 @@ npm run dev
 
 **Terminal 3 (Frontend):**
 - Presionar `Ctrl+C` en la terminal donde está corriendo el frontend
-- O usar: `pkill -f "next.*dev"` o `pkill -f "node.*3000"`
+- Si no se detiene, usar comandos más agresivos:
+
+```bash
+# Método 1: Detener por puerto (más efectivo)
+lsof -ti :3000 | xargs kill -9 2>/dev/null || true
+
+# Método 2: Detener todos los procesos relacionados con Next.js
+pkill -f "next" 2>/dev/null || true
+pkill -f "node.*web" 2>/dev/null || true
+
+# Método 3: Si aún no se detiene, forzar
+pkill -9 -f "next" 2>/dev/null || true
+pkill -9 -f "node.*web" 2>/dev/null || true
+```
+
+**Limpiar Cache de Next.js (opcional pero recomendado):**
+```bash
+cd web
+rm -rf .next
+rm -rf node_modules/.cache
+```
 
 **Verificar que los servicios se detuvieron:**
 ```bash
@@ -1367,6 +1387,10 @@ lsof -i :8545
 
 # Verificar puerto 3000 (Frontend)
 lsof -i :3000
+# No debe mostrar ningún proceso
+
+# Verificar procesos de Node.js/Next.js
+ps aux | grep -E "next|node.*3000" | grep -v grep
 # No debe mostrar ningún proceso
 ```
 
@@ -1378,7 +1402,25 @@ lsof -i :3000
 
 **Terminal 3 (Frontend - PowerShell o CMD):**
 - Presionar `Ctrl+C` en la terminal donde está corriendo el frontend
-- O usar: `taskkill /F /IM node.exe` (esto detendrá todos los procesos Node.js)
+- Si no se detiene, usar comandos más agresivos:
+
+```powershell
+# Método 1: Detener por puerto (más efectivo)
+# En PowerShell:
+$port = 3000
+$process = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess
+if ($process) { Stop-Process -Id $process -Force }
+
+# Método 2: Detener todos los procesos Node.js (CUIDADO: detiene TODOS)
+taskkill /F /IM node.exe
+```
+
+**Limpiar Cache de Next.js (opcional pero recomendado):**
+```powershell
+cd web
+Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force node_modules\.cache -ErrorAction SilentlyContinue
+```
 
 **Verificar que los servicios se detuvieron:**
 ```powershell
@@ -1389,9 +1431,15 @@ netstat -an | findstr 8545
 # Verificar puerto 3000 (Frontend)
 netstat -an | findstr 3000
 # No debe mostrar ninguna conexión LISTENING
+
+# Verificar procesos de Node.js
+tasklist | findstr node.exe
+# No debe mostrar ningún proceso
 ```
 
-**⚠️ NOTA**: Si usas `taskkill /F /IM node.exe`, esto detendrá TODOS los procesos de Node.js en tu sistema. Si solo quieres detener el frontend, es mejor usar `Ctrl+C` en la terminal correspondiente.
+**⚠️ NOTA**: 
+- Si usas `taskkill /F /IM node.exe`, esto detendrá TODOS los procesos de Node.js en tu sistema. 
+- Si solo quieres detener el frontend, es mejor usar `Ctrl+C` en la terminal correspondiente o el método 1 (por puerto).
 
 ---
 
