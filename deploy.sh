@@ -120,22 +120,46 @@ ensure_logs_dir() {
 }
 
 # ============================================================================
-# FUNCIÓN: DETECTAR DISTRIBUCIÓN LINUX
+# FUNCIÓN: DETECTAR SISTEMA OPERATIVO
 # ============================================================================
 
+detect_os() {
+    # Detectar macOS
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "macos"
+        return 0
+    fi
+    
+    # Detectar Linux
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "$ID"
+        elif [ -f /etc/lsb-release ]; then
+            . /etc/lsb-release
+            echo "$DISTRIB_ID" | tr '[:upper:]' '[:lower:]'
+        elif [ -f /etc/debian_version ]; then
+            echo "debian"
+        elif [ -f /etc/redhat-release ]; then
+            echo "rhel"
+        else
+            echo "linux-unknown"
+        fi
+        return 0
+    fi
+    
+    # Sistema no reconocido
+    echo "unknown"
+    return 1
+}
+
+# Función legacy para compatibilidad (ahora llama a detect_os)
 detect_linux_distro() {
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        echo "$ID"
-    elif [ -f /etc/lsb-release ]; then
-        . /etc/lsb-release
-        echo "$DISTRIB_ID" | tr '[:upper:]' '[:lower:]'
-    elif [ -f /etc/debian_version ]; then
-        echo "debian"
-    elif [ -f /etc/redhat-release ]; then
-        echo "rhel"
+    local os=$(detect_os)
+    if [ "$os" = "macos" ]; then
+        echo "macos"
     else
-        echo "unknown"
+        echo "$os"
     fi
 }
 
@@ -174,11 +198,22 @@ install_system_tools() {
         auto_install=true
     fi
     
-    local distro=$(detect_linux_distro)
+    local os=$(detect_os)
     local install_cmd=""
     local packages=()
     
-    case "$distro" in
+    case "$os" in
+        macos)
+            # Verificar si Homebrew está instalado
+            if ! command -v brew >/dev/null 2>&1; then
+                print_error "Homebrew no está instalado en macOS"
+                print_info "Instala Homebrew primero con:"
+                print_info "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+                print_info "Luego ejecuta este script nuevamente."
+                return 1
+            fi
+            install_cmd="brew install"
+            ;;
         ubuntu|debian)
             install_cmd="sudo apt-get update && sudo apt-get install -y"
             ;;
@@ -192,7 +227,7 @@ install_system_tools() {
             install_cmd="sudo zypper install -y"
             ;;
         *)
-            print_error "Distribución Linux no reconocida: $distro"
+            print_error "Sistema operativo no reconocido: $os"
             print_info "Por favor instala manualmente: ${tools[*]}"
             return 1
             ;;
@@ -201,12 +236,43 @@ install_system_tools() {
     # Mapear herramientas a nombres de paquetes
     for tool in "${tools[@]}"; do
         case "$tool" in
-            lsof) packages+=("lsof") ;;
-            netstat) packages+=("net-tools") ;;
-            ss) packages+=("iproute2") ;;
-            curl) packages+=("curl") ;;
-            pgrep) 
-                if [[ "$distro" == "arch" || "$distro" == "manjaro" ]]; then
+            lsof)
+                if [ "$os" = "macos" ]; then
+                    # lsof viene preinstalado en macOS
+                    print_info "lsof ya está disponible en macOS"
+                else
+                    packages+=("lsof")
+                fi
+                ;;
+            netstat)
+                if [ "$os" = "macos" ]; then
+                    # netstat viene preinstalado en macOS
+                    print_info "netstat ya está disponible en macOS"
+                else
+                    packages+=("net-tools")
+                fi
+                ;;
+            ss)
+                if [ "$os" = "macos" ]; then
+                    # ss no está disponible en macOS, usar netstat como alternativa
+                    print_info "ss no está disponible en macOS, usando netstat como alternativa"
+                else
+                    packages+=("iproute2")
+                fi
+                ;;
+            curl)
+                if [ "$os" = "macos" ]; then
+                    # curl viene preinstalado en macOS
+                    print_info "curl ya está disponible en macOS"
+                else
+                    packages+=("curl")
+                fi
+                ;;
+            pgrep)
+                if [ "$os" = "macos" ]; then
+                    # pgrep viene preinstalado en macOS
+                    print_info "pgrep ya está disponible en macOS"
+                elif [[ "$os" == "arch" || "$os" == "manjaro" ]]; then
                     packages+=("procps-ng")
                 else
                     packages+=("procps")
@@ -215,8 +281,14 @@ install_system_tools() {
         esac
     done
     
-    # Eliminar duplicados
-    local unique_packages=($(printf "%s\n" "${packages[@]}" | sort -u))
+    # Eliminar duplicados y vacíos
+    local unique_packages=($(printf "%s\n" "${packages[@]}" | grep -v '^$' | sort -u))
+    
+    # Si no hay paquetes para instalar (todos vienen preinstalados en macOS)
+    if [ ${#unique_packages[@]} -eq 0 ]; then
+        print_success "Todas las herramientas están disponibles (vienen preinstaladas en macOS)"
+        return 0
+    fi
     
     print_warning "Faltan las siguientes herramientas: ${tools[*]}"
     print_info "Se intentará instalar usando: $install_cmd"
@@ -609,12 +681,18 @@ pre_start_check() {
     
     # 2. Verificar requisitos básicos
     print_step "Verificando requisitos básicos..."
+    local os=$(detect_os)
     if ! command -v node >/dev/null 2>&1; then
         print_error "Node.js no está instalado"
         print_info "Instala Node.js v18+ desde: https://nodejs.org/"
-        print_info "  Ubuntu/Debian: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs"
-        print_info "  Fedora/RHEL: sudo dnf install -y nodejs npm"
-        print_info "  Arch/Manjaro: sudo pacman -S nodejs npm"
+        if [ "$os" = "macos" ]; then
+            print_info "  macOS: brew install node"
+            print_info "  O descarga desde: https://nodejs.org/"
+        else
+            print_info "  Ubuntu/Debian: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs"
+            print_info "  Fedora/RHEL: sudo dnf install -y nodejs npm"
+            print_info "  Arch/Manjaro: sudo pacman -S nodejs npm"
+        fi
         errors=$((errors + 1))
     else
         local node_version=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
@@ -635,7 +713,14 @@ pre_start_check() {
     
     if ! command -v forge >/dev/null 2>&1; then
         print_error "Foundry (forge) no está instalado"
-        print_info "Instala Foundry con: curl -L https://foundry.paradigm.xyz | bash && foundryup"
+        if [ "$os" = "macos" ]; then
+            print_info "Instala Foundry con:"
+            print_info "  curl -L https://foundry.paradigm.xyz | bash"
+            print_info "  foundryup"
+            print_info "O usando Homebrew: brew install foundry"
+        else
+            print_info "Instala Foundry con: curl -L https://foundry.paradigm.xyz | bash && foundryup"
+        fi
         errors=$((errors + 1))
     else
         print_success "Foundry instalado"
@@ -643,7 +728,12 @@ pre_start_check() {
     
     if ! command -v anvil >/dev/null 2>&1; then
         print_error "Foundry (anvil) no está instalado"
-        print_info "Ejecuta: foundryup"
+        if [ "$os" = "macos" ]; then
+            print_info "Ejecuta: foundryup"
+            print_info "O usando Homebrew: brew install foundry"
+        else
+            print_info "Ejecuta: foundryup"
+        fi
         errors=$((errors + 1))
     else
         print_success "Anvil instalado"
@@ -742,19 +832,31 @@ pre_start_check() {
 # Función para verificar si un puerto está en uso
 check_port() {
     local port=$1
+    local os=$(detect_os)
+    
     # Verificar tanto IPv4 como IPv6 usando múltiples métodos
-    # Método 1: lsof (funciona para IPv4 y algunos casos IPv6)
+    # Método 1: lsof (funciona en Linux y macOS)
     if lsof -i :$port -t >/dev/null 2>&1; then
         return 0  # Puerto en uso
     fi
-    # Método 2: netstat (detecta IPv6 mejor)
-    if netstat -tlnp 2>/dev/null | grep -q ":$port "; then
-        return 0  # Puerto en uso
+    
+    # Método 2: netstat (funciona en Linux y macOS, pero con sintaxis diferente)
+    if [ "$os" = "macos" ]; then
+        # macOS: netstat no tiene -p, usar -an
+        if netstat -an 2>/dev/null | grep -q "\.$port " || netstat -an 2>/dev/null | grep -q ":$port "; then
+            return 0  # Puerto en uso
+        fi
+    else
+        # Linux: netstat con -p
+        if netstat -tlnp 2>/dev/null | grep -q ":$port "; then
+            return 0  # Puerto en uso
+        fi
+        # Método 3: ss (solo en Linux, alternativa moderna)
+        if ss -tlnp 2>/dev/null | grep -q ":$port "; then
+            return 0  # Puerto en uso
+        fi
     fi
-    # Método 3: ss (alternativa moderna)
-    if ss -tlnp 2>/dev/null | grep -q ":$port "; then
-        return 0  # Puerto en uso
-    fi
+    
     return 1  # Puerto libre
 }
 

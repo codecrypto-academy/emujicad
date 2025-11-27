@@ -711,19 +711,52 @@ npm run dev
 
 ### Paso 13: Verificar que Todo Funciona
 
+#### Linux/macOS:
+
 ```bash
 # Verificar que Anvil está corriendo
 curl -X POST http://127.0.0.1:8545 \
   -H "Content-Type: application/json" \
   --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
 
-# Debe devolver un número de bloque
+# Debe devolver: {"jsonrpc":"2.0","id":1,"result":"0x..."}
+# Donde "result" es un número de bloque en hexadecimal
+
+# Verificar que el frontend está corriendo
+curl http://localhost:3000
+
+# Debe devolver HTML de la página (verás <!DOCTYPE html>...)
+
+# Verificar procesos en ejecución
+lsof -i :8545  # Debe mostrar proceso de Anvil
+lsof -i :3000  # Debe mostrar proceso de Node.js/Next.js
+```
+
+#### Windows:
+
+```powershell
+# Verificar que Anvil está corriendo
+curl -X POST http://127.0.0.1:8545 `
+  -H "Content-Type: application/json" `
+  --data '{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}'
+
+# Debe devolver: {"jsonrpc":"2.0","id":1,"result":"0x..."}
 
 # Verificar que el frontend está corriendo
 curl http://localhost:3000
 
 # Debe devolver HTML de la página
+
+# Verificar procesos en ejecución
+netstat -an | findstr 8545  # Debe mostrar LISTENING en 127.0.0.1:8545
+netstat -an | findstr 3000  # Debe mostrar LISTENING en 127.0.0.1:3000
 ```
+
+**✅ Si todo está correcto:**
+- Anvil responde con un número de bloque
+- Frontend responde con HTML
+- Ambos puertos están en uso (LISTENING)
+- Puedes abrir http://localhost:3000 en tu navegador
 
 ---
 
@@ -1091,14 +1124,44 @@ ls web/src/contracts/config.ts  # Debe existir
 
 ### Verificar que los Servicios Están Corriendo
 
+#### Linux/macOS:
+
 ```bash
 # Verificar Anvil (puerto 8545)
 curl -X POST http://127.0.0.1:8545 \
   -H "Content-Type: application/json" \
   --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
 
+# Debe devolver: {"jsonrpc":"2.0","id":1,"result":"0x..."}
+
 # Verificar Frontend (puerto 3000)
 curl http://localhost:3000
+
+# Debe devolver HTML (verás <!DOCTYPE html>...)
+
+# Verificar procesos
+lsof -i :8545  # Debe mostrar proceso de Anvil
+lsof -i :3000  # Debe mostrar proceso de Node.js
+```
+
+#### Windows:
+
+```powershell
+# Verificar Anvil (puerto 8545)
+curl -X POST http://127.0.0.1:8545 `
+  -H "Content-Type: application/json" `
+  --data '{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}'
+
+# Debe devolver: {"jsonrpc":"2.0","id":1,"result":"0x..."}
+
+# Verificar Frontend (puerto 3000)
+curl http://localhost:3000
+
+# Debe devolver HTML
+
+# Verificar procesos
+netstat -an | findstr 8545  # Debe mostrar LISTENING
+netstat -an | findstr 3000  # Debe mostrar LISTENING
 ```
 
 ### Abrir la Aplicación
@@ -1239,8 +1302,49 @@ npm run dev
 
 ### Detener Todo Manualmente
 
-**Terminal 1 (Anvil):** `Ctrl+C`  
-**Terminal 3 (Frontend):** `Ctrl+C`
+#### Linux/macOS:
+
+**Terminal 1 (Anvil):**
+- Presionar `Ctrl+C` en la terminal donde está corriendo Anvil
+- O usar: `pkill -f "anvil.*8545"`
+
+**Terminal 3 (Frontend):**
+- Presionar `Ctrl+C` en la terminal donde está corriendo el frontend
+- O usar: `pkill -f "next.*dev"` o `pkill -f "node.*3000"`
+
+**Verificar que los servicios se detuvieron:**
+```bash
+# Verificar puerto 8545 (Anvil)
+lsof -i :8545
+# No debe mostrar ningún proceso
+
+# Verificar puerto 3000 (Frontend)
+lsof -i :3000
+# No debe mostrar ningún proceso
+```
+
+#### Windows:
+
+**Terminal 1 (Anvil - Git Bash o WSL2):**
+- Presionar `Ctrl+C` en la terminal donde está corriendo Anvil
+- O usar: `taskkill /F /IM anvil.exe` (en CMD/PowerShell)
+
+**Terminal 3 (Frontend - PowerShell o CMD):**
+- Presionar `Ctrl+C` en la terminal donde está corriendo el frontend
+- O usar: `taskkill /F /IM node.exe` (esto detendrá todos los procesos Node.js)
+
+**Verificar que los servicios se detuvieron:**
+```powershell
+# Verificar puerto 8545 (Anvil)
+netstat -an | findstr 8545
+# No debe mostrar ninguna conexión LISTENING
+
+# Verificar puerto 3000 (Frontend)
+netstat -an | findstr 3000
+# No debe mostrar ninguna conexión LISTENING
+```
+
+**⚠️ NOTA**: Si usas `taskkill /F /IM node.exe`, esto detendrá TODOS los procesos de Node.js en tu sistema. Si solo quieres detener el frontend, es mejor usar `Ctrl+C` en la terminal correspondiente.
 
 ---
 
