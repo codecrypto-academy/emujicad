@@ -1,10 +1,10 @@
 # 📚 Documentación Completa - Supply Chain Tracker
 
-**Última actualización**: 26 de Noviembre, 2025  
+**Última actualización**: 27 de Noviembre, 2025  
 **Versión**: 1.4.0  
 **Proyecto**: Supply Chain DApp (PFM Web3)
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](../../PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](../STATUS.md)**
 
 ---
 
@@ -536,6 +536,203 @@ logs/
 
 **Nota sobre persistencia**: El archivo `anvil_state.json` contiene el estado completo de la blockchain local. Si lo eliminas (con `./deploy.sh clean`), Anvil iniciará con una blockchain limpia en el próximo `start`.
 
+---
+
+### **Script Windows**: `deploy.ps1`
+
+Script PowerShell equivalente para Windows 10/11 que automatiza TODO el proceso de deployment.
+
+#### **Requisitos Previos**:
+
+1. **PowerShell 5.1+** (viene preinstalado en Windows 10/11)
+   ```powershell
+   $PSVersionTable.PSVersion
+   ```
+
+2. **Foundry** (Anvil y Forge)
+   - Instalar desde: https://book.getfoundry.sh/getting-started/installation
+   - Verificar: `anvil --version`, `forge --version`
+
+3. **Node.js y npm**
+   - Instalar desde: https://nodejs.org/
+   - Verificar: `node --version`, `npm --version`
+
+#### **Configuración Inicial (Solo Primera Vez)**:
+
+**Configurar Política de Ejecución**:
+```powershell
+# Abrir PowerShell como Administrador
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**Alternativa** (si no quieres cambiar la política):
+```powershell
+# Ejecutar script con bypass temporal
+powershell -ExecutionPolicy Bypass -File .\deploy.ps1 start
+```
+
+#### **Comandos Disponibles**:
+
+```powershell
+# Iniciar todo el stack (Anvil + Contrato + Frontend)
+.\deploy.ps1 start
+
+# Detener todos los servicios
+.\deploy.ps1 stop
+
+# Reiniciar todo el stack
+.\deploy.ps1 restart
+
+# Ver estado de servicios
+.\deploy.ps1 status
+
+# Mostrar instrucciones de MetaMask
+.\deploy.ps1 metamask
+
+# Limpiar estado persistente de Anvil
+.\deploy.ps1 clean
+
+# Comandos de Frontend (Sin Afectar Anvil/Contrato)
+.\deploy.ps1 frontend start
+.\deploy.ps1 frontend stop
+.\deploy.ps1 frontend restart
+
+# Ayuda
+.\deploy.ps1 help
+```
+
+#### **Ejemplos de Uso**:
+
+**Escenario 1: Primera Ejecución**
+```powershell
+# 1. Configurar política (solo primera vez)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# 2. Iniciar todo
+.\deploy.ps1 start
+
+# 3. Verificar estado
+.\deploy.ps1 status
+
+# 4. Abrir navegador en http://localhost:3000
+```
+
+**Escenario 2: Desarrollo Frontend (Anvil ya corriendo)**
+```powershell
+# 1. Hacer cambios en el frontend
+
+# 2. Reiniciar solo el frontend (Anvil y contrato siguen corriendo)
+.\deploy.ps1 frontend restart
+
+# 3. Los cambios se reflejan sin perder el estado de Anvil
+```
+
+**Escenario 3: Limpiar Estado de Anvil**
+```powershell
+# 1. Detener Anvil primero
+.\deploy.ps1 stop
+
+# 2. Limpiar estado
+.\deploy.ps1 clean
+
+# 3. Reiniciar con blockchain limpia
+.\deploy.ps1 start
+```
+
+#### **Verificación de Funcionamiento**:
+
+**Verificar que los Servicios Están Corriendo**:
+```powershell
+.\deploy.ps1 status
+```
+
+**Salida esperada**:
+```
+═══════════════════════════════════════════════════════════
+  Estado de Servicios
+═══════════════════════════════════════════════════════════
+
+Anvil (Blockchain Local):
+✓ CORRIENDO (PID: 12345, Puerto: 8545)
+ℹ RPC URL: http://127.0.0.1:8545
+ℹ Chain ID: 31337
+
+Frontend (Next.js):
+✓ CORRIENDO (PID: 67890, Puerto: 3000)
+ℹ URL: http://localhost:3000
+
+Smart Contract:
+ℹ Dirección: 0x...
+ℹ Owner: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+```
+
+**Ver Logs**:
+```powershell
+# Ver últimos logs de Anvil
+Get-Content logs\anvil.log -Tail 20
+
+# Ver últimos logs del frontend
+Get-Content logs\frontend.log -Tail 20
+```
+
+**Verificar Puertos**:
+```powershell
+# Verificar puerto de Anvil (8545)
+Get-NetTCPConnection -LocalPort 8545 -ErrorAction SilentlyContinue
+
+# Verificar puerto del frontend (3000)
+Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue
+```
+
+#### **Solución de Problemas**:
+
+**Error: "No se puede cargar el archivo porque la ejecución de scripts está deshabilitada"**
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**Error: "Anvil no está instalado o no está en el PATH"**
+1. Instalar Foundry: https://book.getfoundry.sh/getting-started/installation
+2. Verificar que `anvil` esté en el PATH: `Get-Command anvil`
+3. Si no está, agregar Foundry al PATH manualmente
+
+**Error: "Puerto 8545 ya está en uso"**
+```powershell
+# Ver qué proceso está usando el puerto
+Get-NetTCPConnection -LocalPort 8545 | Select-Object OwningProcess
+
+# Detener el proceso manualmente
+Stop-Process -Id <PID> -Force
+
+# O usar el script
+.\deploy.ps1 stop
+```
+
+**Error: "Puerto 3000 ya está en uso"**
+```powershell
+# Ver qué proceso está usando el puerto
+Get-NetTCPConnection -LocalPort 3000 | Select-Object OwningProcess
+
+# Detener el proceso manualmente
+Stop-Process -Id <PID> -Force
+
+# O usar el script
+.\deploy.ps1 frontend stop
+```
+
+#### **Diferencias con deploy.sh (Linux/Mac)**:
+
+| Característica | deploy.sh (Linux/Mac) | deploy.ps1 (Windows) |
+|----------------|----------------------|---------------------|
+| **Ejecución** | `./deploy.sh start` | `.\deploy.ps1 start` |
+| **Verificación de puertos** | `lsof`, `netstat` | `Get-NetTCPConnection` |
+| **Gestión de procesos** | `pgrep`, `kill` | `Get-Process`, `Stop-Process` |
+| **Paths** | `/path/to/file` | `\path\to\file` o `Join-Path` |
+| **Colores** | Códigos ANSI | `Write-Host -ForegroundColor` |
+| **Background processes** | `nohup` | `ProcessStartInfo` |
+
+**Funcionalidad**: ✅ **100% equivalente** - Todas las funciones del script bash están implementadas en PowerShell.
+
 ### **Gestión de Procesos**:
 
 El script gestiona los procesos de forma inteligente:
@@ -597,6 +794,41 @@ Para probar flujos de transferencias entre usuarios:
 **Cuenta #3**:
 - Dirección: `0x90F79bf6EB2c4f870365E785982E1f101E93b906`
 - Private Key: `0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6`
+
+### **Paso 3.1: Cuentas Adicionales (10-14)**
+
+Anvil genera 15 cuentas usando el mnemonic determinístico. Las cuentas #0-9 están documentadas arriba. Estas son las cuentas adicionales #10-14:
+
+**Cuenta #10**:
+- Dirección: `0xbcd4042de499d14e55001ccbb24a551f3b954096`
+- Private Key: `0xf214f2b2cd398c806f84e317254e0f0b801d0643303237d97a22a48e01628897`
+
+**Cuenta #11**:
+- Dirección: `0x71be63f3384f5fb98995898a86b02fb2426c5788`
+- Private Key: `0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82`
+
+**Cuenta #12**:
+- Dirección: `0xfabb0ac9d68b0b445fb7357272ff202c5651694a`
+- Private Key: `0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1`
+
+**Cuenta #13**:
+- Dirección: `0x1cbd3b2770909d4e10f157cabc84c7264073c9ec`
+- Private Key: `0x47c99abed3324a2707c28affff1267e45918ec8c3f20b8aa892e8b065d2942dd`
+
+**Cuenta #14**:
+- Dirección: `0xdf3e18d64bc6a983f673ab319ccae4f1a57c7097`
+- Private Key: `0xc526ee95bf44d8fc405a158bb884d9d1238d99f0612e9f33d006bb0789009aaa`
+
+**Cómo Importar en MetaMask**:
+1. Abrir MetaMask (asegúrate de estar en red "Anvil Local")
+2. Clic en el ícono de cuenta (arriba derecha)
+3. Seleccionar **"Import Account"**
+4. Elegir **"Private Key"**
+5. Pegar el private key de la cuenta que deseas importar
+6. Clic en **"Import"**
+7. Repetir para cada cuenta adicional
+
+⚠️ **IMPORTANTE**: Estos private keys son SOLO para desarrollo local. NUNCA usar en mainnet o con fondos reales. Cada cuenta tiene 10,000 ETH iniciales en Anvil.
 
 ### **Paso 4: Conectar a la DApp**
 
@@ -1036,4 +1268,68 @@ Este proyecto es parte de un trabajo académico y se proporciona con fines educa
 
 ---
 
-**Última actualización**: 21 de Noviembre, 2025 - Día 6
+## 🗂️ Estructura de Documentación
+
+```
+📁 Proyecto Root
+│
+├── 📄 README.md                    ⭐ README original del proyecto
+├── 📄 QUICKSTART.md                ⭐ Quick start (INICIO AQUÍ)
+├── 📄 INDEX.md                     ⭐ Índice maestro de documentación
+├── 📄 STATUS.md                    ⭐ Single source of truth del estado
+├── 📄 TODO.md                      ⭐ Tareas pendientes
+├── 📄 CHANGELOG.md                 ⭐ Historial de cambios
+├── 📄 CONTRIBUTING.md              ⭐ Guía de contribución
+├── 📄 IA.md                        ⭐ Retrospectiva uso de IA
+├── 🚀 deploy.sh                    ⭐ Script automatizado
+│
+├── 📁 docs/                        ⭐ Documentación consolidada
+│   ├── DOCUMENTATION.md            ⭐ Este archivo (guía técnica completa)
+│   ├── FRONTEND.md                 ⭐ Documentación completa del frontend
+│   ├── SMART_CONTRACT.md           ⭐ Documentación completa del smart contract
+│   ├── REPORTS.md                  ⭐ Reportes consolidados (generales, SC, FE)
+│   ├── RESEARCH.md                 ⭐ Investigación técnica consolidada
+│   └── reports/
+│       └── REPORTE_REORGANIZACION_FINAL.md
+│
+├── 📁 sc/                          ⭐ Smart Contract
+│   ├── src/SupplyChain.sol
+│   ├── test/
+│   └── script/
+│
+├── 📁 web/                         ⭐ Frontend Next.js
+│   ├── src/
+│   │   ├── app/                    (9 páginas)
+│   │   ├── components/             (26 componentes)
+│   │   ├── hooks/                  (24 hooks)
+│   │   ├── contracts/
+│   │   └── lib/
+│   └── package.json
+│
+└── 📁 logs/                        ⭐ Logs de ejecución
+    ├── anvil.log
+    ├── anvil_state.json            (Estado persistente)
+    ├── frontend.log
+    ├── deploy.log
+    └── contract_address.txt
+```
+
+### 📊 Principios de Documentación
+
+1. **Single Source of Truth**: [`STATUS.md`](../STATUS.md) es la fuente única de verdad para el estado del proyecto
+2. **Consolidación**: Documentación consolidada para evitar redundancias
+3. **Organización**: Estructura lógica de básico a avanzado
+4. **Actualización**: Fechas actualizadas a 27 de Noviembre, 2025
+
+### Estadísticas de Documentación
+
+- **Archivos en raíz**: 8 archivos principales
+- **Documentación frontend**: 1 archivo consolidado (`docs/FRONTEND.md`)
+- **Documentación smart contract**: 1 archivo consolidado (`docs/SMART_CONTRACT.md`)
+- **Investigación consolidada**: 1 archivo (`docs/RESEARCH.md`)
+- **Reportes consolidados**: 1 archivo (`docs/REPORTS.md`)
+- **Documentación técnica**: 1 archivo (`docs/DOCUMENTATION.md`)
+
+---
+
+**Última actualización**: 27 de Noviembre, 2025

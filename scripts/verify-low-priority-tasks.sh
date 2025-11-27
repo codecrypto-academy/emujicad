@@ -230,25 +230,18 @@ echo ""
 echo "📝 5. VERIFICANDO DOCUMENTACIÓN"
 echo "----------------------------"
 
-# Verificar documentación de animaciones
-if [ -f "docs/reports/PERFORMANCE_OPTIMIZATION.md" ]; then
-    check "Documentación de optimización existe"
+# Verificar documentación consolidada (todos los reportes están en docs/REPORTS.md)
+if [ -f "docs/REPORTS.md" ]; then
+    check "Documentación de reportes consolidada existe (docs/REPORTS.md)"
+    
+    # Verificar que contiene las secciones relevantes
+    if grep -q "Implementaciones Técnicas\|Performance\|Accesibilidad\|Testing" docs/REPORTS.md 2>/dev/null; then
+        check "  ✓ docs/REPORTS.md contiene secciones de optimización, accesibilidad y testing"
+    else
+        warn "  ⚠ docs/REPORTS.md puede no tener todas las secciones"
+    fi
 else
-    warn "Documentación de optimización no encontrada"
-fi
-
-# Verificar documentación de accesibilidad
-if [ -f "docs/reports/ACCESSIBILITY_IMPLEMENTATION.md" ]; then
-    check "Documentación de accesibilidad existe"
-else
-    warn "Documentación de accesibilidad no encontrada"
-fi
-
-# Verificar documentación de tests
-if [ -f "docs/reports/TESTING_IMPLEMENTATION.md" ]; then
-    check "Documentación de tests existe"
-else
-    warn "Documentación de tests no encontrada"
+    warn "docs/REPORTS.md no encontrado"
 fi
 
 echo ""

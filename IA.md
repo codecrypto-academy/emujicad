@@ -7,7 +7,7 @@
 
 **Proyecto**: Supply Chain Tracker DApp  
 **Fecha de inicio**: 18 de Noviembre, 2025  
-**Última actualización**: 26 de Noviembre, 2025  
+**Última actualización**: 27 de Noviembre, 2025  
 **Duración total**: 7 días (Días 1-4 completados + Validaciones críticas Día 7)
 
 ---
@@ -129,7 +129,7 @@
 | INDEX y QUICKSTART | 0.5h | Guías de navegación |
 
 **Archivos generados**:
-- `docs/common/DOCUMENTATION.md` (940 líneas)
+- `docs/DOCUMENTATION.md` (940 líneas)
 - `docs/reports/` - 4 evaluaciones (2279 líneas)
 - `INDEX.md` (423 líneas)
 - `QUICKSTART.md` (371 líneas)
@@ -354,7 +354,7 @@ PRIVATE_KEY=0xac09... forge script script/Deploy.s.sol \
 [DOCUMENTATION.md](./DOCUMENTATION.md)
 
 <!-- ✅ Enlace actualizado -->
-[docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)
+[docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)
 ```
 
 **Impacto**: Enlaces 404 en documentación  
@@ -706,7 +706,7 @@ const [theme, setTheme] = useState(() => {
 **Archivos afectados**:
 1. QUICKSTART.md - Score 7.0 → 7.5
 2. INDEX.md - Fecha Nov 19 → Nov 20
-3. docs/common/DOCUMENTATION.md - Métricas desactualizadas
+3. docs/DOCUMENTATION.md - Métricas desactualizadas
 4. docs/fe/COMPONENTS.md - Faltaban 6 componentes
 5. docs/fe/HOOKS.md - Faltaban 3 hooks
 6. docs/reports/ACADEMIC_ASSESSMENT.md - Score desactualizado
@@ -886,7 +886,7 @@ Debido a las limitaciones de almacenamiento de GitHub Copilot, **no se generan a
 - Análisis de cobertura
 
 **Archivos de referencia**:
-- `docs/common/DOCUMENTATION.md`
+- `docs/DOCUMENTATION.md`
 - `docs/reports/SUMMARY_DAY1.md`
 - `INDEX.md`
 - `QUICKSTART.md`
@@ -973,7 +973,7 @@ Debido a las limitaciones de almacenamiento de GitHub Copilot, **no se generan a
 **Archivos de referencia**:
 - `QUICKSTART.md`
 - `INDEX.md`
-- `docs/common/DOCUMENTATION.md`
+- `docs/DOCUMENTATION.md`
 - `docs/fe/COMPONENTS.md`
 - `docs/fe/HOOKS.md`
 - `docs/reports/ACADEMIC_ASSESSMENT.md`
@@ -1340,7 +1340,7 @@ const recommendedWallets = allRecommendedWallets.filter(wallet => {
 - [INDEX.md](./INDEX.md) - Índice maestro de documentación
 - [QUICKSTART.md](./QUICKSTART.md) - Guía de inicio rápido
 - [docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md) - Resumen Día 1
-- [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md) - Documentación técnica completa
+- [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) - Documentación técnica completa
 
 ### **Stack Tecnológico Implementado**
 - **Smart Contract**: Solidity 0.8.30 + Foundry
@@ -1423,7 +1423,7 @@ const recommendedWallets = allRecommendedWallets.filter(wallet => {
 ---
 
 **Documento generado**: 19 de Noviembre, 2025  
-**Última actualización**: 26 de Noviembre, 2025  
+**Última actualización**: 27 de Noviembre, 2025  
 **Autor**: GitHub Copilot (Claude Sonnet 4.5)  
 **Proyecto**: Supply Chain Tracker - Días 1-7 Completados  
 **Estado**: ✅ Documentación completamente actualizada con Día 7
@@ -1820,7 +1820,7 @@ Durante las 5 sesiones de desarrollo, se gestionó eficientemente el contexto:
 - [docs/reports/PROYECTO_EVALUACION_COMPLETA.md](./docs/reports/PROYECTO_EVALUACION_COMPLETA.md) - Evaluación completa del proyecto
 
 **Documentación Técnica**:
-- [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md) - Documentación técnica completa
+- [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) - Documentación técnica completa
 - [docs/sc/TESTING.md](./docs/sc/TESTING.md) - Documentación completa de tests (108 tests)
 - [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md) - Referencia completa de API
 - [docs/fe/HOOKS.md](./docs/fe/HOOKS.md) - Documentación completa de hooks (24 hooks)

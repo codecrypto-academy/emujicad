@@ -241,25 +241,11 @@ else
     warn "README.md no encontrado"
 fi
 
-# Verificar documentación de frontend (single source of truth: docs/fe/SETUP.md)
-if [ -f "docs/fe/SETUP.md" ]; then
-    check "docs/fe/SETUP.md existe (fuente única de verdad)"
+# Verificar documentación de frontend (single source of truth: docs/FRONTEND.md)
+if [ -f "docs/FRONTEND.md" ]; then
+    check "docs/FRONTEND.md existe (fuente única de verdad - consolidado)"
 else
-    warn "docs/fe/SETUP.md no encontrado"
-fi
-
-# Verificar documentación de hooks
-if [ -f "docs/fe/HOOKS.md" ]; then
-    check "docs/fe/HOOKS.md existe"
-else
-    warn "docs/fe/HOOKS.md no encontrado"
-fi
-
-# Verificar documentación de componentes
-if [ -f "docs/fe/COMPONENTS.md" ]; then
-    check "docs/fe/COMPONENTS.md existe"
-else
-    warn "docs/fe/COMPONENTS.md no encontrado"
+    warn "docs/FRONTEND.md no encontrado"
 fi
 
 echo ""

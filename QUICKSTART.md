@@ -1,13 +1,13 @@
 # 🚀 Quick Start - Supply Chain Tracker
 
-> **📚 DOCUMENTACIÓN COMPLETA**: Ver [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md) para guía exhaustiva del proyecto
+> **📚 DOCUMENTACIÓN COMPLETA**: Ver [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) para guía exhaustiva del proyecto
 
 ---
 
 ## 📊 Estado de Implementación del Frontend
 
-> **📋 Para el estado más actualizado del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**  
-> **📚 Para documentación completa de páginas y componentes, consulta [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](./STATUS.md)**  
+> **📚 Para documentación completa de páginas y componentes, consulta [docs/FRONTEND.md](./docs/FRONTEND.md)**
 
 ### 📄 Páginas Implementadas (9/9 - 100%)
 
@@ -144,7 +144,7 @@ chmod +x deploy.sh
 
 ## 📋 Comandos del Script `deploy.sh`
 
-> **📚 Para documentación completa del script, consulta [docs/common/DOCUMENTATION.md - Deployment Automatizado](./docs/common/DOCUMENTATION.md#-deployment-automatizado)**
+> **📚 Para documentación completa del script, consulta [docs/DOCUMENTATION.md - Deployment Automatizado](./docs/DOCUMENTATION.md#-deployment-automatizado)**
 
 ### Comandos Principales
 
@@ -184,30 +184,25 @@ chmod +x deploy.sh
 > **📚 Para índice completo de documentación, consulta [INDEX.md](./INDEX.md)**
 
 ### Documentación Principal
-- **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** ⭐ - Single source of truth del estado del proyecto
+- **[STATUS.md](./STATUS.md)** ⭐ - Single source of truth del estado del proyecto
 - **[QUICKSTART.md](./QUICKSTART.md)** - Esta guía rápida
 - **[INDEX.md](./INDEX.md)** - Índice maestro de toda la documentación
-- **[docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)** - Guía técnica completa
+- **[docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)** - Guía técnica completa
 
-### Documentación Frontend
-- **[docs/fe/SETUP.md](./docs/fe/SETUP.md)** - Setup y configuración del frontend
-- **[docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md)** - Documentación de componentes
-- **[docs/fe/HOOKS.md](./docs/fe/HOOKS.md)** - Documentación de hooks personalizados
-
-### Documentación Smart Contract
-- **[docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md)** - Arquitectura del contrato
-- **[docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md)** - Referencia completa de API
+### Documentación por Componente
+- **[docs/FRONTEND.md](./docs/FRONTEND.md)** - Documentación completa del frontend
+- **[docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)** - Documentación completa del smart contract
 
 ### Reportes y Evaluaciones
-- **[docs/reports/ACADEMIC_ASSESSMENT.md](./docs/reports/ACADEMIC_ASSESSMENT.md)** - Evaluación académica
+- **[docs/REPORTS.md](./docs/REPORTS.md)** - Reportes consolidados del proyecto
+- **[docs/RESEARCH.md](./docs/RESEARCH.md)** - Investigación y análisis técnico
 - **[IA.md](./IA.md)** ⭐ - Retrospectiva del uso de IA
-- **[docs/reports/SUMMARY_DAY1.md](./docs/reports/SUMMARY_DAY1.md)** - Resumen del Día 1
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-> **📚 Para información detallada del stack, consulta [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)**
+> **📚 Para información detallada del stack, consulta [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)**
 
 ### Smart Contract
 - **Solidity** 0.8.30
@@ -217,7 +212,7 @@ chmod +x deploy.sh
 - **108 tests** (85.60% lines, 72.15% branches, 82.67% statements, 80.95% functions)
 - **Validaciones críticas**: 5 implementadas (100% completadas)
 
-> **📚 Ver documentación completa**: [docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md) | [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md)
+> **📚 Ver documentación completa**: [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)
 
 ### Frontend
 - **Next.js** 16.0.1
@@ -227,7 +222,7 @@ chmod +x deploy.sh
 - **Shadcn UI**
 - **wagmi** 2.12.0 + **viem** 2.21.0 + **ethers** 6.13.0
 
-> **📚 Ver documentación completa**: [docs/fe/SETUP.md](./docs/fe/SETUP.md) | [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) | [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)
+> **📚 Ver documentación completa**: [docs/FRONTEND.md](./docs/FRONTEND.md)
 
 ### Blockchain Local
 - **Anvil** (Foundry)
@@ -265,14 +260,14 @@ foundryup
 
 ## 📁 Estructura del Proyecto
 
-> **📚 Para estructura detallada, consulta [docs/common/DOCUMENTATION.md - Estructura del Proyecto](./docs/common/DOCUMENTATION.md#-estructura-del-proyecto)**
+> **📚 Para estructura detallada, consulta [docs/DOCUMENTATION.md - Estructura del Proyecto](./docs/DOCUMENTATION.md#-estructura-del-proyecto)**
 
 ```
 emujicad/
 │
 ├── 🚀 deploy.sh                 # Script automatizado (650 líneas)
 ├── 📄 QUICKSTART.md             # Esta guía
-├── 📄 PROJECT_STATUS.md         # Estado actual del proyecto ⭐
+├── 📄 STATUS.md                  # Estado actual del proyecto ⭐
 ├── 📄 INDEX.md                  # Índice de docs
 ├── 📁 docs/                     # Toda la documentación
 │   ├── common/               # Doc general
@@ -454,15 +449,15 @@ cat logs/deploy.log
 
 ### Más problemas
 
-Ver **[docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATION.md#-troubleshooting)** para soluciones detalladas.
+Ver **[docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-troubleshooting)** para soluciones detalladas.
 
 ---
 
 ## 📊 Estado Actual del Proyecto
 
-> **📋 Para información detallada y actualizada del estado del proyecto, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**
+> **📋 Para información detallada y actualizada del estado del proyecto, consulta [STATUS.md](./STATUS.md)**
 
-**Última actualización**: 26 de Noviembre, 2025
+**Última actualización**: 27 de Noviembre, 2025
 
 ### 🎯 Resumen Ejecutivo
 
@@ -477,7 +472,7 @@ Ver **[docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATI
 
 **Próximo paso**: Video Demo (Día 9) - +1.5 puntos
 
-> **📚 Ver roadmap detallado y próximos pasos**: [PROJECT_STATUS.md](./PROJECT_STATUS.md)
+> **📚 Ver roadmap detallado y próximos pasos**: [STATUS.md](./STATUS.md)
 
 ---
 
@@ -487,9 +482,9 @@ Ver **[docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATI
 > **📚 Ver [INDEX.md](./INDEX.md) para índice completo**
 
 **Principales**:
-- [PROJECT_STATUS.md](./PROJECT_STATUS.md) ⭐ - Estado actual y próximos pasos
+- [STATUS.md](./STATUS.md) ⭐ - Estado actual y próximos pasos
 - [INDEX.md](./INDEX.md) - Índice maestro de toda la documentación
-- [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md) - Guía técnica completa
+- [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) - Guía técnica completa
 
 **Frontend**:
 - [docs/fe/SETUP.md](./docs/fe/SETUP.md) - Setup y configuración
@@ -517,7 +512,7 @@ Ver **[docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATI
 
 1. **Usa el script**: No inicies servicios manualmente
 2. **Revisa logs**: Siempre verifica `logs/` ante errores
-3. **Lee docs/common/DOCUMENTATION.md**: Toda la arquitectura está ahí
+3. **Lee docs/DOCUMENTATION.md**: Toda la arquitectura está ahí
 4. **Ejecuta tests**: `cd sc && forge test` antes de commits
 
 ### Para Evaluadores
@@ -525,38 +520,101 @@ Ver **[docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATI
 1. **Ejecuta**: `./deploy.sh start`
 2. **Prueba**: http://localhost:3000
 3. **Revisa tests**: `cd sc && forge test -vv`
-4. **Lee**: docs/reports/ACADEMIC_ASSESSMENT.md para evaluación completa
+4. **Lee**: [docs/REPORTS.md](./docs/REPORTS.md) para evaluación completa
 
 ---
 
 ## 📞 Ayuda
 
 **¿Problema con el deployment?**
-→ `./deploy.sh help` y [docs/common/DOCUMENTATION.md - Troubleshooting](./docs/common/DOCUMENTATION.md#-troubleshooting)
+→ `./deploy.sh help` y [docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-troubleshooting)
 
 **¿Necesitas entender el código?**
-→ [docs/common/DOCUMENTATION.md](./docs/common/DOCUMENTATION.md)
+→ [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)
 
 **¿Trabajando en el frontend?**
-→ [docs/fe/SETUP.md](./docs/fe/SETUP.md) | [docs/fe/COMPONENTS.md](./docs/fe/COMPONENTS.md) | [docs/fe/HOOKS.md](./docs/fe/HOOKS.md)
+→ [docs/FRONTEND.md](./docs/FRONTEND.md)
 
 **¿Trabajando en el smart contract?**
-→ [docs/sc/ARCHITECTURE.md](./docs/sc/ARCHITECTURE.md) | [docs/sc/API_REFERENCE.md](./docs/sc/API_REFERENCE.md)
+→ [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)
 
 **¿Quieres ver el índice completo?**
 → [INDEX.md](./INDEX.md)
 
 **¿Estado actual del proyecto?**
-→ [PROJECT_STATUS.md](./PROJECT_STATUS.md) ⭐
+→ [STATUS.md](./STATUS.md) ⭐
+
+---
+
+## 🔍 Guías Rápidas por Rol
+
+### Para Desarrolladores
+
+**Primera vez**:
+1. Leer [README.md](./README.md)
+2. Ejecutar `./deploy.sh start`
+3. Configurar MetaMask: `./deploy.sh metamask`
+4. Leer [docs/FRONTEND.md](./docs/FRONTEND.md) para frontend
+
+**Desarrollo diario**:
+1. `./deploy.sh start` - Iniciar servicios
+2. Desarrollar features
+3. `./deploy.sh frontend restart` - Reiniciar solo frontend (si solo cambias frontend)
+4. `./deploy.sh stop` - Detener servicios
+
+**Troubleshooting**:
+1. `./deploy.sh status` - Ver estado
+2. Revisar logs en `logs/`
+3. Consultar [docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-troubleshooting)
+
+### Para Evaluadores
+
+**Evaluar el proyecto**:
+1. Leer [docs/REPORTS.md](./docs/REPORTS.md) - Reportes consolidados
+2. Ejecutar `./deploy.sh start`
+3. Probar la DApp en http://localhost:3000
+4. Ver tests: `cd sc && forge test`
+
+### Para Nuevos Colaboradores
+
+**Onboarding**:
+1. [README.md](./README.md) - Quick start
+2. [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) - Arquitectura completa
+3. [docs/FRONTEND.md](./docs/FRONTEND.md) - Detalles frontend
+4. [STATUS.md](./STATUS.md) - Estado actual
+
+---
+
+## 📚 Documentación Externa
+
+### Links Útiles
+
+**Tecnologías**:
+- [Solidity Docs](https://docs.soliditylang.org/)
+- [Foundry Book](https://book.getfoundry.sh/)
+- [Next.js Docs](https://nextjs.org/docs)
+- [wagmi Docs](https://wagmi.sh)
+- [viem Docs](https://viem.sh)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [Shadcn UI](https://ui.shadcn.com)
+
+**OpenZeppelin**:
+- [Contracts](https://docs.openzeppelin.com/contracts/)
+- [Ownable](https://docs.openzeppelin.com/contracts/access#ownership)
+- [Pausable](https://docs.openzeppelin.com/contracts/api/security#Pausable)
+
+**MetaMask**:
+- [Developer Docs](https://docs.metamask.io/)
+- [Getting Started](https://docs.metamask.io/wallet/get-started/set-up-dev-environment/)
 
 ---
 
 **Creado**: 18 de Noviembre, 2025  
-**Última actualización**: 26 de Noviembre, 2025  
-**Versión**: 1.5.0  
+**Última actualización**: 27 de Noviembre, 2025  
+**Versión**: 1.6.0  
 **Estado**: ✅ 9/9 páginas completadas (100%), 24 hooks implementados, validaciones críticas del contrato implementadas
 
-> **📋 Para el estado más actualizado, consulta [PROJECT_STATUS.md](./PROJECT_STATUS.md)**
+> **📋 Para el estado más actualizado, consulta [STATUS.md](./STATUS.md)**
 
 ---
 
