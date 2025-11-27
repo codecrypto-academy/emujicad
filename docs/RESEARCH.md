@@ -1,39 +1,39 @@
-# 🔬 Research - Consolidado
+# 🔬 Research - Consolidated
 
-> **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](../../STATUS.md)**
+> **📋 For the most up-to-date project status, see [STATUS.md](../../STATUS.md)**
 
-Este documento consolida toda la investigación y análisis técnico realizado durante el desarrollo del proyecto Supply Chain Tracker, organizado por naturaleza y destino de la información.
+This document consolidates all research and technical analysis conducted during the development of the Supply Chain Tracker project, organized by nature and destination of the information.
 
-**Última actualización**: 27 de Noviembre, 2025
-
----
-
-## 📋 Índice
-
-### Investigación del Smart Contract
-1. [Análisis de Cobertura](#análisis-de-cobertura)
-2. [Historia de Migración](#historia-de-migración)
-3. [Evolución de Scripts](#evolución-de-scripts)
-
-### Investigación del Frontend
-4. [Validación Contrato vs Frontend](#validación-contrato-vs-frontend)
-5. [Validación Hooks de Ownership](#validación-hooks-de-ownership)
-6. [Análisis de Páginas](#análisis-de-páginas)
-7. [Guía de Navegación](#guía-de-navegación)
+**Last Updated**: November 27, 2025
 
 ---
 
-## 🔷 Investigación del Smart Contract
+## 📋 Table of Contents
 
-### 🔬 Análisis de Cobertura
+### Smart Contract Research
+1. [Coverage Analysis](#coverage-analysis)
+2. [Migration History](#migration-history)
+3. [Script Evolution](#script-evolution)
 
-#### Resumen Ejecutivo
+### Frontend Research
+4. [Contract vs Frontend Validation](#contract-vs-frontend-validation)
+5. [Ownership Hooks Validation](#ownership-hooks-validation)
+6. [Page Analysis](#page-analysis)
+7. [Navigation Guide](#navigation-guide)
 
-Análisis científico de optimización de cobertura de tests realizado en tres fases sistemáticas, demostrando metodología rigurosa y toma de decisiones basada en evidencia.
+---
 
-#### Metodología
+## 🔷 Smart Contract Research
 
-##### Fases de Investigación
+### 🔬 Coverage Analysis
+
+#### Executive Summary
+
+Scientific analysis of test coverage optimization conducted in three systematic phases, demonstrating rigorous methodology and evidence-based decision making.
+
+#### Methodology
+
+##### Research Phases
 
 | Phase | Approach | Tests Added | Outcome |
 |-------|----------|-------------|---------|
@@ -41,16 +41,16 @@ Análisis científico de optimización de cobertura de tests realizado en tres f
 | **Phase 2** | Duplicate analysis | 0 (6 duplicates removed) | ✅ Test suite cleaned |
 | **Phase 3** | Directed edge cases | 11 scientifically targeted tests | ✅ Systematic branch coverage improvement |
 
-#### Hallazgos Clave
+#### Key Findings
 
 - ✅ **Lines Coverage**: 85.60% (Enterprise-grade, exceeds 75% industry standard)
 - ✅ **Functions Coverage**: 80.95% (Excellent API coverage)
 - ✅ **Statements Coverage**: 82.67% (High confidence)
 - 🟡 **Branch Coverage**: 72.15% (Stable, acceptable for smart contracts)
 
-**Conclusión**: Las métricas de cobertura son **production-ready** con validación científica.
+**Conclusion**: Coverage metrics are **production-ready** with scientific validation.
 
-#### Metodología Científica
+#### Scientific Methodology
 
 ##### 3-Phase Analysis Approach
 
@@ -69,87 +69,87 @@ Análisis científico de optimización de cobertura de tests realizado en tres f
 - Based on coverage gap analysis
 - Systematic branch coverage improvement
 
-**Referencia**: Para información detallada sobre tests y cobertura, consulta [docs/SMART_CONTRACT.md](./SMART_CONTRACT.md)
+**Reference**: For detailed information about tests and coverage, see [docs/SMART_CONTRACT.md](./SMART_CONTRACT.md)
 
 ---
 
-### 📜 Historia de Migración
+### 📜 Migration History
 
-#### Resumen
+#### Summary
 
-Historia completa de limpieza de código, refactoring y correcciones de scripts durante la evolución del proyecto.
+Complete history of code cleanup, refactoring, and script corrections during project evolution.
 
-#### Operaciones de Limpieza de Código
+#### Code Cleanup Operations
 
-##### Phase 1: Eliminación de Comentarios Obsoletos
+##### Phase 1: Removal of Obsolete Comments
 
-**Date**: Noviembre 2025  
+**Date**: November 2025  
 **Scope**: Remove 20+ obsolete comments from SupplyChain.sol
 
-**Resultado**: Código más limpio y mantenible, eliminación de comentarios que ya no reflejaban el estado actual del código.
+**Result**: Cleaner and more maintainable code, removal of comments that no longer reflected the current state of the code.
 
-##### Phase 2: Migración de Require a Custom Errors
+##### Phase 2: Migration from Require to Custom Errors
 
-**Date**: Noviembre 2025  
+**Date**: November 2025  
 **Scope**: Migrate all `require()` statements to custom errors for gas optimization
 
-**Resultado**: 
+**Result**: 
 - ✅ Gas savings: ~20-30% reduction in revert gas costs
 - ✅ Better error messages for debugging
 - ✅ Type-safe error handling
 
-##### Phase 3: Refactoring de Scripts
+##### Phase 3: Script Refactoring
 
-**Date**: Noviembre 2025  
+**Date**: November 2025  
 **Scope**: Refactor deployment and interaction scripts
 
-**Mejoras**:
+**Improvements**:
 - ✅ Better error handling
 - ✅ Improved logging
 - ✅ Environment variable validation
 - ✅ Deployment verification
 
-#### Lecciones Aprendidas
+#### Lessons Learned
 
-1. **Custom Errors**: Significativa reducción de gas en operaciones de revert
-2. **Script Refactoring**: Mejor mantenibilidad y debugging
-3. **Code Cleanup**: Código más limpio facilita el mantenimiento futuro
+1. **Custom Errors**: Significant gas reduction in revert operations
+2. **Script Refactoring**: Better maintainability and debugging
+3. **Code Cleanup**: Cleaner code facilitates future maintenance
 
 ---
 
-### 🔧 Evolución de Scripts
+### 🔧 Script Evolution
 
-#### Filosofía de Diseño
+#### Design Philosophy
 
-**Principio**: "Fail Fast, Fail Clear"
+**Principle**: "Fail Fast, Fail Clear"
 
-Los scripts deben:
-- ✅ Fallar inmediatamente si hay un problema
-- ✅ Proporcionar mensajes de error claros
-- ✅ Nunca usar valores hardcodeados como fallback
-- ✅ Validar todas las dependencias antes de ejecutar
+Scripts should:
+- ✅ Fail immediately if there is a problem
+- ✅ Provide clear error messages
+- ✅ Never use hardcoded values as fallback
+- ✅ Validate all dependencies before executing
 
 #### Problema Identificado
 
-##### ❌ Comportamiento Anterior (INCORRECTO)
+##### ❌ Previous Behavior (INCORRECT)
 
-Scripts tenían **valores hardcodeados de fallback** que se mostraban cuando `forge coverage` fallaba:
+Scripts had **hardcoded fallback values** that were displayed when `forge coverage` failed:
 
 ```bash
-# ❌ BEFORE: Si forge falla, muestra valores obsoletos
+# ❌ BEFORE: If forge fails, shows obsolete values
 if [ -z "$COVERAGE_OUTPUT" ]; then
     echo "⚠️ Using known metrics from last execution:"
     COVERAGE_OUTPUT="| src/SupplyChain.sol | 78.22% (158/202) | ... |"
-    # Continúa ejecutando con datos potencialmente obsoletos
+    # Continues executing with potentially obsolete data
 fi
 ```
 
-**Problema**: Un usuario podría ver **métricas incorrectas u obsoletas** y tomar decisiones basadas en información falsa.
+**Problem**: A user could see **incorrect or obsolete metrics** and make decisions based on false information.
 
-##### ✅ Comportamiento Actual (CORRECTO)
+##### ✅ Current Behavior (CORRECT)
 
 ```bash
-# ✅ NOW: Si forge falla, el script falla inmediatamente
+# ✅ NOW: If forge fails, the script fails immediately
 if [ -z "$COVERAGE_OUTPUT" ]; then
     echo "❌ ERROR: forge coverage failed. Cannot proceed."
     echo "Please fix the issue and try again."
@@ -157,51 +157,51 @@ if [ -z "$COVERAGE_OUTPUT" ]; then
 fi
 ```
 
-**Solución**: El script falla inmediatamente con un mensaje claro, evitando decisiones basadas en datos incorrectos.
+**Solution**: The script fails immediately with a clear message, avoiding decisions based on incorrect data.
 
-#### Arquitectura Simplificada
+#### Simplified Architecture
 
-**Principio KISS (Keep It Simple)**:
-- 3 scripts **independientes** sin dependencias entre sí
-- Funciones inline donde se necesitan
-- Sin sobre-ingeniería
-- Fácil mantenimiento
+**KISS Principle (Keep It Simple)**:
+- 3 **independent** scripts with no dependencies between them
+- Inline functions where needed
+- No over-engineering
+- Easy maintenance
 
 **Scripts**:
-1. `validate-all.sh` - Validación técnica (independiente)
-2. `audit-documentation.sh` - Auditoría (independiente)
-3. `coverage-reporter.sh` - Reporte de coverage (independiente)
+1. `validate-all.sh` - Technical validation (independent)
+2. `audit-documentation.sh` - Audit (independent)
+3. `coverage-reporter.sh` - Coverage report (independent)
 
-#### Mejoras Implementadas
+#### Implemented Improvements
 
-1. **Fail Fast, Fail Clear**: Scripts fallan inmediatamente con mensajes claros
-2. **Sin Valores Hardcodeados**: No hay fallbacks que puedan mostrar datos obsoletos
-3. **Validación de Dependencias**: Todas las dependencias se validan antes de ejecutar
-4. **Mensajes de Error Claros**: Cada error tiene un mensaje descriptivo y accionable
+1. **Fail Fast, Fail Clear**: Scripts fail immediately with clear messages
+2. **No Hardcoded Values**: No fallbacks that could show obsolete data
+3. **Dependency Validation**: All dependencies are validated before executing
+4. **Clear Error Messages**: Each error has a descriptive and actionable message
 
-**Referencia**: Para información sobre scripts, consulta [docs/SMART_CONTRACT.md](./SMART_CONTRACT.md#scripts-y-automatización)
-
----
-
-## 🎨 Investigación del Frontend
-
-### 🔍 Validación Contrato vs Frontend
-
-#### Resumen Ejecutivo
-
-**Fecha**: 27 de Noviembre, 2025  
-**Estado**: ✅ **TODAS LAS FUNCIONES ESTÁN COMPATIBLES Y IMPLEMENTADAS**
-
-Se ha realizado una validación exhaustiva comparando las firmas de funciones del contrato inteligente (`SupplyChain.sol`) con las llamadas del frontend.
-
-**Resultado**: ✅ **22/22 funciones compatibles**
-
-> **📚 Para documentación completa de funciones del contrato, consulta [docs/SMART_CONTRACT.md](./SMART_CONTRACT.md)**  
-> **📚 Para documentación completa de hooks del frontend, consulta [docs/FRONTEND.md](./FRONTEND.md)**
+**Reference**: For information about scripts, see [docs/SMART_CONTRACT.md](./SMART_CONTRACT.md#scripts-and-automation)
 
 ---
 
-#### ✅ FUNCIONES DE ESCRITURA (Write Functions)
+## 🎨 Frontend Research
+
+### 🔍 Contract vs Frontend Validation
+
+#### Executive Summary
+
+**Date**: November 27, 2025  
+**Status**: ✅ **ALL FUNCTIONS ARE COMPATIBLE AND IMPLEMENTED**
+
+A comprehensive validation has been performed comparing the function signatures of the smart contract (`SupplyChain.sol`) with the frontend calls.
+
+**Result**: ✅ **22/22 functions compatible**
+
+> **📚 For complete contract function documentation, see [docs/SMART_CONTRACT.md](./SMART_CONTRACT.md)**  
+> **📚 For complete frontend hooks documentation, see [docs/FRONTEND.md](./FRONTEND.md)**
+
+---
+
+#### ✅ WRITE FUNCTIONS
 
 ##### 1. `createToken`
 **Contrato:**
@@ -213,7 +213,7 @@ function createToken(string memory name, TokenType tokenType, uint totalSupply, 
 ```typescript
 args: [name, tokenTypeValue, totalSupply, features, parentId, parentAmount]
 ```
-✅ **COMPATIBLE** - Todos los parámetros coinciden
+✅ **COMPATIBLE** - All parameters match
 
 ##### 2. `transfer`
 **Contrato:**
@@ -225,7 +225,7 @@ function transfer(address to, uint tokenId, uint amount)
 ```typescript
 args: [to, tokenId, amount]
 ```
-✅ **COMPATIBLE** - Todos los parámetros coinciden
+✅ **COMPATIBLE** - All parameters match
 
 ##### 3. `acceptTransfer`
 **Contrato:**
@@ -237,7 +237,7 @@ function acceptTransfer(uint transferId)
 ```typescript
 args: [transferId]
 ```
-✅ **COMPATIBLE** - Parámetros coinciden
+✅ **COMPATIBLE** - Parameters match
 
 ##### 4. `rejectTransfer`
 **Contrato:**
@@ -249,7 +249,7 @@ function rejectTransfer(uint transferId)
 ```typescript
 args: [transferId]
 ```
-✅ **COMPATIBLE** - Parámetros coinciden
+✅ **COMPATIBLE** - Parameters match
 
 ##### 5. `cancelTransfer`
 **Contrato:**
@@ -261,7 +261,7 @@ function cancelTransfer(uint transferId)
 ```typescript
 args: [transferId]
 ```
-✅ **COMPATIBLE** - Parámetros coinciden
+✅ **COMPATIBLE** - Parameters match
 
 ##### 6. `requestUserRole`
 **Contrato:**
@@ -271,9 +271,9 @@ function requestUserRole(UserRole role)
 
 **Frontend (`useRequestRole.ts`):**
 ```typescript
-args: [roleValue]  // roleValue es 0-3
+args: [roleValue]  // roleValue is 0-3
 ```
-✅ **COMPATIBLE** - Parámetros coinciden
+✅ **COMPATIBLE** - Parameters match
 
 ##### 7. `changeStatusUser`
 **Contrato:**
@@ -283,9 +283,9 @@ function changeStatusUser(address userAddress, UserStatus newStatus)
 
 **Frontend (`useAdminUsers.ts`):**
 ```typescript
-args: [userAddress, statusValue]  // statusValue es 0-3
+args: [userAddress, statusValue]  // statusValue is 0-3
 ```
-✅ **COMPATIBLE** - Parámetros coinciden
+✅ **COMPATIBLE** - Parameters match
 
 ##### 8. `pause` / `unpause`
 **Contrato:**
@@ -296,14 +296,14 @@ function unpause() external onlyPauser whenPaused
 
 **Frontend (`usePause.ts`):**
 ```typescript
-// pause: sin argumentos
-// unpause: sin argumentos
+// pause: no arguments
+// unpause: no arguments
 ```
-✅ **COMPATIBLE** - Sin parámetros, correcto
+✅ **COMPATIBLE** - No parameters, correct
 
 ---
 
-#### ✅ FUNCIONES DE LECTURA (Read Functions)
+#### ✅ READ FUNCTIONS
 
 ##### 9. `getUserInfo`
 **Contrato:**
@@ -316,7 +316,7 @@ function getUserInfo(address userAddress) public view returns (User memory)
 functionName: 'getUserInfo',
 args: [userAddress]
 ```
-✅ **COMPATIBLE** - Parámetros y retorno coinciden
+✅ **COMPATIBLE** - Parameters and return match
 
 ##### 10. `getUserInfoById`
 **Contrato:**
@@ -329,7 +329,7 @@ function getUserInfoById(uint userId) public view returns (User memory)
 functionName: 'getUserInfoById',
 args: [userId]
 ```
-✅ **COMPATIBLE** - Parámetros y retorno coinciden
+✅ **COMPATIBLE** - Parameters and return match
 
 ##### 11. `getToken`
 **Contrato:**
@@ -337,12 +337,12 @@ args: [userId]
 function getToken(uint tokenId) public view returns (Token memory)
 ```
 
-**Frontend (múltiples hooks):**
+**Frontend (multiple hooks):**
 ```typescript
 functionName: 'getToken',
 args: [tokenId]
 ```
-✅ **COMPATIBLE** - Parámetros y retorno coinciden
+✅ **COMPATIBLE** - Parameters and return match
 
 ##### 12. `getTokenBalance`
 **Contrato:**
@@ -355,7 +355,7 @@ function getTokenBalance(uint tokenId, address userAddress) public view returns 
 functionName: 'getTokenBalance',
 args: [tokenId, userAddress]
 ```
-✅ **COMPATIBLE** - Parámetros y retorno coinciden
+✅ **COMPATIBLE** - Parameters and return match
 
 ##### 13. `getTransfer`
 **Contrato:**
@@ -368,7 +368,7 @@ function getTransfer(uint transferId) public view returns (Transfer memory)
 functionName: 'getTransfer',
 args: [transferId]
 ```
-✅ **COMPATIBLE** - Parámetros y retorno coinciden
+✅ **COMPATIBLE** - Parameters and return match
 
 ##### 14. `getUserTokens`
 **Contrato:**
@@ -381,9 +381,9 @@ function getUserTokens(address userAddress) public view returns (Token[] memory)
 functionName: 'getUserTokens',
 args: [userAddress]
 ```
-✅ **COMPATIBLE** - Parámetros y retorno coinciden
+✅ **COMPATIBLE** - Parameters and return match
 
-> **⚠️ GAS WARNING**: Esta función tiene alto coste de gas.
+> **⚠️ GAS WARNING**: This function has high gas cost.
 
 ##### 15. `getUserTransfers`
 **Contrato:**
@@ -396,9 +396,9 @@ function getUserTransfers(address userAddress) public view returns (Transfer[] m
 functionName: 'getUserTransfers',
 args: [userAddress]
 ```
-✅ **COMPATIBLE** - Parámetros y retorno coinciden
+✅ **COMPATIBLE** - Parameters and return match
 
-> **⚠️ GAS WARNING**: Esta función tiene alto coste de gas.
+> **⚠️ GAS WARNING**: This function has high gas cost.
 
 ##### 16. `getTotalTokens` / `getTotalUsers` / `getTotalTransfers`
 **Contrato:**
@@ -411,9 +411,9 @@ function getTotalTransfers() public view returns (uint)
 **Frontend (`useContractReads.ts`):**
 ```typescript
 functionName: 'getTotalTokens' | 'getTotalUsers' | 'getTotalTransfers'
-// Sin argumentos
+// No arguments
 ```
-✅ **COMPATIBLE** - Sin parámetros, retorno correcto
+✅ **COMPATIBLE** - No parameters, correct return
 
 ##### 17. `isPaused`
 **Contrato:**
@@ -424,9 +424,9 @@ function isPaused() public view returns (bool)
 **Frontend (`usePause.ts`):**
 ```typescript
 functionName: 'isPaused'
-// Sin argumentos
+// No arguments
 ```
-✅ **COMPATIBLE** - Sin parámetros, retorno correcto
+✅ **COMPATIBLE** - No parameters, correct return
 
 ##### 18. `owner`
 **Contrato:**
@@ -437,22 +437,22 @@ address public owner;
 **Frontend (`useContractOwner.ts`):**
 ```typescript
 functionName: 'owner'
-// Sin argumentos
+// No arguments
 ```
-✅ **COMPATIBLE** - Variable pública, lectura correcta
+✅ **COMPATIBLE** - Public variable, correct reading
 
 ---
 
-#### ✅ FUNCIONES DE OWNERSHIP TRANSFER - IMPLEMENTADAS
+#### ✅ OWNERSHIP TRANSFER FUNCTIONS - IMPLEMENTED
 
 ##### 1. `initiateOwnershipTransfer` ✅ IMPLEMENTADO
 **Contrato:**
 ```solidity
 function initiateOwnershipTransfer(address newOwner) external onlyOwner whenNotPaused
 ```
-✅ **IMPLEMENTADO** - Hook: `useOwnershipTransfer().initiateOwnershipTransfer()`
-- Ubicación: `web/src/hooks/useOwnershipTransfer.ts`
-- Componente: `web/src/components/admin/OwnershipTransfer.tsx`
+✅ **IMPLEMENTED** - Hook: `useOwnershipTransfer().initiateOwnershipTransfer()`
+- Location: `web/src/hooks/useOwnershipTransfer.ts`
+- Component: `web/src/components/admin/OwnershipTransfer.tsx`
 
 ##### 2. `acceptOwnershipTransfer` ✅ IMPLEMENTADO
 **Contrato:**
@@ -483,197 +483,197 @@ function getPendingOwner() public view returns (address)
 
 ---
 
-#### 📊 CONCLUSIÓN - VALIDACIÓN CONTRATO VS FRONTEND
+#### 📊 CONCLUSION - CONTRACT VS FRONTEND VALIDATION
 
-##### ✅ Funciones del Contrato Compatibles: 22/22
-Todas las funciones del contrato inteligente tienen hooks correspondientes en el frontend y están correctamente alineadas.
+##### ✅ Contract Functions Compatible: 22/22
+All smart contract functions have corresponding hooks in the frontend and are correctly aligned.
 
-**Desglose**:
-- **Funciones de escritura**: 8/8 ✅
-- **Funciones de lectura**: 10/10 ✅
-- **Funciones de ownership transfer**: 4/4 ✅
+**Breakdown**:
+- **Write functions**: 8/8 ✅
+- **Read functions**: 10/10 ✅
+- **Ownership transfer functions**: 4/4 ✅
 
-##### ✅ Hooks del Frontend: 27 hooks personalizados
-El frontend implementa 27 hooks personalizados que cubren todas las funciones del contrato.
+##### ✅ Frontend Hooks: 27 custom hooks
+The frontend implements 27 custom hooks that cover all contract functions.
 
-##### 🎯 ESTADO ACTUAL
+##### 🎯 CURRENT STATUS
 
-**✅ IMPLEMENTACIÓN COMPLETA** - El frontend está completamente compatible con el contrato actual, incluyendo todas las funciones de ownership transfer.
-
----
-
-#### 🔍 DETALLES TÉCNICOS
-
-##### Tipos de Datos
-- ✅ Todos los `uint` del contrato se mapean correctamente a `bigint` en TypeScript
-- ✅ Todos los `address` se mapean correctamente a `0x${string}`
-- ✅ Todos los enums (`UserRole`, `UserStatus`, `TokenType`, `TransferStatus`) coinciden
-- ✅ Los strings se manejan correctamente
-
-##### Conversiones
-- ✅ `TokenType` se convierte a número (0 o 1) antes de enviar al contrato
-- ✅ `UserStatus` se convierte a número (0-3) antes de enviar al contrato
-- ✅ `UserRole` se convierte a número (0-3) antes de enviar al contrato
-
-> **Nota**: Las conversiones están implementadas en los hooks. Ver código fuente para detalles específicos.
+**✅ COMPLETE IMPLEMENTATION** - The frontend is fully compatible with the current contract, including all ownership transfer functions.
 
 ---
 
-### 🔍 Validación Hooks de Ownership
+#### 🔍 TECHNICAL DETAILS
 
-#### Resumen Ejecutivo
+##### Data Types
+- ✅ All contract `uint` values are correctly mapped to `bigint` in TypeScript
+- ✅ All `address` values are correctly mapped to `0x${string}`
+- ✅ All enums (`UserRole`, `UserStatus`, `TokenType`, `TransferStatus`) match
+- ✅ Strings are handled correctly
 
-**Fecha**: 27 de Noviembre, 2025  
-**Estado**: ✅ **IMPLEMENTADO Y FUNCIONANDO**
+##### Conversions
+- ✅ `TokenType` is converted to number (0 or 1) before sending to contract
+- ✅ `UserStatus` is converted to number (0-3) before sending to contract
+- ✅ `UserRole` is converted to number (0-3) before sending to contract
+
+> **Note**: Conversions are implemented in the hooks. See source code for specific details.
+
+---
+
+### 🔍 Ownership Hooks Validation
+
+#### Executive Summary
+
+**Date**: November 27, 2025  
+**Status**: ✅ **IMPLEMENTED AND WORKING**
 
 #### `usePendingOwner.ts`
 
-**Estado**: ✅ **COMPLETAMENTE COMPATIBLE**
+**Status**: ✅ **FULLY COMPATIBLE**
 
-- ✅ Función del contrato: `getPendingOwner() public view returns (address)`
-- ✅ Hook llama a: `getPendingOwner` ✅
-- ✅ Parámetros: Ninguno (coincide) ✅
-- ✅ Retorno: `address` → `string | undefined` ✅
-- ✅ Habilitación condicional: Soporta `enabled: boolean` ✅
+- ✅ Contract function: `getPendingOwner() public view returns (address)`
+- ✅ Hook calls: `getPendingOwner` ✅
+- ✅ Parameters: None (matches) ✅
+- ✅ Return: `address` → `string | undefined` ✅
+- ✅ Conditional enabling: Supports `enabled: boolean` ✅
 
 #### `useOwnershipTransfer.ts`
 
-**Estado**: ✅ **COMPATIBLE Y PROBLEMA DE DISEÑO RESUELTO**
+**Status**: ✅ **COMPATIBLE AND DESIGN ISSUE RESOLVED**
 
-**Funciones implementadas**:
-- ✅ `initiateOwnershipTransfer(newOwner: 0x${string})` - Solo el owner actual
-- ✅ `acceptOwnershipTransfer()` - Solo el `pendingOwner`
-- ✅ `rejectOwnershipTransfer()` - Owner actual o `pendingOwner`
+**Implemented functions**:
+- ✅ `initiateOwnershipTransfer(newOwner: 0x${string})` - Only current owner
+- ✅ `acceptOwnershipTransfer()` - Only `pendingOwner`
+- ✅ `rejectOwnershipTransfer()` - Current owner or `pendingOwner`
 
-**Mejoras implementadas**:
-- ✅ Estados separados: 3 instancias de `useWriteContract()` (una por función)
-- ✅ Confirmaciones separadas: 3 instancias de `useWaitForTransactionReceipt()` (una por función)
-- ✅ Estados individuales: Cada función tiene su propio `isPending`, `isConfirming`, `isSuccess`, `error`, `hash`
+**Implemented improvements**:
+- ✅ Separate states: 3 instances of `useWriteContract()` (one per function)
+- ✅ Separate confirmations: 3 instances of `useWaitForTransactionReceipt()` (one per function)
+- ✅ Individual states: Each function has its own `isPending`, `isConfirming`, `isSuccess`, `error`, `hash`
 
-**Componente relacionado**: `web/src/components/admin/OwnershipTransfer.tsx` - UI completa para gestionar ownership transfer.
-
----
-
-### 📄 Análisis de Páginas
-
-#### Resumen Ejecutivo
-
-**Fecha**: 27 de Noviembre, 2025  
-**Estado**: ✅ Todas las páginas están completadas (9/9 - 100%)
-
-#### Páginas Implementadas
-
-1. **`/` (Home)** - Landing page con registro
-2. **`/dashboard`** - Dashboard de usuario/admin
-3. **`/admin/users`** - Gestión de usuarios (admin)
-4. **`/tokens`** - Lista de tokens
-5. **`/tokens/[id]`** - Detalles del token con trazabilidad end-to-end
-6. **`/tokens/[id]/transfer`** - Formulario de transferencia desde detalles
-7. **`/transfers`** - Lista de transferencias
-8. **`/transfers/[id]`** - Detalles de transferencia
-9. **`/create-token`** - Creación de tokens
+**Related component**: `web/src/components/admin/OwnershipTransfer.tsx` - Complete UI for managing ownership transfer.
 
 ---
 
-#### 1. `/tokens/[id]` - Página de Detalles del Token
+### 📄 Page Analysis
 
-##### 🎯 Propósito
-Mostrar información completa y detallada de un token específico, incluyendo su historial de transferencias y trazabilidad completa.
+#### Executive Summary
 
-##### 📋 Contenido Implementado
+**Date**: November 27, 2025  
+**Status**: ✅ All pages are completed (9/9 - 100%)
 
-**Sección 1: Información Principal del Token**
-- Header con nombre del token (grande y destacado)
-- Badge del tipo: Raw Material / Finished Product
+#### Implemented Pages
+
+1. **`/` (Home)** - Landing page with registration
+2. **`/dashboard`** - User/admin dashboard
+3. **`/admin/users`** - User management (admin)
+4. **`/tokens`** - Token list
+5. **`/tokens/[id]`** - Token details with end-to-end traceability
+6. **`/tokens/[id]/transfer`** - Transfer form from details
+7. **`/transfers`** - Transfer list
+8. **`/transfers/[id]`** - Transfer details
+9. **`/create-token`** - Token creation
+
+---
+
+#### 1. `/tokens/[id]` - Token Details Page
+
+##### 🎯 Purpose
+Display complete and detailed information of a specific token, including its transfer history and complete traceability.
+
+##### 📋 Implemented Content
+
+**Section 1: Main Token Information**
+- Header with token name (large and prominent)
+- Type badge: Raw Material / Finished Product
 - Token ID: `#123`
-- Total Supply: Cantidad total creada
-- Mi Balance: Balance del usuario actual (si tiene)
-- Fecha de creación: Formato legible
-- Creator: Dirección del creador (con AddressDisplay)
-- Parent Token: Si es Finished Product, mostrar ID del token padre, nombre y link
-- Features: Metadatos JSON parseados y mostrados de forma legible
+- Total Supply: Total amount created
+- My Balance: Current user balance (if available)
+- Creation date: Readable format
+- Creator: Creator address (with AddressDisplay)
+- Parent Token: If Finished Product, show parent token ID, name and link
+- Features: JSON metadata parsed and displayed in readable format
 
-**Sección 2: Trazabilidad Completa** (Solo para Finished Product)
-- Árbol de trazabilidad con visualización jerárquica
-- Historial de transformación: Mostrar cómo se creó este producto desde la materia prima
-- Información del parent token: Link para ver detalles del token padre
+**Section 2: Complete Traceability** (Only for Finished Product)
+- Traceability tree with hierarchical visualization
+- Transformation history: Show how this product was created from raw material
+- Parent token information: Link to view parent token details
 
-**Sección 3: Historial de Transferencias**
-- Tabla de transferencias relacionadas con este token
-- Filtros: Por estado (All, Pending, Accepted, Rejected, Cancelled) y por dirección (From/To)
-- Estadísticas: Total de transferencias, aceptadas, pendientes, total de tokens transferidos
+**Section 3: Transfer History**
+- Table of transfers related to this token
+- Filters: By status (All, Pending, Accepted, Rejected, Cancelled) and by address (From/To)
+- Statistics: Total transfers, accepted, pending, total tokens transferred
 
-**Sección 4: Distribución de Tokens**
-- Lista de usuarios con balance de este token
-- Porcentaje del total supply por usuario
+**Section 4: Token Distribution**
+- List of users with balance of this token
+- Percentage of total supply per user
 
-**Sección 5: Acciones**
-- Botón "Transfer Tokens": Link a `/tokens/[id]/transfer`
-- Botón "Back to Tokens": Volver a `/tokens`
-- Botón "View Parent Token": Si tiene parent, ver detalles del token padre
+**Section 5: Actions**
+- "Transfer Tokens" button: Link to `/tokens/[id]/transfer`
+- "Back to Tokens" button: Return to `/tokens`
+- "View Parent Token" button: If has parent, view parent token details
 
-**Características especiales**:
-- ✅ Visualización de árbol de trazabilidad con expand/collapse
-- ✅ Filtrado por dirección en el árbol
-- ✅ Resaltado de nodos según el rol del usuario actual
-- ✅ Hook `useTokenTraceability` para trazabilidad end-to-end completa
-- ✅ Formato optimizado (todo en una línea para ahorrar espacio vertical)
+**Special features**:
+- ✅ Traceability tree visualization with expand/collapse
+- ✅ Address filtering in the tree
+- ✅ Node highlighting according to current user role
+- ✅ `useTokenTraceability` hook for complete end-to-end traceability
+- ✅ Optimized format (everything on one line to save vertical space)
 
-##### 📊 Datos Necesarios
-- ✅ `useGetToken(tokenId)` - Información del token
-- ✅ `useGetTokenBalance(tokenId, address)` - Balance del usuario
-- ✅ `useGetAllTransfers()` - Todas las transferencias (filtrar por tokenId)
-- ✅ `useGetToken(parentTokenId)` - Información del token padre (si aplica)
-- ✅ `useTokenTraceability(tokenId)` - Trazabilidad end-to-end con árbol jerárquico
-
----
-
-#### 2. `/tokens/[id]/transfer` - Página de Transferencia desde Detalles
-
-##### 🎯 Propósito
-Formulario de transferencia pre-rellenado con el token seleccionado, permitiendo transferir directamente desde la página de detalles.
-
-##### 📋 Contenido Implementado
-
-**Sección 1: Información del Token a Transferir**
-- Card con resumen del token (nombre, ID, tipo, balance disponible, total supply)
-- Link "Ver detalles completos" → `/tokens/[id]`
-
-**Sección 2: Formulario de Transferencia**
-- Token ID: Pre-seleccionado y bloqueado (no editable)
-- Token Name: Mostrado para referencia (solo lectura)
-- Amount: Campo editable con validaciones (no puede ser 0, negativo, o exceder balance)
-- Recipient: Dropdown con usuarios disponibles según rol (filtrado automático)
-
-**Sección 3: Resumen de la Transferencia**
-- Token: Nombre e ID
-- Cantidad: X tokens
-- Destinatario: Dirección y rol
-- Balance después: "Tu balance será: X tokens"
-
-**Sección 4: Acciones**
-- Botón "Transfer": Enviar transferencia
-- Botón "Cancel": Volver a `/tokens/[id]`
-- Botón "Back to Details": Volver a `/tokens/[id]`
-
-##### ⚠️ Validaciones Especiales
-- Verificar que el usuario tiene balance suficiente
-- Verificar que el contrato no está pausado
-- Verificar que el usuario está aprobado
-- Verificar que el destinatario es válido según el rol
-
-##### 📊 Datos Necesarios
-- ✅ `useGetToken(tokenId)` - Información del token
-- ✅ `useGetTokenBalance(tokenId, address)` - Balance del usuario
-- ✅ `useGetAllUsers()` - Usuarios disponibles según rol (filtrado en el componente)
-- ✅ `useTransfer()` - Hook para crear transferencia
-- ✅ `useIsPaused()` - Verificar si el contrato está pausado
+##### 📊 Required Data
+- ✅ `useGetToken(tokenId)` - Token information
+- ✅ `useGetTokenBalance(tokenId, address)` - User balance
+- ✅ `useGetAllTransfers()` - All transfers (filter by tokenId)
+- ✅ `useGetToken(parentTokenId)` - Parent token information (if applicable)
+- ✅ `useTokenTraceability(tokenId)` - End-to-end traceability with hierarchical tree
 
 ---
 
-### 🧭 Guía de Navegación
+#### 2. `/tokens/[id]/transfer` - Transfer Page from Details
 
-#### Flujo de Navegación Completo
+##### 🎯 Purpose
+Pre-filled transfer form with the selected token, allowing direct transfer from the details page.
+
+##### 📋 Implemented Content
+
+**Section 1: Token Information to Transfer**
+- Card with token summary (name, ID, type, available balance, total supply)
+- "View complete details" link → `/tokens/[id]`
+
+**Section 2: Transfer Form**
+- Token ID: Pre-selected and locked (not editable)
+- Token Name: Shown for reference (read-only)
+- Amount: Editable field with validations (cannot be 0, negative, or exceed balance)
+- Recipient: Dropdown with available users according to role (automatic filtering)
+
+**Section 3: Transfer Summary**
+- Token: Name and ID
+- Amount: X tokens
+- Recipient: Address and role
+- Balance after: "Your balance will be: X tokens"
+
+**Section 4: Actions**
+- "Transfer" button: Send transfer
+- "Cancel" button: Return to `/tokens/[id]`
+- "Back to Details" button: Return to `/tokens/[id]`
+
+##### ⚠️ Special Validations
+- Verify user has sufficient balance
+- Verify contract is not paused
+- Verify user is approved
+- Verify recipient is valid according to role
+
+##### 📊 Required Data
+- ✅ `useGetToken(tokenId)` - Token information
+- ✅ `useGetTokenBalance(tokenId, address)` - User balance
+- ✅ `useGetAllUsers()` - Available users according to role (filtered in component)
+- ✅ `useTransfer()` - Hook to create transfer
+- ✅ `useIsPaused()` - Verify if contract is paused
+
+---
+
+### 🧭 Navigation Guide
+
+#### Complete Navigation Flow
 
 ```
 /tokens (lista de tokens)
@@ -687,105 +687,105 @@ Formulario de transferencia pre-rellenado con el token seleccionado, permitiendo
               └── /tokens/[parentId] (detalles del parent)
 ```
 
-#### Paso a Paso
+#### Step by Step
 
-##### Paso 1: Ir a la Lista de Tokens
-1. **Desde el Header**: Click en "My Tokens" en la barra superior
-2. **Desde el Dashboard**: Click en "My Tokens" en el dashboard
-3. **URL directa**: `http://localhost:3000/tokens`
+##### Step 1: Go to Token List
+1. **From Header**: Click on "My Tokens" in the top bar
+2. **From Dashboard**: Click on "My Tokens" in the dashboard
+3. **Direct URL**: `http://localhost:3000/tokens`
 
-**Resultado**: Lista de todas las tarjetas de tokens (TokenCard o TokenCardModern)
+**Result**: List of all token cards (TokenCard or TokenCardModern)
 
-##### Paso 2: Ver Detalles de un Token
-**Opción A: Desde la Lista de Tokens**
-1. En la página `/tokens`, verás tarjetas de tokens
-2. **Click en cualquier tarjeta de token** (la tarjeta completa es clickeable)
-3. Serás redirigido a `/tokens/[id]` (ejemplo: `/tokens/1`)
+##### Step 2: View Token Details
+**Option A: From Token List**
+1. On the `/tokens` page, you'll see token cards
+2. **Click on any token card** (the entire card is clickable)
+3. You'll be redirected to `/tokens/[id]` (example: `/tokens/1`)
 
-**Opción B: URL Directa**
-- Escribe en el navegador: `http://localhost:3000/tokens/1`
-- También puedes usar tu IP si accedes desde otro dispositivo
+**Option B: Direct URL**
+- Type in browser: `http://localhost:3000/tokens/1`
+- You can also use your IP if accessing from another device
 
-**Resultado**: Página de detalles del token con información completa, historial de transferencias, estadísticas y trazabilidad end-to-end (si es Finished Product)
+**Result**: Token details page with complete information, transfer history, statistics and end-to-end traceability (if Finished Product)
 
-##### Paso 3: Transferir Tokens desde Detalles
-**Desde la Página de Detalles (`/tokens/[id]`)**:
-1. En la parte superior derecha, verás un botón azul **"Transfer Tokens"**
-2. **Click en ese botón**
-3. Serás redirigido a `/tokens/[id]/transfer` (ejemplo: `/tokens/1/transfer`)
+##### Step 3: Transfer Tokens from Details
+**From Details Page (`/tokens/[id]`)**:
+1. In the top right, you'll see a blue **"Transfer Tokens"** button
+2. **Click that button**
+3. You'll be redirected to `/tokens/[id]/transfer` (example: `/tokens/1/transfer`)
 
-**Resultado**: Formulario de transferencia con token pre-seleccionado, validaciones y resumen antes de enviar
+**Result**: Transfer form with pre-selected token, validations and summary before sending
 
-##### Paso 4: Volver Atrás
-**Desde la Página de Detalles**:
-- Botón **"Back to Tokens"** (arriba a la izquierda) → Vuelve a `/tokens`
+##### Step 4: Go Back
+**From Details Page**:
+- **"Back to Tokens"** button (top left) → Returns to `/tokens`
 
-**Desde la Página de Transferencia**:
-- Botón **"Cancel"** o **"Back to Token Details"** → Vuelve a `/tokens/[id]`
+**From Transfer Page**:
+- **"Cancel"** or **"Back to Token Details"** button → Returns to `/tokens/[id]`
 
-#### Puntos de Entrada
+#### Entry Points
 
-**Desde el Header**:
-- Click en "My Tokens" → `/tokens`
+**From Header**:
+- Click on "My Tokens" → `/tokens`
 
-**Desde el Dashboard**:
-- Click en "My Tokens" → `/tokens`
+**From Dashboard**:
+- Click on "My Tokens" → `/tokens`
 
-**Desde Transfers**:
-- Ver transferencia → Click en Token ID (si está linkeado) → `/tokens/[id]`
+**From Transfers**:
+- View transfer → Click on Token ID (if linked) → `/tokens/[id]`
 
-#### Indicadores Visuales
+#### Visual Indicators
 
-**En la Página de Detalles (`/tokens/[id]`)**:
-- ✅ Botón "Transfer Tokens" visible si tienes balance > 0 y puedes transferir
-- ✅ Sección de Trazabilidad End-to-End visible solo para Finished Products con parent token
-- ✅ Historial de Transferencias siempre visible (puede estar vacío)
+**On Details Page (`/tokens/[id]`)**:
+- ✅ "Transfer Tokens" button visible if you have balance > 0 and can transfer
+- ✅ End-to-End Traceability section visible only for Finished Products with parent token
+- ✅ Transfer History always visible (may be empty)
 
-**En la Página `/tokens`**:
-- ✅ **Hover effect**: Al pasar el mouse, las tarjetas se elevan ligeramente
-- ✅ **Cursor pointer**: El cursor cambia a "mano" al pasar sobre ellas
-- ✅ **Sombra aumentada**: Al hacer hover, la sombra se hace más grande
-- ✅ **Toda la tarjeta es clickeable**: No solo el título, toda la tarjeta
+**On `/tokens` Page**:
+- ✅ **Hover effect**: When hovering, cards slightly elevate
+- ✅ **Cursor pointer**: Cursor changes to "hand" when hovering
+- ✅ **Increased shadow**: On hover, shadow becomes larger
+- ✅ **Entire card is clickable**: Not just the title, the entire card
 
-#### Problemas Comunes y Soluciones
+#### Common Problems and Solutions
 
-##### Problema 1: "No veo el botón Transfer Tokens"
-**Causas posibles**:
-- ❌ No tienes balance del token (balance = 0)
-- ❌ Tu rol no permite transferir (Consumer no puede transferir)
-- ❌ El contrato está pausado
-- ❌ Tu usuario no está aprobado
+##### Problem 1: "I don't see the Transfer Tokens button"
+**Possible causes**:
+- ❌ You don't have token balance (balance = 0)
+- ❌ Your role doesn't allow transfers (Consumer cannot transfer)
+- ❌ Contract is paused
+- ❌ Your user is not approved
 
-**Solución**: 
-- Verifica tu balance en la página de detalles
-- Si eres Consumer, solo puedes recibir transferencias
-- Si el contrato está pausado, espera a que se reactive
-- Verifica tu estado de usuario en el dashboard
+**Solution**: 
+- Check your balance on the details page
+- If you're a Consumer, you can only receive transfers
+- If contract is paused, wait for it to be reactivated
+- Check your user status in the dashboard
 
-##### Problema 2: "No puedo hacer clic en las tarjetas"
-**Causas posibles**:
-- ❌ JavaScript deshabilitado
-- ❌ Error en la consola del navegador
+##### Problem 2: "I can't click on the cards"
+**Possible causes**:
+- ❌ JavaScript disabled
+- ❌ Error in browser console
 
-**Solución**:
-- Abre la consola del navegador (F12)
-- Busca errores en rojo
-- Recarga la página (Ctrl+R o Cmd+R)
+**Solution**:
+- Open browser console (F12)
+- Look for errors in red
+- Reload page (Ctrl+R or Cmd+R)
 
-##### Problema 3: "La página de detalles no carga"
-**Causas posibles**:
-- ❌ Token ID inválido
-- ❌ Token no existe
-- ❌ Error de conexión con el contrato
-- ❌ Anvil no está corriendo
+##### Problem 3: "Details page doesn't load"
+**Possible causes**:
+- ❌ Invalid token ID
+- ❌ Token doesn't exist
+- ❌ Connection error with contract
+- ❌ Anvil is not running
 
-**Solución**:
-- Verifica que el token ID sea correcto
-- Asegúrate de que el contrato esté desplegado (`./deploy.sh status`)
-- Verifica que MetaMask esté conectado
-- Verifica que Anvil esté corriendo (`./deploy.sh status`)
+**Solution**:
+- Verify token ID is correct
+- Make sure contract is deployed (`./deploy.sh status`)
+- Verify MetaMask is connected
+- Verify Anvil is running (`./deploy.sh status`)
 
-#### URLs de Ejemplo
+#### Example URLs
 
 **Lista de Tokens**:
 ```
@@ -802,49 +802,49 @@ http://localhost:3000/tokens/1
 http://localhost:3000/tokens/1/transfer
 ```
 
-**Nota**: Si accedes desde otro dispositivo en la misma red, reemplaza `localhost` con la IP de tu máquina (ej: `http://192.168.1.100:3000/tokens`).
+**Note**: If accessing from another device on the same network, replace `localhost` with your machine's IP (e.g., `http://192.168.1.100:3000/tokens`).
 
 ---
 
-## 📊 Resumen de Investigación
+## 📊 Research Summary
 
-### Investigación del Smart Contract
-- ✅ **Análisis científico de cobertura** - 3 fases sistemáticas completadas
-- ✅ **Historia de migración** - Limpieza de código y refactoring documentados
-- ✅ **Evolución de scripts** - Filosofía "Fail Fast, Fail Clear" implementada
+### Smart Contract Research
+- ✅ **Scientific coverage analysis** - 3 systematic phases completed
+- ✅ **Migration history** - Code cleanup and refactoring documented
+- ✅ **Script evolution** - "Fail Fast, Fail Clear" philosophy implemented
 
-### Investigación del Frontend
-- ✅ **22/22 funciones del contrato** compatibles con el frontend
-- ✅ **27 hooks personalizados** implementados
-- ✅ **4 funciones de ownership transfer** implementadas con estados separados
-- ✅ **9/9 páginas** completadas (100%)
+### Frontend Research
+- ✅ **22/22 contract functions** compatible with frontend
+- ✅ **27 custom hooks** implemented
+- ✅ **4 ownership transfer functions** implemented with separate states
+- ✅ **9/9 pages** completed (100%)
 
-### Características Técnicas
-- ✅ Trazabilidad end-to-end con árbol interactivo
-- ✅ Batch reads para optimización de performance
-- ✅ Validación completa de datos
-- ✅ Manejo robusto de errores
-- ✅ Accesibilidad WCAG 2.1 AA
-- ✅ Tests implementados (24 tests)
-
----
-
-## 📚 Referencias
-
-**Documentación del Proyecto**:
-- [STATUS.md](../../STATUS.md) - Estado actual del proyecto
-- [INDEX.md](../../INDEX.md) - Índice completo de documentación
-- [docs/SMART_CONTRACT.md](./SMART_CONTRACT.md) - Documentación del smart contract
-- [docs/FRONTEND.md](./FRONTEND.md) - Documentación completa del frontend
-
-**Archivos de Código**:
-- `web/src/hooks/useOwnershipTransfer.ts` - Hook de ownership transfer
-- `web/src/hooks/usePendingOwner.ts` - Hook de pending owner
-- `web/src/components/admin/OwnershipTransfer.tsx` - Componente UI
-- `web/src/app/tokens/[id]/page.tsx` - Página de detalles del token
+### Technical Features
+- ✅ End-to-end traceability with interactive tree
+- ✅ Batch reads for performance optimization
+- ✅ Complete data validation
+- ✅ Robust error handling
+- ✅ WCAG 2.1 AA accessibility
+- ✅ Tests implemented (24 tests)
 
 ---
 
-**Última actualización**: 27 de Noviembre, 2025  
-**Estado**: ✅ Investigación completa y validada
+## 📚 References
+
+**Project Documentation**:
+- [STATUS.md](../../STATUS.md) - Current project status
+- [INDEX.md](../../INDEX.md) - Complete documentation index
+- [docs/SMART_CONTRACT.md](./SMART_CONTRACT.md) - Smart contract documentation
+- [docs/FRONTEND.md](./FRONTEND.md) - Complete frontend documentation
+
+**Code Files**:
+- `web/src/hooks/useOwnershipTransfer.ts` - Ownership transfer hook
+- `web/src/hooks/usePendingOwner.ts` - Pending owner hook
+- `web/src/components/admin/OwnershipTransfer.tsx` - UI component
+- `web/src/app/tokens/[id]/page.tsx` - Token details page
+
+---
+
+**Last Updated**: November 27, 2025  
+**Status**: ✅ Complete and validated research
 

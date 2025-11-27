@@ -1,12 +1,12 @@
 # 🤝 Contributing to Supply Chain Tracker
 
-> **📋 For the most up-to-date project status, see [STATUS.md](./STATUS.md)**  
-> **📚 For complete documentation index, see [INDEX.md](./INDEX.md)**  
-> **📚 For quick start guide, see [QUICKSTART.md](./QUICKSTART.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](./STATUS.md)**  
+> **📚 Para índice completo de documentación, consulta [INDEX.md](./INDEX.md)**  
+> **📚 Para guía rápida de inicio, consulta [QUICKSTART.md](./QUICKSTART.md)**
 
 Thank you for your interest in contributing to the Supply Chain Tracker project!
 
-**Last Updated**: November 27, 2025
+**Última actualización**: 27 de Noviembre, 2025
 
 ---
 
@@ -112,7 +112,7 @@ npm run type-check
 npm run build
 ```
 
-> **📚 For validation details, see [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)**
+> **📚 Para detalles de validación, consulta [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)**
 
 ### 4. Commit
 ```bash
@@ -168,7 +168,7 @@ git push origin feature/your-feature-name
 
 ## 🧪 Testing Requirements
 
-> **📚 For complete test documentation, see [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)**
+> **📚 Para documentación completa de tests, consulta [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)**
 
 ### Smart Contract Test Coverage
 All contributions must maintain or improve test coverage:
@@ -238,7 +238,7 @@ describe('YourComponent', () => {
 - Update [CHANGELOG.md](./CHANGELOG.md) for significant changes
 - Add examples to relevant docs
 
-> **📚 For complete documentation structure, see [INDEX.md](./INDEX.md)**
+> **📚 Para estructura completa de documentación, consulta [INDEX.md](./INDEX.md)**
 
 ### Documentation Style
 - Clear and concise
@@ -327,7 +327,7 @@ Include:
 
 ---
 
-**Last Updated**: November 27, 2025  
+**Última actualización**: 27 de Noviembre, 2025  
 **Test Suite**: 108 tests (64 core + 44 edge cases) - 100% passing  
 **Coverage**: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
 

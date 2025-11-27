@@ -1,32 +1,32 @@
-# 📚 Complete Documentation - Supply Chain Tracker
+# 📚 Documentación Completa - Supply Chain Tracker
 
-**Last Updated**: November 27, 2025  
-**Version**: 1.4.0  
-**Project**: Supply Chain DApp (PFM Web3)
+**Última actualización**: 27 de Noviembre, 2025  
+**Versión**: 1.4.0  
+**Proyecto**: Supply Chain DApp (PFM Web3)
 
-> **📋 For the most up-to-date project status, see [STATUS.md](../STATUS.md)**
+> **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](../STATUS.md)**
 
 ---
 
-## 📑 Table of Contents
+## 📑 Índice
 
-1. [Project Summary](#project-summary)
-2. [Architecture](#architecture)
+1. [Resumen del Proyecto](#resumen-del-proyecto)
+2. [Arquitectura](#arquitectura)
 3. [Smart Contract](#smart-contract)
 4. [Frontend](#frontend)
-5. [Automated Deployment](#automated-deployment)
-6. [MetaMask Configuration](#metamask-configuration)
+5. [Deployment Automatizado](#deployment-automatizado)
+6. [Configuración de MetaMask](#configuración-de-metamask)
 7. [Testing](#testing)
 8. [Troubleshooting](#troubleshooting)
 9. [Roadmap](#roadmap)
 
 ---
 
-## 📖 Project Summary
+## 📖 Resumen del Proyecto
 
-Supply Chain Tracker is a decentralized DApp for managing supply chains through blockchain. It allows registering users with specific roles, creating tokens that represent products/raw materials, and performing transfers between chain participants.
+Supply Chain Tracker es una DApp descentralizada para gestionar cadenas de suministro mediante blockchain. Permite registrar usuarios con roles específicos, crear tokens que representan productos/materias primas, y realizar transferencias entre participantes de la cadena.
 
-### **Technology Stack**:
+### **Stack Tecnológico**:
 
 **Backend (Smart Contract)**:
 - Solidity 0.8.30
@@ -34,34 +34,34 @@ Supply Chain Tracker is a decentralized DApp for managing supply chains through 
 - OpenZeppelin Contracts (Ownable, Pausable)
 
 **Frontend**:
-- Next.js 16.0.1 with App Router
+- Next.js 16.0.1 con App Router
 - React 19.2.0
 - TypeScript 5.x
 - Tailwind CSS 3.4.14 + Shadcn UI
 - wagmi 2.12.0 + viem 2.21.0 + ethers 6.13.0
 
-**Local Blockchain**:
+**Blockchain Local**:
 - Anvil (localhost:8545, Chain ID: 31337)
 
-### **Project Metrics**:
+### **Métricas del Proyecto**:
 
-> **📋 For updated metrics, see [STATUS.md](../STATUS.md)**
+> **📋 Para métricas actualizadas, consulta [STATUS.md](../STATUS.md)**
 
-- **Smart Contract**: 970+ lines of code
+- **Smart Contract**: 970+ líneas de código
 - **Tests**: 108 tests (100% passing) - 64 core + 44 edge cases
-- **Coverage**: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
-- **Critical validations**: 5 implemented (100% completed)
-- **Frontend**: ~4,000+ lines of productive code
-- **Hooks**: 22 custom hooks (12 files)
-- **Components**: 26 components (15 custom + 11 Shadcn UI)
-- **Pages**: 9 of 9 implemented (100%) - All with Modern Design 2025
-- **Frontend Tests**: 17 tests (14 unit + 3 E2E) passing
-- **Development time**: ~61-68 hours (Days 1-7)
-- **Status**: 7.4/9.5 ✅ PASSING (100% Frontend, critical validations completed)
+- **Coverage**: 85.60% líneas, 82.67% statements, 72.15% branches, 80.95% functions
+- **Validaciones críticas**: 5 implementadas (100% completadas)
+- **Frontend**: ~4,000+ líneas de código productivo
+- **Hooks**: 22 hooks personalizados (12 archivos)
+- **Componentes**: 26 componentes (15 personalizados + 11 Shadcn UI)
+- **Páginas**: 9 de 9 implementadas (100%) - Todas con Diseño Moderno 2025
+- **Tests Frontend**: 17 tests (14 unitarios + 3 E2E) pasando
+- **Tiempo de desarrollo**: ~61-68 horas (Días 1-7)
+- **Estado**: 7.4/9.5 ✅ APROBATORIO (100% Frontend, validaciones críticas completadas)
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Arquitectura
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -105,57 +105,57 @@ Supply Chain Tracker is a decentralized DApp for managing supply chains through 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### **Data Flow**:
+### **Flujo de Datos**:
 
-1. **User** opens the DApp in the browser
-2. **Frontend** loads and connects to MetaMask
-3. **MetaMask** connects to Anvil (local blockchain)
-4. **Wagmi/Viem** facilitate communication with the contract
-5. **Smart Contract** executes business logic
-6. **Blockchain** records all transactions
-7. **Frontend** displays results to the user
+1. **Usuario** abre la DApp en el navegador
+2. **Frontend** carga y se conecta a MetaMask
+3. **MetaMask** se conecta a Anvil (blockchain local)
+4. **Wagmi/Viem** facilitan la comunicación con el contrato
+5. **Smart Contract** ejecuta la lógica de negocio
+6. **Blockchain** registra todas las transacciones
+7. **Frontend** muestra los resultados al usuario
 
 ---
 
 ## 📜 Smart Contract
 
-### **Location**: `sc/src/SupplyChain.sol`
+### **Ubicación**: `sc/src/SupplyChain.sol`
 
-### **Main Features**:
+### **Características Principales**:
 
-#### **1. User Management**:
+#### **1. Gestión de Usuarios**:
 ```solidity
-// Available roles
+// Roles disponibles
 enum UserRole {
-    Producer,      // Raw material producer
-    Manufacturer,  // Product manufacturer
-    Distributor,   // Distributor
-    Retailer       // Retailer
+    Producer,      // Productor de materia prima
+    Manufacturer,  // Fabricante de productos
+    Distributor,   // Distribuidor
+    Retailer       // Minorista
 }
 
-// User states
+// Estados de usuario
 enum UserStatus {
-    Pending,    // Pending approval
-    Approved,   // Approved
-    Rejected,   // Rejected
-    Suspended   // Suspended
+    Pending,    // Pendiente de aprobación
+    Approved,   // Aprobado
+    Rejected,   // Rechazado
+    Suspended   // Suspendido
 }
 
-// Main functions
-requestUserRole(UserRole role)           // Request role
-changeStatusUser(address, UserStatus)    // Change status (admin)
-getUserInfo(address) → User              // Get info
+// Funciones principales
+requestUserRole(UserRole role)           // Solicitar rol
+changeStatusUser(address, UserStatus)    // Cambiar estado (admin)
+getUserInfo(address) → User              // Obtener info
 ```
 
-#### **2. Token Management**:
+#### **2. Gestión de Tokens**:
 ```solidity
-// Token types
+// Tipos de token
 enum TokenType {
-    RowMaterial,      // Raw material
-    FinishedProduct   // Finished product
+    RowMaterial,      // Materia prima
+    FinishedProduct   // Producto terminado
 }
 
-// Creation function
+// Función de creación
 createToken(
     string name,
     TokenType tokenType,
@@ -164,24 +164,24 @@ createToken(
     uint256 parentId
 ) → uint256 tokenId
 
-// Query functions
+// Funciones de consulta
 getToken(uint256 tokenId) → Token
 getTokenBalance(address user, uint256 tokenId) → uint256
 getUserTokens(address user) → uint256[]
 getTotalTokens() → uint256
 ```
 
-#### **3. Transfer System**:
+#### **3. Sistema de Transferencias**:
 ```solidity
-// Transfer states
+// Estados de transferencia
 enum TransferStatus {
-    Pending,   // Pending
-    Accepted,  // Accepted
-    Rejected,  // Rejected
-    Cancelled  // Cancelled
+    Pending,   // Pendiente
+    Accepted,  // Aceptada
+    Rejected,  // Rechazada
+    Cancelled  // Cancelada
 }
 
-// Main functions
+// Funciones principales
 transfer(address to, uint256 tokenId, uint256 amount) → uint256
 acceptTransfer(uint256 transferId)
 rejectTransfer(uint256 transferId)
@@ -189,22 +189,22 @@ cancelTransfer(uint256 transferId)
 getTransfer(uint256 transferId) → Transfer
 ```
 
-#### **4. Administrative Functions**:
+#### **4. Funciones Administrativas**:
 ```solidity
-// Owner only
+// Solo owner
 changeStatusUser(address user, UserStatus status)
-pause()    // Pause contract
-unpause()  // Resume contract
+pause()    // Pausar contrato
+unpause()  // Reanudar contrato
 transferOwnershipProposal(address newOwner)
 acceptOwnership()
 
-// Queries
+// Consultas
 isAdmin(address) → bool
 isPaused() → bool
 owner() → address
 ```
 
-### **Events**:
+### **Eventos**:
 ```solidity
 event UserRegistered(address indexed user, UserRole role)
 event UserStatusChanged(address indexed user, UserStatus status)
@@ -216,7 +216,7 @@ event OwnershipTransferProposed(address indexed currentOwner, address indexed ne
 
 ### **Testing**:
 
-**Test files**:
+**Archivos de test**:
 - `sc/test/SupplyChain.t.sol` - 55 tests core
 - `sc/test/EdgeCasesTest.t.sol` - 18 tests de casos edge
 
@@ -228,7 +228,7 @@ Branches:   61.22% (30/49)
 Functions:  80.95% (34/42)
 ```
 
-**Run tests**:
+**Ejecutar tests**:
 ```bash
 cd sc
 
@@ -249,9 +249,9 @@ forge coverage
 
 ## 🎨 Frontend
 
-### **Location**: `web/`
+### **Ubicación**: `web/`
 
-### **Project Structure**:
+### **Estructura del Proyecto**:
 
 ```
 web/
@@ -319,7 +319,7 @@ web/
 └── README.md                   # Documentación frontend
 ```
 
-### **Web3 Configuration**:
+### **Configuración Web3**:
 
 #### **wagmi-config.ts**:
 ```typescript
@@ -351,7 +351,7 @@ export enum TokenType { RowMaterial = 0, FinishedProduct = 1 }
 export enum TransferStatus { Pending = 0, Accepted = 1, ... }
 ```
 
-### **Custom Hooks**:
+### **Hooks Personalizados**:
 
 #### **useContractReads.ts** (Lectura):
 ```typescript
@@ -392,7 +392,7 @@ transfer('0x123...', BigInt(1), BigInt(100))
 acceptTransfer(BigInt(5))
 ```
 
-### **Components**:
+### **Componentes**:
 
 #### **ConnectWallet.tsx**:
 ```typescript
@@ -413,13 +413,13 @@ acceptTransfer(BigInt(5))
 
 ---
 
-## 🤖 Automated Deployment
+## 🤖 Deployment Automatizado
 
 ### **Script**: `deploy.sh`
 
-Complete bash script that automates the ENTIRE deployment process.
+Script bash completo que automatiza TODO el proceso de deployment.
 
-### **Available Commands**:
+### **Comandos Disponibles**:
 
 ```bash
 # Ver ayuda
@@ -441,7 +441,7 @@ Complete bash script that automates the ENTIRE deployment process.
 ./deploy.sh restart
 ```
 
-### **Flow of `./deploy.sh start`**:
+### **Flujo de `./deploy.sh start`**:
 
 #### **PASO 1: Iniciar Anvil**
 ```bash
@@ -521,7 +521,7 @@ nohup npm run dev > logs/frontend.log 2>&1 &
 # - Comandos útiles (status, stop)
 ```
 
-### **Logs Structure**:
+### **Estructura de Logs**:
 
 ```
 logs/
@@ -534,15 +534,15 @@ logs/
 └── contract_address.txt   # Dirección del contrato deployado
 ```
 
-**Note on persistence**: The `anvil_state.json` file contains the complete state of the local blockchain. If you delete it (with `./deploy.sh clean`), Anvil will start with a clean blockchain on the next `start`.
+**Nota sobre persistencia**: El archivo `anvil_state.json` contiene el estado completo de la blockchain local. Si lo eliminas (con `./deploy.sh clean`), Anvil iniciará con una blockchain limpia en el próximo `start`.
 
 ---
 
-### **Windows Script**: `deploy.ps1`
+### **Script Windows**: `deploy.ps1`
 
-Equivalent PowerShell script for Windows 10/11 that automates the ENTIRE deployment process.
+Script PowerShell equivalente para Windows 10/11 que automatiza TODO el proceso de deployment.
 
-#### **Prerequisites**:
+#### **Requisitos Previos**:
 
 1. **PowerShell 5.1+** (viene preinstalado en Windows 10/11)
    ```powershell
@@ -557,21 +557,21 @@ Equivalent PowerShell script for Windows 10/11 that automates the ENTIRE deploym
    - Instalar desde: https://nodejs.org/
    - Verificar: `node --version`, `npm --version`
 
-#### **Initial Configuration (First Time Only)**:
+#### **Configuración Inicial (Solo Primera Vez)**:
 
-**Configure Execution Policy**:
+**Configurar Política de Ejecución**:
 ```powershell
 # Abrir PowerShell como Administrador
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-**Alternative** (if you don't want to change the policy):
+**Alternativa** (si no quieres cambiar la política):
 ```powershell
 # Ejecutar script con bypass temporal
 powershell -ExecutionPolicy Bypass -File .\deploy.ps1 start
 ```
 
-#### **Available Commands**:
+#### **Comandos Disponibles**:
 
 ```powershell
 # Iniciar todo el stack (Anvil + Contrato + Frontend)
@@ -601,7 +601,7 @@ powershell -ExecutionPolicy Bypass -File .\deploy.ps1 start
 .\deploy.ps1 help
 ```
 
-#### **Usage Examples**:
+#### **Ejemplos de Uso**:
 
 **Escenario 1: Primera Ejecución**
 ```powershell
@@ -639,7 +639,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 .\deploy.ps1 start
 ```
 
-#### **Functionality Verification**:
+#### **Verificación de Funcionamiento**:
 
 **Verificar que los Servicios Están Corriendo**:
 ```powershell
@@ -684,7 +684,7 @@ Get-NetTCPConnection -LocalPort 8545 -ErrorAction SilentlyContinue
 Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue
 ```
 
-#### **Troubleshooting**:
+#### **Solución de Problemas**:
 
 **Error: "No se puede cargar el archivo porque la ejecución de scripts está deshabilitada"**
 ```powershell
@@ -720,7 +720,7 @@ Stop-Process -Id <PID> -Force
 .\deploy.ps1 frontend stop
 ```
 
-#### **Differences with deploy.sh (Linux/Mac)**:
+#### **Diferencias con deploy.sh (Linux/Mac)**:
 
 | Característica | deploy.sh (Linux/Mac) | deploy.ps1 (Windows) |
 |----------------|----------------------|---------------------|
@@ -731,11 +731,11 @@ Stop-Process -Id <PID> -Force
 | **Colores** | Códigos ANSI | `Write-Host -ForegroundColor` |
 | **Background processes** | `nohup` | `ProcessStartInfo` |
 
-**Functionality**: ✅ **100% equivalent** - All bash script functions are implemented in PowerShell.
+**Funcionalidad**: ✅ **100% equivalente** - Todas las funciones del script bash están implementadas en PowerShell.
 
-### **Process Management**:
+### **Gestión de Procesos**:
 
-The script manages processes intelligently:
+El script gestiona los procesos de forma inteligente:
 
 - **Verificación de puertos**: Detecta si un servicio ya está corriendo
 - **PIDs persistentes**: Guarda PIDs para detener servicios correctamente
@@ -745,9 +745,9 @@ The script manages processes intelligently:
 
 ---
 
-## 🦊 MetaMask Configuration
+## 🦊 Configuración de MetaMask
 
-### **Step 1: Add Anvil Local Network**
+### **Paso 1: Agregar Red Anvil Local**
 
 1. Abrir MetaMask
 2. Clic en selector de red (arriba izquierda)
@@ -763,7 +763,7 @@ The script manages processes intelligently:
 
 5. Clic en "Save"
 
-### **Step 2: Import Account (Owner)**
+### **Paso 2: Importar Cuenta (Owner)**
 
 **Cuenta #0 (Deployer/Owner)**:
 - Dirección: `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`
@@ -779,7 +779,7 @@ The script manages processes intelligently:
 
 ⚠️ **IMPORTANTE**: Este private key es SOLO para desarrollo local. NUNCA usar en mainnet.
 
-### **Step 3: Additional Accounts (Optional)**
+### **Paso 3: Cuentas Adicionales (Opcional)**
 
 Para probar flujos de transferencias entre usuarios:
 
@@ -795,7 +795,7 @@ Para probar flujos de transferencias entre usuarios:
 - Dirección: `0x90F79bf6EB2c4f870365E785982E1f101E93b906`
 - Private Key: `0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6`
 
-### **Step 3.1: Additional Accounts (10-14)**
+### **Paso 3.1: Cuentas Adicionales (10-14)**
 
 Anvil genera 15 cuentas usando el mnemonic determinístico. Las cuentas #0-9 están documentadas arriba. Estas son las cuentas adicionales #10-14:
 
@@ -819,7 +819,7 @@ Anvil genera 15 cuentas usando el mnemonic determinístico. Las cuentas #0-9 est
 - Dirección: `0xdf3e18d64bc6a983f673ab319ccae4f1a57c7097`
 - Private Key: `0xc526ee95bf44d8fc405a158bb884d9d1238d99f0612e9f33d006bb0789009aaa`
 
-**How to Import in MetaMask**:
+**Cómo Importar en MetaMask**:
 1. Abrir MetaMask (asegúrate de estar en red "Anvil Local")
 2. Clic en el ícono de cuenta (arriba derecha)
 3. Seleccionar **"Import Account"**
@@ -830,7 +830,7 @@ Anvil genera 15 cuentas usando el mnemonic determinístico. Las cuentas #0-9 est
 
 ⚠️ **IMPORTANTE**: Estos private keys son SOLO para desarrollo local. NUNCA usar en mainnet o con fondos reales. Cada cuenta tiene 10,000 ETH iniciales en Anvil.
 
-### **Step 4: Connect to DApp**
+### **Paso 4: Conectar a la DApp**
 
 1. Abrir `http://localhost:3000`
 2. Asegurarse de estar en red "Anvil Local" en MetaMask
@@ -841,9 +841,9 @@ Anvil genera 15 cuentas usando el mnemonic determinístico. Las cuentas #0-9 est
    - Botón "Desconectar"
    - Stats cards con datos del contrato
 
-### **Step 5: Verify Connection**
+### **Paso 5: Verificar Conexión**
 
-**Successful connection indicators**:
+**Indicadores de conexión exitosa**:
 - ✅ MetaMask muestra "Connected" con punto verde
 - ✅ DApp muestra tu dirección
 - ✅ Stats cards muestran: 0 Tokens, 0 Usuarios, 0 Transferencias
@@ -878,7 +878,7 @@ forge coverage
 forge coverage --report lcov
 ```
 
-**Test categories**:
+**Categorías de tests**:
 - ✅ User Management (8 tests)
 - ✅ Token Creation (8 tests)
 - ✅ Transfers (8 tests)
@@ -887,7 +887,7 @@ forge coverage --report lcov
 - ✅ Events (6 tests)
 - ✅ Security (6 tests)
 
-### **Frontend Tests** (Pending):
+### **Frontend Tests** (Pendiente):
 
 ```bash
 cd web
@@ -903,13 +903,13 @@ npm run test:e2e
 
 ## 🐛 Troubleshooting
 
-### **Problem: Anvil doesn't start**
+### **Problema: Anvil no inicia**
 
-**Symptoms**:
+**Síntomas**:
 - Error: "Connection refused" al deployar
 - Puerto 8545 no responde
 
-**Solutions**:
+**Soluciones**:
 ```bash
 # 1. Verificar si hay otro proceso en el puerto
 lsof -i :8545
@@ -921,13 +921,13 @@ kill -9 $(lsof -ti:8545)
 ./deploy.sh restart
 ```
 
-### **Problem: Contract doesn't deploy**
+### **Problema: Contrato no se despliega**
 
-**Symptoms**:
+**Síntomas**:
 - Error: "No se pudo obtener la dirección del contrato"
 - Logs de deploy vacíos
 
-**Solutions**:
+**Soluciones**:
 ```bash
 # 1. Verificar que Anvil esté corriendo
 ./deploy.sh status
@@ -944,13 +944,13 @@ PRIVATE_KEY=0xac09... forge script script/SupplyChainDeploy.s.sol --rpc-url http
 # 5. Copiar dirección y actualizar config.ts manualmente
 ```
 
-### **Problem: Frontend doesn't connect with MetaMask**
+### **Problema: Frontend no conecta con MetaMask**
 
-**Symptoms**:
+**Síntomas**:
 - Botón "Conectar" no hace nada
 - Error en consola del navegador
 
-**Solutions**:
+**Soluciones**:
 ```bash
 # 1. Verificar que MetaMask esté en red Anvil Local (Chain ID: 31337)
 # 2. Refrescar la página (F5)
@@ -964,13 +964,13 @@ cat web/src/lib/wagmi-config.ts
 ./deploy.sh restart
 ```
 
-### **Problem: Incorrect contract address**
+### **Problema: Dirección del contrato incorrecta**
 
-**Symptoms**:
+**Síntomas**:
 - Error: "Contract not found" al llamar funciones
 - Stats cards no cargan
 
-**Solutions**:
+**Soluciones**:
 ```bash
 # 1. Ver dirección actual en config.ts
 cat web/src/contracts/config.ts | grep SUPPLY_CHAIN_ADDRESS
@@ -983,13 +983,13 @@ cat logs/contract_address.txt
 ./deploy.sh restart
 ```
 
-### **Problem: Transaction fails in MetaMask**
+### **Problema: Transacción falla en MetaMask**
 
-**Symptoms**:
+**Síntomas**:
 - MetaMask muestra error al enviar transacción
 - "Gas estimation failed"
 
-**Solutions**:
+**Soluciones**:
 ```bash
 # 1. Verificar que la cuenta conectada sea la correcta
 # 2. Verificar que haya fondos suficientes
@@ -1003,19 +1003,19 @@ cat logs/anvil.log
 ./deploy.sh restart
 ```
 
-### **Problem: Frontend shows "0" in all counters**
+### **Problema: Frontend muestra "0" en todos los contadores**
 
-**Symptoms**:
+**Síntomas**:
 - Stats cards muestran: 0 Tokens, 0 Usuarios, 0 Transferencias
 - Pero es correcto al inicio
 
-**Explanation**:
-This is **NORMAL** at the start. The newly deployed contract doesn't have:
-- Created tokens
-- Registered users (owner doesn't count)
-- Performed transfers
+**Explicación**:
+Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
+- Tokens creados
+- Usuarios registrados (el owner no cuenta)
+- Transferencias realizadas
 
-**To see data**:
+**Para ver datos**:
 1. Registrar usuarios con `requestUserRole()`
 2. Aprobar usuarios (solo owner)
 3. Crear tokens con `createToken()`
@@ -1025,7 +1025,7 @@ This is **NORMAL** at the start. The newly deployed contract doesn't have:
 
 ## 🗺️ Roadmap
 
-### **✅ Completed (Days 1-8 - Nov 18-24, 2025)**:
+### **✅ Completado (Días 1-8 - 18-24 Nov 2025)**:
 
 - [x] Smart contract implementado y testeado (970+ líneas, 108 tests, 85.60% coverage, 72.15% branches)
 - [x] Validaciones críticas del contrato (5 validaciones completadas)
@@ -1090,7 +1090,7 @@ This is **NORMAL** at the start. The newly deployed contract doesn't have:
 - [x] TokenCardModern.tsx creado (glassmorphism, gradientes)
 - [x] PauseControl actualizado con diseño moderno
 
-### **🔄 Pending (Days 5-7 - Nov 22-24, 2025)**:
+### **🔄 Pendiente (Días 5-7 - 22-24 Nov 2025)**:
 - [x] Página `/dashboard`
 - [x] Mostrar perfil del usuario conectado (UserProfileCard)
 - [x] Mostrar rol y estado (Pending/Approved/etc.)
@@ -1163,7 +1163,7 @@ This is **NORMAL** at the start. The newly deployed contract doesn't have:
 - [x] Hook `useTokenTraceability` para árbol jerárquico
 - [x] Componente `TraceabilityTimeline` con expand/collapse
 
-### **🎯 Week 2 (Nov 25-28, 2025)**:
+### **🎯 Semana 2 (25-28 Nov 2025)**:
 
 #### **Día 9 (24 Nov)**: Video Demo (PRÓXIMO)
 - [ ] Script del video (5 minutos)
@@ -1187,7 +1187,7 @@ This is **NORMAL** at the start. The newly deployed contract doesn't have:
 
 ---
 
-## 📊 Project Metrics
+## 📊 Métricas del Proyecto
 
 ### **Smart Contract**:
 - **Líneas de código**: 971
@@ -1198,15 +1198,15 @@ This is **NORMAL** at the start. The newly deployed contract doesn't have:
 - **Modificadores**: 2
 
 ### **Frontend**:
-- **Lines of code**: ~4,000+
-- **Files created**: 25+
-- **Files modified**: 10+
-- **Hooks**: 21 (16 read + 9 write, includes useGetUserTransfers, useUserTokenStats, useGetUserTokensWithData)
-- **Components**: 25 (11 Shadcn + 14 custom, includes TokenCardModern, CreateTransferForm, UserTokenList, AddressDisplay)
-- **Pages**: 6 of 9 (67%) - All with Modern Design 2025
-- **Features**: Theme toggle, Multi-tab sync, Complete admin panel, Modern Design 2025
+- **Líneas de código**: ~4,000+
+- **Archivos creados**: 25+
+- **Archivos modificados**: 10+
+- **Hooks**: 21 (16 lectura + 9 escritura, incluye useGetUserTransfers, useUserTokenStats, useGetUserTokensWithData)
+- **Componentes**: 25 (11 Shadcn + 14 personalizados, incluye TokenCardModern, CreateTransferForm, UserTokenList, AddressDisplay)
+- **Páginas**: 6 de 9 (67%) - Todas con Diseño Moderno 2025
+- **Features**: Theme toggle, Multi-tab sync, Admin panel completo, Diseño Moderno 2025
 
-### **Development Time**:
+### **Tiempo de Desarrollo**:
 - **Smart Contract**: ~6 horas (Día 1)
 - **Frontend Setup**: ~2 horas (Día 1)
 - **Deployment Script**: ~1 hora (Día 1)
@@ -1220,9 +1220,9 @@ This is **NORMAL** at the start. The newly deployed contract doesn't have:
 
 ---
 
-## 🎓 Resources
+## 🎓 Recursos
 
-### **Official Documentation**:
+### **Documentación Oficial**:
 - [Solidity Docs](https://docs.soliditylang.org/)
 - [Foundry Book](https://book.getfoundry.sh/)
 - [Next.js Docs](https://nextjs.org/docs)
@@ -1242,12 +1242,12 @@ This is **NORMAL** at the start. The newly deployed contract doesn't have:
 
 ---
 
-## 👥 Team
+## 👥 Equipo
 
-**Academic Project**: PFM/TFM - Supply Chain Tracker  
-**Institution**: Master Blockchain Web3  
-**Deadline**: November 28, 2025  
-**Version**: 1.0.0
+**Proyecto Académico**: PFM/TFM - Supply Chain Tracker  
+**Institución**: Master Blockchain Web3  
+**Fecha límite**: 28 de Noviembre, 2025  
+**Versión**: 1.0.0
 
 ---
 
@@ -1262,13 +1262,13 @@ This is **NORMAL** at the start. The newly deployed contract doesn't have:
 
 ---
 
-## 📄 License
+## 📄 Licencia
 
-This project is part of an academic work and is provided for educational purposes.
+Este proyecto es parte de un trabajo académico y se proporciona con fines educativos.
 
 ---
 
-## 🗂️ Documentation Structure
+## 🗂️ Estructura de Documentación
 
 ```
 📁 Proyecto Root
@@ -1314,22 +1314,22 @@ This project is part of an academic work and is provided for educational purpose
     └── contract_address.txt
 ```
 
-### 📊 Documentation Principles
+### 📊 Principios de Documentación
 
-1. **Single Source of Truth**: [`STATUS.md`](../STATUS.md) is the single source of truth for project status
-2. **Consolidation**: Consolidated documentation to avoid redundancies
-3. **Organization**: Logical structure from basic to advanced
-4. **Update**: Dates updated to November 27, 2025
+1. **Single Source of Truth**: [`STATUS.md`](../STATUS.md) es la fuente única de verdad para el estado del proyecto
+2. **Consolidación**: Documentación consolidada para evitar redundancias
+3. **Organización**: Estructura lógica de básico a avanzado
+4. **Actualización**: Fechas actualizadas a 27 de Noviembre, 2025
 
-### Documentation Statistics
+### Estadísticas de Documentación
 
-- **Root files**: 8 main files
-- **Frontend documentation**: 1 consolidated file (`docs/FRONTEND.md`)
-- **Smart contract documentation**: 1 consolidated file (`docs/SMART_CONTRACT.md`)
-- **Consolidated research**: 1 file (`docs/RESEARCH.md`)
-- **Consolidated reports**: 1 file (`docs/REPORTS.md`)
-- **Technical documentation**: 1 file (`docs/DOCUMENTATION.md`)
+- **Archivos en raíz**: 8 archivos principales
+- **Documentación frontend**: 1 archivo consolidado (`docs/FRONTEND.md`)
+- **Documentación smart contract**: 1 archivo consolidado (`docs/SMART_CONTRACT.md`)
+- **Investigación consolidada**: 1 archivo (`docs/RESEARCH.md`)
+- **Reportes consolidados**: 1 archivo (`docs/REPORTS.md`)
+- **Documentación técnica**: 1 archivo (`docs/DOCUMENTATION.md`)
 
 ---
 
-**Last Updated**: November 27, 2025
+**Última actualización**: 27 de Noviembre, 2025

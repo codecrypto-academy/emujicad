@@ -1,49 +1,49 @@
-# 🎨 Frontend - Documentación Completa
+# 🎨 Frontend - Complete Documentation
 
-> **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](../../STATUS.md)**
+> **📋 For the most up-to-date project status, see [STATUS.md](../../STATUS.md)**
 
-Documentación completa del frontend del proyecto Supply Chain Tracker, desarrollado con Next.js 16, React 19, TypeScript, wagmi, viem y Shadcn UI.
+Complete documentation of the Supply Chain Tracker project frontend, developed with Next.js 16, React 19, TypeScript, wagmi, viem and Shadcn UI.
 
-**Última actualización**: 27 de Noviembre, 2025
+**Last Updated**: November 27, 2025
 
 ---
 
-## 📋 Índice
+## 📋 Table of Contents
 
 1. [Setup y Configuración](#setup-y-configuración)
-2. [Arquitectura Web3](#arquitectura-web3)
-3. [Componentes](#componentes)
+2. [Web3 Architecture](#web3-architecture)
+3. [Components](#components)
 4. [Custom Hooks](#custom-hooks)
-5. [Páginas y Navegación](#páginas-y-navegación)
-6. [Sistema de Pausabilidad](#sistema-de-pausabilidad)
-7. [Sincronización Multi-Pestaña](#sincronización-multi-pestaña)
-8. [Permisos de Transferencia](#permisos-de-transferencia)
-9. [Guía de Testing](#guía-de-testing)
+5. [Pages and Navigation](#pages-and-navigation)
+6. [Pausability System](#pausability-system)
+7. [Multi-Tab Synchronization](#multi-tab-synchronization)
+8. [Transfer Permissions](#transfer-permissions)
+9. [Testing Guide](#testing-guide)
 
 ---
 
-## 🚀 Setup y Configuración
+## 🚀 Setup and Configuration
 
-### Tecnologías
+### Technologies
 
-- **Framework**: Next.js 16.0.1 con App Router
+- **Framework**: Next.js 16.0.1 with App Router
 - **UI**: React 19.2.0, TypeScript 5.x
-- **Estilos**: Tailwind CSS 3.4.14 + Shadcn UI
+- **Styles**: Tailwind CSS 3.4.14 + Shadcn UI
 - **Web3 Stack**:
-  - wagmi 2.12.0 (React Hooks para Ethereum)
+  - wagmi 2.12.0 (React Hooks for Ethereum)
   - viem 2.21.0 (TypeScript Ethereum library)
   - ethers 6.13.0 (Ethereum interactions)
   - @tanstack/react-query 5.x (Data fetching/caching)
-- **Blockchain Local**: Anvil (localhost:8545, Chain ID: 31337)
+- **Local Blockchain**: Anvil (localhost:8545, Chain ID: 31337)
 
-### Setup Completo - Paso a Paso
+### Complete Setup - Step by Step
 
-#### **PASO 0**: Ubicación inicial
+#### **STEP 0**: Initial location
 ```bash
 cd /mnt/backups/emujicad/Documents/master_blockchainweb3/web3/PFM/emujicad
 ```
 
-#### **PASO 1**: Crear proyecto Next.js
+#### **STEP 1**: Create Next.js project
 ```bash
 npx create-next-app@latest web \
   --typescript \
@@ -55,7 +55,7 @@ npx create-next-app@latest web \
   --skip-install
 ```
 
-#### **PASO 2**: Agregar dependencias Web3
+#### **STEP 2**: Add Web3 dependencies
 ```bash
 cd web
 npm pkg set dependencies.ethers="^6.13.0"
@@ -65,22 +65,22 @@ npm pkg set dependencies."@rainbow-me/rainbowkit"="^2.1.0"
 npm install
 ```
 
-#### **PASO 3**: Configurar Shadcn UI
+#### **STEP 3**: Configure Shadcn UI
 ```bash
 npx shadcn@latest add button card label select input table badge dialog alert -y
 ```
 
-#### **PASO 4**: Copiar ABI del Smart Contract
+#### **STEP 4**: Copy Smart Contract ABI
 ```bash
 cp ../sc/out/SupplyChain.sol/SupplyChain.json src/contracts/
 ```
 
-#### **PASO 5**: Crear estructura de directorios
+#### **STEP 5**: Create directory structure
 ```bash
 mkdir -p src/contracts src/hooks src/lib
 ```
 
-### Configuración Principal
+### Main Configuration
 
 #### `lib/wagmi-config.ts`
 ```typescript
@@ -159,58 +159,58 @@ export default function RootLayout({ children }) {
 }
 ```
 
-### Deployment Automatizado
+### Automated Deployment
 
-El script `deploy.sh` maneja todo el ciclo de vida del proyecto:
+The `deploy.sh` script manages the entire project lifecycle:
 
 ```bash
-# Iniciar todo el stack
+# Start entire stack
 ./deploy.sh start
 
-# Ver estado de servicios
+# View service status
 ./deploy.sh status
 
-# Ver instrucciones de MetaMask
+# View MetaMask instructions
 ./deploy.sh metamask
 
-# Detener todo
+# Stop everything
 ./deploy.sh stop
 ```
 
 ---
 
-## 🔗 Arquitectura Web3
+## 🔗 Web3 Architecture
 
-### Stack Web3 Implementado
+### Implemented Web3 Stack
 
-- **wagmi**: 2.12.0 - React Hooks para Ethereum
-- **viem**: 2.21.0 - TypeScript Ethereum library (bajo nivel)
-- **ethers**: 6.13.0 - Ethereum interactions (compatibilidad)
-- **@tanstack/react-query**: 5.x - State management y caching
+- **wagmi**: 2.12.0 - React Hooks for Ethereum
+- **viem**: 2.21.0 - TypeScript Ethereum library (low level)
+- **ethers**: 6.13.0 - Ethereum interactions (compatibility)
+- **@tanstack/react-query**: 5.x - State management and caching
 
-### Ventajas del Stack
+### Stack Advantages
 
-- ✅ **Type-safe**: Todo tipado con TypeScript
-- ✅ **Modern**: wagmi es el estándar actual (2024+)
-- ✅ **Optimizado**: viem es más rápido que ethers.js
-- ✅ **Caching**: react-query maneja cache automáticamente
-- ✅ **Hooks**: API declarativa con React Hooks
+- ✅ **Type-safe**: Everything typed with TypeScript
+- ✅ **Modern**: wagmi is the current standard (2024+)
+- ✅ **Optimized**: viem is faster than ethers.js
+- ✅ **Caching**: react-query handles cache automatically
+- ✅ **Hooks**: Declarative API with React Hooks
 
 ### AuthContext
 
-Contexto global para manejar autenticación y autorización:
+Global context to handle authentication and authorization:
 
-**Ubicación**: `web/src/contexts/AuthContext.tsx`
+**Location**: `web/src/contexts/AuthContext.tsx`
 
-**Características**:
-- Detecta si el usuario es administrador
-- Detecta si el usuario está aprobado
-- Detecta si el usuario está autenticado
-- Optimización con `useUserIdByAddress` para detección rápida
-- Redirección inmediata para usuarios no registrados
-- Restauración de preferencia de tema al autenticar
+**Features**:
+- Detects if user is administrator
+- Detects if user is approved
+- Detects if user is authenticated
+- Optimization with `useUserIdByAddress` for fast detection
+- Immediate redirect for unregistered users
+- Theme preference restoration on authentication
 
-**Uso**:
+**Usage**:
 ```typescript
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -225,22 +225,22 @@ function Component() {
 }
 ```
 
-### Hooks de wagmi Utilizados
+### wagmi Hooks Used
 
-#### Hooks de Conexión
-- `useAccount()` - Información de la cuenta conectada
-- `useConnect()` - Maneja la conexión con MetaMask
-- `useDisconnect()` - Maneja la desconexión
+#### Connection Hooks
+- `useAccount()` - Connected account information
+- `useConnect()` - Handles MetaMask connection
+- `useDisconnect()` - Handles disconnection
 
-#### Hooks de Lectura
-- `useReadContract()` - Lee datos del contrato (view/pure functions)
-- `useReadContracts()` - Lee múltiples funciones en paralelo
+#### Read Hooks
+- `useReadContract()` - Reads contract data (view/pure functions)
+- `useReadContracts()` - Reads multiple functions in parallel
 
-#### Hooks de Escritura
-- `useWriteContract()` - Ejecuta transacciones
-- `useWaitForTransactionReceipt()` - Espera confirmación de transacción
+#### Write Hooks
+- `useWriteContract()` - Executes transactions
+- `useWaitForTransactionReceipt()` - Waits for transaction confirmation
 
-### Patrón Completo: Write + Wait
+### Complete Pattern: Write + Wait
 
 ```typescript
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
@@ -263,9 +263,9 @@ export function useRequestRole() {
   
   return {
     requestRole,
-    isPending,      // Esperando usuario en MetaMask
-    isConfirming,   // Esperando confirmación blockchain
-    isSuccess,      // Transacción confirmada
+    isPending,      // Waiting for user in MetaMask
+    isConfirming,   // Waiting for blockchain confirmation
+    isSuccess,      // Transaction confirmed
     error
   }
 }
@@ -273,493 +273,493 @@ export function useRequestRole() {
 
 ---
 
-## 🎨 Componentes
+## 🎨 Components
 
-### Componentes Personalizados (26 totales)
+### Custom Components (26 total)
 
 #### 1. ConnectWallet.tsx
-Componente para conexión/desconexión con MetaMask.
+Component for MetaMask connection/disconnection.
 
-**Características**:
-- Conexión con MetaMask usando wagmi
-- Muestra dirección acortada (0x1234...5678)
-- Botón de desconexión
-- Estados de carga (connecting, isPending)
-- Previene doble popup de MetaMask
+**Features**:
+- MetaMask connection using wagmi
+- Shows shortened address (0x1234...5678)
+- Disconnect button
+- Loading states (connecting, isPending)
+- Prevents double MetaMask popup
 
 #### 2. Header.tsx
-Componente unificado de navegación y branding.
+Unified navigation and branding component.
 
-**Características**:
-- Layout de dos filas: (1) Branding + Acciones, (2) Dirección + Rol/Estado
+**Features**:
+- Two-row layout: (1) Branding + Actions, (2) Address + Role/Status
 - Branding: "📦 Supply Chain Tracker"
-- Botones condicionales según página
-- Información de usuario (dirección, rol, estado)
-- Theme toggle integrado
-- Badge de estado de pausa del contrato
+- Conditional buttons according to page
+- User information (address, role, status)
+- Integrated theme toggle
+- Contract pause status badge
 
 #### 3. ThemeToggle.tsx
-Toggle para cambiar entre modo claro y oscuro.
+Toggle to switch between light and dark mode.
 
-**Características**:
-- Estado persistente en localStorage
-- Default: modo claro
-- Iconos: 🌙 (light mode) / ☀️ (dark mode)
-- Transiciones suaves
+**Features**:
+- Persistent state in localStorage
+- Default: light mode
+- Icons: 🌙 (light mode) / ☀️ (dark mode)
+- Smooth transitions
 
 #### 4. RegisterForm.tsx
-Formulario de registro de usuarios con selección de rol.
+User registration form with role selection.
 
-**Características**:
-- Select con 4 roles: Producer, Factory, Retailer, Consumer
-- Validación de rol seleccionado
-- Manejo de errores específicos
-- Estados de carga
-- Validación cuando el contrato está pausado
+**Features**:
+- Select with 4 roles: Producer, Factory, Retailer, Consumer
+- Selected role validation
+- Specific error handling
+- Loading states
+- Validation when contract is paused
 
 #### 5. ChangeRoleDialog.tsx
-Diálogo modal para cambiar el rol de un usuario.
+Modal dialog to change a user's role.
 
-**Características**:
-- Dialog con select de 4 roles
-- Validación de nuevo rol
-- Confirmación antes de cambiar
-- Estados de carga
-- Validación de pausa y estados de usuario
+**Features**:
+- Dialog with 4-role select
+- New role validation
+- Confirmation before changing
+- Loading states
+- Pause and user status validation
 
 #### 6. UserManagementTable.tsx (Admin)
-Componente completo de gestión de usuarios.
+Complete user management component.
 
-**Características**:
-- Integración de UserStatsCards
-- Tabla con todos los usuarios
-- Filtros por estado: All, Pending, Approved, Rejected, Canceled
-- Búsqueda por dirección
-- Acciones por usuario (Aprobar, Rechazar, Cancelar, Cambiar Rol)
-- Auto-refresh después de cambios
+**Features**:
+- UserStatsCards integration
+- Table with all users
+- Status filters: All, Pending, Approved, Rejected, Canceled
+- Address search
+- Actions per user (Approve, Reject, Cancel, Change Role)
+- Auto-refresh after changes
 
 #### 7. UserStatsCards.tsx (Admin)
-Cards con estadísticas del sistema.
+Cards with system statistics.
 
-**Características**:
-- 5 cards con contadores (Total, Pending, Approved, Rejected, Canceled)
-- Grid responsive
-- Iconos visuales
+**Features**:
+- 5 cards with counters (Total, Pending, Approved, Rejected, Canceled)
+- Responsive grid
+- Visual icons
 - Dark mode compatible
 
 #### 8. TokenCard.tsx
-Componente reutilizable para mostrar información de un token.
+Reusable component to display token information.
 
-**Características**:
-- Muestra información completa del token
-- Soporte para mostrar balance del usuario
-- Iconos diferentes para Raw Material vs Finished Product
-- Badge con ID del token
-- Muestra parent token si es un producto derivado
-- Estados de carga con Skeleton
+**Features**:
+- Shows complete token information
+- Support to show user balance
+- Different icons for Raw Material vs Finished Product
+- Badge with token ID
+- Shows parent token if it's a derived product
+- Loading states with Skeleton
 - Hover effects
 
 #### 9. TokenCardModern.tsx
-Versión moderna del TokenCard con diseño 2025.
+Modern version of TokenCard with 2025 design.
 
-**Características**:
-- Glassmorphism con `backdrop-blur-xl`
-- Gradientes azul-púrpura
-- Animaciones suaves
-- Misma funcionalidad que TokenCard
+**Features**:
+- Glassmorphism with `backdrop-blur-xl`
+- Blue-purple gradients
+- Smooth animations
+- Same functionality as TokenCard
 
 #### 10. UserProfileCard.tsx
-Componente para mostrar el perfil del usuario conectado.
+Component to display the connected user's profile.
 
-**Características**:
-- Muestra User ID, Address, Role y Status
-- Badges de estado con iconos
-- Colores por rol
-- Mensajes informativos según estado
-- Estados de carga con Skeleton
+**Features**:
+- Shows User ID, Address, Role and Status
+- Status badges with icons
+- Colors by role
+- Informative messages according to status
+- Loading states with Skeleton
 
 #### 11. QuickActions.tsx
-Componente con botones de acciones rápidas.
+Component with quick action buttons.
 
-**Características**:
-- Botones condicionales según rol
-- Validación de estado (solo usuarios aprobados)
-- Deshabilitación cuando el contrato está pausado
-- Alert informativo cuando está pausado
+**Features**:
+- Conditional buttons according to role
+- Status validation (only approved users)
+- Disabling when contract is paused
+- Informative alert when paused
 
 #### 12. PauseControl.tsx (Admin)
-Componente para que el administrador pause/reanude el contrato.
+Component for administrator to pause/resume the contract.
 
-**Características**:
-- Muestra estado actual del contrato
-- Botón para pausar con confirmación (requiere escribir "PAUSAR")
-- Botón para reanudar con confirmación
-- Alert con lista de funciones deshabilitadas cuando está pausado
-- Estados de carga durante transacciones
+**Features**:
+- Shows current contract status
+- Pause button with confirmation (requires typing "PAUSAR")
+- Resume button with confirmation
+- Alert with list of disabled functions when paused
+- Loading states during transactions
 
 #### 13. TransferList.tsx
-Lista de transferencias con separación sent/received y filtros.
+Transfer list with sent/received separation and filters.
 
-**Características**:
-- Separación de transferencias enviadas/recibidas
-- Filtros dinámicos por rol
-- Token Name mostrado junto al Token ID
-- Botones de acción (Accept/Reject/Cancel)
-- Direcciones clickeables con AddressDisplay
-- Estados: Pending, Accepted, Rejected
+**Features**:
+- Separation of sent/received transfers
+- Dynamic filters by role
+- Token Name shown alongside Token ID
+- Action buttons (Accept/Reject/Cancel)
+- Clickable addresses with AddressDisplay
+- States: Pending, Accepted, Rejected
 
 #### 14. CreateTransferForm.tsx
-Formulario para crear nuevas transferencias.
+Form to create new transfers.
 
-**Características**:
-- Dropdown de destinatarios filtrado por rol
-- Dropdown de tokens mostrando nombre
-- Validación de cantidad
-- Validación de pausa del contrato
-- Mensajes de éxito amigables
+**Features**:
+- Recipient dropdown filtered by role
+- Token dropdown showing name
+- Amount validation
+- Contract pause validation
+- Friendly success messages
 
 #### 15. UserTokenList.tsx
-Lista de tokens del usuario.
+User's token list.
 
-**Características**:
-- Muestra tokens con balance > 0
-- Filtrado por tipo de token según rol
-- Integración con TokenCard/TokenCardModern
-- Loading states y empty states
+**Features**:
+- Shows tokens with balance > 0
+- Filtered by token type according to role
+- Integration with TokenCard/TokenCardModern
+- Loading states and empty states
 
 #### 16. AddressDisplay.tsx
-Componente reutilizable para mostrar direcciones.
+Reusable component to display addresses.
 
-**Características**:
-- Dirección truncada (0x1234...5678)
-- Botón de copiar al portapapeles
-- Tooltip con dirección completa
-- Indicador visual de copia exitosa
+**Features**:
+- Truncated address (0x1234...5678)
+- Copy to clipboard button
+- Tooltip with full address
+- Visual indicator of successful copy
 
 #### 17. TraceabilityTimeline.tsx
-Trazabilidad end-to-end con árbol interactivo.
+End-to-end traceability with interactive tree.
 
-### Componentes Shadcn UI (10 totales)
+### Shadcn UI Components (10 total)
 
-Todos ubicados en `web/src/components/ui/`:
-- `button.tsx` - Botones con variantes
-- `card.tsx` - Contenedor con header, contenido y footer
-- `input.tsx` - Campo de entrada de texto
-- `label.tsx` - Etiqueta para formularios
-- `select.tsx` - Selector dropdown
-- `table.tsx` - Tabla con header, body, footer
-- `badge.tsx` - Badge/etiqueta para estados
-- `dialog.tsx` - Modal/diálogo
-- `alert.tsx` - Alertas/notificaciones
-- `skeleton.tsx` - Placeholder de carga animado
+All located in `web/src/components/ui/`:
+- `button.tsx` - Buttons with variants
+- `card.tsx` - Container with header, content and footer
+- `input.tsx` - Text input field
+- `label.tsx` - Form label
+- `select.tsx` - Dropdown selector
+- `table.tsx` - Table with header, body, footer
+- `badge.tsx` - Badge/label for states
+- `dialog.tsx` - Modal/dialog
+- `alert.tsx` - Alerts/notifications
+- `skeleton.tsx` - Animated loading placeholder
 
 ---
 
 ## 🪝 Custom Hooks
 
-### Hooks Implementados (27 totales)
+### Implemented Hooks (27 total)
 
-#### Archivo: `useContractReads.ts` (7 hooks de lectura)
+#### File: `useContractReads.ts` (7 read hooks)
 
-1. **useUserInfo(address)** - Obtiene información completa de un usuario
-2. **useIsAdmin(address)** - Verifica si una address es el admin
-3. **useTotalTokens()** - Obtiene el total de tokens creados
-4. **useTotalUsers()** - Obtiene el total de usuarios registrados
-5. **useTotalTransfers()** - Obtiene el total de transferencias
-6. **useDashboardStats()** - Hook optimizado batch para estadísticas
-7. **useUserIdByAddress(address?)** - Obtiene rápidamente el User ID
+1. **useUserInfo(address)** - Gets complete user information
+2. **useIsAdmin(address)** - Verifies if an address is the admin
+3. **useTotalTokens()** - Gets total tokens created
+4. **useTotalUsers()** - Gets total registered users
+5. **useTotalTransfers()** - Gets total transfers
+6. **useDashboardStats()** - Optimized batch hook for statistics
+7. **useUserIdByAddress(address?)** - Quickly gets User ID
 
-#### Archivo: `useRequestRole.ts` (1 hook de escritura)
+#### File: `useRequestRole.ts` (1 write hook)
 
-8. **useRequestRole()** - Hook para solicitar un rol de usuario
+8. **useRequestRole()** - Hook to request a user role
 
-#### Archivo: `useCreateToken.ts` (1 hook de escritura)
+#### File: `useCreateToken.ts` (1 write hook)
 
-9. **useCreateToken()** - Hook para crear un nuevo token
+9. **useCreateToken()** - Hook to create a new token
 
-#### Archivo: `useTransfer.ts` (4 hooks de escritura)
+#### File: `useTransfer.ts` (4 write hooks)
 
-10. **useTransfer()** - Hook para iniciar una transferencia
-11. **useAcceptTransfer()** - Hook para aceptar una transferencia
-12. **useRejectTransfer()** - Hook para rechazar una transferencia
-13. **useCancelTransfer()** - Hook para cancelar una transferencia
+10. **useTransfer()** - Hook to initiate a transfer
+11. **useAcceptTransfer()** - Hook to accept a transfer
+12. **useRejectTransfer()** - Hook to reject a transfer
+13. **useCancelTransfer()** - Hook to cancel a transfer
 
-#### Archivo: `useGetUserTokens.ts` (4 hooks de lectura)
+#### File: `useGetUserTokens.ts` (4 read hooks)
 
-14. **useGetUserTokens(address?)** - Obtiene todos los token IDs que posee un usuario
-15. **useGetToken(tokenId?)** - Obtiene información detallada de un token
-16. **useGetTokenBalance(tokenId?, address?)** - Obtiene el balance de un token
-17. **useGetAllTokens()** - Obtiene todos los tokens del sistema
+14. **useGetUserTokens(address?)** - Gets all token IDs owned by a user
+15. **useGetToken(tokenId?)** - Gets detailed token information
+16. **useGetTokenBalance(tokenId?, address?)** - Gets token balance
+17. **useGetAllTokens()** - Gets all tokens in the system
 
-#### Archivo: `usePause.ts` (3 hooks)
+#### File: `usePause.ts` (3 hooks)
 
-18. **useIsPaused()** - Lee el estado de pausa del contrato
-19. **usePause()** - Hook para pausar el contrato (solo admin)
-20. **useUnpause()** - Hook para reanudar el contrato (solo admin)
+18. **useIsPaused()** - Reads contract pause status
+19. **usePause()** - Hook to pause the contract (admin only)
+20. **useUnpause()** - Hook to resume the contract (admin only)
 
-#### Archivo: `useAdminUsers.ts` (2 hooks admin)
+#### File: `useAdminUsers.ts` (2 admin hooks)
 
-21. **useGetAllUsers()** - Obtiene todos los usuarios registrados (solo admin)
-22. **useChangeUserStatus()** - Hook para cambiar el estado de un usuario
+21. **useGetAllUsers()** - Gets all registered users (admin only)
+22. **useChangeUserStatus()** - Hook to change a user's status
 
-#### Archivo: `useContractOwner.ts` (1 hook)
+#### File: `useContractOwner.ts` (1 hook)
 
-23. **useContractOwner()** - Verifica si el usuario conectado es el owner
+23. **useContractOwner()** - Verifies if connected user is the owner
 
-#### Archivo: `usePendingOwner.ts` (1 hook)
+#### File: `usePendingOwner.ts` (1 hook)
 
-24. **usePendingOwner(enabled?)** - Obtiene la dirección del `pendingOwner`
+24. **usePendingOwner(enabled?)** - Gets the `pendingOwner` address
 
-#### Archivo: `useOwnershipTransfer.ts` (1 hook con 3 funciones)
+#### File: `useOwnershipTransfer.ts` (1 hook with 3 functions)
 
-25. **useOwnershipTransfer()** - Hook para gestionar la transferencia de ownership
+25. **useOwnershipTransfer()** - Hook to manage ownership transfer
    - `initiateOwnershipTransfer(newOwner)`
    - `acceptOwnershipTransfer()`
    - `rejectOwnershipTransfer()`
 
-#### Archivo: `useGetUserTransfers.ts` (1 hook)
+#### File: `useGetUserTransfers.ts` (1 hook)
 
-26. **useGetUserTransfers(address)** - Obtiene todas las transferencias de un usuario
+26. **useGetUserTransfers(address)** - Gets all transfers of a user
 
-#### Archivo: `useUserTokenStats.ts` (1 hook)
+#### File: `useUserTokenStats.ts` (1 hook)
 
-27. **useUserTokenStats()** - Obtiene estadísticas de tokens por tipo
+27. **useUserTokenStats()** - Gets token statistics by type
 
-### Resumen de Hooks por Archivo
+### Hooks Summary by File
 
-| Archivo | Hooks | Tipo | Estado |
-|---------|-------|------|--------|
-| useContractReads.ts | 7 | Lectura | ✅ |
-| useRequestRole.ts | 1 | Escritura | ✅ |
-| useCreateToken.ts | 1 | Escritura | ✅ |
-| useTransfer.ts | 4 | Escritura | ✅ |
-| useAdminUsers.ts | 2 | Lectura + Escritura | ✅ |
-| useContractOwner.ts | 1 | Lectura | ✅ |
-| useGetUserTokens.ts | 4 | Lectura | ✅ |
-| usePause.ts | 3 | Lectura + Escritura | ✅ |
-| useUserTokenStats.ts | 1 | Lectura | ✅ |
-| useGetUserTokensWithData.ts | 1 | Lectura | ✅ |
-| useGetUserTransfers.ts | 1 | Lectura | ✅ |
-| usePendingOwner.ts | 1 | Lectura | ✅ |
-| useOwnershipTransfer.ts | 1 | Escritura | ✅ |
-| **TOTAL** | **27** | **17 lectura + 10 escritura** | **100%** |
-
----
-
-## 📄 Páginas y Navegación
-
-### Resumen Ejecutivo
-
-**Estado**: ✅ Todas las páginas están completadas (9/9 - 100%)
-
-### Páginas Implementadas
-
-1. **`/` (Home)** - Landing page con registro
-2. **`/dashboard`** - Dashboard de usuario/admin
-3. **`/admin/users`** - Gestión de usuarios (admin)
-4. **`/tokens`** - Lista de tokens
-5. **`/tokens/[id]`** - Detalles del token con trazabilidad end-to-end
-6. **`/tokens/[id]/transfer`** - Formulario de transferencia desde detalles
-7. **`/transfers`** - Lista de transferencias
-8. **`/transfers/[id]`** - Detalles de transferencia
-9. **`/tokens/create`** - Creación de tokens
+| File | Hooks | Type | Status |
+|------|-------|------|--------|
+| useContractReads.ts | 7 | Read | ✅ |
+| useRequestRole.ts | 1 | Write | ✅ |
+| useCreateToken.ts | 1 | Write | ✅ |
+| useTransfer.ts | 4 | Write | ✅ |
+| useAdminUsers.ts | 2 | Read + Write | ✅ |
+| useContractOwner.ts | 1 | Read | ✅ |
+| useGetUserTokens.ts | 4 | Read | ✅ |
+| usePause.ts | 3 | Read + Write | ✅ |
+| useUserTokenStats.ts | 1 | Read | ✅ |
+| useGetUserTokensWithData.ts | 1 | Read | ✅ |
+| useGetUserTransfers.ts | 1 | Read | ✅ |
+| usePendingOwner.ts | 1 | Read | ✅ |
+| useOwnershipTransfer.ts | 1 | Write | ✅ |
+| **TOTAL** | **27** | **17 read + 10 write** | **100%** |
 
 ---
 
-### Página de Detalles del Token (`/tokens/[id]`)
+## 📄 Pages and Navigation
 
-#### 🎯 Propósito
-Mostrar información completa y detallada de un token específico, incluyendo su historial de transferencias y trazabilidad completa.
+### Executive Summary
 
-#### 📋 Secciones Implementadas
+**Status**: ✅ All pages are completed (9/9 - 100%)
 
-**1. Información Principal del Token**
-- Header con nombre del token (grande y destacado)
-- Badge del tipo: Raw Material / Finished Product
-- Token ID, Total Supply, Mi Balance
-- Fecha de creación, Creator (con AddressDisplay)
-- Parent Token (si es Finished Product): ID, nombre y link al token padre
-- Features: Metadatos JSON parseados y mostrados de forma legible
+### Implemented Pages
 
-**2. Trazabilidad Completa** (Solo para Finished Product)
-- Árbol de trazabilidad con visualización jerárquica
-- Historial de transformación: Mostrar cómo se creó este producto desde la materia prima
-- Información del parent token: Link para ver detalles del token padre
-- Características especiales:
-  - ✅ Visualización de árbol con expand/collapse
-  - ✅ Filtrado por dirección en el árbol
-  - ✅ Resaltado de nodos según el rol del usuario actual
-  - ✅ Hook `useTokenTraceability` para trazabilidad end-to-end completa
-
-**3. Historial de Transferencias**
-- Tabla de transferencias relacionadas con este token
-- Filtros: Por estado (All, Pending, Accepted, Rejected, Cancelled) y por dirección (From/To)
-- Estadísticas: Total de transferencias, aceptadas, pendientes, total de tokens transferidos
-
-**4. Distribución de Tokens**
-- Lista de usuarios con balance de este token
-- Porcentaje del total supply por usuario
-
-**5. Acciones**
-- Botón "Transfer Tokens": Link a `/tokens/[id]/transfer`
-- Botón "Back to Tokens": Volver a `/tokens`
-- Botón "View Parent Token": Si tiene parent, ver detalles del token padre
-
-#### 📊 Hooks Utilizados
-- ✅ `useGetToken(tokenId)` - Información del token
-- ✅ `useGetTokenBalance(tokenId, address)` - Balance del usuario
-- ✅ `useGetAllTransfers()` - Todas las transferencias (filtrar por tokenId)
-- ✅ `useGetToken(parentTokenId)` - Información del token padre (si aplica)
-- ✅ `useTokenTraceability(tokenId)` - Trazabilidad end-to-end con árbol jerárquico
+1. **`/` (Home)** - Landing page with registration
+2. **`/dashboard`** - User/admin dashboard
+3. **`/admin/users`** - User management (admin)
+4. **`/tokens`** - Token list
+5. **`/tokens/[id]`** - Token details with end-to-end traceability
+6. **`/tokens/[id]/transfer`** - Transfer form from details
+7. **`/transfers`** - Transfer list
+8. **`/transfers/[id]`** - Transfer details
+9. **`/tokens/create`** - Token creation
 
 ---
 
-### Página de Transferencia desde Detalles (`/tokens/[id]/transfer`)
+### Token Details Page (`/tokens/[id]`)
 
-#### 🎯 Propósito
-Formulario de transferencia pre-rellenado con el token seleccionado, permitiendo transferir directamente desde la página de detalles.
+#### 🎯 Purpose
+Display complete and detailed information of a specific token, including its transfer history and complete traceability.
 
-#### 📋 Secciones Implementadas
+#### 📋 Implemented Sections
 
-**1. Información del Token a Transferir**
-- Card con resumen del token (nombre, ID, tipo, balance disponible, total supply)
-- Link "Ver detalles completos" → `/tokens/[id]`
+**1. Main Token Information**
+- Header with token name (large and prominent)
+- Type badge: Raw Material / Finished Product
+- Token ID, Total Supply, My Balance
+- Creation date, Creator (with AddressDisplay)
+- Parent Token (if Finished Product): ID, name and link to parent token
+- Features: JSON metadata parsed and displayed in readable format
 
-**2. Formulario de Transferencia**
-- Token ID: Pre-seleccionado y bloqueado (no editable)
-- Token Name: Mostrado para referencia (solo lectura)
-- Amount: Campo editable con validaciones:
-  - No puede ser 0
-  - No puede ser negativo
-  - No puede exceder el balance disponible
-  - Mostrar: "Balance disponible: X tokens"
-- Recipient: Dropdown con usuarios disponibles según rol (filtrado automático):
-  - Producer → Solo Factory aprobados
-  - Factory → Solo Retailer aprobados
-  - Retailer → Solo Consumer aprobados
-  - Consumer → No puede transferir (mostrar mensaje)
+**2. Complete Traceability** (Only for Finished Product)
+- Traceability tree with hierarchical visualization
+- Transformation history: Show how this product was created from raw material
+- Parent token information: Link to view parent token details
+- Special features:
+  - ✅ Tree visualization with expand/collapse
+  - ✅ Address filtering in the tree
+  - ✅ Node highlighting according to current user role
+  - ✅ `useTokenTraceability` hook for complete end-to-end traceability
 
-**3. Resumen de la Transferencia**
-- Token: Nombre e ID
-- Cantidad: X tokens
-- Destinatario: Dirección y rol
-- Balance después: "Tu balance será: X tokens"
+**3. Transfer History**
+- Table of transfers related to this token
+- Filters: By status (All, Pending, Accepted, Rejected, Cancelled) and by address (From/To)
+- Statistics: Total transfers, accepted, pending, total tokens transferred
 
-**4. Acciones**
-- Botón "Transfer": Enviar transferencia
-- Botón "Cancel": Volver a `/tokens/[id]`
-- Botón "Back to Details": Volver a `/tokens/[id]`
+**4. Token Distribution**
+- List of users with balance of this token
+- Percentage of total supply per user
 
-#### ⚠️ Validaciones Especiales
-- Verificar que el usuario tiene balance suficiente
-- Verificar que el contrato no está pausado
-- Verificar que el usuario está aprobado
-- Verificar que el destinatario es válido según el rol
+**5. Actions**
+- "Transfer Tokens" button: Link to `/tokens/[id]/transfer`
+- "Back to Tokens" button: Return to `/tokens`
+- "View Parent Token" button: If has parent, view parent token details
 
-#### 📊 Hooks Utilizados
-- ✅ `useGetToken(tokenId)` - Información del token
-- ✅ `useGetTokenBalance(tokenId, address)` - Balance del usuario
-- ✅ `useGetAllUsers()` - Usuarios disponibles según rol (filtrado en el componente)
-- ✅ `useTransfer()` - Hook para crear transferencia
-- ✅ `useIsPaused()` - Verificar si el contrato está pausado
+#### 📊 Hooks Used
+- ✅ `useGetToken(tokenId)` - Token information
+- ✅ `useGetTokenBalance(tokenId, address)` - User balance
+- ✅ `useGetAllTransfers()` - All transfers (filter by tokenId)
+- ✅ `useGetToken(parentTokenId)` - Parent token information (if applicable)
+- ✅ `useTokenTraceability(tokenId)` - End-to-end traceability with hierarchical tree
 
 ---
 
-### Guía de Navegación
+### Transfer Page from Details (`/tokens/[id]/transfer`)
 
-#### Flujo de Navegación Completo
+#### 🎯 Purpose
+Pre-filled transfer form with the selected token, allowing direct transfer from the details page.
+
+#### 📋 Implemented Sections
+
+**1. Token Information to Transfer**
+- Card with token summary (name, ID, type, available balance, total supply)
+- "View complete details" link → `/tokens/[id]`
+
+**2. Transfer Form**
+- Token ID: Pre-selected and locked (not editable)
+- Token Name: Shown for reference (read-only)
+- Amount: Editable field with validations:
+  - Cannot be 0
+  - Cannot be negative
+  - Cannot exceed available balance
+  - Show: "Available balance: X tokens"
+- Recipient: Dropdown with available users according to role (automatic filtering):
+  - Producer → Only approved Factory
+  - Factory → Only approved Retailer
+  - Retailer → Only approved Consumer
+  - Consumer → Cannot transfer (show message)
+
+**3. Transfer Summary**
+- Token: Name and ID
+- Amount: X tokens
+- Recipient: Address and role
+- Balance after: "Your balance will be: X tokens"
+
+**4. Actions**
+- "Transfer" button: Send transfer
+- "Cancel" button: Return to `/tokens/[id]`
+- "Back to Details" button: Return to `/tokens/[id]`
+
+#### ⚠️ Special Validations
+- Verify user has sufficient balance
+- Verify contract is not paused
+- Verify user is approved
+- Verify recipient is valid according to role
+
+#### 📊 Hooks Used
+- ✅ `useGetToken(tokenId)` - Token information
+- ✅ `useGetTokenBalance(tokenId, address)` - User balance
+- ✅ `useGetAllUsers()` - Available users according to role (filtered in component)
+- ✅ `useTransfer()` - Hook to create transfer
+- ✅ `useIsPaused()` - Verify if contract is paused
+
+---
+
+### Navigation Guide
+
+#### Complete Navigation Flow
 
 ```
-/tokens (lista de tokens)
-  └── Click en token card
-      └── /tokens/[id] (detalles)
+/tokens (token list)
+  └── Click on token card
+      └── /tokens/[id] (details)
           ├── Click "Transfer Tokens"
-          │   └── /tokens/[id]/transfer (formulario)
-          │       ├── Submit → Crear transferencia → Redirección a /tokens/[id]
-          │       └── Cancel/Back → Volver a /tokens/[id]
-          └── Click "View Parent Token" (si aplica)
-              └── /tokens/[parentId] (detalles del parent)
+          │   └── /tokens/[id]/transfer (form)
+          │       ├── Submit → Create transfer → Redirect to /tokens/[id]
+          │       └── Cancel/Back → Return to /tokens/[id]
+          └── Click "View Parent Token" (if applicable)
+              └── /tokens/[parentId] (parent details)
 ```
 
-#### Paso a Paso
+#### Step by Step
 
-**Paso 1: Ir a la Lista de Tokens**
-1. **Desde el Header**: Click en "My Tokens" en la barra superior
-2. **Desde el Dashboard**: Click en "My Tokens" en el dashboard
-3. **URL directa**: `http://localhost:3000/tokens`
+**Step 1: Go to Token List**
+1. **From Header**: Click on "My Tokens" in the top bar
+2. **From Dashboard**: Click on "My Tokens" in the dashboard
+3. **Direct URL**: `http://localhost:3000/tokens`
 
-**Paso 2: Ver Detalles de un Token**
-- **Opción A**: Click en cualquier tarjeta de token en `/tokens`
-- **Opción B**: URL directa: `http://localhost:3000/tokens/1`
+**Step 2: View Token Details**
+- **Option A**: Click on any token card in `/tokens`
+- **Option B**: Direct URL: `http://localhost:3000/tokens/1`
 
-**Paso 3: Transferir Tokens desde Detalles**
-- Desde `/tokens/[id]`, click en botón "Transfer Tokens" (arriba a la derecha)
-- Serás redirigido a `/tokens/[id]/transfer`
+**Step 3: Transfer Tokens from Details**
+- From `/tokens/[id]`, click on "Transfer Tokens" button (top right)
+- You'll be redirected to `/tokens/[id]/transfer`
 
-**Paso 4: Volver Atrás**
-- Desde detalles: Botón "Back to Tokens" → Vuelve a `/tokens`
-- Desde transferencia: Botón "Cancel" o "Back to Token Details" → Vuelve a `/tokens/[id]`
+**Step 4: Go Back**
+- From details: "Back to Tokens" button → Returns to `/tokens`
+- From transfer: "Cancel" or "Back to Token Details" button → Returns to `/tokens/[id]`
 
-#### Indicadores Visuales
+#### Visual Indicators
 
-**En la Página `/tokens`**:
-- ✅ **Hover effect**: Al pasar el mouse, las tarjetas se elevan ligeramente
-- ✅ **Cursor pointer**: El cursor cambia a "mano" al pasar sobre ellas
-- ✅ **Sombra aumentada**: Al hacer hover, la sombra se hace más grande
-- ✅ **Toda la tarjeta es clickeable**: No solo el título, toda la tarjeta
+**On `/tokens` Page**:
+- ✅ **Hover effect**: When hovering, cards slightly elevate
+- ✅ **Cursor pointer**: Cursor changes to "hand" when hovering
+- ✅ **Increased shadow**: On hover, shadow becomes larger
+- ✅ **Entire card is clickable**: Not just the title, the entire card
 
-**En la Página de Detalles (`/tokens/[id]`)**:
-- ✅ Botón "Transfer Tokens" visible si tienes balance > 0 y puedes transferir
-- ✅ Sección de Trazabilidad End-to-End visible solo para Finished Products con parent token
-- ✅ Historial de Transferencias siempre visible (puede estar vacío)
+**On Details Page (`/tokens/[id]`)**:
+- ✅ "Transfer Tokens" button visible if you have balance > 0 and can transfer
+- ✅ End-to-End Traceability section visible only for Finished Products with parent token
+- ✅ Transfer History always visible (may be empty)
 
-#### Problemas Comunes y Soluciones
+#### Common Problems and Solutions
 
-**Problema 1: "No veo el botón Transfer Tokens"**
-- Verifica tu balance en la página de detalles
-- Si eres Consumer, solo puedes recibir transferencias
-- Si el contrato está pausado, espera a que se reactive
-- Verifica tu estado de usuario en el dashboard
+**Problem 1: "I don't see the Transfer Tokens button"**
+- Check your balance on the details page
+- If you're a Consumer, you can only receive transfers
+- If contract is paused, wait for it to be reactivated
+- Check your user status in the dashboard
 
-**Problema 2: "No puedo hacer clic en las tarjetas"**
-- Abre la consola del navegador (F12)
-- Busca errores en rojo
-- Recarga la página (Ctrl+R o Cmd+R)
+**Problem 2: "I can't click on the cards"**
+- Open browser console (F12)
+- Look for errors in red
+- Reload page (Ctrl+R or Cmd+R)
 
-**Problema 3: "La página de detalles no carga"**
-- Verifica que el token ID sea correcto
-- Asegúrate de que el contrato esté desplegado (`./deploy.sh status`)
-- Verifica que MetaMask esté conectado
-- Verifica que Anvil esté corriendo (`./deploy.sh status`)
+**Problem 3: "Details page doesn't load"**
+- Verify token ID is correct
+- Make sure contract is deployed (`./deploy.sh status`)
+- Verify MetaMask is connected
+- Verify Anvil is running (`./deploy.sh status`)
 
-> **📚 Para más detalles sobre navegación y troubleshooting, consulta [docs/RESEARCH.md](./RESEARCH.md#guía-de-navegación)**
+> **📚 For more details on navigation and troubleshooting, see [docs/RESEARCH.md](./RESEARCH.md#navigation-guide)**
 
 ---
 
-## ⏸️ Sistema de Pausabilidad
+## ⏸️ Pausability System
 
-### Estado del Contrato
+### Contract Status
 
-El contrato puede estar en dos estados:
-- **Activo**: Todas las funciones están disponibles
-- **Pausado**: Funciones críticas deshabilitadas
+The contract can be in two states:
+- **Active**: All functions are available
+- **Paused**: Critical functions disabled
 
-### Funciones Afectadas cuando está Pausado
+### Functions Affected when Paused
 
-Cuando el contrato está pausado, se deshabilitan:
-1. Solicitud de roles (`requestRole`)
-2. Cambio de roles (`changeRole`)
-3. Creación de tokens (`createToken`)
-4. Transferencias (`transfer`)
-5. Aceptar transferencias (`acceptTransfer`)
-6. Rechazar transferencias (`rejectTransfer`)
-7. Cancelar transferencias (`cancelTransfer`)
-8. Cambio de estado de usuarios
+When the contract is paused, the following are disabled:
+1. Role requests (`requestRole`)
+2. Role changes (`changeRole`)
+3. Token creation (`createToken`)
+4. Transfers (`transfer`)
+5. Accept transfers (`acceptTransfer`)
+6. Reject transfers (`rejectTransfer`)
+7. Cancel transfers (`cancelTransfer`)
+8. User status changes
 
 ### Hooks
 
 #### `useIsPaused()`
-Hook para leer el estado de pausa del contrato.
+Hook to read the contract pause status.
 
 ```typescript
 import { useIsPaused } from '@/hooks/usePause'
@@ -767,73 +767,73 @@ import { useIsPaused } from '@/hooks/usePause'
 function Component() {
   const { data: isPaused, isLoading } = useIsPaused()
   // isPaused = true | false | undefined
-  // Auto-refresh cada 5 segundos
+  // Auto-refresh every 5 seconds
 }
 ```
 
-#### `usePause()` y `useUnpause()`
-Hooks para pausar/reanudar el contrato (solo admin).
+#### `usePause()` and `useUnpause()`
+Hooks to pause/resume the contract (admin only).
 
-### Componente PauseControl.tsx
+### PauseControl.tsx Component
 
-Componente principal para que el administrador controle el estado de pausa.
+Main component for the administrator to control pause status.
 
-**Características**:
-- Muestra estado actual (Pausado/Activo) con colores visuales
-- Botón para pausar con confirmación (requiere escribir "PAUSAR")
-- Botón para reanudar con confirmación
-- Dialogs de confirmación para ambas acciones
-- Alert con lista de funciones deshabilitadas cuando está pausado
+**Features**:
+- Shows current status (Paused/Active) with visual colors
+- Pause button with confirmation (requires typing "PAUSAR")
+- Resume button with confirmation
+- Confirmation dialogs for both actions
+- Alert with list of disabled functions when paused
 
-### Integración en Componentes
+### Component Integration
 
-Todos los componentes que realizan acciones críticas verifican el estado de pausa:
-- `Header.tsx` - Muestra badge visual cuando está pausado
-- `RegisterForm.tsx` - Oculta formulario y muestra alert
-- `ChangeRoleDialog.tsx` - Valida estado de pausa
-- `QuickActions.tsx` - Deshabilita botones
-- `UserManagementTable.tsx` - Deshabilita acciones
-- `Dashboard Page` - Deshabilita botón "Create Token"
+All components that perform critical actions check pause status:
+- `Header.tsx` - Shows visual badge when paused
+- `RegisterForm.tsx` - Hides form and shows alert
+- `ChangeRoleDialog.tsx` - Validates pause status
+- `QuickActions.tsx` - Disables buttons
+- `UserManagementTable.tsx` - Disables actions
+- `Dashboard Page` - Disables "Create Token" button
 
 ---
 
-## 🔄 Sincronización Multi-Pestaña
+## 🔄 Multi-Tab Synchronization
 
-### Estado Actual
+### Current Status
 
-**Implementado (Día 2 - Versión Simplificada)**:
-- ✅ Sincronización de desconexiones entre pestañas
-- ✅ Persistencia de última dirección conectada en localStorage
-- ✅ Detección de cambios de cuenta en MetaMask
+**Implemented (Day 2 - Simplified Version)**:
+- ✅ Disconnection synchronization between tabs
+- ✅ Persistence of last connected address in localStorage
+- ✅ Detection of account changes in MetaMask
 
 **POSTPONED**:
-- ⏸️ Reconexión automática cuando otra pestaña se conecta (causaba race conditions)
-- ⏸️ Sincronización completa de estado entre pestañas
+- ⏸️ Automatic reconnection when another tab connects (caused race conditions)
+- ⏸️ Complete state synchronization between tabs
 
-### Tecnologías Utilizadas
+### Technologies Used
 
-1. **localStorage**: Para persistir la sesión entre pestañas
-2. **StorageEvent API**: Para detectar cambios en localStorage desde otras pestañas
-3. **MetaMask Events**: Para detectar cambios de cuenta/desconexión desde la wallet
+1. **localStorage**: To persist session between tabs
+2. **StorageEvent API**: To detect changes in localStorage from other tabs
+3. **MetaMask Events**: To detect account changes/disconnection from wallet
 
-### Flujos de Sincronización
+### Synchronization Flows
 
-#### 1. Desconexión en Pestaña B
+#### 1. Disconnection in Tab B
 ```
-Pestaña B: Usuario desconecta → localStorage limpiado
+Tab B: User disconnects → localStorage cleared
     ↓
-Pestaña A: Detecta cambio → Se desconecta automáticamente
-Pestaña C: Detecta cambio → Se desconecta automáticamente
+Tab A: Detects change → Automatically disconnects
+Tab C: Detects change → Automatically disconnects
 ```
 
-#### 2. Cambio de Cuenta en MetaMask
+#### 2. Account Change in MetaMask
 ```
-MetaMask: Usuario cambia cuenta → Evento accountsChanged
+MetaMask: User changes account → accountsChanged event
     ↓
-Todas las pestañas: Detectan cambio → Actualizan localStorage
+All tabs: Detect change → Update localStorage
 ```
 
-### Claves de Storage
+### Storage Keys
 
 ```typescript
 const STORAGE_KEY = 'lastConnectedAddress'
@@ -842,11 +842,11 @@ const SESSION_STORAGE_KEY = 'wallet_connection_session'
 
 ---
 
-## 🔐 Permisos de Transferencia
+## 🔐 Transfer Permissions
 
 ### Smart Contract Rules
 
-El smart contract define reglas estrictas sobre quién puede enviar y recibir transferencias:
+The smart contract defines strict rules about who can send and receive transfers:
 
 #### Transfer Functions and Their Permissions
 
@@ -893,212 +893,212 @@ Producer → Factory → Retailer → Consumer
 ### Frontend Implementation
 
 #### CreateTransferForm.tsx
-- Valida user role antes de mostrar form
-- Consumer ve mensaje informativo en lugar de form
-- Solo Producer, Factory, y Retailer pueden acceder al form
+- Validates user role before showing form
+- Consumer sees informative message instead of form
+- Only Producer, Factory, and Retailer can access the form
 
 #### TransferList.tsx
-- Muestra todas las transferencias (sent y received)
-- Botones de acción contextuales:
-  - **Accept/Reject**: Solo para receiver
-  - **Cancel**: Solo para sender
-- UI simplificada para Consumer:
-  - Estadísticas: Muestra Total, Received, Pending (oculta "Sent")
-  - Filtro de dirección: **Oculto completamente**
-  - Filtro de estado: Muestra "All", "Pending", "Accepted", "Rejected" (oculta "Cancelled")
+- Shows all transfers (sent and received)
+- Contextual action buttons:
+  - **Accept/Reject**: Only for receiver
+  - **Cancel**: Only for sender
+- Simplified UI for Consumer:
+  - Statistics: Shows Total, Received, Pending (hides "Sent")
+  - Address filter: **Completely hidden**
+  - Status filter: Shows "All", "Pending", "Accepted", "Rejected" (hides "Cancelled")
 
 ---
 
-## 🧪 Guía de Testing
+## 🧪 Testing Guide
 
-### Checklist de Pruebas
+### Testing Checklist
 
-#### 1. Creación de Tokens (`/tokens/create`)
+#### 1. Token Creation (`/tokens/create`)
 
-##### 1.1. Crear Raw Material Token (Producer)
-- [ ] Conectar wallet como Producer aprobado
-- [ ] Navegar a `/tokens/create?type=raw`
-- [ ] Verificar que el formulario muestra campos correctos
-- [ ] Llenar formulario y crear token
-- [ ] Verificar mensaje de éxito y redirección
+##### 1.1. Create Raw Material Token (Producer)
+- [ ] Connect wallet as approved Producer
+- [ ] Navigate to `/tokens/create?type=raw`
+- [ ] Verify form shows correct fields
+- [ ] Fill form and create token
+- [ ] Verify success message and redirect
 
-##### 1.2. Crear Finished Product Token (Factory)
-- [ ] Conectar wallet como Factory aprobado
-- [ ] Asegurarse de tener balance de un Raw Material token
-- [ ] Navegar a `/tokens/create?type=product`
-- [ ] Verificar que muestra campo "Parent Token"
-- [ ] Seleccionar Parent Token y crear producto
-- [ ] Verificar que balance del parent token se redujo
+##### 1.2. Create Finished Product Token (Factory)
+- [ ] Connect wallet as approved Factory
+- [ ] Ensure having balance of a Raw Material token
+- [ ] Navigate to `/tokens/create?type=product`
+- [ ] Verify it shows "Parent Token" field
+- [ ] Select Parent Token and create product
+- [ ] Verify parent token balance decreased
 
-##### 1.3. Validación de Balance Insuficiente
-- [ ] Intentar crear Finished Product con balance 0
-- [ ] Verificar que campos están deshabilitados
-- [ ] Verificar mensaje de balance insuficiente
+##### 1.3. Insufficient Balance Validation
+- [ ] Try to create Finished Product with balance 0
+- [ ] Verify fields are disabled
+- [ ] Verify insufficient balance message
 
-##### 1.4. Validación de Contrato Pausado
-- [ ] Como Admin, pausar el contrato
-- [ ] Intentar crear token como Producer/Factory
-- [ ] Verificar mensaje de alerta y formulario deshabilitado
+##### 1.4. Paused Contract Validation
+- [ ] As Admin, pause the contract
+- [ ] Try to create token as Producer/Factory
+- [ ] Verify alert message and disabled form
 
-#### 2. Visualización de Tokens (`/tokens`)
+#### 2. Token Visualization (`/tokens`)
 
-##### 2.1. Lista de Tokens Propios
-- [ ] Conectar wallet con tokens
-- [ ] Navegar a `/tokens`
-- [ ] Verificar que se muestran SOLO tokens con balance > 0
-- [ ] Verificar información mostrada (nombre, tipo, balance, ID)
+##### 2.1. Own Token List
+- [ ] Connect wallet with tokens
+- [ ] Navigate to `/tokens`
+- [ ] Verify that ONLY tokens with balance > 0 are shown
+- [ ] Verify displayed information (name, type, balance, ID)
 
-##### 2.2. Filtros por Tipo (Según Rol)
-- [ ] Como Producer: Verificar que NO aparece filtro de tipo
-- [ ] Como Factory: Verificar que SÍ aparece filtro de tipo
-- [ ] Probar filtros: "All Types", "Raw Material", "Finished Product"
+##### 2.2. Type Filters (According to Role)
+- [ ] As Producer: Verify that type filter does NOT appear
+- [ ] As Factory: Verify that type filter DOES appear
+- [ ] Test filters: "All Types", "Raw Material", "Finished Product"
 
-##### 2.3. Búsqueda por Nombre
-- [ ] Buscar "plátano" (con acento)
-- [ ] Verificar que encuentra tokens con nombre "Plátano"
-- [ ] Buscar "banana" (sin acento)
-- [ ] Verificar que también encuentra "Plátano" (búsqueda flexible)
+##### 2.3. Name Search
+- [ ] Search "plátano" (with accent)
+- [ ] Verify it finds tokens named "Plátano"
+- [ ] Search "banana" (without accent)
+- [ ] Verify it also finds "Plátano" (flexible search)
 
-##### 2.4. Paginación
-- [ ] Crear más de 12 tokens
-- [ ] Verificar que se muestran máximo 12 tokens por página
-- [ ] Probar controles de paginación
+##### 2.4. Pagination
+- [ ] Create more than 12 tokens
+- [ ] Verify maximum 12 tokens per page are shown
+- [ ] Test pagination controls
 
 #### 3. Dashboard (`/dashboard`)
 
-##### 3.1. Visualización de Perfil
-- [ ] Conectar wallet
-- [ ] Navegar a `/dashboard`
-- [ ] Verificar UserProfileCard con información correcta
+##### 3.1. Profile Visualization
+- [ ] Connect wallet
+- [ ] Navigate to `/dashboard`
+- [ ] Verify UserProfileCard with correct information
 
-##### 3.2. Estadísticas de Tokens por Tipo
-- [ ] Verificar tabla "Token Statistics"
-- [ ] Verificar que muestra tipos con balance > 0
+##### 3.2. Token Statistics by Type
+- [ ] Verify "Token Statistics" table
+- [ ] Verify it shows types with balance > 0
 
-##### 3.3. Lista de Tokens Propios
-- [ ] Verificar sección "My Tokens"
-- [ ] Verificar máximo 6 tokens visibles
-- [ ] Verificar botón "View All" redirige a `/tokens`
+##### 3.3. Own Token List
+- [ ] Verify "My Tokens" section
+- [ ] Verify maximum 6 tokens visible
+- [ ] Verify "View All" button redirects to `/tokens`
 
-##### 3.4. Acciones Rápidas
-- [ ] Como Producer: Verificar botón "Create Raw Material"
-- [ ] Como Factory: Verificar botón "Create Product"
-- [ ] Como Retailer/Consumer: Verificar que NO aparecen botones de creación
+##### 3.4. Quick Actions
+- [ ] As Producer: Verify "Create Raw Material" button
+- [ ] As Factory: Verify "Create Product" button
+- [ ] As Retailer/Consumer: Verify creation buttons do NOT appear
 
-##### 3.5. Panel de Admin
-- [ ] Como Admin, navegar a `/dashboard`
-- [ ] Verificar estadísticas globales
-- [ ] Verificar Control de pausa (PauseControl)
-- [ ] Verificar botón "Manage Users"
+##### 3.5. Admin Panel
+- [ ] As Admin, navigate to `/dashboard`
+- [ ] Verify global statistics
+- [ ] Verify Pause Control (PauseControl)
+- [ ] Verify "Manage Users" button
 
-#### 4. Validaciones y Edge Cases
+#### 4. Validations and Edge Cases
 
-##### 4.1. Redirecciones
-- [ ] Usuario no conectado intenta acceder a `/tokens` → redirige a `/`
-- [ ] Usuario no aprobado intenta acceder a `/tokens` → redirige a `/`
-- [ ] Admin intenta acceder a `/tokens` → redirige a `/dashboard`
+##### 4.1. Redirects
+- [ ] Unconnected user tries to access `/tokens` → redirects to `/`
+- [ ] Unapproved user tries to access `/tokens` → redirects to `/`
+- [ ] Admin tries to access `/tokens` → redirects to `/dashboard`
 
-##### 4.2. Estados de Carga
-- [ ] Verificar skeleton loaders durante carga de datos
-- [ ] Verificar que no hay flickering al refrescar datos
-- [ ] Verificar mensajes de error si falla la carga
+##### 4.2. Loading States
+- [ ] Verify skeleton loaders during data loading
+- [ ] Verify no flickering when refreshing data
+- [ ] Verify error messages if loading fails
 
-##### 4.3. Diseño Moderno
-- [ ] Verificar que el diseño moderno está activo (si `NEXT_PUBLIC_MODERN_DESIGN=true`)
-- [ ] Verificar glassmorphism en cards
-- [ ] Verificar gradientes y animaciones
-- [ ] Verificar que funciona en modo claro y oscuro
+##### 4.3. Modern Design
+- [ ] Verify modern design is active (if `NEXT_PUBLIC_MODERN_DESIGN=true`)
+- [ ] Verify glassmorphism in cards
+- [ ] Verify gradients and animations
+- [ ] Verify it works in light and dark mode
 
-### Criterios de Éxito
+### Success Criteria
 
-La implementación es exitosa si:
-1. ✅ Todas las pruebas pasan
-2. ✅ No hay errores en la consola del navegador
-3. ✅ La experiencia de usuario es fluida y sin interrupciones
-4. ✅ Las validaciones funcionan correctamente
-5. ✅ El diseño es responsive y accesible
+Implementation is successful if:
+1. ✅ All tests pass
+2. ✅ No errors in browser console
+3. ✅ User experience is smooth and uninterrupted
+4. ✅ Validations work correctly
+5. ✅ Design is responsive and accessible
 
 ---
 
-## 📊 Resumen de Archivos
+## 📊 File Summary
 
-### Estructura Completa
+### Complete Structure
 
 ```
 web/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx          ✅ Providers configurados
-│   │   ├── page.tsx            ✅ Landing con stats
+│   │   ├── layout.tsx          ✅ Providers configured
+│   │   ├── page.tsx            ✅ Landing with stats
 │   │   └── globals.css         ✅ Tailwind base
 │   ├── components/
-│   │   ├── ui/                 ✅ 10 componentes Shadcn
-│   │   ├── ConnectWallet.tsx   ✅ Componente custom
-│   │   ├── Header.tsx          ✅ Navegación unificada
-│   │   ├── ThemeToggle.tsx     ✅ Toggle de tema
-│   │   ├── RegisterForm.tsx    ✅ Formulario registro
-│   │   ├── ChangeRoleDialog.tsx ✅ Diálogo cambio rol
-│   │   ├── TokenCard.tsx       ✅ Card de token
-│   │   ├── TokenCardModern.tsx ✅ Card moderna 2025
-│   │   ├── UserProfileCard.tsx  ✅ Perfil usuario
-│   │   ├── QuickActions.tsx    ✅ Acciones rápidas
-│   │   ├── TransferList.tsx     ✅ Lista transferencias
-│   │   ├── CreateTransferForm.tsx ✅ Formulario transferencia
-│   │   ├── UserTokenList.tsx     ✅ Lista tokens usuario
-│   │   ├── AddressDisplay.tsx    ✅ Display dirección
-│   │   ├── TraceabilityTimeline.tsx ✅ Trazabilidad
+│   │   ├── ui/                 ✅ 10 Shadcn components
+│   │   ├── ConnectWallet.tsx   ✅ Custom component
+│   │   ├── Header.tsx          ✅ Unified navigation
+│   │   ├── ThemeToggle.tsx     ✅ Theme toggle
+│   │   ├── RegisterForm.tsx    ✅ Registration form
+│   │   ├── ChangeRoleDialog.tsx ✅ Role change dialog
+│   │   ├── TokenCard.tsx       ✅ Token card
+│   │   ├── TokenCardModern.tsx ✅ Modern 2025 card
+│   │   ├── UserProfileCard.tsx  ✅ User profile
+│   │   ├── QuickActions.tsx    ✅ Quick actions
+│   │   ├── TransferList.tsx     ✅ Transfer list
+│   │   ├── CreateTransferForm.tsx ✅ Transfer form
+│   │   ├── UserTokenList.tsx     ✅ User token list
+│   │   ├── AddressDisplay.tsx    ✅ Address display
+│   │   ├── TraceabilityTimeline.tsx ✅ Traceability
 │   │   └── admin/
-│   │       ├── UserManagementTable.tsx ✅ Gestión usuarios
-│   │       ├── UserStatsCards.tsx      ✅ Stats usuarios
-│   │       └── PauseControl.tsx         ✅ Control pausa
+│   │       ├── UserManagementTable.tsx ✅ User management
+│   │       ├── UserStatsCards.tsx      ✅ User stats
+│   │       └── PauseControl.tsx         ✅ Pause control
 │   ├── contracts/
-│   │   ├── config.ts           ✅ Dirección + ABI + Enums
-│   │   └── SupplyChain.json   ✅ ABI completo
+│   │   ├── config.ts           ✅ Address + ABI + Enums
+│   │   └── SupplyChain.json   ✅ Complete ABI
 │   ├── hooks/
-│   │   ├── useContractReads.ts ✅ 7 hooks lectura
-│   │   ├── useRequestRole.ts   ✅ Hook escritura
-│   │   ├── useCreateToken.ts   ✅ Hook escritura
-│   │   ├── useTransfer.ts      ✅ 4 hooks escritura
-│   │   ├── useGetUserTokens.ts ✅ 4 hooks lectura
-│   │   ├── usePause.ts         ✅ 3 hooks pausa
-│   │   ├── useAdminUsers.ts    ✅ 2 hooks admin
-│   │   ├── useContractOwner.ts ✅ Hook owner
-│   │   ├── usePendingOwner.ts  ✅ Hook pending owner
-│   │   ├── useOwnershipTransfer.ts ✅ Hook ownership
-│   │   ├── useGetUserTransfers.ts ✅ Hook transfers
-│   │   └── useUserTokenStats.ts ✅ Hook stats
+│   │   ├── useContractReads.ts ✅ 7 read hooks
+│   │   ├── useRequestRole.ts   ✅ Write hook
+│   │   ├── useCreateToken.ts   ✅ Write hook
+│   │   ├── useTransfer.ts      ✅ 4 write hooks
+│   │   ├── useGetUserTokens.ts ✅ 4 read hooks
+│   │   ├── usePause.ts         ✅ 3 pause hooks
+│   │   ├── useAdminUsers.ts    ✅ 2 admin hooks
+│   │   ├── useContractOwner.ts ✅ Owner hook
+│   │   ├── usePendingOwner.ts  ✅ Pending owner hook
+│   │   ├── useOwnershipTransfer.ts ✅ Ownership hook
+│   │   ├── useGetUserTransfers.ts ✅ Transfers hook
+│   │   └── useUserTokenStats.ts ✅ Stats hook
 │   ├── contexts/
-│   │   └── AuthContext.tsx    ✅ Contexto autenticación
+│   │   └── AuthContext.tsx    ✅ Authentication context
 │   └── lib/
 │       ├── utils.ts            ✅ cn() helper
-│       └── wagmi-config.ts     ✅ Config Anvil
-├── public/                     ✅ Assets estáticos
-├── package.json                ✅ Todas deps instaladas
+│       └── wagmi-config.ts     ✅ Anvil config
+├── public/                     ✅ Static assets
+├── package.json                ✅ All deps installed
 ├── tsconfig.json               ✅ TypeScript config
 ├── tailwind.config.js          ✅ Tailwind config
 ├── next.config.ts              ✅ Next.js config
 └── components.json             ✅ Shadcn config
 ```
 
-### Métricas
+### Metrics
 
-- **Archivos creados**: 40+ archivos nuevos
-- **Líneas de código**: ~5000+ líneas de código productivo
-- **Hooks implementados**: 27 hooks (17 lectura + 10 escritura)
-- **Componentes UI**: 26 componentes (10 Shadcn + 16 custom)
-- **Páginas implementadas**: 9/9 páginas (100%)
-- **Diseño Moderno 2025**: Aplicado a 5 páginas principales
+- **Files created**: 40+ new files
+- **Lines of code**: ~5000+ productive code lines
+- **Hooks implemented**: 27 hooks (17 read + 10 write)
+- **UI Components**: 26 components (10 Shadcn + 16 custom)
+- **Pages implemented**: 9/9 pages (100%)
+- **Modern Design 2025**: Applied to 5 main pages
 
 ---
 
-## 🔗 Referencias
+## 🔗 References
 
-- **Estado del Proyecto**: [STATUS.md](../../STATUS.md)
+- **Project Status**: [STATUS.md](../../STATUS.md)
 - **Smart Contract**: [docs/SMART_CONTRACT.md](./SMART_CONTRACT.md)
 - **Changelog**: [CHANGELOG.md](../../CHANGELOG.md)
 - **Contributing**: [CONTRIBUTING.md](../../CONTRIBUTING.md)
 
 ---
 
-**Última actualización**: 27 de Noviembre, 2025
+**Last Updated**: November 27, 2025
 

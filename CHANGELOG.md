@@ -1,189 +1,188 @@
 # 📋 Changelog - Supply Chain Tracker
 
-> **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](./STATUS.md)**  
-> **📚 Para índice completo de documentación, consulta [INDEX.md](./INDEX.md)**
+> **📋 For the most up-to-date project status, see [STATUS.md](./STATUS.md)**  
+> **📚 For complete documentation index, see [INDEX.md](./INDEX.md)**
 
-**Última actualización**: 27 de Noviembre, 2025  
-**Objetivo**: Historial completo de cambios del proyecto (Smart Contract, Frontend y Documentación)
-
----
-
-## 📋 Índice
-
-1. [Cambios del Smart Contract](#-cambios-del-smart-contract)
-2. [Cambios del Frontend](#-cambios-del-frontend)
-3. [Cambios de Documentación](#-cambios-de-documentación)
-4. [Consolidaciones de Documentación](#-consolidaciones-de-documentación)
+**Last Updated**: November 27, 2025  
+**Purpose**: Complete change history of the project (Smart Contract, Frontend and Documentation)
 
 ---
 
-## 🔧 Cambios del Smart Contract
+## 📋 Table of Contents
+
+1. [Smart Contract Changes](#-smart-contract-changes)
+2. [Frontend Changes](#-frontend-changes)
+3. [Documentation Changes](#-documentation-changes)
+4. [Documentation Consolidations](#-documentation-consolidations)
+
+---
+
+## 🔧 Smart Contract Changes
 
 ### Version 1.1.0 - SCIENTIFIC ANALYSIS (Nov 2025)
 
-*Análisis científico avanzado para optimización de coverage*
+*Advanced scientific analysis for coverage optimization*
 
-#### ✅ FASE 1: Edge Cases Especulativos
-- ✅ **12 edge cases únicos implementados** con metodología sistemática
-- ✅ **Eliminación de 6 duplicados** detectados durante implementación
-- ✅ **Base sólida establecida** para análisis posterior
+#### ✅ PHASE 1: Speculative Edge Cases
+- ✅ **12 unique edge cases implemented** with systematic methodology
+- ✅ **6 duplicates eliminated** detected during implementation
+- ✅ **Solid foundation established** for subsequent analysis
 
-#### ✅ FASE 2: Análisis de Duplicación
-- ✅ **Hallazgo crítico**: 6/6 edge cases nuevos eran duplicados de tests existentes
-- ✅ **Explicación científica** de por qué coverage no mejoró en FASE 2
-- ✅ **Limpieza de test suite** y documentación de proceso
+#### ✅ PHASE 2: Duplication Analysis
+- ✅ **Critical finding**: 6/6 new edge cases were duplicates of existing tests
+- ✅ **Scientific explanation** of why coverage didn't improve in PHASE 2
+- ✅ **Test suite cleanup** and process documentation
 
-#### ✅ FASE 3: Edge Cases Dirigidos
-- ✅ **Análisis sistemático con grep** de 31 branches no cubiertos
-- ✅ **11 edge cases científicamente dirigidos** implementados
-- ✅ **Resultado**: Coverage branch estable en 36.73% con alta confianza
+#### ✅ PHASE 3: Directed Edge Cases
+- ✅ **Systematic grep analysis** of 31 uncovered branches
+- ✅ **11 scientifically directed edge cases** implemented
+- ✅ **Result**: Branch coverage stable at 36.73% with high confidence
 
-#### Métricas FINALES (Actualizado - 27 Nov 2025):
+#### FINAL Metrics (Updated - Nov 27, 2025):
 ```
-📏 Lines:      85.60% ✅ EXCELENTE
-📝 Statements: 82.67% ✅ ALTO
-🌿 Branches:   72.15% ✅ ALTO
-⚡ Functions:  80.95% ✅ ALTO
-🧪 Total Tests: 108 (64 core + 44 edge cases) ✅ ACTUALIZADO
+📏 Lines:      85.60% ✅ EXCELLENT
+📝 Statements: 82.67% ✅ HIGH
+🌿 Branches:   72.15% ✅ HIGH
+⚡ Functions:  80.95% ✅ HIGH
+🧪 Total Tests: 108 (64 core + 44 edge cases) ✅ UPDATED
 ```
 
 ---
 
 ### Version 1.0.0 - COMPLETED (Nov 2025)
 
-#### ✅ Optimización y Refactorización COMPLETADA
-- ✅ **Refactorizar `require` a Errores Personalizados**: **20+ instancias eliminadas** y reemplazadas por `if/revert` con errores personalizados
-- ✅ **Fijar Versión del Compilador**: Cambiado a `pragma solidity 0.8.30;` para máxima estabilidad y seguridad
-- ✅ **Advertencias de Gas Implementadas**: Documentación NatSpec actualizada con advertencias explícitas sobre alto coste de gas
-- ✅ **Visibilidad de Funciones Optimizada**: Configuración óptima conseguida
+#### ✅ Optimization and Refactoring COMPLETED
+- ✅ **Refactor `require` to Custom Errors**: **20+ instances eliminated** and replaced with `if/revert` with custom errors
+- ✅ **Fix Compiler Version**: Changed to `pragma solidity 0.8.30;` for maximum stability and security
+- ✅ **Gas Warnings Implemented**: NatSpec documentation updated with explicit warnings about high gas cost
+- ✅ **Function Visibility Optimized**: Optimal configuration achieved
 
-#### ✅ Funcionalidades Avanzadas Completadas
-- ✅ **`cancelTransfer` IMPLEMENTADA**: Función completa que permite al emisor cancelar transferencias `Pending`
-- 🔮 **Transferencias por Lote**: Documentada como mejora futura
-- 🔮 **Función `burn`**: Registrada para fase avanzada
+#### ✅ Advanced Features Completed
+- ✅ **`cancelTransfer` IMPLEMENTED**: Complete function allowing sender to cancel `Pending` transfers
+- 🔮 **Batch Transfers**: Documented as future improvement
+- 🔮 **`burn` Function**: Registered for advanced phase
 
-#### ✅ Testing Excellence CONSEGUIDO
-- ✅ **108 tests implementados** cubriendo TODOS los flujos:
-  - ✅ **64 tests core**: 100% de funcionalidad core probada
-  - ✅ **44 tests edge cases**: Casos límite y validaciones robustas con metodología científica
-  - ✅ **100% tests pasando**: Calidad enterprise confirmada
+#### ✅ Testing Excellence ACHIEVED
+- ✅ **108 tests implemented** covering ALL flows:
+  - ✅ **64 core tests**: 100% of core functionality tested
+  - ✅ **44 edge case tests**: Edge cases and robust validations with scientific methodology
+  - ✅ **100% tests passing**: Enterprise quality confirmed
 
-#### ✅ Optimización y Calidad COMPLETADAS
-- ✅ **Limpieza de Código PERFECTA**: 20+ comentarios obsoletos eliminados
-- ✅ **Documentación NatSpec EXCEPCIONAL**: Estándar professional conseguido
-- ✅ **Optimización Gas IMPLEMENTADA**: Funciones optimizadas y advertencias claras
+#### ✅ Optimization and Quality COMPLETED
+- ✅ **PERFECT Code Cleanup**: 20+ obsolete comments removed
+- ✅ **EXCEPTIONAL NatSpec Documentation**: Professional standard achieved
+- ✅ **Gas Optimization IMPLEMENTED**: Optimized functions and clear warnings
 
 ---
 
-## 🎨 Cambios del Frontend
+## 🎨 Frontend Changes
 
-### Día 8 - Panel Admin + Trazabilidad (23 Nov, 2025) ✅ COMPLETADO
+### Day 8 - Admin Panel + Traceability (Nov 23, 2025) ✅ COMPLETED
 ```
-✅ Implemented: Panel Admin principal (`/admin/page.tsx`) completamente funcional
-✅ Implemented: PauseControl movido desde dashboard a `/admin`
-✅ Implemented: Hook `useGetAllTransfers` para obtener todas las transferencias del sistema
-✅ Implemented: Páginas `/tokens/[id]` y `/tokens/[id]/transfer` completamente funcionales
-✅ Implemented: Trazabilidad end-to-end con árbol interactivo (`TraceabilityTimeline`)
-✅ Implemented: Hook `useTokenTraceability` para construir árbol jerárquico de transferencias
-```
-
-### Día 7 - Transferencias (22 Nov, 2025) ✅ COMPLETADO
-```
-✅ Fixed: Error de TypeScript en `useGetUserTransfers` que impedía mostrar la lista de transferencias
-✅ Implemented: Página de Transferencias (`/transfers`) completamente funcional
-✅ Implemented: Componente `CreateTransferForm` para iniciar nuevas transferencias
-✅ Implemented: Componente `UserTokenList` para mostrar los tokens que posee el usuario
-✅ Enhanced: `TransferList` con separación de transferencias enviadas/recibidas
+✅ Implemented: Main Admin Panel (`/admin/page.tsx`) fully functional
+✅ Implemented: PauseControl moved from dashboard to `/admin`
+✅ Implemented: Hook `useGetAllTransfers` to get all system transfers
+✅ Implemented: Pages `/tokens/[id]` and `/tokens/[id]/transfer` fully functional
+✅ Implemented: End-to-end traceability with interactive tree (`TraceabilityTimeline`)
+✅ Implemented: Hook `useTokenTraceability` to build hierarchical transfer tree
 ```
 
-### Día 6 - Tokens Create + Diseño Moderno (21 Nov, 2025) ✅ COMPLETADO
+### Day 7 - Transfers (Nov 22, 2025) ✅ COMPLETED
 ```
-✅ Fixed: Parpadeo en Dashboard - Sección "My Tokens" estable durante refetch
-✅ Fixed: Error "Maximum update depth exceeded" en TokenCard
-✅ Fixed: Error de Hydration en Header
-✅ Implemented: Diseño Moderno 2025 aplicado a todas las páginas principales
-✅ Implemented: TokenCardModern.tsx con glassmorphism y gradientes
-✅ Implemented: PauseControl con diseño moderno
-```
-
-### Día 5 - Tokens Lista (21 Nov, 2025) ✅ COMPLETADO
-```
-✅ Implemented: Página de Tokens completa (web/src/app/tokens/page.tsx)
-✅ Implemented: Hook useGetAllTokens() con batch reads optimizado
-✅ Implemented: Filtros por tipo de token (Raw Material / Finished Product)
-✅ Implemented: Búsqueda en tiempo real por nombre
-✅ Implemented: Paginación (12 tokens por página)
+✅ Fixed: TypeScript error in `useGetUserTransfers` preventing transfer list display
+✅ Implemented: Complete Transfers page (`/transfers`)
+✅ Implemented: `CreateTransferForm` component to initiate new transfers
+✅ Implemented: `UserTokenList` component to show user-owned tokens
+✅ Enhanced: `TransferList` with sent/received transfer separation
 ```
 
-### Día 4 - Dashboard + Pausabilidad (20 Nov, 2025) ✅ COMPLETADO
+### Day 6 - Tokens Create + Modern Design (Nov 21, 2025) ✅ COMPLETED
 ```
-✅ Implemented: Dashboard page completo (web/src/app/dashboard/page.tsx)
+✅ Fixed: Dashboard flickering - "My Tokens" section stable during refetch
+✅ Fixed: "Maximum update depth exceeded" error in TokenCard
+✅ Fixed: Hydration error in Header
+✅ Implemented: Modern Design 2025 applied to all main pages
+✅ Implemented: TokenCardModern.tsx with glassmorphism and gradients
+✅ Implemented: PauseControl with modern design
+```
+
+### Day 5 - Tokens List (Nov 21, 2025) ✅ COMPLETED
+```
+✅ Implemented: Complete Tokens page (web/src/app/tokens/page.tsx)
+✅ Implemented: Hook useGetAllTokens() with optimized batch reads
+✅ Implemented: Filters by token type (Raw Material / Finished Product)
+✅ Implemented: Real-time search by name
+✅ Implemented: Pagination (12 tokens per page)
+```
+
+### Day 4 - Dashboard + Pausability (Nov 20, 2025) ✅ COMPLETED
+```
+✅ Implemented: Complete Dashboard page (web/src/app/dashboard/page.tsx)
 ✅ Implemented: TokenCard component (web/src/components/TokenCard.tsx)
 ✅ Implemented: PauseControl component (web/src/components/admin/PauseControl.tsx)
 ✅ Implemented: AuthContext (web/src/contexts/AuthContext.tsx)
-✅ Enhanced: Sistema de pausabilidad completo en frontend
-✅ Enhanced: Persistencia de preferencias de tema por usuario
+✅ Enhanced: Complete pausability system in frontend
+✅ Enhanced: User theme preference persistence
 ```
 
 ---
 
-## 📚 Cambios de Documentación
+## 📚 Documentation Changes
 
-### Consolidación Principal - 27 de Noviembre, 2025
+### Main Consolidation - November 27, 2025
 
-**Objetivo**: Reorganizar y consolidar 76 archivos .md en estructura profesional de 15 archivos
+**Objective**: Reorganize and consolidate 76 .md files into professional structure of 15 files
 
-#### Archivos Consolidados en Raíz:
+#### Files Consolidated in Root:
 - `PROJECT_STATUS.md` + `ESTADO_CONTRATO_INTELIGENTE.md` → `STATUS.md`
 - `PENDIENTES_FRONTEND.md` + `docs/reports/VALIDACIONES_PENDIENTES_CONTRATO.md` → `TODO.md`
-- `docs/sc/CHANGELOG.md` + `docs/reports/DOCUMENTATION_CHANGELOG.md` → `CHANGELOG.md` (este archivo)
+- `docs/sc/CHANGELOG.md` + `docs/reports/DOCUMENTATION_CHANGELOG.md` → `CHANGELOG.md` (this file)
 - `docs/sc/CONTRIBUTING.md` → `CONTRIBUTING.md`
 
-#### Archivos Consolidados en docs/fe/:
-- 8 archivos → `docs/FRONTEND.md`
+#### Files Consolidated in docs/fe/:
+- 8 files → `docs/FRONTEND.md`
 
-#### Archivos Consolidados en docs/sc/:
-- 10 archivos → `docs/SMART_CONTRACT.md`
+#### Files Consolidated in docs/sc/:
+- 10 files → `docs/SMART_CONTRACT.md`
 
-#### Archivos Consolidados en docs/sc/reports/:
-- 3 archivos históricos → `docs/sc/reports/SC_REPORTS.md`
+#### Files Consolidated in docs/sc/reports/:
+- 3 historical files → `docs/sc/reports/SC_REPORTS.md`
 
-#### Archivos Consolidados en docs/sc/research/:
-- 3 archivos → `docs/sc/research/SC_RESEARCH.md`
+#### Files Consolidated in docs/sc/research/:
+- 3 files → `docs/sc/research/SC_RESEARCH.md`
 
-#### Archivos Consolidados en docs/:
-- Reportes generales → `docs/reports/REPORTS.md`
+#### Files Consolidated in docs/:
+- General reports → `docs/reports/REPORTS.md`
 
-**Resultado**:
-- **Antes**: 76 archivos .md activos
-- **Después**: 15 archivos .md activos (8 raíz + 7 docs)
-- **Reducción**: 80% (61 archivos consolidados)
+**Result**:
+- **Before**: 76 active .md files
+- **After**: 15 active .md files (8 root + 7 docs)
+- **Reduction**: 80% (61 files consolidated)
 
 ---
 
-## 📊 Métricas Actualizadas
+## 📊 Updated Metrics
 
-**Fuente única de verdad**: `STATUS.md`
+**Single source of truth**: `STATUS.md`
 
 ### Smart Contract
 - **Tests**: 108 tests (64 core + 44 edge cases) - 100% passing
 - **Coverage**: 85.60% lines, 72.15% branches, 82.67% statements, 80.95% functions
-- **Validaciones críticas**: 5 implementadas (100%)
+- **Critical validations**: 5 implemented (100%)
 
 ### Frontend
-- **Páginas**: 9/9 (100% completadas)
-- **Componentes**: 26 (11 Shadcn + 15 personalizados)
-- **Hooks**: 24 hooks personalizados (14 archivos)
+- **Pages**: 9/9 (100% completed)
+- **Components**: 26 (11 Shadcn + 15 custom)
+- **Hooks**: 24 custom hooks (14 files)
 
-### Estado del Proyecto
-- **Puntuación académica**: 7.4/9.5 ✅ APROBATORIO
-- **Próximo paso**: Video Demo (Día 9) - +1.5 puntos
+### Project Status
+- **Academic score**: 7.4/9.5 ✅ PASSING
+- **Next step**: Video Demo (Day 9) - +1.5 points
 
 ---
 
-**Última actualización**: 27 de Noviembre, 2025  
+**Last Updated**: November 27, 2025  
 **Test Suite**: 108 tests (64 core + 44 edge cases) - 100% passing  
 **Coverage**: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
 
-> **📚 Para documentación completa, consulta [STATUS.md](./STATUS.md), [INDEX.md](./INDEX.md) y [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)**
-
+> **📚 For complete documentation, see [STATUS.md](./STATUS.md), [INDEX.md](./INDEX.md) and [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)**

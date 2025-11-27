@@ -1,31 +1,31 @@
 # 📋 TODO - Supply Chain Tracker
 
-> **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](./STATUS.md)**  
-> **📚 Para índice completo de documentación, consulta [INDEX.md](./INDEX.md)**
+> **📋 For the most up-to-date project status, see [STATUS.md](./STATUS.md)**  
+> **📚 For complete documentation index, see [INDEX.md](./INDEX.md)**
 
-**Última actualización**: 27 de Noviembre, 2025  
-**Objetivo**: Lista consolidada de tareas pendientes, errores y validaciones
+**Last Updated**: November 27, 2025  
+**Purpose**: Consolidated list of pending tasks, errors and validations
 
 ---
 
-## ⚠️ ERRORES PENDIENTES
+## ⚠️ PENDING ERRORS
 
 ### Frontend
 
-#### Error de TypeScript en Dashboard
-**Archivo**: `web/src/app/dashboard/page.tsx`  
-**Ubicación**: Líneas ~812-815 y ~819-822 (pueden haber cambiado)
+#### TypeScript Error in Dashboard
+**File**: `web/src/app/dashboard/page.tsx`  
+**Location**: Lines ~812-815 and ~819-822 (may have changed)
 
 **Error**:
 ```
 Type error: 'userInfo' is possibly 'null'.
 ```
 
-**Causa**:
-TypeScript no puede inferir que `userInfo` no es `null` después de la verificación `userInfo &&` cuando se usa en expresiones complejas con múltiples operadores `&&`.
+**Cause**:
+TypeScript cannot infer that `userInfo` is not `null` after the `userInfo &&` check when used in complex expressions with multiple `&&` operators.
 
-**Solución propuesta**:
-1. **Opción 1**: Usar optional chaining en todas las referencias:
+**Proposed Solution**:
+1. **Option 1**: Use optional chaining in all references:
    ```typescript
    {userInfo && 
     userInfo.status !== undefined &&
@@ -35,7 +35,7 @@ TypeScript no puede inferir que `userInfo` no es `null` después de la verificac
      : 'No tokens available yet'}
    ```
 
-2. **Opción 2**: Extraer la verificación a una variable:
+2. **Option 2**: Extract check to a variable:
    ```typescript
    const canCreateToken = userInfo && 
      userInfo.status !== undefined &&
@@ -47,7 +47,7 @@ TypeScript no puede inferir que `userInfo` no es `null` después de la verificac
      : 'No tokens available yet'}
    ```
 
-3. **Opción 3**: Usar una función helper:
+3. **Option 3**: Use a helper function:
    ```typescript
    const canCreateToken = (userInfo: UserInfo | null): boolean => {
      if (!userInfo || userInfo.status === undefined) return false
@@ -57,145 +57,144 @@ TypeScript no puede inferir que `userInfo` no es `null` después de la verificac
    }
    ```
 
-**Estado**: 
-- ❌ **PENDIENTE** - No bloquea funcionalidad pero impide el build de producción
-- ⚠️ **PRIORIDAD**: Media (el código funciona en desarrollo, pero el build falla)
+**Status**: 
+- ❌ **PENDING** - Doesn't block functionality but prevents production build
+- ⚠️ **PRIORITY**: Medium (code works in development, but build fails)
 
-**Notas**:
-- Este error **NO** fue causado por `usePendingOwner.ts` ni `useOwnershipTransfer.ts`
-- El error existía antes, solo se hizo visible al ejecutar el build
-- Los hooks de ownership transfer están completamente funcionales y no causan problemas
-- Para verificar si el error sigue presente, ejecutar: `cd web && npm run build`
+**Notes**:
+- This error **WAS NOT** caused by `usePendingOwner.ts` or `useOwnershipTransfer.ts`
+- The error existed before, only became visible when running build
+- Ownership transfer hooks are completely functional and cause no problems
+- To verify if error still exists, run: `cd web && npm run build`
 
 ---
 
-## ✅ VALIDACIONES COMPLETADAS
+## ✅ COMPLETED VALIDATIONS
 
 ### Smart Contract
 
-Todas las validaciones críticas y recomendadas están implementadas en el contrato:
+All critical and recommended validations are implemented in the contract:
 
-#### ✅ Validaciones de Alta Prioridad - COMPLETADAS
-1. **Validación de usuario cancelado en `requestRole()`** ✅ **COMPLETADO**
-   - **Impacto**: Seguridad y lógica de negocio
-   - **Estado**: ✅ **IMPLEMENTADO** (24 Nov 2025)
-   - **Test**: ✅ `testCanceledUserCannotRequestRole()` agregado
+#### ✅ High Priority Validations - COMPLETED
+1. **Canceled user validation in `requestRole()`** ✅ **COMPLETED**
+   - **Impact**: Security and business logic
+   - **Status**: ✅ **IMPLEMENTED** (Nov 24, 2025)
+   - **Test**: ✅ `testCanceledUserCannotRequestRole()` added
 
-2. **Validación de restricciones de rol por tipo de token en transferencias** ✅ **IMPLEMENTADO**
-   - **Impacto**: Seguridad y lógica de negocio crítica
-   - **Estado**: ✅ **IMPLEMENTADO** (verificado 26 Nov 2025)
-   - **Implementación**:
-     - ✅ Función helper `_validateRoleForTokenType()` creada
-     - ✅ Validación en `transfer()` - Valida rol del emisor
-     - ✅ Validación en `acceptTransfer()` - Valida rol del receptor
-     - ✅ Validación en `rejectTransfer()` - Valida rol del receptor
+2. **Role restriction validation by token type in transfers** ✅ **IMPLEMENTED**
+   - **Impact**: Critical security and business logic
+   - **Status**: ✅ **IMPLEMENTED** (verified Nov 26, 2025)
+   - **Implementation**:
+     - ✅ Helper function `_validateRoleForTokenType()` created
+     - ✅ Validation in `transfer()` - Validates sender role
+     - ✅ Validation in `acceptTransfer()` - Validates receiver role
+     - ✅ Validation in `rejectTransfer()` - Validates receiver role
 
-#### ✅ Validaciones de Media Prioridad - COMPLETADAS
-1. **Longitud mínima del nombre en `createToken()`** ✅ **COMPLETADO**
-   - **Impacto**: UX y consistencia de datos
-   - **Estado**: ✅ **IMPLEMENTADO** (24 Nov 2025)
-   - **Test**: ✅ `testCreateTokenSingleCharacterName()` agregado
+#### ✅ Medium Priority Validations - COMPLETED
+1. **Minimum name length in `createToken()`** ✅ **COMPLETED**
+   - **Impact**: UX and data consistency
+   - **Status**: ✅ **IMPLEMENTED** (Nov 24, 2025)
+   - **Test**: ✅ `testCreateTokenSingleCharacterName()` added
 
-#### ✅ Validaciones Verificadas e Implementadas
-1. **Validación de formato de dirección en `transfer()`** ✅ **IMPLEMENTADO**
-   - **Estado**: ✅ Valida `to != address(0)` en `transfer()`
+#### ✅ Verified and Implemented Validations
+1. **Address format validation in `transfer()`** ✅ **IMPLEMENTED**
+   - **Status**: ✅ Validates `to != address(0)` in `transfer()`
 
-2. **Validación de tokenId > 0 en `transfer()` y `getToken()`** ✅ **IMPLEMENTADO**
-   - **Estado**: ✅ Valida `tokenId == 0 || tokenId >= nextTokenId` en `getToken()`
+2. **tokenId > 0 validation in `transfer()` and `getToken()`** ✅ **IMPLEMENTED**
+   - **Status**: ✅ Validates `tokenId == 0 || tokenId >= nextTokenId` in `getToken()`
 
-3. **Validación de balance del parent token antes de crear FinishedProduct** ✅ **IMPLEMENTADO**
-   - **Estado**: ✅ Valida balance suficiente en `_validateAndConsumeParentToken()`
-
----
-
-## 🚨 TAREAS PENDIENTES
-
-### Prioridad Alta
-
-#### Video Demo (Falta +1.5 puntos)
-**Tiempo estimado**: 3-4 horas  
-**Impacto**: +1.5 puntos académicos
-
-**Tareas**:
-- [ ] Script del video (5 minutos)
-- [ ] Grabación con OBS/screen recorder
-- [ ] Edición básica
-- [ ] Upload a YouTube/Vimeo
-- [ ] Agregar link al README.md
-
-**Script del video (5 minutos)**:
-1. [ ] Introducción (30s) - Proyecto, tecnologías
-2. [ ] Smart Contract (1m) - Código, tests, coverage
-3. [ ] Demo Frontend (2.5m):
-   - Conectar MetaMask
-   - Solicitar rol
-   - Dashboard y perfil
-   - Crear token
-   - Hacer transferencia
-   - Aprobar como admin
-   - Sistema de pausabilidad
-4. [ ] Arquitectura (1m) - Documentación, diagramas
-5. [ ] Cierre (30s) - GitHub, conclusiones
+3. **Parent token balance validation before creating FinishedProduct** ✅ **IMPLEMENTED**
+   - **Status**: ✅ Validates sufficient balance in `_validateAndConsumeParentToken()`
 
 ---
 
-### Prioridad Media
+## 🚨 PENDING TASKS
 
-#### Mejoras Opcionales del Frontend
-- [ ] Tests frontend (Vitest + Playwright) - Parcialmente implementado
-- [ ] Testnet deployment (opcional)
-- [ ] Responsive design mobile (parcialmente implementado)
-- [ ] Loading states y error handling mejorados (parcialmente implementado)
+### High Priority
 
-#### Mejoras Opcionales del Smart Contract
-- [ ] Aumentar cobertura de branches (actualmente 72.15%)
-- [ ] Optimización de gas adicional (si es necesario)
-- [ ] Documentación NatSpec expandida
+#### Video Demo (Missing +1.5 points)
+**Estimated time**: 3-4 hours  
+**Impact**: +1.5 academic points
+
+**Tasks**:
+- [ ] Video script (5 minutes)
+- [ ] Recording with OBS/screen recorder
+- [ ] Basic editing
+- [ ] Upload to YouTube/Vimeo
+- [ ] Add link to README.md
+
+**Video script (5 minutes)**:
+1. [ ] Introduction (30s) - Project, technologies
+2. [ ] Smart Contract (1m) - Code, tests, coverage
+3. [ ] Frontend Demo (2.5m):
+   - Connect MetaMask
+   - Request role
+   - Dashboard and profile
+   - Create token
+   - Make transfer
+   - Approve as admin
+   - Pausability system
+4. [ ] Architecture (1m) - Documentation, diagrams
+5. [ ] Closing (30s) - GitHub, conclusions
 
 ---
 
-### Prioridad Baja
+### Medium Priority
 
-#### Features Futuras
-- 🔮 **Transferencias por Lote**: `transferBatch` para optimización
-- 🔮 **Función `burn`**: Burn de tokens con permisos especiales
-- 🔮 **Modularización Avanzada**: División en contratos especializados
-- 🔮 **Integración Web3**: IPFS para metadatos, Oracle connectivity
+#### Optional Frontend Improvements
+- [ ] Frontend tests (Vitest + Playwright) - Partially implemented
+- [ ] Testnet deployment (optional)
+- [ ] Mobile responsive design (partially implemented)
+- [ ] Improved loading states and error handling (partially implemented)
+
+#### Optional Smart Contract Improvements
+- [ ] Increase branch coverage (currently 72.15%)
+- [ ] Additional gas optimization (if needed)
+- [ ] Expanded NatSpec documentation
 
 ---
 
-## ✅ COMPLETADO RECIENTEMENTE
+### Low Priority
+
+#### Future Features
+- 🔮 **Batch Transfers**: `transferBatch` for optimization
+- 🔮 **`burn` Function**: Token burn with special permissions
+- 🔮 **Advanced Modularization**: Division into specialized contracts
+- 🔮 **Web3 Integration**: IPFS for metadata, Oracle connectivity
+
+---
+
+## ✅ RECENTLY COMPLETED
 
 ### Frontend
-- ✅ Hook `usePendingOwner.ts` - COMPLETADO
-- ✅ Hook `useOwnershipTransfer.ts` - COMPLETADO
-- ✅ Componente `OwnershipTransfer.tsx` - COMPLETADO
-- ✅ Todas las 9 páginas esenciales (100%)
-- ✅ 24 hooks personalizados (14 archivos)
-- ✅ 26 componentes (11 Shadcn + 15 personalizados)
+- ✅ Hook `usePendingOwner.ts` - COMPLETED
+- ✅ Hook `useOwnershipTransfer.ts` - COMPLETED
+- ✅ Component `OwnershipTransfer.tsx` - COMPLETED
+- ✅ All 9 essential pages (100%)
+- ✅ 24 custom hooks (14 files)
+- ✅ 26 components (11 Shadcn + 15 custom)
 
 ### Smart Contract
 - ✅ 108 tests (64 core + 44 edge cases) - 100% passing
 - ✅ Coverage: 85.60% lines, 72.15% branches, 82.67% statements, 80.95% functions
-- ✅ 5 validaciones críticas implementadas (100%)
-- ✅ Sistema de pausabilidad completo
-- ✅ Ownership transfer implementado
+- ✅ 5 critical validations implemented (100%)
+- ✅ Complete pausability system
+- ✅ Ownership transfer implemented
 
 ---
 
-## 📊 Resumen de Estado
+## 📊 Status Summary
 
-| Categoría | Pendiente | Completado | Estado |
-|-----------|-----------|------------|--------|
-| **Errores Frontend** | 1 | 0 | ⚠️ Media prioridad |
-| **Validaciones SC** | 0 | 5 | ✅ 100% |
-| **Tareas Críticas** | 1 (Video) | 0 | 🚨 Alta prioridad |
-| **Mejoras Opcionales** | 4 | 0 | 🟡 Media prioridad |
+| Category | Pending | Completed | Status |
+|----------|---------|-----------|--------|
+| **Frontend Errors** | 1 | 0 | ⚠️ Medium priority |
+| **SC Validations** | 0 | 5 | ✅ 100% |
+| **Critical Tasks** | 1 (Video) | 0 | 🚨 High priority |
+| **Optional Improvements** | 4 | 0 | 🟡 Medium priority |
 
 ---
 
-**Última actualización**: 27 de Noviembre, 2025  
-**Próximo paso**: Video Demo (Día 9) - +1.5 puntos
+**Last Updated**: November 27, 2025  
+**Next step**: Video Demo (Day 9) - +1.5 points
 
-> **📚 Para detalles completos, consulta [STATUS.md](./STATUS.md) y [CHANGELOG.md](./CHANGELOG.md)**
-
+> **📚 For complete details, see [STATUS.md](./STATUS.md) and [CHANGELOG.md](./CHANGELOG.md)**

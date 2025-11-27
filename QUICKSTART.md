@@ -1,218 +1,218 @@
 # 🚀 Quick Start - Supply Chain Tracker
 
-> **📚 DOCUMENTACIÓN COMPLETA**: Ver [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) para guía exhaustiva del proyecto
+> **📚 COMPLETE DOCUMENTATION**: See [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) for comprehensive project guide
 
 ---
 
-## 📊 Estado de Implementación del Frontend
+## 📊 Frontend Implementation Status
 
-> **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](./STATUS.md)**  
-> **📚 Para documentación completa de páginas y componentes, consulta [docs/FRONTEND.md](./docs/FRONTEND.md)**
+> **📋 For the most up-to-date project status, see [STATUS.md](./STATUS.md)**  
+> **📚 For complete pages and components documentation, see [docs/FRONTEND.md](./docs/FRONTEND.md)**
 
-### 📄 Páginas Implementadas (9/9 - 100%)
+### 📄 Implemented Pages (9/9 - 100%)
 
 ```
 web/src/app/
-├── page.tsx                    ✅ IMPLEMENTADO - Landing con MetaMask + Stats (Diseño Moderno 2025)
-├── dashboard/page.tsx          ✅ IMPLEMENTADO - Panel principal por rol COMPLETO (Diseño Moderno 2025)
+├── page.tsx                    ✅ IMPLEMENTED - Landing with MetaMask + Stats (Modern Design 2025)
+├── dashboard/page.tsx          ✅ IMPLEMENTED - Complete role-based main panel (Modern Design 2025)
 ├── tokens/
-│   ├── page.tsx               ✅ IMPLEMENTADO - Lista de tokens usuario (Diseño Moderno 2025) ⭐ Día 5
-│   ├── create/page.tsx        ✅ IMPLEMENTADO - Formulario crear token (Diseño Moderno 2025) ⭐ Día 6
-│   ├── [id]/page.tsx          ✅ IMPLEMENTADO - Detalles token con trazabilidad ⭐ Día 8
-│   └── [id]/transfer/page.tsx ✅ IMPLEMENTADO - Transferir desde detalles ⭐ Día 8
-├── transfers/page.tsx         ✅ IMPLEMENTADO - Gestión transferencias COMPLETA (Diseño Moderno 2025) ⭐ Día 7
+│   ├── page.tsx               ✅ IMPLEMENTED - User token list (Modern Design 2025) ⭐ Day 5
+│   ├── create/page.tsx        ✅ IMPLEMENTED - Create token form (Modern Design 2025) ⭐ Day 6
+│   ├── [id]/page.tsx          ✅ IMPLEMENTED - Token details with traceability ⭐ Day 8
+│   └── [id]/transfer/page.tsx ✅ IMPLEMENTED - Transfer from details ⭐ Day 8
+├── transfers/page.tsx         ✅ IMPLEMENTED - Complete transfer management (Modern Design 2025) ⭐ Day 7
 ├── admin/
-│   ├── page.tsx               ✅ IMPLEMENTADO - Panel admin principal ⭐ Día 8
-│   └── users/page.tsx         ✅ IMPLEMENTADO - Gestión completa de usuarios (Diseño Moderno 2025)
-└── profile/page.tsx           ✅ IMPLEMENTADO - Perfil usuario ⭐ Día 8
+│   ├── page.tsx               ✅ IMPLEMENTED - Main admin panel ⭐ Day 8
+│   └── users/page.tsx         ✅ IMPLEMENTED - Complete user management (Modern Design 2025)
+└── profile/page.tsx           ✅ IMPLEMENTED - User profile ⭐ Day 8
 ```
 
-**Progreso**: 9/9 páginas (100%) ✅
+**Progress**: 9/9 pages (100%) ✅
 
-### 🧩 Componentes Específicos (6/6 implementados)
-
-```
-web/src/components/
-├── ConnectWallet.tsx          ✅ IMPLEMENTADO - Conexión MetaMask
-├── Header.tsx                 ✅ IMPLEMENTADO - Navegación + branding + pausa badge
-├── ThemeToggle.tsx            ✅ IMPLEMENTADO - Modo claro/oscuro con persistencia
-├── TokenCard.tsx              ✅ IMPLEMENTADO - Tarjeta de token completa
-├── TokenCardModern.tsx        ✅ IMPLEMENTADO - Tarjeta moderna 2025 (glassmorphism) ⭐ Día 6
-└── TransferList.tsx           ✅ IMPLEMENTADO - Lista transferencias con filtros y acciones ⭐ Día 7
-```
-
-**Progreso**: 6/6 componentes específicos (100%) ✅
-
-### 🎨 Componentes Adicionales Implementados
+### 🧩 Specific Components (6/6 implemented)
 
 ```
 web/src/components/
-├── RegisterForm.tsx           ✅ Formulario registro con validación de pausa
-├── ChangeRoleDialog.tsx       ✅ Diálogo cambiar rol con validación de pausa
-├── UserProfileCard.tsx        ✅ Perfil de usuario
-├── QuickActions.tsx           ✅ Acciones rápidas con validación de pausa
-├── CreateTransferForm.tsx     ✅ Formulario crear transferencias ⭐ Día 7
-├── UserTokenList.tsx          ✅ Lista tokens usuario ⭐ Día 7
-├── AddressDisplay.tsx         ✅ Direcciones con copy/tooltip ⭐ Día 7
-├── TraceabilityTimeline.tsx   ✅ Trazabilidad end-to-end ⭐ Día 8
+├── ConnectWallet.tsx          ✅ IMPLEMENTED - MetaMask connection
+├── Header.tsx                 ✅ IMPLEMENTED - Navigation + branding + pause badge
+├── ThemeToggle.tsx            ✅ IMPLEMENTED - Light/dark mode with persistence
+├── TokenCard.tsx              ✅ IMPLEMENTED - Complete token card
+├── TokenCardModern.tsx        ✅ IMPLEMENTED - Modern 2025 card (glassmorphism) ⭐ Day 6
+└── TransferList.tsx           ✅ IMPLEMENTED - Transfer list with filters and actions ⭐ Day 7
+```
+
+**Progress**: 6/6 specific components (100%) ✅
+
+### 🎨 Additional Implemented Components
+
+```
+web/src/components/
+├── RegisterForm.tsx           ✅ Registration form with pause validation
+├── ChangeRoleDialog.tsx       ✅ Change role dialog with pause validation
+├── UserProfileCard.tsx        ✅ User profile
+├── QuickActions.tsx           ✅ Quick actions with pause validation
+├── CreateTransferForm.tsx     ✅ Create transfer form ⭐ Day 7
+├── UserTokenList.tsx          ✅ User token list ⭐ Day 7
+├── AddressDisplay.tsx         ✅ Addresses with copy/tooltip ⭐ Day 7
+├── TraceabilityTimeline.tsx   ✅ End-to-end traceability ⭐ Day 8
 └── admin/
-    ├── UserManagementTable.tsx  ✅ Tabla gestión usuarios con filtros + pausa
-    ├── UserStatsCards.tsx       ✅ Cards estadísticas del sistema
-    ├── PauseControl.tsx         ✅ Control de pausa del contrato
-    └── OwnershipTransfer.tsx    ✅ Gestión ownership transfer ⭐
+    ├── UserManagementTable.tsx  ✅ User management table with filters + pause
+    ├── UserStatsCards.tsx       ✅ System statistics cards
+    ├── PauseControl.tsx         ✅ Contract pause control
+    └── OwnershipTransfer.tsx    ✅ Ownership transfer management ⭐
 ```
 
-**Total componentes personalizados**: 26 implementados  
-**Componentes Shadcn UI**: 11 componentes (button, card, input, label, select, table, badge, dialog, alert, skeleton, textarea)
+**Total custom components**: 26 implemented  
+**Shadcn UI Components**: 11 components (button, card, input, label, select, table, badge, dialog, alert, skeleton, textarea)
 
-> **📚 Ver documentación completa**: [docs/FRONTEND.md](./docs/FRONTEND.md)
+> **📚 See complete documentation**: [docs/FRONTEND.md](./docs/FRONTEND.md)
 
-### 🎨 Diseño Moderno 2025 ⭐ NUEVO
-**Características implementadas**:
-- Glassmorphism (efectos de vidrio con `backdrop-blur-xl`)
-- Gradientes azul-púrpura en títulos y botones
-- Animaciones suaves y efectos hover
-- Bordes redondeados (`rounded-2xl`, `rounded-3xl`)
-- Sombras modernas (`shadow-lg`, `shadow-2xl`)
-- Controlado por variable de entorno: `NEXT_PUBLIC_MODERN_DESIGN=true`
+### 🎨 Modern Design 2025 ⭐ NEW
+**Implemented features**:
+- Glassmorphism (glass effects with `backdrop-blur-xl`)
+- Blue-purple gradients on titles and buttons
+- Smooth animations and hover effects
+- Rounded borders (`rounded-2xl`, `rounded-3xl`)
+- Modern shadows (`shadow-lg`, `shadow-2xl`)
+- Controlled by environment variable: `NEXT_PUBLIC_MODERN_DESIGN=true`
 
-**Páginas con diseño moderno**:
+**Pages with modern design**:
 - ✅ Landing (`/`)
 - ✅ Dashboard (`/dashboard`)
 - ✅ Tokens (`/tokens`)
-- ✅ Crear Token (`/tokens/create`)
-- ✅ Transfers (`/transfers`) ⭐ Día 7
+- ✅ Create Token (`/tokens/create`)
+- ✅ Transfers (`/transfers`) ⭐ Day 7
 - ✅ Admin Users (`/admin/users`)
 
-### 🪝 Hooks Personalizados
+### 🪝 Custom Hooks
 
-> **📚 Para documentación completa de todos los hooks, consulta [docs/FRONTEND.md](./docs/FRONTEND.md)**
+> **📚 For complete documentation of all hooks, see [docs/FRONTEND.md](./docs/FRONTEND.md)**
 
-**Total**: 24 hooks personalizados (14 archivos) ✅
+**Total**: 24 custom hooks (14 files) ✅
 
-**Archivos principales**:
+**Main files**:
 ```
 web/src/hooks/
-├── useContractReads.ts        ✅ 6 hooks lectura (userInfo, isAdmin, totals, dashboard stats)
-├── useRequestRole.ts          ✅ Solicitar rol de usuario
-├── useCreateToken.ts          ✅ Crear tokens
-├── useTransfer.ts             ✅ 4 hooks transferencias (transfer, accept, reject, cancel)
-├── useAdminUsers.ts           ✅ 2 hooks admin (getAllUsers, changeUserStatus)
-├── useContractOwner.ts        ✅ Verificar ownership del contrato
-├── usePendingOwner.ts         ✅ Obtener pendingOwner
-├── useOwnershipTransfer.ts    ✅ 3 funciones ownership (initiate, accept, reject)
-├── useGetUserTokens.ts        ✅ 4 hooks tokens (getUserTokens, getToken, getTokenBalance, useGetAllTokens)
-├── usePause.ts                ✅ 3 hooks pausa (isPaused, pause, unpause)
-├── useUserTokenStats.ts        ✅ Estadísticas por tipo ⭐ Día 7
-├── useGetUserTokensWithData.ts ✅ Tokens con datos completos ⭐ Día 7
-├── useGetUserTransfers.ts     ✅ Transferencias de usuario ⭐ Día 7
-├── useGetAllTransfers.ts      ✅ Todas las transferencias ⭐ Día 8
-└── useTokenTraceability.ts    ✅ Trazabilidad end-to-end ⭐ Día 8
+├── useContractReads.ts        ✅ 6 read hooks (userInfo, isAdmin, totals, dashboard stats)
+├── useRequestRole.ts          ✅ Request user role
+├── useCreateToken.ts          ✅ Create tokens
+├── useTransfer.ts             ✅ 4 transfer hooks (transfer, accept, reject, cancel)
+├── useAdminUsers.ts           ✅ 2 admin hooks (getAllUsers, changeUserStatus)
+├── useContractOwner.ts        ✅ Verify contract ownership
+├── usePendingOwner.ts         ✅ Get pendingOwner
+├── useOwnershipTransfer.ts    ✅ 3 ownership functions (initiate, accept, reject)
+├── useGetUserTokens.ts        ✅ 4 token hooks (getUserTokens, getToken, getTokenBalance, useGetAllTokens)
+├── usePause.ts                ✅ 3 pause hooks (isPaused, pause, unpause)
+├── useUserTokenStats.ts        ✅ Stats by type ⭐ Day 7
+├── useGetUserTokensWithData.ts ✅ Tokens with complete data ⭐ Day 7
+├── useGetUserTransfers.ts     ✅ User transfers ⭐ Day 7
+├── useGetAllTransfers.ts      ✅ All system transfers ⭐ Day 8
+└── useTokenTraceability.ts    ✅ End-to-end traceability ⭐ Day 8
 ```
 
-> **📚 Ver lista completa y documentación detallada**: [docs/FRONTEND.md](./docs/FRONTEND.md)
+> **📚 See complete list and detailed documentation**: [docs/FRONTEND.md](./docs/FRONTEND.md)
 
-### 📁 Directorio `contexts/`
+### 📁 `contexts/` Directory
 
-✅ **Implementado**: `src/contexts/AuthContext.tsx`
-- Gestión de autenticación y autorización
-- Detección de admin vs usuarios aprobados
-- Optimización de redirecciones (useUserIdByAddress)
-- Restauración de preferencias de tema por usuario
-- Manejo de estados de carga optimizado
+✅ **Implemented**: `src/contexts/AuthContext.tsx`
+- Authentication and authorization management
+- Admin vs approved users detection
+- Redirect optimization (useUserIdByAddress)
+- User theme preference restoration
+- Optimized loading state handling
 
 ---
 
-## 🚀 Próximos Pasos (Roadmap)
+## 🚀 Next Steps (Roadmap)
 
-### Iniciar el proyecto en 3 comandos:
+### Start the project in 3 commands:
 
 ```bash
-# 1. Dar permisos al script (solo primera vez)
+# 1. Give script permissions (first time only)
 chmod +x deploy.sh
 
-# 2. Iniciar TODO (Anvil + Contrato + Frontend)
+# 2. Start EVERYTHING (Anvil + Contract + Frontend)
 ./deploy.sh start
 
-# 3. Ver instrucciones de MetaMask
+# 3. See MetaMask instructions
 ./deploy.sh metamask
 ```
 
-**¡Listo!** Abre http://localhost:3000 y conecta MetaMask.
+**Ready!** Open http://localhost:3000 and connect MetaMask.
 
 ---
 
-## 📋 Comandos del Script `deploy.sh`
+## 📋 `deploy.sh` Script Commands
 
-> **📚 Para documentación completa del script, consulta [docs/DOCUMENTATION.md - Deployment Automatizado](./docs/DOCUMENTATION.md#-deployment-automatizado)**
+> **📚 For complete script documentation, see [docs/DOCUMENTATION.md - Automated Deployment](./docs/DOCUMENTATION.md#-deployment-automatizado)**
 
-### Comandos Principales
+### Main Commands
 
 ```bash
-./deploy.sh start      # Iniciar todo el stack (Anvil + Contrato + Frontend)
-./deploy.sh stop       # Detener todos los servicios
-./deploy.sh restart    # Reiniciar todo el stack
-./deploy.sh status     # Ver estado de servicios
-./deploy.sh metamask   # Instrucciones para configurar MetaMask
-./deploy.sh clean      # Limpiar estado persistente de Anvil (requiere Anvil detenido)
-./deploy.sh help       # Ayuda completa con todos los comandos
+./deploy.sh start      # Start entire stack (Anvil + Contract + Frontend)
+./deploy.sh stop       # Stop all services
+./deploy.sh restart    # Restart entire stack
+./deploy.sh status     # See service status
+./deploy.sh metamask   # Instructions to configure MetaMask
+./deploy.sh clean      # Clean Anvil persistent state (requires Anvil stopped)
+./deploy.sh help       # Complete help with all commands
 ```
 
-### Comandos de Frontend (sin afectar Anvil/Contrato)
+### Frontend Commands (without affecting Anvil/Contract)
 
 ```bash
-./deploy.sh frontend start    # Iniciar solo el frontend (requiere Anvil corriendo)
-./deploy.sh frontend stop     # Detener solo el frontend
-./deploy.sh frontend restart  # Reiniciar solo el frontend
+./deploy.sh frontend start    # Start only frontend (requires Anvil running)
+./deploy.sh frontend stop     # Stop only frontend
+./deploy.sh frontend restart  # Restart only frontend
 ```
 
-**Uso típico**: Después de hacer cambios en el frontend, puedes reiniciar solo el frontend sin afectar Anvil ni el contrato desplegado.
+**Typical usage**: After making frontend changes, you can restart only the frontend without affecting Anvil or the deployed contract.
 
-### Características del Script
+### Script Features
 
-✅ **Persistencia de Estado**: Anvil guarda el estado de la blockchain entre reinicios  
-✅ **Detección Inteligente**: Detecta si servicios ya están corriendo antes de iniciarlos  
-✅ **Validación Automática**: Verifica que el contrato esté desplegado antes de iniciar frontend  
-✅ **Actualización Automática**: Actualiza ABI y dirección del contrato en el frontend automáticamente  
-✅ **Logs Organizados**: Todos los logs se guardan en `logs/`  
-✅ **Manejo de Errores**: Validaciones y mensajes de error claros
-
----
-
-## 📖 Documentación Disponible
-
-> **📚 Para índice completo de documentación, consulta [INDEX.md](./INDEX.md)**
-
-### Documentación Principal
-- **[STATUS.md](./STATUS.md)** ⭐ - Single source of truth del estado del proyecto
-- **[QUICKSTART.md](./QUICKSTART.md)** - Esta guía rápida
-- **[INDEX.md](./INDEX.md)** - Índice maestro de toda la documentación
-- **[docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)** - Guía técnica completa
-
-### Documentación por Componente
-- **[docs/FRONTEND.md](./docs/FRONTEND.md)** - Documentación completa del frontend
-- **[docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)** - Documentación completa del smart contract
-
-### Reportes y Evaluaciones
-- **[docs/REPORTS.md](./docs/REPORTS.md)** - Reportes consolidados del proyecto
-- **[docs/RESEARCH.md](./docs/RESEARCH.md)** - Investigación y análisis técnico
-- **[IA.md](./IA.md)** ⭐ - Retrospectiva del uso de IA
+✅ **State Persistence**: Anvil saves blockchain state between restarts  
+✅ **Smart Detection**: Detects if services are already running before starting them  
+✅ **Automatic Validation**: Verifies contract is deployed before starting frontend  
+✅ **Automatic Update**: Updates ABI and contract address in frontend automatically  
+✅ **Organized Logs**: All logs saved in `logs/`  
+✅ **Error Handling**: Clear validations and error messages
 
 ---
 
-## 🛠️ Stack Tecnológico
+## 📖 Available Documentation
 
-> **📚 Para información detallada del stack, consulta [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)**
+> **📚 For complete documentation index, see [INDEX.md](./INDEX.md)**
+
+### Main Documentation
+- **[STATUS.md](./STATUS.md)** ⭐ - Single source of truth for project status
+- **[QUICKSTART.md](./QUICKSTART.md)** - This quick guide
+- **[INDEX.md](./INDEX.md)** - Master index of all documentation
+- **[docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)** - Complete technical guide
+
+### Component Documentation
+- **[docs/FRONTEND.md](./docs/FRONTEND.md)** - Complete frontend documentation
+- **[docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)** - Complete smart contract documentation
+
+### Reports and Evaluations
+- **[docs/REPORTS.md](./docs/REPORTS.md)** - Consolidated project reports
+- **[docs/RESEARCH.md](./docs/RESEARCH.md)** - Technical research and analysis
+- **[IA.md](./IA.md)** ⭐ - AI usage retrospective
+
+---
+
+## 🛠️ Technology Stack
+
+> **📚 For detailed stack information, see [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)**
 
 ### Smart Contract
 - **Solidity** 0.8.30
 - **Foundry** (Forge + Anvil)
 - **OpenZeppelin** Contracts
-- **970+ líneas** de código
+- **970+ lines** of code
 - **108 tests** (85.60% lines, 72.15% branches, 82.67% statements, 80.95% functions)
-- **Validaciones críticas**: 5 implementadas (100% completadas)
+- **Critical validations**: 5 implemented (100% completed)
 
-> **📚 Ver documentación completa**: [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)
+> **📚 See complete documentation**: [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)
 
 ### Frontend
 - **Next.js** 16.0.1
@@ -222,22 +222,22 @@ chmod +x deploy.sh
 - **Shadcn UI**
 - **wagmi** 2.12.0 + **viem** 2.21.0 + **ethers** 6.13.0
 
-> **📚 Ver documentación completa**: [docs/FRONTEND.md](./docs/FRONTEND.md)
+> **📚 See complete documentation**: [docs/FRONTEND.md](./docs/FRONTEND.md)
 
-### Blockchain Local
+### Local Blockchain
 - **Anvil** (Foundry)
 - **Chain ID**: 31337
 - **RPC**: http://127.0.0.1:8545
-- **15 cuentas** con 10,000 ETH cada una
+- **15 accounts** with 10,000 ETH each
 
 ---
 
-## 🔧 Requisitos
+## 🔧 Requirements
 
-Asegúrate de tener instalado:
+Make sure you have installed:
 
 ```bash
-# Node.js y npm
+# Node.js and npm
 node --version  # v18+
 npm --version   # v9+
 
@@ -249,7 +249,7 @@ anvil --version
 git --version
 ```
 
-### Instalar Foundry (si no lo tienes):
+### Install Foundry (if you don't have it):
 
 ```bash
 curl -L https://foundry.paradigm.xyz | bash
@@ -258,22 +258,24 @@ foundryup
 
 ---
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
-> **📚 Para estructura detallada, consulta [docs/DOCUMENTATION.md - Estructura del Proyecto](./docs/DOCUMENTATION.md#-estructura-del-proyecto)**
+> **📚 For detailed structure, see [docs/DOCUMENTATION.md - Project Structure](./docs/DOCUMENTATION.md#-estructura-del-proyecto)**
 
 ```
 emujicad/
 │
-├── 🚀 deploy.sh                 # Script automatizado (650 líneas)
-├── 📄 QUICKSTART.md             # Esta guía
-├── 📄 STATUS.md                  # Estado actual del proyecto ⭐
-├── 📄 INDEX.md                  # Índice de docs
-├── 📁 docs/                     # Toda la documentación
-│   ├── common/               # Doc general
-│   ├── sc/                   # 18 archivos Smart Contract
-│   ├── fe/                   # 5 archivos frontend
-│   └── reports/              # Reportes y evaluaciones
+├── 🚀 deploy.sh                 # Automated script (650 lines)
+├── 📄 QUICKSTART.md             # This guide
+├── 📄 STATUS.md                  # Current project status ⭐
+├── 📄 INDEX.md                  # Documentation index
+├── 📁 docs/                     # All documentation
+│   ├── DOCUMENTATION.md      # Complete technical guide
+│   ├── FRONTEND.md           # Frontend documentation
+│   ├── SMART_CONTRACT.md     # Smart contract documentation
+│   ├── REPORTS.md            # Consolidated reports
+│   ├── RESEARCH.md           # Technical research
+│   └── SECURITY.md           # Security policy
 │
 ├── 📁 sc/                       # Smart Contract
 │   ├── src/SupplyChain.sol
@@ -282,14 +284,14 @@ emujicad/
 │
 ├── 📁 web/                      # Frontend Next.js
 │   ├── src/
-│   │   ├── app/              # 9 páginas implementadas
-│   │   ├── components/       # 26 componentes
-│   │   ├── hooks/            # 24 hooks personalizados
+│   │   ├── app/              # 9 implemented pages
+│   │   ├── components/       # 26 components
+│   │   ├── hooks/            # 24 custom hooks
 │   │   ├── contracts/
 │   │   └── lib/
 │   └── package.json
 │
-└── 📁 logs/                     # Logs de ejecución
+└── 📁 logs/                     # Execution logs
     ├── anvil.log
     ├── frontend.log
     └── deploy.log
@@ -297,202 +299,202 @@ emujicad/
 
 ---
 
-## 🎯 Flujo de Trabajo
+## 🎯 Workflow
 
-### 1️⃣ Primera vez (Setup)
+### 1️⃣ First Time (Setup)
 
 ```bash
-# Clonar el repo (si aplica)
+# Clone the repo (if applicable)
 git clone <repo-url>
 cd emujicad
 
-# Dar permisos al script
+# Give script permissions
 chmod +x deploy.sh
 
-# Iniciar todo
+# Start everything
 ./deploy.sh start
 ```
 
-### 2️⃣ Configurar MetaMask
+### 2️⃣ Configure MetaMask
 
 ```bash
-# Ver instrucciones detalladas
+# See detailed instructions
 ./deploy.sh metamask
 ```
 
-**Resumen rápido**:
-- Agregar red Anvil (Chain ID: 31337, RPC: http://127.0.0.1:8545)
-- Importar cuenta de prueba (ver output del comando)
-- Conectar en http://localhost:3000
+**Quick summary**:
+- Add Anvil network (Chain ID: 31337, RPC: http://127.0.0.1:8545)
+- Import test account (see command output)
+- Connect at http://localhost:3000
 
-### 3️⃣ Desarrollo Diario
+### 3️⃣ Daily Development
 
 ```bash
-# Al iniciar el día
+# At start of day
 ./deploy.sh start
 
-# Desarrollar features...
+# Develop features...
 
-# Si solo cambias el frontend, puedes reiniciar solo el frontend
+# If you only change frontend, you can restart only frontend
 ./deploy.sh frontend restart
 
-# Al terminar el día
+# At end of day
 ./deploy.sh stop
 ```
 
-**Tip**: Si solo estás trabajando en el frontend, usa `./deploy.sh frontend restart` para ahorrar tiempo (no redesplega el contrato).
+**Tip**: If you're only working on frontend, use `./deploy.sh frontend restart` to save time (doesn't redeploy contract).
 
-### 4️⃣ Verificar Estado
+### 4️⃣ Verify Status
 
 ```bash
-# Ver estado de servicios
+# See service status
 ./deploy.sh status
 
-# Ver logs en tiempo real
+# See logs in real time
 tail -f logs/anvil.log
 tail -f logs/frontend.log
 tail -f logs/deploy.log
 ```
 
-### 5️⃣ Limpiar Estado de Anvil (Opcional)
+### 5️⃣ Clean Anvil State (Optional)
 
-Si necesitas empezar con una blockchain limpia (sin tokens, transferencias, usuarios):
+If you need to start with a clean blockchain (no tokens, transfers, users):
 
 ```bash
-# Detener Anvil primero
+# Stop Anvil first
 ./deploy.sh stop
 
-# Limpiar estado persistente
+# Clean persistent state
 ./deploy.sh clean
 
-# Reiniciar todo con blockchain limpia
+# Restart everything with clean blockchain
 ./deploy.sh start
 ```
 
-**Nota**: El script te preguntará confirmación antes de eliminar el estado. Si Anvil está corriendo, te ofrecerá detenerlo primero.
+**Note**: The script will ask for confirmation before deleting state. If Anvil is running, it will offer to stop it first.
 
 ---
 
-## 🔍 Verificación Rápida
+## 🔍 Quick Verification
 
-Después de `./deploy.sh start`, verifica:
+After `./deploy.sh start`, verify:
 
-1. **Anvil corriendo**: 
+1. **Anvil running**: 
    ```bash
    lsof -i :8545
-   # Debe mostrar un proceso
+   # Should show a process
    ```
 
-2. **Frontend corriendo**:
+2. **Frontend running**:
    ```bash
    lsof -i :3000
-   # Debe mostrar un proceso
+   # Should show a process
    ```
 
-3. **Contrato deployado**:
+3. **Contract deployed**:
    ```bash
    cat logs/contract_address.txt
-   # Debe mostrar una dirección (0x...)
+   # Should show an address (0x...)
    ```
 
-4. **Abrir DApp**:
-   - Navegador: http://localhost:3000
-   - Conectar MetaMask
-   - Ver stats: 0 Tokens, 0 Users, 0 Transfers (estado inicial)
+4. **Open DApp**:
+   - Browser: http://localhost:3000
+   - Connect MetaMask
+   - See stats: 0 Tokens, 0 Users, 0 Transfers (initial state)
 
-5. **Verificar estado persistente** (si reinicias Anvil):
+5. **Verify persistent state** (if you restart Anvil):
    ```bash
-   # Si Anvil se reinició pero el estado persiste, verás:
+   # If Anvil restarted but state persists, you'll see:
    ls -lh logs/anvil_state.json
-   # El archivo contiene el estado de la blockchain (tokens, transferencias, usuarios)
+   # File contains blockchain state (tokens, transfers, users)
    ```
 
 ---
 
-## 🐛 Troubleshooting Rápido
+## 🐛 Quick Troubleshooting
 
 ### Error: "Port already in use"
 
 ```bash
-# Detener servicios
+# Stop services
 ./deploy.sh stop
 
-# Verificar puertos
+# Verify ports
 lsof -i :8545  # Anvil
 lsof -i :3000  # Frontend
 
-# Matar procesos si es necesario
+# Kill processes if necessary
 kill -9 <PID>
 ```
 
 ### Error: "Contract not deployed"
 
 ```bash
-# Ver logs de deployment
+# See deployment logs
 cat logs/deploy.log
 
-# Reiniciar todo
+# Restart everything
 ./deploy.sh restart
 ```
 
 ### Error: "Cannot connect to MetaMask"
 
 ```bash
-# Verificar configuración
+# Verify configuration
 ./deploy.sh metamask
 
-# Asegurarse de:
-# - Red Anvil agregada en MetaMask
-# - Cuenta importada
-# - Frontend corriendo en :3000
+# Make sure:
+# - Anvil network added in MetaMask
+# - Account imported
+# - Frontend running on :3000
 ```
 
-### Más problemas
+### More problems
 
-Ver **[docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-troubleshooting)** para soluciones detalladas.
-
----
-
-## 📊 Estado Actual del Proyecto
-
-> **📋 Para información detallada y actualizada del estado del proyecto, consulta [STATUS.md](./STATUS.md)**
-
-**Última actualización**: 27 de Noviembre, 2025
-
-### 🎯 Resumen Ejecutivo
-
-**Puntuación General: 7.4/9.5** ✅ APROBATORIO
-
-| Componente | Estado |
-|------------|--------|
-| **Smart Contract** | ✅ 4.0/4.0 (100%) - 108 tests, 85.60% coverage, validaciones críticas completadas |
-| **Frontend** | ✅ 3.0/3.0 (100%) - 9/9 páginas, 26 componentes, 24 hooks |
-| **Extras** | ⚠️ 0.5/1.0 (50%) - deploy script validado |
-| **Video** | ❌ 0.0/1.5 (0%) - Pendiente |
-
-**Próximo paso**: Video Demo (Día 9) - +1.5 puntos
-
-> **📚 Ver roadmap detallado y próximos pasos**: [STATUS.md](./STATUS.md)
+See **[docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-troubleshooting)** for detailed solutions.
 
 ---
 
-## 🔗 Links Útiles
+## 📊 Current Project Status
 
-### Documentación del Proyecto
-> **📚 Ver [INDEX.md](./INDEX.md) para índice completo**
+> **📋 For detailed and up-to-date project status information, see [STATUS.md](./STATUS.md)**
 
-**Principales**:
-- [STATUS.md](./STATUS.md) ⭐ - Estado actual y próximos pasos
-- [INDEX.md](./INDEX.md) - Índice maestro de toda la documentación
-- [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) - Guía técnica completa
+**Last Updated**: November 27, 2025
+
+### 🎯 Executive Summary
+
+**General Score: 7.4/9.5** ✅ PASSING
+
+| Component | Status |
+|-----------|--------|
+| **Smart Contract** | ✅ 4.0/4.0 (100%) - 108 tests, 85.60% coverage, critical validations completed |
+| **Frontend** | ✅ 3.0/3.0 (100%) - 9/9 pages, 26 components, 24 hooks |
+| **Extras** | ⚠️ 0.5/1.0 (50%) - deploy script validated |
+| **Video** | ❌ 0.0/1.5 (0%) - Pending |
+
+**Next step**: Video Demo (Day 9) - +1.5 points
+
+> **📚 See detailed roadmap and next steps**: [STATUS.md](./STATUS.md)
+
+---
+
+## 🔗 Useful Links
+
+### Project Documentation
+> **📚 See [INDEX.md](./INDEX.md) for complete index**
+
+**Main**:
+- [STATUS.md](./STATUS.md) ⭐ - Current status and next steps
+- [INDEX.md](./INDEX.md) - Master index of all documentation
+- [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) - Complete technical guide
 
 **Frontend**:
-- [docs/FRONTEND.md](./docs/FRONTEND.md) - Documentación completa del frontend
+- [docs/FRONTEND.md](./docs/FRONTEND.md) - Complete frontend documentation
 
 **Smart Contract**:
-- [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md) - Documentación completa del smart contract
+- [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md) - Complete smart contract documentation
 
-### Tecnologías
+### Technologies
 - [Solidity Docs](https://docs.soliditylang.org/)
 - [Foundry Book](https://book.getfoundry.sh/)
 - [Next.js Docs](https://nextjs.org/docs)
@@ -503,90 +505,90 @@ Ver **[docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-trouble
 
 ---
 
-## 💡 Consejos
+## 💡 Tips
 
-### Para Desarrolladores
+### For Developers
 
-1. **Usa el script**: No inicies servicios manualmente
-2. **Revisa logs**: Siempre verifica `logs/` ante errores
-3. **Lee docs/DOCUMENTATION.md**: Toda la arquitectura está ahí
-4. **Ejecuta tests**: `cd sc && forge test` antes de commits
+1. **Use the script**: Don't start services manually
+2. **Check logs**: Always verify `logs/` for errors
+3. **Read docs/DOCUMENTATION.md**: All architecture is there
+4. **Run tests**: `cd sc && forge test` before commits
 
-### Para Evaluadores
+### For Evaluators
 
-1. **Ejecuta**: `./deploy.sh start`
-2. **Prueba**: http://localhost:3000
-3. **Revisa tests**: `cd sc && forge test -vv`
-4. **Lee**: [docs/REPORTS.md](./docs/REPORTS.md) para evaluación completa
+1. **Run**: `./deploy.sh start`
+2. **Test**: http://localhost:3000
+3. **Review tests**: `cd sc && forge test -vv`
+4. **Read**: [docs/REPORTS.md](./docs/REPORTS.md) for complete evaluation
 
 ---
 
-## 📞 Ayuda
+## 📞 Help
 
-**¿Problema con el deployment?**
-→ `./deploy.sh help` y [docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-troubleshooting)
+**Problem with deployment?**
+→ `./deploy.sh help` and [docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-troubleshooting)
 
-**¿Necesitas entender el código?**
+**Need to understand the code?**
 → [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)
 
-**¿Trabajando en el frontend?**
+**Working on frontend?**
 → [docs/FRONTEND.md](./docs/FRONTEND.md)
 
-**¿Trabajando en el smart contract?**
+**Working on smart contract?**
 → [docs/SMART_CONTRACT.md](./docs/SMART_CONTRACT.md)
 
-**¿Quieres ver el índice completo?**
+**Want to see complete index?**
 → [INDEX.md](./INDEX.md)
 
-**¿Estado actual del proyecto?**
+**Current project status?**
 → [STATUS.md](./STATUS.md) ⭐
 
 ---
 
-## 🔍 Guías Rápidas por Rol
+## 🔍 Quick Guides by Role
 
-### Para Desarrolladores
+### For Developers
 
-**Primera vez**:
-1. Leer [README.md](./README.md)
-2. Ejecutar `./deploy.sh start`
-3. Configurar MetaMask: `./deploy.sh metamask`
-4. Leer [docs/FRONTEND.md](./docs/FRONTEND.md) para frontend
+**First time**:
+1. Read [README.md](./README.md)
+2. Run `./deploy.sh start`
+3. Configure MetaMask: `./deploy.sh metamask`
+4. Read [docs/FRONTEND.md](./docs/FRONTEND.md) for frontend
 
-**Desarrollo diario**:
-1. `./deploy.sh start` - Iniciar servicios
-2. Desarrollar features
-3. `./deploy.sh frontend restart` - Reiniciar solo frontend (si solo cambias frontend)
-4. `./deploy.sh stop` - Detener servicios
+**Daily development**:
+1. `./deploy.sh start` - Start services
+2. Develop features
+3. `./deploy.sh frontend restart` - Restart only frontend (if only changing frontend)
+4. `./deploy.sh stop` - Stop services
 
 **Troubleshooting**:
-1. `./deploy.sh status` - Ver estado
-2. Revisar logs en `logs/`
-3. Consultar [docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-troubleshooting)
+1. `./deploy.sh status` - See status
+2. Review logs in `logs/`
+3. Consult [docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-troubleshooting)
 
-### Para Evaluadores
+### For Evaluators
 
-**Evaluar el proyecto**:
-1. Leer [docs/REPORTS.md](./docs/REPORTS.md) - Reportes consolidados
-2. Ejecutar `./deploy.sh start`
-3. Probar la DApp en http://localhost:3000
-4. Ver tests: `cd sc && forge test`
+**Evaluate the project**:
+1. Read [docs/REPORTS.md](./docs/REPORTS.md) - Consolidated reports
+2. Run `./deploy.sh start`
+3. Test DApp at http://localhost:3000
+4. See tests: `cd sc && forge test`
 
-### Para Nuevos Colaboradores
+### For New Contributors
 
 **Onboarding**:
 1. [README.md](./README.md) - Quick start
-2. [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) - Arquitectura completa
-3. [docs/FRONTEND.md](./docs/FRONTEND.md) - Detalles frontend
-4. [STATUS.md](./STATUS.md) - Estado actual
+2. [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) - Complete architecture
+3. [docs/FRONTEND.md](./docs/FRONTEND.md) - Frontend details
+4. [STATUS.md](./STATUS.md) - Current status
 
 ---
 
-## 📚 Documentación Externa
+## 📚 External Documentation
 
-### Links Útiles
+### Useful Links
 
-**Tecnologías**:
+**Technologies**:
 - [Solidity Docs](https://docs.soliditylang.org/)
 - [Foundry Book](https://book.getfoundry.sh/)
 - [Next.js Docs](https://nextjs.org/docs)
@@ -606,18 +608,18 @@ Ver **[docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-trouble
 
 ---
 
-**Creado**: 18 de Noviembre, 2025  
-**Última actualización**: 27 de Noviembre, 2025  
-**Versión**: 1.6.0  
-**Estado**: ✅ 9/9 páginas completadas (100%), 24 hooks implementados, validaciones críticas del contrato implementadas
+**Created**: November 18, 2025  
+**Last Updated**: November 27, 2025  
+**Version**: 1.6.0  
+**Status**: ✅ 9/9 pages completed (100%), 24 hooks implemented, critical contract validations implemented
 
-> **📋 Para el estado más actualizado, consulta [STATUS.md](./STATUS.md)**
+> **📋 For the most up-to-date status, see [STATUS.md](./STATUS.md)**
 
 ---
 
 <div align="center">
 
-### 🚀 ¡A Desarrollar!
+### 🚀 Let's Develop!
 
 ```bash
 ./deploy.sh start

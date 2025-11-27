@@ -21,18 +21,18 @@ Complete documentation of the Smart Contract SupplyChain.sol, developed with Sol
 
 ---
 
-## 🧭 Executive Summary
+## 🧭 Resumen Ejecutivo
 
-### In Spanish
+### En Español
 
-This project presents the design and implementation of a comprehensive traceability system in a supply chain using blockchain technology, developed in Solidity as part of a Master's Final Project (PFM). The smart contract `SupplyChain.sol` implements a complete model of user management, token creation and transfer, and role control with a focus on security, efficiency, and maintainability.
+Este proyecto presenta el diseño e implementación de un sistema integral de trazabilidad en una cadena de suministro utilizando tecnología blockchain, desarrollado en Solidity como parte del Proyecto de Fin de Máster (PFM). El contrato inteligente `SupplyChain.sol` implementa un modelo completo de gestión de usuarios, creación y transferencia de tokens, y control de roles con enfoque en seguridad, eficiencia y mantenibilidad.
 
-**Key Features**:
-- ✅ **108 Tests**: 64 core + 44 edge cases with scientific methodology
-- ✅ **Exceptional Coverage**: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
-- ✅ **Enterprise Security**: ReentrancyGuard, Pausable, Access Control
+**Características principales**:
+- ✅ **108 Tests**: 64 core + 44 edge cases con metodología científica
+- ✅ **Cobertura Excepcional**: 85.60% lines, 82.67% statements, 72.15% branches, 80.95% functions
+- ✅ **Seguridad Enterprise**: ReentrancyGuard, Pausable, Access Control
 - ✅ **Ownership Transfer**: Two-step ownership transfer (initiate, accept/reject)
-- ✅ **Professional Documentation**: Complete suite of technical documents
+- ✅ **Documentación Profesional**: Suite completa de documentos técnicos
 
 ### In English
 
@@ -118,15 +118,15 @@ Check `foundry.toml` for project settings:
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Arquitectura
 
-### Project Purpose
+### Propósito del Proyecto
 
-This project presents an exceptional Solidity smart contract, `SupplyChain.sol`, which implements a **complete and robust supply chain**. Its main objective is **educational** and serves as an **exemplary central piece** for a **high-quality** Master's Final Project (PFM).
+Este proyecto presenta un contrato inteligente excepcional de Solidity, `SupplyChain.sol`, que implementa una **cadena de suministro completa y robusta**. Su objetivo principal es **educativo** y sirve como **pieza central ejemplar** para un Proyecto de Fin de Máster (PFM) de **máxima calidad**.
 
-### Architecture Diagrams
+### Diagramas de Arquitectura
 
-#### 1. Entity Relationship Diagram
+#### 1. Diagrama de Entidades y Relaciones
 
 ```mermaid
 erDiagram
@@ -164,7 +164,7 @@ erDiagram
     }
 ```
 
-#### 2. User State Flow
+#### 2. Flujo de Estados de Usuario
 
 ```mermaid
 stateDiagram-v2
@@ -179,7 +179,7 @@ stateDiagram-v2
     Approved --> [*] : user can operate
 ```
 
-#### 3. Transfer State Flow
+#### 3. Flujo de Estados de Transferencia
 
 ```mermaid
 stateDiagram-v2
@@ -193,7 +193,7 @@ stateDiagram-v2
     Canceled --> [*] : tokens returned to sender
 ```
 
-#### 4. Role and Permission Architecture
+#### 4. Arquitectura de Roles y Permisos
 
 ```
 Producer → Factory → Retailer → Consumer
@@ -651,17 +651,17 @@ forge coverage --match-path "test/SupplyChain.t.sol"
 
 #### 3-Phase Analysis Approach
 
-**PHASE 1: Speculative Edge Cases**
+**FASE 1: Speculative Edge Cases**
 - 12 unique edge cases implemented
 - Coverage of unexpected scenarios
 - Boundary condition testing
 
-**PHASE 2: Duplicate Analysis**
+**FASE 2: Duplicate Analysis**
 - Identification of redundant tests
 - Elimination of 6 duplicate tests
 - Test suite optimization
 
-**PHASE 3: Directed Edge Cases**
+**FASE 3: Directed Edge Cases**
 - 11 scientifically targeted tests
 - Based on coverage gap analysis
 - Systematic branch coverage improvement
@@ -679,37 +679,37 @@ bash validate-all.sh
 
 #### Validation Phases (26+ checks)
 
-**PHASE 1: Dependencies** (3/3)
+**FASE 1: Dependencies** (3/3)
 - ✅ Foundry (forge) installed
 - ✅ Foundry (cast) installed
 - ✅ bc (calculator) installed
 
-**PHASE 2: Compilation** (1/1)
+**FASE 2: Compilation** (1/1)
 - ✅ forge build successful
 
-**PHASE 3: Tests** (3/3)
+**FASE 3: Tests** (3/3)
 - ✅ Core tests (64) passing
 - ✅ Edge case tests (44) passing
 - ✅ Total tests (108) passing
 
-**PHASE 4: Scripts** (2/2)
+**FASE 4: Scripts** (2/2)
 - ✅ SupplyChainDeploy.s.sol functional
 - ✅ SupplyChainInteractions.s.sol functional
 
-**PHASE 5: Coverage** (4/4)
+**FASE 5: Coverage** (4/4)
 - ✅ Lines coverage > 80%
 - ✅ Statements coverage > 75%
 - ✅ Branches coverage > 50%
 - ✅ Functions coverage > 75%
 
-**PHASE 6: Reporting Scripts** (2/2)
+**FASE 6: Scripts de Reporte** (2/2)
 - ✅ coverage-reporter-simple.sh functional
 - ✅ coverage-reporter.sh functional
 
-**PHASE 7: File Structure** (5/5)
+**FASE 7: File Structure** (5/5)
 - ✅ All critical files present
 
-**PHASE 8: Documentation Validation** (6/6)
+**FASE 8: Validación de Documentación** (6/6)
 - ✅ All documentation files present
 
 ---
@@ -821,15 +821,15 @@ forge script script/SupplyChainDeploy.s.sol \
 
 **Purpose:** Complete automation for Anvil + Smart Contract + Frontend.
 
-**Available Commands:**
-- `./deploy.sh start` - Starts the entire stack
-- `./deploy.sh stop` - Stops all services
-- `./deploy.sh restart` - Restarts the entire stack
-- `./deploy.sh status` - Shows service status
-- `./deploy.sh frontend start/stop/restart` - Independent frontend management
-- `./deploy.sh clean` - Cleans Anvil persistent state
-- `./deploy.sh metamask` - Instructions to configure MetaMask
-- `./deploy.sh help` - Complete help
+**Comandos disponibles:**
+- `./deploy.sh start` - Inicia todo el stack
+- `./deploy.sh stop` - Detiene todos los servicios
+- `./deploy.sh restart` - Reinicia todo el stack
+- `./deploy.sh status` - Muestra estado de servicios
+- `./deploy.sh frontend start/stop/restart` - Gestión independiente del frontend
+- `./deploy.sh clean` - Limpia estado persistente de Anvil
+- `./deploy.sh metamask` - Instrucciones para configurar MetaMask
+- `./deploy.sh help` - Ayuda completa
 
 #### SupplyChainDeploy.s.sol - Main Deployment Script
 
@@ -869,7 +869,7 @@ forge script script/SupplyChainDeploy.s.sol \
 ## 🔒 Security
 
 > **📚 For comprehensive security documentation, see [SECURITY.md](./SECURITY.md)**  
-> **📚 For complete security documentation in Spanish, see [SECURITY.es.md](./SECURITY.es.md)**
+> **📚 Para documentación completa de seguridad, ver [SECURITY.es.md](./SECURITY.es.md)**
 
 ### Security Features Implemented
 
@@ -984,7 +984,7 @@ bash validate-all.sh
 
 ---
 
-## 🤖 Scripts and Automation
+## 🤖 Scripts y Automatización
 
 ### Script Categories
 
@@ -1056,22 +1056,22 @@ bash coverage-reporter-simple.sh
 
 ### Script Architecture
 
-**Simplified Architecture - KISS (Keep It Simple)**:
-- 3 **independent** scripts with no dependencies between them
-- Inline functions where needed
-- No over-engineering
-- Easy maintenance
+**Arquitectura Simplificada - KISS (Keep It Simple)**:
+- 3 scripts **independientes** sin dependencias entre sí
+- Funciones inline donde se necesitan
+- Sin sobre-ingeniería
+- Fácil mantenimiento
 
 **Scripts**:
-1. `validate-all.sh` - Technical validation (independent)
-2. `audit-documentation.sh` - Audit (independent)
-3. `coverage-reporter.sh` - Coverage report (independent)
+1. `validate-all.sh` - Validación técnica (independiente)
+2. `audit-documentation.sh` - Auditoría (independiente)
+3. `coverage-reporter.sh` - Reporte de coverage (independiente)
 
 ---
 
-## 🔗 References
+## 🔗 Referencias
 
-- **Project Status**: [STATUS.md](../../STATUS.md)
+- **Estado del Proyecto**: [STATUS.md](../../STATUS.md)
 - **Frontend**: [docs/FRONTEND.md](./FRONTEND.md)
 - **Changelog**: [CHANGELOG.md](../../CHANGELOG.md)
 - **Contributing**: [CONTRIBUTING.md](../../CONTRIBUTING.md)
@@ -1079,5 +1079,5 @@ bash coverage-reporter-simple.sh
 
 ---
 
-**Last Updated**: November 27, 2025
+**Última actualización**: 27 de Noviembre, 2025
 
