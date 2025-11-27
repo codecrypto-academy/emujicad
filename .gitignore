@@ -19,6 +19,9 @@ out/
 .env.production
 */.env
 */.env.local
+# Exception: .env.example files should be tracked
+!.env.example
+!*/.env.example
 
 # IDE
 .vscode/

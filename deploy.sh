@@ -7,8 +7,8 @@
 # Descripción: Script para automatizar deployment de Anvil + Smart Contract + Frontend
 # Autor: Supply Chain Tracker Team
 # Fecha: 18 Noviembre 2025
-# Última actualización: 26 de Noviembre, 2025
-# Versión: 2.0.0
+# Última actualización: 27 de Noviembre, 2025
+# Versión: 2.1.0
 #
 # Funcionalidades:
 #   - Iniciar/detener Anvil (blockchain local con persistencia de estado)
@@ -116,6 +116,626 @@ ensure_logs_dir() {
     if [ ! -d "$LOGS_DIR" ]; then
         mkdir -p "$LOGS_DIR"
         print_success "Directorio de logs creado: $LOGS_DIR"
+    fi
+}
+
+# ============================================================================
+# FUNCIÓN: DETECTAR DISTRIBUCIÓN LINUX
+# ============================================================================
+
+detect_linux_distro() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        echo "$ID"
+    elif [ -f /etc/lsb-release ]; then
+        . /etc/lsb-release
+        echo "$DISTRIB_ID" | tr '[:upper:]' '[:lower:]'
+    elif [ -f /etc/debian_version ]; then
+        echo "debian"
+    elif [ -f /etc/redhat-release ]; then
+        echo "rhel"
+    else
+        echo "unknown"
+    fi
+}
+
+# ============================================================================
+# FUNCIÓN: VERIFICAR HERRAMIENTAS DEL SISTEMA
+# ============================================================================
+
+check_system_tools() {
+    local missing_tools=()
+    local tools=("lsof" "netstat" "ss" "curl" "pgrep")
+    
+    for tool in "${tools[@]}"; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            missing_tools+=("$tool")
+        fi
+    done
+    
+    if [ ${#missing_tools[@]} -eq 0 ]; then
+        return 0
+    else
+        echo "${missing_tools[@]}"
+        return 1
+    fi
+}
+
+# ============================================================================
+# FUNCIÓN: INSTALAR HERRAMIENTAS FALTANTES
+# ============================================================================
+
+install_system_tools() {
+    local tools=("$@")
+    local auto_install=false
+    
+    # Verificar si se debe instalar automáticamente
+    if [ "${AUTO_INSTALL:-false}" = "true" ]; then
+        auto_install=true
+    fi
+    
+    local distro=$(detect_linux_distro)
+    local install_cmd=""
+    local packages=()
+    
+    case "$distro" in
+        ubuntu|debian)
+            install_cmd="sudo apt-get update && sudo apt-get install -y"
+            ;;
+        fedora|rhel|centos)
+            install_cmd="sudo dnf install -y"
+            ;;
+        arch|manjaro)
+            install_cmd="sudo pacman -S --noconfirm"
+            ;;
+        opensuse*)
+            install_cmd="sudo zypper install -y"
+            ;;
+        *)
+            print_error "Distribución Linux no reconocida: $distro"
+            print_info "Por favor instala manualmente: ${tools[*]}"
+            return 1
+            ;;
+    esac
+    
+    # Mapear herramientas a nombres de paquetes
+    for tool in "${tools[@]}"; do
+        case "$tool" in
+            lsof) packages+=("lsof") ;;
+            netstat) packages+=("net-tools") ;;
+            ss) packages+=("iproute2") ;;
+            curl) packages+=("curl") ;;
+            pgrep) 
+                if [[ "$distro" == "arch" || "$distro" == "manjaro" ]]; then
+                    packages+=("procps-ng")
+                else
+                    packages+=("procps")
+                fi
+                ;;
+        esac
+    done
+    
+    # Eliminar duplicados
+    local unique_packages=($(printf "%s\n" "${packages[@]}" | sort -u))
+    
+    print_warning "Faltan las siguientes herramientas: ${tools[*]}"
+    print_info "Se intentará instalar usando: $install_cmd"
+    print_info "Paquetes a instalar: ${unique_packages[*]}"
+    
+    if [ "$auto_install" = false ]; then
+        echo ""
+        read -p "¿Deseas instalar estas herramientas ahora? (s/N): " -n 1 -r
+        echo ""
+        if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+            print_warning "Instalación cancelada. Por favor instala manualmente: ${tools[*]}"
+            return 1
+        fi
+    else
+        print_info "Modo automático: instalando herramientas sin confirmación..."
+    fi
+    
+    print_step "Instalando herramientas del sistema..."
+    
+    # Registrar en log
+    ensure_logs_dir
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Instalando herramientas del sistema: ${unique_packages[*]}" >> "$LOGS_DIR/install.log" 2>&1
+    
+    if eval "$install_cmd ${unique_packages[*]}" >> "$LOGS_DIR/install.log" 2>&1; then
+        print_success "Herramientas instaladas correctamente"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Herramientas instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
+        return 0
+    else
+        print_error "Error al instalar herramientas"
+        print_info "Ver logs en: $LOGS_DIR/install.log"
+        print_info "Puedes instalar manualmente: ${unique_packages[*]}"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar herramientas" >> "$LOGS_DIR/install.log" 2>&1
+        return 1
+    fi
+}
+
+# ============================================================================
+# FUNCIÓN: VERIFICAR DEPENDENCIAS DEL PROYECTO
+# ============================================================================
+
+check_project_dependencies() {
+    local missing_deps=()
+    
+    # Verificar dependencias del frontend
+    if [ ! -d "$WEB_DIR/node_modules" ]; then
+        missing_deps+=("frontend")
+    fi
+    
+    # Verificar dependencias del smart contract
+    # Verificar que lib/ existe Y que forge-std está dentro
+    if [ ! -d "$SC_DIR/lib" ] || [ ! -d "$SC_DIR/lib/forge-std" ]; then
+        missing_deps+=("smart-contract")
+    fi
+    
+    if [ ${#missing_deps[@]} -eq 0 ]; then
+        return 0
+    else
+        echo "${missing_deps[@]}"
+        return 1
+    fi
+}
+
+# ============================================================================
+# FUNCIÓN: INSTALAR DEPENDENCIAS DEL PROYECTO
+# ============================================================================
+
+install_project_dependencies() {
+    local deps=("$@")
+    local auto_install=false
+    
+    # Verificar si se debe instalar automáticamente
+    if [ "${AUTO_INSTALL:-false}" = "true" ]; then
+        auto_install=true
+    fi
+    
+    for dep in "${deps[@]}"; do
+        case "$dep" in
+            frontend)
+                # Verificar que npm está disponible
+                if ! command -v npm >/dev/null 2>&1; then
+                    print_error "npm no está instalado. No se pueden instalar dependencias del frontend."
+                    print_info "Instala Node.js y npm primero."
+                    return 1
+                fi
+                
+                print_step "Instalando dependencias del frontend..."
+                print_info "Esto puede tardar varios minutos..."
+                
+                cd "$WEB_DIR"
+                
+                # Registrar inicio en log
+                ensure_logs_dir
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Iniciando instalación de dependencias del frontend..." >> "$LOGS_DIR/install.log" 2>&1
+                
+                # Instalar con timeout (30 minutos = 1800 segundos)
+                if timeout 1800 npm install --progress=true 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
+                    # Mostrar progreso en tiempo real
+                    if [[ "$line" =~ (^[0-9]+/[0-9]+|^added|^removed|^changed|^audited) ]]; then
+                        echo -ne "\r${BLUE}ℹ${NC} $line"
+                    fi
+                done; then
+                    echo "" # Nueva línea después del progreso
+                    print_success "Dependencias del frontend instaladas"
+                    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del frontend instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
+                else
+                    local exit_code=${PIPESTATUS[0]}
+                    echo "" # Nueva línea
+                    if [ $exit_code -eq 124 ]; then
+                        print_error "Timeout: La instalación de dependencias del frontend excedió 30 minutos"
+                    else
+                        print_error "Error al instalar dependencias del frontend"
+                    fi
+                    print_info "Ver logs en: $LOGS_DIR/install.log"
+                    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del frontend (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
+                    cd "$PROJECT_ROOT"
+                    return 1
+                fi
+                cd "$PROJECT_ROOT"
+                ;;
+            smart-contract)
+                # Verificar que forge está disponible
+                if ! command -v forge >/dev/null 2>&1; then
+                    print_error "forge no está instalado. No se pueden instalar dependencias del smart contract."
+                    print_info "Instala Foundry primero: curl -L https://foundry.paradigm.xyz | bash && foundryup"
+                    return 1
+                fi
+                
+                print_step "Instalando dependencias del smart contract..."
+                print_info "Instalando forge-std y otras dependencias..."
+                
+                cd "$SC_DIR"
+                
+                # Registrar inicio en log
+                ensure_logs_dir
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Iniciando instalación de dependencias del smart contract..." >> "$LOGS_DIR/install.log" 2>&1
+                
+                # Instalar con timeout (10 minutos = 600 segundos)
+                if timeout 600 forge install 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
+                    # Mostrar progreso
+                    if [[ "$line" =~ (Installing|Installed|Cloning|Updating) ]]; then
+                        echo -ne "\r${BLUE}ℹ${NC} $line"
+                    fi
+                done; then
+                    echo "" # Nueva línea después del progreso
+                    print_success "Dependencias del smart contract instaladas"
+                    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del smart contract instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
+                else
+                    local exit_code=${PIPESTATUS[0]}
+                    echo "" # Nueva línea
+                    if [ $exit_code -eq 124 ]; then
+                        print_error "Timeout: La instalación de dependencias del smart contract excedió 10 minutos"
+                    else
+                        print_error "Error al instalar dependencias del smart contract"
+                    fi
+                    print_info "Ver logs en: $LOGS_DIR/install.log"
+                    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del smart contract (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
+                    cd "$PROJECT_ROOT"
+                    return 1
+                fi
+                cd "$PROJECT_ROOT"
+                ;;
+        esac
+    done
+    
+    return 0
+}
+
+# ============================================================================
+# FUNCIÓN: CONFIGURAR VARIABLES DE ENTORNO
+# ============================================================================
+
+setup_environment_variables() {
+    local env_file="$WEB_DIR/.env.local"
+    local MODERN_DESIGN=""
+    local DEBUG_MODE=""
+    local DEBUG_TOKENS=""
+    local auto_mode=false
+    
+    # Verificar si está en modo automático
+    if [ "${AUTO_INSTALL:-false}" = "true" ]; then
+        auto_mode=true
+        # Valores por defecto en modo automático
+        MODERN_DESIGN="true"
+        DEBUG_MODE="false"
+        DEBUG_TOKENS="false"
+        print_info "Modo automático: usando valores por defecto"
+        print_info "  - NEXT_PUBLIC_MODERN_DESIGN=true"
+        print_info "  - NEXT_PUBLIC_DEBUG_MODE=false"
+        print_info "  - NEXT_PUBLIC_DEBUG_TOKENS=false"
+    fi
+    
+    # Parsear argumentos
+    local use_params=false
+    local all_params=false
+    
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --modern-design)
+                MODERN_DESIGN="$2"
+                use_params=true
+                shift 2
+                ;;
+            --debug-mode)
+                DEBUG_MODE="$2"
+                use_params=true
+                shift 2
+                ;;
+            --debug-tokens)
+                DEBUG_TOKENS="$2"
+                use_params=true
+                shift 2
+                ;;
+            --all)
+                MODERN_DESIGN="$2"
+                DEBUG_MODE="$3"
+                DEBUG_TOKENS="$4"
+                use_params=true
+                all_params=true
+                shift 4
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+    
+    # Si se pasaron parámetros, validarlos
+    if [ "$use_params" = true ]; then
+        # Validar MODERN_DESIGN
+        if [ -n "$MODERN_DESIGN" ]; then
+            if [[ ! "$MODERN_DESIGN" =~ ^(true|false)$ ]]; then
+                print_error "Valor inválido para --modern-design: $MODERN_DESIGN (debe ser 'true' o 'false')"
+                return 1
+            fi
+        fi
+        
+        # Validar DEBUG_MODE
+        if [ -n "$DEBUG_MODE" ]; then
+            if [[ ! "$DEBUG_MODE" =~ ^(true|false)$ ]]; then
+                print_error "Valor inválido para --debug-mode: $DEBUG_MODE (debe ser 'true' o 'false')"
+                return 1
+            fi
+        fi
+        
+        # Validar DEBUG_TOKENS
+        if [ -n "$DEBUG_TOKENS" ]; then
+            if [[ ! "$DEBUG_TOKENS" =~ ^(true|false)$ ]]; then
+                print_error "Valor inválido para --debug-tokens: $DEBUG_TOKENS (debe ser 'true' o 'false')"
+                return 1
+            fi
+        fi
+        
+        # Si se usó --all, verificar que todos los valores estén presentes
+        if [ "$all_params" = true ]; then
+            if [ -z "$MODERN_DESIGN" ] || [ -z "$DEBUG_MODE" ] || [ -z "$DEBUG_TOKENS" ]; then
+                print_error "Uso incorrecto de --all. Debe ser: --all <modern-design> <debug-mode> <debug-tokens>"
+                return 1
+            fi
+        fi
+    fi
+    
+    # Verificar si ya existe el archivo
+    if [ -f "$env_file" ]; then
+        if [ "$use_params" = false ] && [ "$auto_mode" = false ]; then
+            print_info "Archivo .env.local ya existe"
+            read -p "¿Deseas actualizar la configuración? (s/N): " -n 1 -r
+            echo ""
+            if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+                return 0
+            fi
+        elif [ "$auto_mode" = true ]; then
+            print_warning "Archivo .env.local ya existe. Se sobrescribirá con valores por defecto."
+        else
+            print_warning "Archivo .env.local ya existe. Se sobrescribirá."
+        fi
+    fi
+    
+    # Si no se pasaron parámetros y no está en modo automático, preguntar interactivamente
+    if [ "$use_params" = false ] && [ "$auto_mode" = false ]; then
+        print_header "Configuración de Variables de Entorno"
+        
+        # Modern Design
+        echo ""
+        echo "¿Deseas activar el diseño moderno 2025? (glassmorphism, gradientes)"
+        read -p "(S/n): " -n 1 -r
+        echo ""
+        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            MODERN_DESIGN="true"
+        else
+            MODERN_DESIGN="false"
+        fi
+        
+        # Debug Mode
+        echo ""
+        echo "¿Deseas activar el modo debug? (logs adicionales en consola)"
+        read -p "(s/N): " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Ss]$ ]]; then
+            DEBUG_MODE="true"
+        else
+            DEBUG_MODE="false"
+        fi
+        
+        # Debug Tokens
+        echo ""
+        echo "¿Deseas activar el debug de tokens? (información adicional de tokens)"
+        read -p "(s/N): " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Ss]$ ]]; then
+            DEBUG_TOKENS="true"
+        else
+            DEBUG_TOKENS="false"
+        fi
+    else
+        # Usar valores por defecto si no se proporcionaron
+        MODERN_DESIGN=${MODERN_DESIGN:-"true"}
+        DEBUG_MODE=${DEBUG_MODE:-"false"}
+        DEBUG_TOKENS=${DEBUG_TOKENS:-"false"}
+    fi
+    
+    # Crear archivo .env.local
+    cat > "$env_file" << EOF
+# Supply Chain Tracker - Environment Variables
+# Generated automatically by deploy.sh
+# Last updated: $(date '+%Y-%m-%d %H:%M:%S')
+
+# Modern Design 2025 (glassmorphism, gradients, animations)
+# Options: true | false
+NEXT_PUBLIC_MODERN_DESIGN=$MODERN_DESIGN
+
+# Debug Mode (additional console logs)
+# Options: true | false
+NEXT_PUBLIC_DEBUG_MODE=$DEBUG_MODE
+
+# Debug Tokens (additional token information)
+# Options: true | false
+NEXT_PUBLIC_DEBUG_TOKENS=$DEBUG_TOKENS
+EOF
+    
+    print_success "Archivo .env.local creado/actualizado en: $env_file"
+    print_info "Valores configurados:"
+    print_info "  - NEXT_PUBLIC_MODERN_DESIGN=$MODERN_DESIGN"
+    print_info "  - NEXT_PUBLIC_DEBUG_MODE=$DEBUG_MODE"
+    print_info "  - NEXT_PUBLIC_DEBUG_TOKENS=$DEBUG_TOKENS"
+    
+    # Registrar en log
+    ensure_logs_dir
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Variables de entorno configuradas: MODERN_DESIGN=$MODERN_DESIGN, DEBUG_MODE=$DEBUG_MODE, DEBUG_TOKENS=$DEBUG_TOKENS" >> "$LOGS_DIR/install.log" 2>&1
+    
+    return 0
+}
+
+# ============================================================================
+# FUNCIÓN: VERIFICACIÓN COMPLETA PRE-START
+# ============================================================================
+
+pre_start_check() {
+    ensure_logs_dir  # Asegurar que logs/ existe para los logs de instalación
+    
+    print_header "Verificación Pre-Inicio"
+    
+    local errors=0
+    local warnings=0
+    local auto_mode=false
+    
+    # Verificar si está en modo automático
+    if [ "${AUTO_INSTALL:-false}" = "true" ]; then
+        auto_mode=true
+        print_info "Modo automático activado: instalaciones sin confirmación"
+        print_info "Valores por defecto que se usarán:"
+        print_info "  - Herramientas del sistema: se instalarán automáticamente"
+        print_info "  - Dependencias del proyecto: se instalarán automáticamente"
+        print_info "  - Variables de entorno: MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false"
+    fi
+    
+    # 1. Verificar herramientas del sistema
+    print_step "Verificando herramientas del sistema..."
+    local missing_tools=$(check_system_tools)
+    if [ $? -ne 0 ]; then
+        print_warning "Faltan herramientas: $missing_tools"
+        if install_system_tools $missing_tools; then
+            print_success "Herramientas instaladas correctamente"
+        else
+            print_error "No se pudieron instalar las herramientas. Abortando."
+            errors=$((errors + 1))
+        fi
+    else
+        print_success "Todas las herramientas del sistema están instaladas"
+    fi
+    
+    # 2. Verificar requisitos básicos
+    print_step "Verificando requisitos básicos..."
+    if ! command -v node >/dev/null 2>&1; then
+        print_error "Node.js no está instalado"
+        print_info "Instala Node.js v18+ desde: https://nodejs.org/"
+        print_info "  Ubuntu/Debian: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs"
+        print_info "  Fedora/RHEL: sudo dnf install -y nodejs npm"
+        print_info "  Arch/Manjaro: sudo pacman -S nodejs npm"
+        errors=$((errors + 1))
+    else
+        local node_version=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
+        if [ "$node_version" -lt 18 ]; then
+            print_error "Node.js versión $node_version es muy antigua. Se requiere v18+"
+            errors=$((errors + 1))
+        else
+            print_success "Node.js $(node --version) instalado"
+        fi
+    fi
+    
+    if ! command -v npm >/dev/null 2>&1; then
+        print_error "npm no está instalado"
+        errors=$((errors + 1))
+    else
+        print_success "npm $(npm --version) instalado"
+    fi
+    
+    if ! command -v forge >/dev/null 2>&1; then
+        print_error "Foundry (forge) no está instalado"
+        print_info "Instala Foundry con: curl -L https://foundry.paradigm.xyz | bash && foundryup"
+        errors=$((errors + 1))
+    else
+        print_success "Foundry instalado"
+    fi
+    
+    if ! command -v anvil >/dev/null 2>&1; then
+        print_error "Foundry (anvil) no está instalado"
+        print_info "Ejecuta: foundryup"
+        errors=$((errors + 1))
+    else
+        print_success "Anvil instalado"
+    fi
+    
+    # Si hay errores críticos, abortar
+    if [ $errors -gt 0 ]; then
+        print_error "❌ Se encontraron $errors error(es) crítico(s). Abortando."
+        print_info "Corrige los errores antes de continuar."
+        return 1
+    fi
+    
+    # 3. Verificar dependencias del proyecto
+    print_step "Verificando dependencias del proyecto..."
+    local missing_deps=$(check_project_dependencies)
+    if [ $? -ne 0 ]; then
+        print_warning "Faltan dependencias: $missing_deps"
+        
+        if [ "$auto_mode" = false ]; then
+            echo ""
+            read -p "¿Deseas instalar las dependencias faltantes ahora? (S/n): " -n 1 -r
+            echo ""
+            if [[ $REPLY =~ ^[Nn]$ ]]; then
+                print_warning "Instalación cancelada. Debes instalar manualmente:"
+                for dep in $missing_deps; do
+                    case "$dep" in
+                        frontend)
+                            print_info "  - Frontend: cd web && npm install"
+                            ;;
+                        smart-contract)
+                            print_info "  - Smart Contract: cd sc && forge install"
+                            ;;
+                    esac
+                done
+                errors=$((errors + 1))
+            else
+                if ! install_project_dependencies $missing_deps; then
+                    print_error "Error al instalar dependencias. Abortando."
+                    errors=$((errors + 1))
+                fi
+            fi
+        else
+            # Modo automático: instalar sin preguntar
+            print_info "Modo automático: instalando dependencias sin confirmación..."
+            if ! install_project_dependencies $missing_deps; then
+                print_error "Error al instalar dependencias. Abortando."
+                errors=$((errors + 1))
+            fi
+        fi
+    else
+        print_success "Todas las dependencias del proyecto están instaladas"
+    fi
+    
+    # Si hay errores después de intentar instalar, abortar
+    if [ $errors -gt 0 ]; then
+        print_error "❌ Se encontraron $errors error(es). Abortando."
+        return 1
+    fi
+    
+    # 4. Configurar variables de entorno (opcional, no crítico)
+    if [ ! -f "$WEB_DIR/.env.local" ]; then
+        print_step "Configuración de variables de entorno..."
+        if [ "$auto_mode" = false ]; then
+            echo ""
+            read -p "¿Deseas configurar las variables de entorno ahora? (S/n): " -n 1 -r
+            echo ""
+            if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+                setup_environment_variables
+            else
+                print_info "Puedes configurarlas después con: ./deploy.sh env"
+            fi
+        else
+            # Modo automático: configurar con valores por defecto
+            print_info "Modo automático: configurando variables de entorno con valores por defecto..."
+            setup_environment_variables
+        fi
+    else
+        print_success "Archivo .env.local encontrado"
+    fi
+    
+    # Resumen
+    echo ""
+    if [ $errors -eq 0 ]; then
+        if [ $warnings -eq 0 ]; then
+            print_success "✅ Todas las verificaciones pasaron correctamente"
+        else
+            print_warning "⚠️  Verificación completada con $warnings advertencia(s)"
+        fi
+        return 0
+    else
+        print_error "❌ Se encontraron $errors error(es). Abortando."
+        return 1
     fi
 }
 
@@ -931,6 +1551,13 @@ clean_anvil_state() {
 start_all() {
     ensure_logs_dir
     
+    # NUEVO: Verificación pre-start
+    if ! pre_start_check; then
+        print_error "Verificación pre-inicio falló. Corrige los errores antes de continuar."
+        print_info "Puedes ejecutar './deploy.sh setup' para verificar e instalar dependencias"
+        exit 1
+    fi
+    
     print_header "🚀 Iniciando Supply Chain Tracker"
     
     # Paso 1: Iniciar Anvil
@@ -995,10 +1622,10 @@ EOF
     echo -e "${NC}"
     
     echo -e "${YELLOW}USO:${NC}"
-    echo "  ./deploy.sh [comando]"
+    echo "  ./deploy.sh [comando] [opciones]"
     echo ""
     
-    echo -e "${YELLOW}COMANDOS:${NC}"
+    echo -e "${YELLOW}COMANDOS PRINCIPALES:${NC}"
     echo -e "  ${GREEN}start${NC}           Inicia todo el stack (Anvil + Deploy + Frontend)"
     echo -e "  ${GREEN}stop${NC}            Detiene todos los servicios"
     echo -e "  ${GREEN}restart${NC}         Reinicia todos los servicios"
@@ -1006,19 +1633,39 @@ EOF
     echo -e "  ${GREEN}metamask${NC}        Muestra instrucciones para configurar MetaMask"
     echo -e "  ${GREEN}clean${NC}           Limpia el estado persistente de Anvil (requiere Anvil detenido)"
     echo ""
+    
+    echo -e "${YELLOW}COMANDOS DE CONFIGURACIÓN:${NC}"
+    echo -e "  ${GREEN}setup${NC}           Verifica requisitos e instala dependencias faltantes"
+    echo -e "  ${GREEN}env${NC}             Configura variables de entorno (.env.local)"
+    echo ""
+    
     echo -e "${YELLOW}COMANDOS DE FRONTEND (sin afectar Anvil/Contrato):${NC}"
     echo -e "  ${GREEN}frontend start${NC}  Inicia solo el frontend (requiere Anvil corriendo)"
     echo -e "  ${GREEN}frontend stop${NC}   Detiene solo el frontend"
     echo -e "  ${GREEN}frontend restart${NC} Reinicia solo el frontend"
     echo ""
-    echo -e "${YELLOW}NOTA:${NC} Anvil ahora persiste el estado entre reinicios."
-    echo -e "      Usa ${GREEN}./deploy.sh clean${NC} para limpiar el estado."
-    echo -e "      Si Anvil está corriendo, te preguntará si deseas detenerlo primero."
-    echo ""
-    echo -e "  ${GREEN}help${NC}             Muestra esta ayuda"
+    
+    echo -e "${YELLOW}OPCIONES:${NC}"
+    echo -e "  ${GREEN}--yes${NC}, ${GREEN}--auto${NC}, ${GREEN}-y${NC}  Modo automático (sin confirmaciones)"
     echo ""
     
     echo -e "${YELLOW}EJEMPLOS:${NC}"
+    echo "  # Primera vez - Setup completo"
+    echo "  ./deploy.sh setup"
+    echo "  ./deploy.sh env"
+    echo "  ./deploy.sh start"
+    echo ""
+    echo "  # Modo automático (sin preguntar)"
+    echo "  ./deploy.sh setup --yes"
+    echo "  ./deploy.sh start --auto"
+    echo ""
+    echo "  # Configurar variables de entorno interactivamente"
+    echo "  ./deploy.sh env"
+    echo ""
+    echo "  # Configurar variables con parámetros"
+    echo "  ./deploy.sh env --modern-design true --debug-mode false"
+    echo "  ./deploy.sh env --all true false false"
+    echo ""
     echo "  # Iniciar todo"
     echo "  ./deploy.sh start"
     echo ""
@@ -1035,11 +1682,20 @@ EOF
     echo "  ./deploy.sh stop"
     echo ""
     
+    echo -e "${YELLOW}NOTA:${NC} Anvil ahora persiste el estado entre reinicios."
+    echo -e "      Usa ${GREEN}./deploy.sh clean${NC} para limpiar el estado."
+    echo -e "      Si Anvil está corriendo, te preguntará si deseas detenerlo primero."
+    echo ""
+    
+    echo -e "  ${GREEN}help${NC}             Muestra esta ayuda"
+    echo ""
+    
     echo -e "${YELLOW}LOGS:${NC}"
     echo "  Los logs se guardan en: $LOGS_DIR"
     echo "  • anvil.log     - Logs de Anvil"
     echo "  • frontend.log  - Logs del frontend"
     echo "  • deploy.log    - Logs del deployment"
+    echo "  • install.log   - Logs de instalación de dependencias"
     echo ""
     
     echo -e "${YELLOW}PUERTOS:${NC}"
@@ -1060,6 +1716,16 @@ main() {
         exit 1
     fi
     
+    # Verificar flags de modo automático
+    local auto_flag=false
+    for arg in "$@"; do
+        if [[ "$arg" == "--yes" || "$arg" == "--auto" || "$arg" == "-y" ]]; then
+            auto_flag=true
+            export AUTO_INSTALL=true
+            break
+        fi
+    done
+    
     # Procesar comando
     case "${1:-}" in
         start)
@@ -1072,6 +1738,13 @@ main() {
             stop_services
             sleep 2
             start_all
+            ;;
+        setup)
+            pre_start_check
+            ;;
+        env|environment)
+            shift  # Remover 'env' o 'environment'
+            setup_environment_variables "$@"
             ;;
         frontend)
             case "${2:-}" in
