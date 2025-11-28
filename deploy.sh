@@ -547,7 +547,7 @@ setup_environment_variables() {
         DEBUG_MODE="false"
         DEBUG_TOKENS="false"
         print_info "Modo automático: usando valores por defecto"
-        print_info "  - NEXT_PUBLIC_MODERN_DESIGN=true"
+        print_info "  - NEXT_PUBLIC_MODERN_DESIGN=true (modo moderno activado)"
         print_info "  - NEXT_PUBLIC_DEBUG_MODE=false"
         print_info "  - NEXT_PUBLIC_DEBUG_TOKENS=false"
     fi
@@ -676,6 +676,7 @@ setup_environment_variables() {
         fi
     else
         # Usar valores por defecto si no se proporcionaron
+        # MODERN_DESIGN siempre es true por defecto (modo moderno activado)
         MODERN_DESIGN=${MODERN_DESIGN:-"true"}
         DEBUG_MODE=${DEBUG_MODE:-"false"}
         DEBUG_TOKENS=${DEBUG_TOKENS:-"false"}
