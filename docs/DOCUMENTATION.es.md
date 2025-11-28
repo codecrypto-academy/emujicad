@@ -568,8 +568,16 @@ nohup npm run dev > logs/frontend.log 2>&1 &
 ```
 
 **Resultado**:
-- ✅ Frontend corriendo en `http://localhost:3000`
+- ✅ Frontend corriendo en `http://localhost:3000` (y accesible desde cualquier IP de tu red)
 - ✅ Logs en `logs/frontend.log`
+
+**Acceso desde la Red**: El frontend está configurado para escuchar en `0.0.0.0`, lo que significa que es accesible desde:
+- **Localhost**: `http://localhost:3000` (desde la misma computadora)
+- **IP de Red**: `http://<tu-ip>:3000` (desde otros dispositivos en tu red local)
+  - El script detecta automáticamente y muestra tu IP local
+  - Ejemplo: `http://192.168.1.100:3000`
+
+**Nota**: Anvil permanece en `127.0.0.1:8545` (solo localhost) por seguridad. El frontend actúa como proxy y se conecta a Anvil localmente en la máquina servidor.
 
 #### **PASO 5: Mostrar Instrucciones**
 ```bash
@@ -1362,6 +1370,84 @@ El script gestiona los procesos de forma inteligente:
 
 ---
 
+### **Configuración de Acceso desde la Red**
+
+El frontend está configurado para ser accesible desde cualquier dirección IP de tu red local, no solo desde `localhost`.
+
+#### **Configuración**:
+
+**Frontend (Next.js)**:
+- **Host**: `0.0.0.0` (escucha en todas las interfaces de red)
+- **Puerto**: `3000`
+- **Accesible desde**:
+  - `http://localhost:3000` (misma computadora)
+  - `http://<tu-ip>:3000` (otros dispositivos en tu red)
+  - Ejemplo: `http://192.168.1.100:3000`
+
+**Anvil (Blockchain)**:
+- **Host**: `127.0.0.1` (solo localhost - por seguridad)
+- **Puerto**: `8545`
+- **Accesible desde**: Solo la misma computadora donde corre Anvil
+
+#### **Cómo Funciona**:
+
+```
+Dispositivo en la Red → http://192.168.1.100:3000 (Frontend)
+                              ↓
+                    Frontend se conecta a Anvil
+                              ↓
+                    http://127.0.0.1:8545 (Anvil en el servidor)
+```
+
+El frontend actúa como proxy: los dispositivos en tu red se conectan al frontend, y el frontend se conecta a Anvil localmente en la máquina servidor.
+
+#### **Encontrar Tu Dirección IP**:
+
+El script detecta y muestra automáticamente tu IP local cuando ejecutas:
+```bash
+./deploy.sh start
+# o
+./deploy.sh status
+```
+
+**Detección manual**:
+- **Linux**: `hostname -I` o `ip addr show`
+- **macOS**: `ipconfig getifaddr en0` o `ifconfig | grep "inet "`
+- **Windows**: `ipconfig` (busca IPv4 Address)
+
+#### **Consideraciones de Seguridad**:
+
+- ✅ **Frontend en `0.0.0.0`**: Seguro para acceso desde la red local (desarrollo)
+- ✅ **Anvil en `127.0.0.1`**: Seguro - solo accesible desde la máquina servidor
+- ⚠️ **Producción**: Para despliegues en producción, usa medidas de seguridad apropiadas (HTTPS, autenticación, reglas de firewall)
+
+#### **Acceder desde Otros Dispositivos**:
+
+1. **Iniciar la aplicación**:
+   ```bash
+   ./deploy.sh start
+   ```
+
+2. **Notar la IP de red** mostrada en el output:
+   ```
+   ✓ Frontend started successfully
+   ℹ URL (localhost): http://localhost:3000
+   ℹ URL (network):   http://192.168.1.100:3000
+   ```
+
+3. **Desde otro dispositivo en la misma red**:
+   - Abrir un navegador
+   - Navegar a `http://<tu-ip>:3000`
+   - Ejemplo: `http://192.168.1.100:3000`
+
+4. **Configurar MetaMask en el otro dispositivo**:
+   - Agregar la misma configuración de red Anvil
+   - **Importante**: La URL RPC debe apuntar a la IP del servidor, no a `127.0.0.1`
+   - RPC URL: `http://<ip-servidor>:8545` (si Anvil también está expuesto)
+   - **Nota**: Por defecto, Anvil solo escucha en `127.0.0.1`, por lo que MetaMask en otros dispositivos no puede conectarse directamente a Anvil. El frontend maneja esto haciendo proxy de las peticiones.
+
+---
+
 ## 🛠️ Guía de Despliegue Manual (Sin Scripts)
 
 Si prefieres entender el proceso subyacente o no puedes usar los scripts de automatización, sigue estas instrucciones paso a paso.
@@ -1503,6 +1589,10 @@ npm run dev
 ```
 
 > **Mantén esta terminal abierta.** Deberías ver "Ready in ... ms".
+
+**Nota**: El script `dev` está configurado para escuchar en `0.0.0.0`, por lo que el frontend es accesible desde cualquier IP de tu red:
+- **Localhost**: `http://localhost:3000`
+- **Red**: `http://<tu-ip>:3000` (desde otros dispositivos en tu red local)
 
 ### **6. Verificar Despliegue**
 

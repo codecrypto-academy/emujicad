@@ -39,6 +39,31 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timer)
   }, [])
 
+  // 1.5. CRÍTICO: Deshabilitar auto-connect si no hay conexión guardada
+  // Este efecto verifica si wagmi auto-conectó sin permiso del usuario
+  const [hasCheckedAutoConnect, setHasCheckedAutoConnect] = useState(false)
+  
+  useEffect(() => {
+    if (typeof window === 'undefined' || hasCheckedAutoConnect) return
+
+    // Esperar un momento para que wagmi termine de inicializar y verificar
+    const checkAutoConnect = setTimeout(() => {
+      const stored = localStorage.getItem('lastConnectedAddress')
+      
+      // Si no hay conexión guardada Y está conectado, es un auto-connect no deseado
+      // Desconectar inmediatamente para forzar que el usuario se conecte manualmente
+      if (!stored && isConnected) {
+        console.log('🚫 Auto-connect detected without stored connection, disconnecting...')
+        disconnect()
+        localStorage.removeItem('lastConnectedAddress')
+      }
+      
+      setHasCheckedAutoConnect(true)
+    }, 200) // Dar tiempo suficiente para que wagmi inicialice
+
+    return () => clearTimeout(checkAutoConnect)
+  }, [isConnected, disconnect, hasCheckedAutoConnect]) // Ejecutar cuando isConnected cambia, pero solo una vez
+
   // 2. Persistencia: Guardar address cuando se conecta
   useEffect(() => {
     if (!isInitialized) return

@@ -111,6 +111,35 @@ print_step() {
     echo -e "${MAGENTA}➜${NC} $1"
 }
 
+# Function to get local IP address
+get_local_ip() {
+    local os=$(detect_os)
+    local ip=""
+    
+    if [ "$os" = "macos" ]; then
+        # macOS: try multiple methods
+        ip=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo "")
+        if [ -z "$ip" ]; then
+            # Fallback: use ifconfig
+            ip=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -1)
+        fi
+    else
+        # Linux: use hostname -I or ip command
+        ip=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "")
+        if [ -z "$ip" ]; then
+            # Fallback: use ip command (compatible with both GNU and BSD)
+            ip=$(ip route get 8.8.8.8 2>/dev/null | grep -oE 'src [0-9.]+' | awk '{print $2}' || echo "")
+        fi
+        if [ -z "$ip" ]; then
+            # Last fallback: use ifconfig
+            ip=$(ifconfig 2>/dev/null | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -1 | sed 's/addr://')
+        fi
+    fi
+    
+    # If still no IP found, return empty string
+    echo "$ip"
+}
+
 # Function to create logs directory if it doesn't exist
 ensure_logs_dir() {
     if [ ! -d "$LOGS_DIR" ]; then
@@ -1475,7 +1504,11 @@ start_frontend() {
     # Wait for frontend to be ready
     if wait_for_port $FRONTEND_PORT 30; then
         print_success "Frontend started successfully"
-        print_info "URL: http://localhost:$FRONTEND_PORT"
+        local local_ip=$(get_local_ip)
+        print_info "URL (localhost): http://localhost:$FRONTEND_PORT"
+        if [ -n "$local_ip" ]; then
+            print_info "URL (network):   http://$local_ip:$FRONTEND_PORT"
+        fi
         return 0
     else
         print_error "Frontend could not start correctly"
@@ -1627,7 +1660,11 @@ show_status() {
     local frontend_pid=$(pgrep -f "next-server" 2>/dev/null || pgrep -f "npm.*run dev" 2>/dev/null | head -n 1)
     if [ -n "$frontend_pid" ]; then
         print_success "RUNNING (PID: $frontend_pid, Port: $FRONTEND_PORT)"
-        print_info "URL: http://localhost:$FRONTEND_PORT"
+        local local_ip=$(get_local_ip)
+        print_info "URL (localhost): http://localhost:$FRONTEND_PORT"
+        if [ -n "$local_ip" ]; then
+            print_info "URL (network):   http://$local_ip:$FRONTEND_PORT"
+        fi
     else
         print_error "STOPPED"
     fi
@@ -1702,7 +1739,11 @@ show_metamask_instructions() {
     echo ""
     
     echo -e "${CYAN}4. Connect to DApp:${NC}"
-    echo "   • Open http://localhost:$FRONTEND_PORT"
+    local local_ip=$(get_local_ip)
+    echo "   • Open http://localhost:$FRONTEND_PORT (from this computer)"
+    if [ -n "$local_ip" ]; then
+        echo "   • Or http://$local_ip:$FRONTEND_PORT (from other devices on your network)"
+    fi
     echo "   • Click 'Connect MetaMask'"
     echo "   • Authorize connection in MetaMask"
     echo "   • Done! You should see your address and contract statistics"
@@ -1748,7 +1789,11 @@ start_frontend_only() {
     fi
     
     print_success "Frontend started successfully"
-    print_info "URL: http://localhost:$FRONTEND_PORT"
+    local local_ip=$(get_local_ip)
+    print_info "URL (localhost): http://localhost:$FRONTEND_PORT"
+    if [ -n "$local_ip" ]; then
+        print_info "URL (network):   http://$local_ip:$FRONTEND_PORT"
+    fi
     print_info "Anvil and contract continue running"
 }
 
@@ -1998,9 +2043,13 @@ start_all() {
     # Show summary
     print_header "✅ Deployment Completed"
     
+    local local_ip=$(get_local_ip)
     echo -e "${GREEN}All services are running correctly:${NC}\n"
-    echo -e "  ${CYAN}Anvil:${NC}    http://$ANVIL_HOST:$ANVIL_PORT"
+    echo -e "  ${CYAN}Anvil:${NC}    http://$ANVIL_HOST:$ANVIL_PORT (localhost only)"
     echo -e "  ${CYAN}Frontend:${NC} http://localhost:$FRONTEND_PORT"
+    if [ -n "$local_ip" ]; then
+        echo -e "              http://$local_ip:$FRONTEND_PORT (network access)"
+    fi
     echo -e "  ${CYAN}Contract:${NC} $(cat $LOGS_DIR/contract_address.txt)"
     echo ""
     

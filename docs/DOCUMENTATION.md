@@ -568,8 +568,16 @@ nohup npm run dev > logs/frontend.log 2>&1 &
 ```
 
 **Result**:
-- ✅ Frontend running at `http://localhost:3000`
+- ✅ Frontend running at `http://localhost:3000` (and accessible from any IP on your network)
 - ✅ Logs in `logs/frontend.log`
+
+**Network Access**: The frontend is configured to listen on `0.0.0.0`, which means it's accessible from:
+- **Localhost**: `http://localhost:3000` (from the same computer)
+- **Network IP**: `http://<your-ip>:3000` (from other devices on your local network)
+  - The script automatically detects and displays your local IP address
+  - Example: `http://192.168.1.100:3000`
+
+**Note**: Anvil remains on `127.0.0.1:8545` (localhost only) for security. The frontend acts as a proxy and connects to Anvil locally on the server machine.
 
 #### **STEP 5: Show Instructions**
 ```bash
@@ -1334,6 +1342,84 @@ The script manages processes intelligently:
 
 ---
 
+### **Network Access Configuration**
+
+The frontend is configured to be accessible from any IP address on your local network, not just `localhost`.
+
+#### **Configuration**:
+
+**Frontend (Next.js)**:
+- **Host**: `0.0.0.0` (listens on all network interfaces)
+- **Port**: `3000`
+- **Accessible from**:
+  - `http://localhost:3000` (same computer)
+  - `http://<your-ip>:3000` (other devices on your network)
+  - Example: `http://192.168.1.100:3000`
+
+**Anvil (Blockchain)**:
+- **Host**: `127.0.0.1` (localhost only - for security)
+- **Port**: `8545`
+- **Accessible from**: Only the same computer where Anvil is running
+
+#### **How It Works**:
+
+```
+Device on Network → http://192.168.1.100:3000 (Frontend)
+                          ↓
+                Frontend connects to Anvil
+                          ↓
+                http://127.0.0.1:8545 (Anvil on server)
+```
+
+The frontend acts as a proxy: devices on your network connect to the frontend, and the frontend connects to Anvil locally on the server machine.
+
+#### **Finding Your IP Address**:
+
+The script automatically detects and displays your local IP address when you run:
+```bash
+./deploy.sh start
+# or
+./deploy.sh status
+```
+
+**Manual detection**:
+- **Linux**: `hostname -I` or `ip addr show`
+- **macOS**: `ipconfig getifaddr en0` or `ifconfig | grep "inet "`
+- **Windows**: `ipconfig` (look for IPv4 Address)
+
+#### **Security Considerations**:
+
+- ✅ **Frontend on `0.0.0.0`**: Safe for local network access (development)
+- ✅ **Anvil on `127.0.0.1`**: Secure - only accessible from the server machine
+- ⚠️ **Production**: For production deployments, use proper security measures (HTTPS, authentication, firewall rules)
+
+#### **Accessing from Other Devices**:
+
+1. **Start the application**:
+   ```bash
+   ./deploy.sh start
+   ```
+
+2. **Note the network IP** shown in the output:
+   ```
+   ✓ Frontend started successfully
+   ℹ URL (localhost): http://localhost:3000
+   ℹ URL (network):   http://192.168.1.100:3000
+   ```
+
+3. **From another device on the same network**:
+   - Open a browser
+   - Navigate to `http://<your-ip>:3000`
+   - Example: `http://192.168.1.100:3000`
+
+4. **Configure MetaMask on the other device**:
+   - Add the same Anvil network configuration
+   - **Important**: The RPC URL must point to the server's IP, not `127.0.0.1`
+   - RPC URL: `http://<server-ip>:8545` (if Anvil is also exposed)
+   - **Note**: By default, Anvil only listens on `127.0.0.1`, so MetaMask on other devices cannot connect directly to Anvil. The frontend handles this by proxying requests.
+
+---
+
 ## 🛠️ Manual Deployment Guide (No Scripts)
 
 If you prefer to understand the underlying process or cannot use the automation scripts (`deploy.sh`/`deploy.ps1`), follow these step-by-step instructions to deploy the DApp manually.
@@ -1489,6 +1575,10 @@ npm run dev
 ```
 
 > **Keep this terminal open.** You should see "Ready in ... ms".
+
+**Note**: The `dev` script is configured to listen on `0.0.0.0`, so the frontend is accessible from any IP on your network:
+- **Localhost**: `http://localhost:3000`
+- **Network**: `http://<your-ip>:3000` (from other devices on your local network)
 
 ### **6. Verify Deployment**
 

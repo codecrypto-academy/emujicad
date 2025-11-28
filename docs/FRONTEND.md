@@ -94,8 +94,14 @@ export const config = createConfig({
   transports: {
     [localhost.id]: http('http://127.0.0.1:8545'),
   },
+  multiInjectedProviderDiscovery: false, // Prevent multiple connection requests
+  ssr: false, // Disable SSR to avoid hydration issues
 })
 ```
+
+**Important Configuration Notes**:
+- `multiInjectedProviderDiscovery: false`: Prevents wagmi from making multiple connection requests when multiple injected providers are detected
+- `ssr: false`: Disables server-side rendering for wagmi to prevent hydration mismatches in Next.js
 
 #### `contracts/config.ts`
 ```typescript
@@ -805,6 +811,7 @@ All components that perform critical actions check pause status:
 - ✅ Disconnection synchronization between tabs
 - ✅ Persistence of last connected address in localStorage
 - ✅ Detection of account changes in MetaMask
+- ✅ Auto-connect prevention (forces manual connection)
 
 **POSTPONED**:
 - ⏸️ Automatic reconnection when another tab connects (caused race conditions)
@@ -839,6 +846,41 @@ All tabs: Detect change → Update localStorage
 const STORAGE_KEY = 'lastConnectedAddress'
 const SESSION_STORAGE_KEY = 'wallet_connection_session'
 ```
+
+### Auto-Connect Prevention
+
+**Problem**: By default, wagmi automatically reconnects to MetaMask when the application loads, even if the user hasn't explicitly clicked "Connect Wallet". This causes the application to show the dashboard instead of the landing page.
+
+**Solution**: The `Web3Context` component includes logic to prevent unwanted auto-connections:
+
+```typescript
+// In Web3Context.tsx
+useEffect(() => {
+  if (typeof window === 'undefined') return
+
+  const checkAutoConnect = setTimeout(() => {
+    const stored = localStorage.getItem('lastConnectedAddress')
+    
+    // If no stored connection AND isConnected, it's an unwanted auto-connect
+    if (!stored && isConnected) {
+      console.log('🚫 Auto-connect detected without stored connection, disconnecting...')
+      disconnect()
+      localStorage.removeItem('lastConnectedAddress')
+    }
+  }, 200) // Give wagmi time to initialize
+
+  return () => clearTimeout(checkAutoConnect)
+}, [])
+```
+
+**How it works**:
+1. On application load, the effect waits 200ms for wagmi to initialize
+2. Checks if there's a stored connection in `localStorage` (`lastConnectedAddress`)
+3. If there's **no stored connection** but wagmi reports `isConnected === true`, it's an unwanted auto-connect
+4. Automatically disconnects to force the user to manually click "Connect Wallet"
+5. Only connections made through explicit user action (clicking "Connect Wallet") are persisted
+
+**Result**: The application always starts showing the landing page with "Connect Wallet" button, ensuring users must explicitly connect before accessing the dashboard.
 
 ---
 

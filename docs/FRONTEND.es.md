@@ -94,8 +94,14 @@ export const config = createConfig({
   transports: {
     [localhost.id]: http('http://127.0.0.1:8545'),
   },
+  multiInjectedProviderDiscovery: false, // Prevenir múltiples solicitudes de conexión
+  ssr: false, // Deshabilitar SSR para evitar problemas de hidratación
 })
 ```
+
+**Notas Importantes de Configuración**:
+- `multiInjectedProviderDiscovery: false`: Previene que wagmi haga múltiples solicitudes de conexión cuando se detectan múltiples proveedores inyectados
+- `ssr: false`: Deshabilita el renderizado del lado del servidor para wagmi para prevenir problemas de hidratación en Next.js
 
 #### `contracts/config.ts`
 ```typescript
@@ -805,6 +811,7 @@ Todos los componentes que realizan acciones críticas verifican el estado de pau
 - ✅ Sincronización de desconexiones entre pestañas
 - ✅ Persistencia de última dirección conectada en localStorage
 - ✅ Detección de cambios de cuenta en MetaMask
+- ✅ Prevención de auto-conexión (fuerza conexión manual)
 
 **POSTPONED**:
 - ⏸️ Reconexión automática cuando otra pestaña se conecta (causaba race conditions)
@@ -839,6 +846,41 @@ Todas las pestañas: Detectan cambio → Actualizan localStorage
 const STORAGE_KEY = 'lastConnectedAddress'
 const SESSION_STORAGE_KEY = 'wallet_connection_session'
 ```
+
+### Prevención de Auto-Conexión
+
+**Problema**: Por defecto, wagmi se reconecta automáticamente a MetaMask cuando la aplicación carga, incluso si el usuario no ha hecho clic explícitamente en "Conectar Wallet". Esto hace que la aplicación muestre el dashboard en lugar de la landing page.
+
+**Solución**: El componente `Web3Context` incluye lógica para prevenir auto-conexiones no deseadas:
+
+```typescript
+// En Web3Context.tsx
+useEffect(() => {
+  if (typeof window === 'undefined') return
+
+  const checkAutoConnect = setTimeout(() => {
+    const stored = localStorage.getItem('lastConnectedAddress')
+    
+    // Si no hay conexión guardada Y está conectado, es un auto-connect no deseado
+    if (!stored && isConnected) {
+      console.log('🚫 Auto-connect detectado sin conexión guardada, desconectando...')
+      disconnect()
+      localStorage.removeItem('lastConnectedAddress')
+    }
+  }, 200) // Dar tiempo a wagmi para inicializar
+
+  return () => clearTimeout(checkAutoConnect)
+}, [])
+```
+
+**Cómo funciona**:
+1. Al cargar la aplicación, el efecto espera 200ms para que wagmi inicialice
+2. Verifica si hay una conexión guardada en `localStorage` (`lastConnectedAddress`)
+3. Si **no hay conexión guardada** pero wagmi reporta `isConnected === true`, es un auto-connect no deseado
+4. Se desconecta automáticamente para forzar que el usuario haga clic manualmente en "Conectar Wallet"
+5. Solo las conexiones hechas a través de acción explícita del usuario (clic en "Conectar Wallet") se persisten
+
+**Resultado**: La aplicación siempre inicia mostrando la landing page con el botón "Conectar Wallet", asegurando que los usuarios deben conectarse explícitamente antes de acceder al dashboard.
 
 ---
 
