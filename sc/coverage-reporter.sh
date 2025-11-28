@@ -124,19 +124,19 @@ extract_metrics() {
 generate_markdown_report() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     local date_filename=$(date '+%Y-%m-%d')
-    local report_file="../docs/sc/reports/COVERAGE_REPORT_${date_filename}.md"
+    local report_file="../docs/reports/COVERAGE_REPORT_${date_filename}.md"
     
     echo -e "\n${BLUE}📝 Generando reporte markdown...${NC}"
     
     # Crear directorio si no existe
-    mkdir -p ../docs/sc/reports
+    mkdir -p ../docs/reports
     
     cat > $report_file << EOF
 # 📊 Reporte Automático de Cobertura - SupplyChain
 
 **Generado**: $timestamp  
 **Comando**: \`forge coverage --match-path "test/*"\`  
-**Total Tests**: 108 (64 core + 44 edge cases)
+**Total Tests**: 109 (64 core + 45 edge cases)
 
 ## 📈 Métricas Actuales
 
@@ -156,7 +156,7 @@ $COVERAGE_OUTPUT
 ## 🎯 Recomendaciones
 
 ### ✅ Fortalezas
-- Testing comprehensivo de APIs principales (104 tests totales)
+- Testing comprehensivo de APIs principales (109 tests totales)
 - Cobertura excelente de líneas (>80%) y statements (>80%)
 - Cobertura de branches mejorada significativamente (+24% vs inicial)
 - Flujos críticos bien probados con edge cases dedicados
@@ -168,7 +168,7 @@ $COVERAGE_OUTPUT
 
 ### 📦 Suite de Tests
 - **SupplyChain.t.sol**: 64 tests core (flujos principales)
-- **EdgeCasesTest.t.sol**: 44 tests científicos (branches + edge cases)
+- **EdgeCasesTest.t.sol**: 45 tests científicos (branches + edge cases)
 - Scripts funcionales: Deploy.s.sol, Interactions.s.sol
 
 ## 🚀 Comandos de Reproducción
@@ -191,11 +191,11 @@ forge test --match-path "test/*" -vv
 
 **Última Ejecución**: $timestamp  
 *Reporte generado automáticamente por coverage-reporter.sh*  
-*Ubicación*: \`docs/sc/reports/COVERAGE_REPORT_${date_filename}.md\`
+*Ubicación*: \`docs/reports/COVERAGE_REPORT_${date_filename}.md\`
 EOF
 
     echo -e "${GREEN}✅ Reporte guardado en: $report_file${NC}"
-    echo -e "${BLUE}📂 Ubicación: docs/sc/reports/${NC}"
+    echo -e "${BLUE}📂 Ubicación: docs/reports/${NC}"
 }
 
 get_status() {

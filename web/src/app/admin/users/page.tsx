@@ -18,12 +18,12 @@ export default function AdminUsersPage() {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   
-  // Activar diseño moderno si está habilitado
+  // Enable modern design if enabled
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
 
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase()
 
-  // Prevenir hydration mismatch - usar setTimeout para diferir el setState
+  // Prevent hydration mismatch - use setTimeout to defer setState
   useEffect(() => {
     const timer = setTimeout(() => {
       setMounted(true)
@@ -31,18 +31,18 @@ export default function AdminUsersPage() {
     return () => clearTimeout(timer)
   }, [])
 
-  // Redireccionar si no es owner o si se desconecta
+  // Redirect if not owner or if disconnected
   useEffect(() => {
     if (mounted && !isLoadingOwner) {
-      // Si no está conectado O si está conectado pero no es owner
+      // If not connected OR if connected but not owner
       if (!isConnected || (isConnected && !isOwner)) {
         router.push('/')
       }
     }
   }, [isOwner, isConnected, isLoadingOwner, router, mounted])
 
-  // No renderizar nada hasta que se monte en el cliente
-  // No renderizar Header durante carga inicial para evitar problemas de hidratación
+  // Don't render anything until mounted on client
+  // Don't render Header during initial load to avoid hydration issues
   if (!mounted || isLoadingOwner) {
     if (useModernDesign) {
       return (
@@ -51,7 +51,7 @@ export default function AdminUsersPage() {
           <div className="container mx-auto px-4 py-12">
             <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8 text-center">
               <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-xl w-48 mx-auto animate-pulse mb-4"></div>
-              <p className="text-slate-600 dark:text-slate-400">Verificando permisos...</p>
+              <p className="text-slate-600 dark:text-slate-400">Verifying permissions...</p>
             </div>
           </div>
         </div>
@@ -65,14 +65,14 @@ export default function AdminUsersPage() {
             <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-48 mx-auto animate-pulse"></div>
           </CardHeader>
           <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground">Verificando permisos...</p>
+            <p className="text-muted-foreground">Verifying permissions...</p>
           </CardContent>
         </Card>
       </div>
     )
   }
 
-  // Manejo de errores al verificar ownership
+  // Error handling when verifying ownership
   if (ownerError) {
     if (useModernDesign) {
       return (
@@ -89,7 +89,7 @@ export default function AdminUsersPage() {
                 {ownerError.message}
               </p>
               <Link href="/">
-                <Button variant="outline" className="rounded-xl">Volver al inicio</Button>
+                <Button variant="outline" className="rounded-xl">Back to home</Button>
               </Link>
             </div>
           </div>
@@ -109,7 +109,7 @@ export default function AdminUsersPage() {
               {ownerError.message}
             </p>
             <Link href="/">
-              <Button variant="outline">Volver al inicio</Button>
+              <Button variant="outline">Back to home</Button>
             </Link>
           </CardContent>
         </Card>
@@ -117,7 +117,7 @@ export default function AdminUsersPage() {
     )
   }
 
-  // Estados de carga
+  // Loading states
   if (!isConnected) {
     if (useModernDesign) {
       return (
@@ -126,12 +126,12 @@ export default function AdminUsersPage() {
           <Header />
           <div className="container mx-auto px-4 py-12">
             <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8 text-center animate-in fade-in slide-in-from-bottom-4">
-              <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-slate-800 to-red-700 dark:from-slate-100 dark:to-red-300 bg-clip-text text-transparent">🔐 Acceso Denegado</h1>
+              <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-slate-800 to-red-700 dark:from-slate-100 dark:to-red-300 bg-clip-text text-transparent">🔐 Access Denied</h1>
               <p className="text-slate-600 dark:text-slate-400 mb-6">
-                Debes conectar tu wallet para acceder a esta página.
+                You must connect your wallet to access this page.
               </p>
               <Link href="/">
-                <Button className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">Volver al inicio</Button>
+                <Button className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">Back to home</Button>
               </Link>
             </div>
           </div>
@@ -143,12 +143,12 @@ export default function AdminUsersPage() {
         <DebugLabel component="AdminUsersPage" section="NotConnectedState" props={{ useModernDesign: false }} />
         <Card>
           <CardContent className="pt-6 text-center">
-            <h1 className="text-2xl font-bold mb-4">🔐 Acceso Denegado</h1>
+            <h1 className="text-2xl font-bold mb-4">🔐 Access Denied</h1>
             <p className="text-muted-foreground mb-4">
-              Debes conectar tu wallet para acceder a esta página.
+              You must connect your wallet to access this page.
             </p>
             <Link href="/">
-              <Button>Volver al inicio</Button>
+              <Button>Back to home</Button>
             </Link>
           </CardContent>
         </Card>
@@ -164,20 +164,20 @@ export default function AdminUsersPage() {
           <Header />
           <div className="container mx-auto px-4 py-12">
             <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 p-8 text-center animate-in fade-in slide-in-from-bottom-4">
-              <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-slate-800 to-red-700 dark:from-slate-100 dark:to-red-300 bg-clip-text text-transparent">🚫 Acceso Denegado</h1>
+              <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-slate-800 to-red-700 dark:from-slate-100 dark:to-red-300 bg-clip-text text-transparent">🚫 Access Denied</h1>
               <p className="text-slate-600 dark:text-slate-400 mb-4">
-                Solo el propietario del contrato puede acceder a esta página.
+                Only the contract owner can access this page.
               </p>
               <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 mb-4 space-y-2">
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Tu dirección: <code className="bg-white dark:bg-slate-700 px-2 py-1 rounded-lg font-mono text-xs">{address}</code>
+                  Your address: <code className="bg-white dark:bg-slate-700 px-2 py-1 rounded-lg font-mono text-xs">{address}</code>
                 </p>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
                   Owner: <code className="bg-white dark:bg-slate-700 px-2 py-1 rounded-lg font-mono text-xs">{owner}</code>
                 </p>
               </div>
               <Link href="/">
-                <Button className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">Volver al inicio</Button>
+                <Button className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">Back to home</Button>
               </Link>
             </div>
           </div>
@@ -189,18 +189,18 @@ export default function AdminUsersPage() {
         <DebugLabel component="AdminUsersPage" section="NotOwnerState" props={{ isConnected, useModernDesign: false }} />
         <Card>
           <CardContent className="pt-6 text-center">
-            <h1 className="text-2xl font-bold mb-4">🚫 Acceso Denegado</h1>
+            <h1 className="text-2xl font-bold mb-4">🚫 Access Denied</h1>
             <p className="text-muted-foreground mb-4">
-              Solo el propietario del contrato puede acceder a esta página.
+              Only the contract owner can access this page.
             </p>
             <p className="text-sm text-muted-foreground mb-4">
-              Tu dirección: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{address}</code>
+              Your address: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{address}</code>
             </p>
             <p className="text-sm text-muted-foreground mb-6">
               Owner: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{owner}</code>
             </p>
             <Link href="/">
-              <Button>Volver al inicio</Button>
+              <Button>Back to home</Button>
             </Link>
           </CardContent>
         </Card>
@@ -208,59 +208,59 @@ export default function AdminUsersPage() {
     )
   }
 
-  // Si llegamos aquí, el usuario es el owner
+  // If we get here, the user is the owner
   if (useModernDesign) {
     return (
       <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
         <Header />
         
         <div className="container mx-auto px-4 py-12 max-w-7xl">
-          {/* Título Moderno */}
+          {/* Modern Title */}
           <div className="relative mb-10 animate-in fade-in slide-in-from-top-4 duration-700" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
             <DebugLabel component="AdminUsersPage" section="TitleSection" props={{ useModernDesign: true }} position="top-right" offset={4} />
             <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-3 flex items-center gap-3">
-              👤 Gestión de Usuarios
+              👤 User Management
             </h1>
             <p className="text-lg text-slate-600 dark:text-slate-400">
-              Administración de usuarios y permisos del sistema
+              User and system permissions administration
             </p>
           </div>
 
-          {/* Tabla de gestión */}
+          {/* Management table */}
           <div className="relative animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
             <DebugLabel component="AdminUsersPage" section="UserManagementTableSection" props={{ useModernDesign: true }} position="top-left" offset={4} />
             <UserManagementTable />
           </div>
         </div>
-        {/* DebugLabel de la página principal al final */}
+        {/* Main page DebugLabel at the end */}
         <DebugLabel component="AdminUsersPage" section="MainContent" props={{ isOwner, useModernDesign: true, isConnected }} position="bottom-right" offset={4} />
       </div>
     )
   }
 
-  // Diseño original
+  // Original design
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
       <main className="flex min-h-screen w-full max-w-6xl flex-col py-8 px-4 md:px-8 bg-white dark:bg-black">
-      {/* Header Común */}
+      {/* Common Header */}
       <Header />
 
       {/* Page Title */}
       <div className="relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '8px', marginBottom: '16px' } : {}}>
         <DebugLabel component="AdminUsersPage" section="TitleSection" props={{ useModernDesign: false }} position="top-right" offset={4} />
-        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">👤 Gestión de Usuarios</h1>
+        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">👤 User Management</h1>
         <p className="text-muted-foreground dark:text-slate-400 mt-1">
-          Administración de usuarios y permisos del sistema
+          User and system permissions administration
         </p>
       </div>
 
-      {/* Tabla de gestión (incluye stats internamente para sincronización) */}
+      {/* Management table (includes stats internally for synchronization) */}
       <div className="relative" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
         <DebugLabel component="AdminUsersPage" section="UserManagementTableSection" props={{ useModernDesign: false }} position="top-left" offset={4} />
         <UserManagementTable />
       </div>
       </main>
-      {/* DebugLabel de la página principal al final */}
+      {/* Main page DebugLabel at the end */}
       <DebugLabel component="AdminUsersPage" section="MainContent" props={{ isOwner, useModernDesign: false, isConnected }} position="bottom-right" offset={4} />
     </div>
   )

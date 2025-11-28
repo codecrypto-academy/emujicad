@@ -26,13 +26,7 @@ export function UserProfileCard() {
     return (
       <Card style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
         <DebugLabel component="UserProfileCard" section="NotConnectedState" props={{ isConnected, hasAddress: !!address }} position="top-right" offset={4} />
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            User Profile
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <p className="text-sm text-muted-foreground">
             Please connect your wallet to view your profile
           </p>
@@ -64,13 +58,7 @@ export function UserProfileCard() {
     return (
       <Card className="border-yellow-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-left-4" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
         <DebugLabel component="UserProfileCard" section="NotRegisteredState" props={{ hasUserInfo: !!userInfo }} position="top-right" offset={4} />
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            User Profile
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
               You are not registered yet. Please request a role to get started.
@@ -108,13 +96,7 @@ export function UserProfileCard() {
   return (
     <Card className="transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-left-4" style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
       <DebugLabel component="UserProfileCard" section="MainContent" props={{ hasUserInfo: !!userInfo, userStatus: status }} position="top-right" offset={4} />
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5 transition-transform duration-200 hover:scale-110" />
-          User Profile
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-6">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">User ID</span>
           <Badge variant="outline">#{userInfo.id.toString()}</Badge>

@@ -607,7 +607,9 @@ contract SupplyChain  is ReentrancyGuard {
         }
 
         // Validar que no esté solicitando el mismo rol
-        if (uint(role) == uint(user.role)) {
+        // EXCEPCIÓN: Si el usuario está Rejected, puede volver a solicitar el mismo rol
+        // (el rechazo puede haber sido por un tema administrativo que ya resolvió)
+        if (uint(role) == uint(user.role) && user.status != UserStatus.Rejected) {
             revert UserWithExistingRole();
         }
 

@@ -149,14 +149,14 @@ export function Header() {
               <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 py-2">
                 <Pause className="h-4 w-4 text-red-600 dark:text-red-400" />
                 <AlertDescription className="text-red-700 dark:text-red-300 text-sm">
-                  <strong>⚠️ Contrato Pausado:</strong> Las funciones críticas están deshabilitadas temporalmente.
+                  <strong>⚠️ Contract Paused:</strong> Critical functions are temporarily disabled.
                 </AlertDescription>
               </Alert>
             )}
 
             {/* User Address - Siempre visible cuando está conectado */}
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Dirección:</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Address:</span>
               <code className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded font-mono border border-gray-200 dark:border-gray-700">
                 {address}
               </code>
@@ -229,7 +229,7 @@ export function Header() {
                 {pathname !== '/dashboard' && (
                   <Link href="/dashboard">
                     <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
-                      Dashboard
+                      My Dashboard
                     </Button>
                   </Link>
                 )}
@@ -243,14 +243,14 @@ export function Header() {
                 {pathname !== '/transfers' && (
                   <Link href="/transfers">
                     <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
-                      Transfers
+                      My Transfers
                     </Button>
                   </Link>
                 )}
                 {pathname !== '/profile' && pathname !== '/dashboard' && (
                   <Link href="/profile">
                     <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
-                      Profile
+                      My Profile
                     </Button>
                   </Link>
                 )}
@@ -263,14 +263,14 @@ export function Header() {
                 {pathname !== '/dashboard' && (
                   <Link href="/dashboard">
                     <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
-                      Dashboard
+                      My Dashboard
                     </Button>
                   </Link>
                 )}
                 {pathname !== '/profile' && pathname !== '/dashboard' && (
                   <Link href="/profile">
                     <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
-                      Profile
+                      My Profile
                     </Button>
                   </Link>
                 )}

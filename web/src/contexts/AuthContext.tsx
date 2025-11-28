@@ -216,7 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     // Si userId existe pero aún no tenemos userInfo del contrato, intentar cargar del localStorage
     // Esto es útil justo después de registrar un usuario, antes de que el refetch complete
-    if (userId !== undefined && userId > BigInt(0) && !rawUserInfo && address && isLoadingUser) {
+    if (userId !== undefined && userId !== null && typeof userId === 'bigint' && userId > BigInt(0) && !rawUserInfo && address && isLoadingUser) {
       const storedUserInfo = getStoredUserInfo(address)
       if (storedUserInfo && storedUserInfo.id === userId) {
         console.log('AuthContext: ⚡ Usando userInfo del localStorage mientras se carga del contrato')

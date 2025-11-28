@@ -19,8 +19,36 @@ interface TokenCardProps {
 
 export function TokenCard({ tokenId, showBalance = false, onClick }: TokenCardProps) {
   const { address } = useAccount();
-  const { data: rawTokenData, isLoading: isLoadingToken } = useGetToken(tokenId);
-  const { data: balance, isLoading: isLoadingBalance } = useGetTokenBalance(tokenId, address);
+  const { data: rawTokenData, isLoading: isLoadingToken, refetch: refetchToken } = useGetToken(tokenId);
+  const { data: balance, isLoading: isLoadingBalance, refetch: refetchBalance } = useGetTokenBalance(tokenId, address);
+  
+  // Listen for transfer events to force immediate balance update
+  React.useEffect(() => {
+    const handleTransferCreated = () => {
+      console.log(`[TokenCard] Transfer created, refetching balance for token ${tokenId?.toString()}...`)
+      // Refetch balance after 2 seconds to allow blockchain to update
+      setTimeout(() => {
+        refetchBalance()
+      }, 2000)
+    }
+    
+    const handleTransferUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<{ hash: string; tokenId: string; transferId: string; action: 'accept' | 'reject' | 'cancel' }>
+      // Refetch balance for all tokens when any transfer is updated
+      // This ensures balances update even if the tokenId doesn't match (e.g., when sender's balance changes)
+      console.log(`[TokenCard] Transfer updated, refetching balance for token ${tokenId?.toString()}...`, customEvent.detail)
+      setTimeout(() => {
+        refetchBalance()
+      }, 2000)
+    }
+    
+    window.addEventListener('transferCreated', handleTransferCreated)
+    window.addEventListener('transferUpdated', handleTransferUpdated)
+    return () => {
+      window.removeEventListener('transferCreated', handleTransferCreated)
+      window.removeEventListener('transferUpdated', handleTransferUpdated)
+    }
+  }, [tokenId, refetchBalance])
 
   // Validación robusta de tokenData - memoizar para evitar re-creación en cada render
   const tokenData = React.useMemo(() => {

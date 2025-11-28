@@ -271,10 +271,10 @@ export default function Home() {
           {!isConnected && (
             <div className="flex flex-col items-center gap-8 text-center mt-12">
               <h2 className="max-w-2xl text-5xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent leading-tight animate-in fade-in slide-in-from-bottom-4 duration-700">
-                ¡Bienvenido a la DApp!
+                Welcome to the DApp!
               </h2>
               <p className="text-xl font-semibold text-slate-700 dark:text-slate-300 mt-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-                Conecta tu wallet para comenzar
+                Connect your wallet to get started
               </p>
               <div className="mt-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
                 <ConnectWallet />
@@ -285,15 +285,15 @@ export default function Home() {
           {/* Footer Message - Al final de la página */}
           <div className="flex flex-col items-center gap-2 text-center mt-16 mb-8">
             <p className="max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-400">
-              Sistema descentralizado de tracking para supply chain basado en blockchain.{" "}
-              <a
-                href="https://github.com"
-                className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline transition-colors"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Ver repositorio
-              </a>
+              Decentralized supply chain tracking system based on blockchain.{" "}
+                <a
+                  href="https://github.com/codecrypto-academy/emujicad/tree/supply-chain-tracker"
+                  className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View repository
+                </a>
             </p>
           </div>
         </main>
@@ -453,10 +453,10 @@ export default function Home() {
         {!isConnected && (
           <div className="flex flex-col items-center gap-6 text-center">
             <h2 className="max-w-md text-2xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-              ¡Bienvenido a la DApp!
+              Welcome to the DApp!
             </h2>
             <p className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mt-4">
-              Conecta tu wallet para comenzar
+              Connect your wallet to get started
             </p>
             <div className="mt-2">
               <ConnectWallet />
@@ -467,14 +467,14 @@ export default function Home() {
         {/* Footer Message - Al final de la página */}
         <div className="flex flex-col items-center gap-2 text-center mt-16 mb-8">
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Sistema descentralizado de tracking para supply chain basado en blockchain.{" "}
+            Decentralized supply chain tracking system based on blockchain.{" "}
             <a
-              href="https://github.com"
+              href="https://github.com/codecrypto-academy/emujicad/tree/supply-chain-tracker"
               className="font-medium text-zinc-950 dark:text-zinc-50 underline"
               target="_blank"
               rel="noopener noreferrer"
             >
-              Ver repositorio
+              View repository
             </a>
           </p>
         </div>

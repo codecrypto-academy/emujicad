@@ -18,6 +18,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
+import { formatTransactionError, getWalletName } from '@/lib/error-formatter'
 
 export function PauseControl() {
   const { data: isPaused, isLoading: isLoadingStatus } = useIsPaused()
@@ -25,26 +26,14 @@ export function PauseControl() {
   const { unpause, isPending: isUnpausing, isConfirming: isConfirmingUnpause, isSuccess: unpauseSuccess, error: unpauseError } = useUnpause()
   const { connector } = useAccount()
   
-  // Obtener el nombre de la billetera conectada
-  const getWalletName = () => {
-    if (!connector) return 'your wallet'
-    
-    // Si es injected y MetaMask está instalado, mostrar MetaMask
-    if (connector.id === 'injected' && typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
-      return 'MetaMask'
-    }
-    
-    // Usar el nombre del conector
-    return connector.name || 'your wallet'
-  }
-  
-  const walletName = getWalletName()
+  // Get the connected wallet name using the centralized function
+  const walletName = getWalletName(connector)
   
   const [showPauseDialog, setShowPauseDialog] = useState(false)
   const [confirmationText, setConfirmationText] = useState('')
   const [showUnpauseDialog, setShowUnpauseDialog] = useState(false)
   
-  // Activar diseño moderno si está habilitado
+  // Enable modern design if enabled
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
 
   const REQUIRED_CONFIRMATION = 'PAUSAR'
@@ -78,7 +67,7 @@ export function PauseControl() {
           <DebugLabel component="PauseControl" section="LoadingState" props={{ isLoadingStatus, useModernDesign: true }} position="top-right" offset={4} />
           <div className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin text-slate-600 dark:text-slate-400" />
-            <span className="text-sm text-slate-600 dark:text-slate-400">Verificando estado...</span>
+            <span className="text-sm text-slate-600 dark:text-slate-400">Checking status...</span>
           </div>
         </div>
       )
@@ -87,12 +76,12 @@ export function PauseControl() {
       <Card style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
         <DebugLabel component="PauseControl" section="LoadingState" props={{ isLoadingStatus, useModernDesign: false }} position="top-right" offset={4} />
         <CardHeader>
-          <CardTitle>Estado del Contrato</CardTitle>
+          <CardTitle>Contract Status</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm text-muted-foreground">Verificando estado...</span>
+            <span className="text-sm text-muted-foreground">Checking status...</span>
           </div>
         </CardContent>
       </Card>
@@ -101,7 +90,7 @@ export function PauseControl() {
 
   const paused = isPaused === true
 
-  // Diseño moderno
+  // Modern design
   if (useModernDesign) {
     return (
       <>
@@ -116,8 +105,8 @@ export function PauseControl() {
                     <Pause className="h-5 w-5 text-red-600 dark:text-red-400" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-red-700 dark:text-red-300">Contrato Pausado</h3>
-                    <p className="text-sm text-red-600 dark:text-red-400">El contrato está pausado. Las funciones críticas están deshabilitadas.</p>
+                    <h3 className="text-xl font-bold text-red-700 dark:text-red-300">Contract Paused</h3>
+                    <p className="text-sm text-red-600 dark:text-red-400">The contract is paused. Critical functions are disabled.</p>
                   </div>
                 </>
               ) : (
@@ -126,8 +115,8 @@ export function PauseControl() {
                     <Play className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-green-700 dark:text-green-300">Contrato Activo</h3>
-                    <p className="text-sm text-green-600 dark:text-green-400">El contrato está activo. Todas las funciones están disponibles.</p>
+                    <h3 className="text-xl font-bold text-green-700 dark:text-green-300">Contract Active</h3>
+                    <p className="text-sm text-green-600 dark:text-green-400">The contract is active. All functions are available.</p>
                   </div>
                 </>
               )}
@@ -139,12 +128,12 @@ export function PauseControl() {
                   <Alert className="rounded-xl bg-red-100/80 dark:bg-red-900/30 backdrop-blur border-red-300 dark:border-red-700">
                     <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
                     <AlertDescription className="text-red-700 dark:text-red-300">
-                      <strong>Funciones deshabilitadas:</strong>
+                      <strong>Disabled functions:</strong>
                       <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                        <li>Solicitar rol o cambiar rol</li>
-                        <li>Crear tokens</li>
-                        <li>Hacer transferencias</li>
-                        <li>Aceptar/Rechazar/Cancelar transferencias</li>
+                        <li>Request role or change role</li>
+                        <li>Create tokens</li>
+                        <li>Make transfers</li>
+                        <li>Accept/Reject/Cancel transfers</li>
                       </ul>
                     </AlertDescription>
                   </Alert>
@@ -159,57 +148,58 @@ export function PauseControl() {
                     {isUnpausing || isConfirmingUnpause ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        {isUnpausing ? 'Confirmando...' : 'Procesando...'}
+                        {isUnpausing ? 'Confirming...' : 'Processing...'}
                       </>
                     ) : (
                       <>
                         <Play className="h-4 w-4 mr-2" />
-                        Reanudar Contrato
+                        Resume Contract
                       </>
                     )}
                   </Button>
 
-                  {unpauseError && (
+                  {unpauseError && (() => {
+                    const { friendlyMessage, isUserCancelled, technicalDetails } = formatTransactionError(
+                      unpauseError,
+                      {
+                        action: 'unpausing the contract',
+                        walletName,
+                      }
+                    )
+                    // Dividir el mensaje por líneas y filtrar líneas vacías
+                    const messageLines = friendlyMessage.split('\n').filter(line => line.trim() !== '')
+                    return (
                     <Alert className="rounded-xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur border-red-200 dark:border-red-800">
                       <AlertDescription className="text-red-700 dark:text-red-300">
-                        {(() => {
-                          const errorAny = unpauseError as any
-                          const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
-                          const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
-                          const errorMsg = unpauseError.message || String(unpauseError) || ''
-                          const errorStr = errorMsg.toLowerCase()
-                          const errorNameStr = errorName.toLowerCase()
-                          
-                          const isUserCancelled = 
-                            errorCode === 4001 ||
-                            errorNameStr.includes('userrejected') ||
-                            errorStr.includes('user rejected') ||
-                            errorStr.includes('user denied') ||
-                            errorStr.includes('user cancelled') ||
-                            errorStr.includes('transaction cancelled') ||
-                            errorStr.includes('cancelled by user')
-                          
-                          if (isUserCancelled) {
-                            return (
-                              <div>
-                                <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
-                                <p className="text-sm">
-                                  You cancelled the transaction in {walletName}. No changes were made.
-                                </p>
-                              </div>
-                            )
-                          }
-                          
-                          return `❌ Error: ${errorMsg}`
-                        })()}
+                          {messageLines.map((line, index) => (
+                            <p key={index} className={index === 0 ? 'font-semibold' : 'mt-1 text-sm'}>
+                              {line}
+                            </p>
+                          ))}
+                          {isUserCancelled && (
+                            <p className="text-sm mt-1">
+                              You can try again by clicking "Unpause Contract" below.
+                            </p>
+                          )}
+                          {process.env.NODE_ENV === 'development' && technicalDetails && (
+                            <details className="mt-2">
+                              <summary className="text-xs text-red-500 cursor-pointer hover:text-red-700">
+                                ▼ Technical details (dev only)
+                              </summary>
+                              <pre className="text-xs mt-1 p-2 bg-red-100 dark:bg-red-900/30 rounded overflow-auto max-h-32">
+                                {technicalDetails}
+                              </pre>
+                            </details>
+                          )}
                       </AlertDescription>
                     </Alert>
-                  )}
+                    )
+                  })()}
 
                   {unpauseSuccess && (
                     <Alert className="rounded-xl bg-green-50/80 dark:bg-green-900/30 backdrop-blur border-green-200 dark:border-green-800">
                       <AlertDescription className="text-green-700 dark:text-green-300">
-                        ✅ Contrato reanudado exitosamente
+                        ✅ Contract resumed successfully
                       </AlertDescription>
                     </Alert>
                   )}
@@ -226,57 +216,58 @@ export function PauseControl() {
                     {isPausing || isConfirmingPause ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        {isPausing ? 'Confirmando...' : 'Procesando...'}
+                        {isPausing ? 'Confirming...' : 'Processing...'}
                       </>
                     ) : (
                       <>
                         <Pause className="h-4 w-4 mr-2" />
-                        Pausar Contrato
+                        Pause Contract
                       </>
                     )}
                   </Button>
 
-                  {pauseError && (
+                  {pauseError && (() => {
+                    const { friendlyMessage, isUserCancelled, technicalDetails } = formatTransactionError(
+                      pauseError,
+                      {
+                        action: 'pausing the contract',
+                        walletName,
+                      }
+                    )
+                    // Dividir el mensaje por líneas y filtrar líneas vacías
+                    const messageLines = friendlyMessage.split('\n').filter(line => line.trim() !== '')
+                    return (
                     <Alert className="rounded-xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur border-red-200 dark:border-red-800">
                       <AlertDescription className="text-red-700 dark:text-red-300">
-                        {(() => {
-                          const errorAny = pauseError as any
-                          const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
-                          const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
-                          const errorMsg = pauseError.message || String(pauseError) || ''
-                          const errorStr = errorMsg.toLowerCase()
-                          const errorNameStr = errorName.toLowerCase()
-                          
-                          const isUserCancelled = 
-                            errorCode === 4001 ||
-                            errorNameStr.includes('userrejected') ||
-                            errorStr.includes('user rejected') ||
-                            errorStr.includes('user denied') ||
-                            errorStr.includes('user cancelled') ||
-                            errorStr.includes('transaction cancelled') ||
-                            errorStr.includes('cancelled by user')
-                          
-                          if (isUserCancelled) {
-                            return (
-                              <div>
-                                <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
-                                <p className="text-sm">
-                                  You cancelled the transaction in {walletName}. No changes were made.
-                                </p>
-                              </div>
-                            )
-                          }
-                          
-                          return `❌ Error: ${errorMsg}`
-                        })()}
+                          {messageLines.map((line, index) => (
+                            <p key={index} className={index === 0 ? 'font-semibold' : 'mt-1 text-sm'}>
+                              {line}
+                            </p>
+                          ))}
+                          {isUserCancelled && (
+                            <p className="text-sm mt-1">
+                              You can try again by clicking "Pause Contract" below.
+                            </p>
+                          )}
+                          {process.env.NODE_ENV === 'development' && technicalDetails && (
+                            <details className="mt-2">
+                              <summary className="text-xs text-red-500 cursor-pointer hover:text-red-700">
+                                ▼ Technical details (dev only)
+                              </summary>
+                              <pre className="text-xs mt-1 p-2 bg-red-100 dark:bg-red-900/30 rounded overflow-auto max-h-32">
+                                {technicalDetails}
+                              </pre>
+                            </details>
+                          )}
                       </AlertDescription>
                     </Alert>
-                  )}
+                    )
+                  })()}
 
                   {pauseSuccess && (
                     <Alert className="rounded-xl bg-green-50/80 dark:bg-green-900/30 backdrop-blur border-green-200 dark:border-green-800">
                       <AlertDescription className="text-green-700 dark:text-green-300">
-                        ✅ Contrato pausado exitosamente
+                        ✅ Contract paused successfully
                       </AlertDescription>
                     </Alert>
                   )}
@@ -286,7 +277,7 @@ export function PauseControl() {
           </div>
         </div>
 
-        {/* Dialogs modernos */}
+        {/* Modern dialogs */}
         <Dialog open={showPauseDialog} onOpenChange={setShowPauseDialog}>
           <DialogContent className="rounded-2xl" aria-labelledby="pause-dialog-title" style={DEBUG_MODE ? { outline: '3px solid rgba(0, 128, 0, 0.6)', outlineOffset: '0px' } : {}}>
             <div className="relative">
@@ -294,29 +285,29 @@ export function PauseControl() {
               <DialogHeader>
               <DialogTitle id="pause-dialog-title" className="flex items-center gap-2 text-red-600 dark:text-red-400">
                 <AlertTriangle className="h-5 w-5" />
-                Confirmar Pausa del Contrato
+                Confirm Contract Pause
               </DialogTitle>
               <DialogDescription>
-                Esta acción pausará el contrato y deshabilitará todas las funciones críticas.
+                This action will pause the contract and disable all critical functions.
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4 py-4">
               <Alert className="rounded-xl bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
                 <AlertDescription className="text-red-700 dark:text-red-300">
-                  <strong>⚠️ Advertencia:</strong> Al pausar el contrato se deshabilitarán:
+                  <strong>⚠️ Warning:</strong> Pausing the contract will disable:
                   <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                    <li>Solicitud de roles</li>
-                    <li>Cambio de roles</li>
-                    <li>Creación de tokens</li>
-                    <li>Todas las transferencias</li>
+                    <li>Role requests</li>
+                    <li>Role changes</li>
+                    <li>Token creation</li>
+                    <li>All transfers</li>
                   </ul>
                 </AlertDescription>
               </Alert>
 
               <div className="space-y-2">
                 <Label htmlFor="confirmation">
-                  Escribe <strong className="font-mono">PAUSAR</strong> para confirmar:
+                  Type <strong className="font-mono">PAUSAR</strong> to confirm:
                 </Label>
                 <Input
                   id="confirmation"
@@ -337,7 +328,7 @@ export function PauseControl() {
                 }}
                 className="rounded-xl"
               >
-                Cancelar
+                Cancel
               </Button>
               <Button
                 variant="destructive"
@@ -345,7 +336,7 @@ export function PauseControl() {
                 disabled={confirmationText !== REQUIRED_CONFIRMATION}
                 className="rounded-xl"
               >
-                Confirmar Pausa
+                Confirm Pause
               </Button>
             </DialogFooter>
             </div>
@@ -359,10 +350,10 @@ export function PauseControl() {
               <DialogHeader>
               <DialogTitle id="unpause-dialog-title" className="flex items-center gap-2 text-green-600 dark:text-green-400">
                 <Play className="h-5 w-5" />
-                Reanudar Contrato
+                Resume Contract
               </DialogTitle>
               <DialogDescription>
-                ¿Estás seguro de que deseas reanudar el contrato? Esto habilitará todas las funciones nuevamente.
+                Are you sure you want to resume the contract? This will enable all functions again.
               </DialogDescription>
             </DialogHeader>
 
@@ -372,13 +363,13 @@ export function PauseControl() {
                 onClick={() => setShowUnpauseDialog(false)}
                 className="rounded-xl"
               >
-                Cancelar
+                Cancel
               </Button>
               <Button
                 onClick={handleUnpauseConfirm}
                 className="rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
               >
-                Reanudar
+                Resume
               </Button>
             </DialogFooter>
             </div>
@@ -388,7 +379,7 @@ export function PauseControl() {
     )
   }
 
-  // Diseño original
+  // Original design
   return (
     <>
       <Card className={`${paused ? 'border-red-500 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : 'border-green-500 dark:border-green-700 bg-green-50 dark:bg-green-900/20'} transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-bottom-4`} style={DEBUG_MODE ? { outline: '3px solid rgba(0, 128, 0, 0.6)', outlineOffset: '0px' } : {}}>
@@ -398,19 +389,19 @@ export function PauseControl() {
             {paused ? (
               <>
                 <Pause className="h-5 w-5 text-red-600 dark:text-red-400" />
-                <span className="text-red-700 dark:text-red-300">Contrato Pausado</span>
+                <span className="text-red-700 dark:text-red-300">Contract Paused</span>
               </>
             ) : (
               <>
                 <Play className="h-5 w-5 text-green-600 dark:text-green-400" />
-                <span className="text-green-700 dark:text-green-300">Contrato Activo</span>
+                <span className="text-green-700 dark:text-green-300">Contract Active</span>
               </>
             )}
           </CardTitle>
           <CardDescription className={paused ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
             {paused 
-              ? 'El contrato está pausado. Las funciones críticas están deshabilitadas.'
-              : 'El contrato está activo. Todas las funciones están disponibles.'}
+              ? 'The contract is paused. Critical functions are disabled.'
+              : 'The contract is active. All functions are available.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -419,12 +410,12 @@ export function PauseControl() {
               <Alert className="bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700">
                 <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
                 <AlertDescription className="text-red-700 dark:text-red-300">
-                  <strong>Funciones deshabilitadas:</strong>
+                  <strong>Disabled functions:</strong>
                   <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                    <li>Solicitar rol o cambiar rol</li>
-                    <li>Crear tokens</li>
-                    <li>Hacer transferencias</li>
-                    <li>Aceptar/Rechazar/Cancelar transferencias</li>
+                    <li>Request role or change role</li>
+                    <li>Create tokens</li>
+                    <li>Make transfers</li>
+                    <li>Accept/Reject/Cancel transfers</li>
                   </ul>
                 </AlertDescription>
               </Alert>
@@ -449,42 +440,43 @@ export function PauseControl() {
                 )}
               </Button>
 
-              {unpauseError && (
+              {unpauseError && (() => {
+                const { friendlyMessage, isUserCancelled, technicalDetails } = formatTransactionError(
+                  unpauseError,
+                  {
+                    action: 'unpausing the contract',
+                    walletName,
+                  }
+                )
+                // Dividir el mensaje por líneas y filtrar líneas vacías
+                const messageLines = friendlyMessage.split('\n').filter(line => line.trim() !== '')
+                return (
                 <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
                   <AlertDescription className="text-red-700 dark:text-red-300">
-                    {(() => {
-                      const errorAny = unpauseError as any
-                      const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
-                      const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
-                      const errorMsg = unpauseError.message || String(unpauseError) || ''
-                      const errorStr = errorMsg.toLowerCase()
-                      const errorNameStr = errorName.toLowerCase()
-                      
-                      const isUserCancelled = 
-                        errorCode === 4001 ||
-                        errorNameStr.includes('userrejected') ||
-                        errorStr.includes('user rejected') ||
-                        errorStr.includes('user denied') ||
-                        errorStr.includes('user cancelled') ||
-                        errorStr.includes('transaction cancelled') ||
-                        errorStr.includes('cancelled by user')
-                      
-                      if (isUserCancelled) {
-                        return (
-                          <div>
-                            <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
-                            <p className="text-sm">
-                              You cancelled the transaction in MetaMask. No changes were made.
-                            </p>
-                          </div>
-                        )
-                      }
-                      
-                      return `❌ Error: ${errorMsg}`
-                    })()}
+                      {messageLines.map((line, index) => (
+                        <p key={index} className={index === 0 ? 'font-semibold' : 'mt-1 text-sm'}>
+                          {line}
+                        </p>
+                      ))}
+                      {isUserCancelled && (
+                        <p className="text-sm mt-1">
+                          You can try again by clicking "Unpause Contract" below.
+                        </p>
+                      )}
+                      {process.env.NODE_ENV === 'development' && technicalDetails && (
+                        <details className="mt-2">
+                          <summary className="text-xs text-red-500 cursor-pointer hover:text-red-700">
+                            ▼ Technical details (dev only)
+                          </summary>
+                          <pre className="text-xs mt-1 p-2 bg-red-100 dark:bg-red-900/30 rounded overflow-auto max-h-32">
+                            {technicalDetails}
+                          </pre>
+                        </details>
+                      )}
                   </AlertDescription>
                 </Alert>
-              )}
+                )
+              })()}
 
               {unpauseSuccess && (
                 <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
@@ -517,42 +509,43 @@ export function PauseControl() {
                 )}
               </Button>
 
-              {pauseError && (
+              {pauseError && (() => {
+                const { friendlyMessage, isUserCancelled, technicalDetails } = formatTransactionError(
+                  pauseError,
+                  {
+                    action: 'pausing the contract',
+                    walletName,
+                  }
+                )
+                // Dividir el mensaje por líneas y filtrar líneas vacías
+                const messageLines = friendlyMessage.split('\n').filter(line => line.trim() !== '')
+                return (
                 <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
                   <AlertDescription className="text-red-700 dark:text-red-300">
-                    {(() => {
-                      const errorAny = pauseError as any
-                      const errorCode = errorAny?.cause?.cause?.code || errorAny?.code
-                      const errorName = errorAny?.cause?.cause?.name || errorAny?.name || ''
-                      const errorMsg = pauseError.message || String(pauseError) || ''
-                      const errorStr = errorMsg.toLowerCase()
-                      const errorNameStr = errorName.toLowerCase()
-                      
-                      const isUserCancelled = 
-                        errorCode === 4001 ||
-                        errorNameStr.includes('userrejected') ||
-                        errorStr.includes('user rejected') ||
-                        errorStr.includes('user denied') ||
-                        errorStr.includes('user cancelled') ||
-                        errorStr.includes('transaction cancelled') ||
-                        errorStr.includes('cancelled by user')
-                      
-                      if (isUserCancelled) {
-                        return (
-                          <div>
-                            <p className="font-semibold mb-2">⚠️ Transaction Cancelled</p>
-                            <p className="text-sm">
-                              You cancelled the transaction in MetaMask. No changes were made.
-                            </p>
-                          </div>
-                        )
-                      }
-                      
-                      return `❌ Error: ${errorMsg}`
-                    })()}
+                      {messageLines.map((line, index) => (
+                        <p key={index} className={index === 0 ? 'font-semibold' : 'mt-1 text-sm'}>
+                          {line}
+                        </p>
+                      ))}
+                      {isUserCancelled && (
+                        <p className="text-sm mt-1">
+                          You can try again by clicking "Pause Contract" below.
+                        </p>
+                      )}
+                      {process.env.NODE_ENV === 'development' && technicalDetails && (
+                        <details className="mt-2">
+                          <summary className="text-xs text-red-500 cursor-pointer hover:text-red-700">
+                            ▼ Technical details (dev only)
+                          </summary>
+                          <pre className="text-xs mt-1 p-2 bg-red-100 dark:bg-red-900/30 rounded overflow-auto max-h-32">
+                            {technicalDetails}
+                          </pre>
+                        </details>
+                      )}
                   </AlertDescription>
                 </Alert>
-              )}
+                )
+              })()}
 
               {pauseSuccess && (
                 <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
@@ -566,7 +559,7 @@ export function PauseControl() {
         </CardContent>
       </Card>
 
-      {/* Dialog de confirmación para pausar */}
+      {/* Confirmation dialog for pause */}
       <Dialog open={showPauseDialog} onOpenChange={setShowPauseDialog}>
         <DialogContent aria-labelledby="pause-dialog-title-original" style={DEBUG_MODE ? { outline: '3px solid rgba(0, 128, 0, 0.6)', outlineOffset: '0px' } : {}}>
           <div className="relative">
@@ -574,29 +567,29 @@ export function PauseControl() {
             <DialogHeader>
             <DialogTitle id="pause-dialog-title-original" className="flex items-center gap-2 text-red-600 dark:text-red-400">
               <AlertTriangle className="h-5 w-5" />
-              Confirmar Pausa del Contrato
+              Confirm Contract Pause
             </DialogTitle>
             <DialogDescription>
-              Esta acción pausará el contrato y deshabilitará todas las funciones críticas.
+              This action will pause the contract and disable all critical functions.
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
               <AlertDescription className="text-red-700 dark:text-red-300">
-                <strong>⚠️ Advertencia:</strong> Al pausar el contrato se deshabilitarán:
+                <strong>⚠️ Warning:</strong> Pausing the contract will disable:
                 <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                  <li>Solicitud de roles</li>
-                  <li>Cambio de roles</li>
-                  <li>Creación de tokens</li>
-                  <li>Todas las transferencias</li>
+                  <li>Role requests</li>
+                  <li>Role changes</li>
+                  <li>Token creation</li>
+                  <li>All transfers</li>
                 </ul>
               </AlertDescription>
             </Alert>
 
             <div className="space-y-2">
               <Label htmlFor="confirmation">
-                Escribe <strong className="font-mono">PAUSAR</strong> para confirmar:
+                Type <strong className="font-mono">PAUSAR</strong> to confirm:
               </Label>
               <Input
                 id="confirmation"
@@ -616,21 +609,21 @@ export function PauseControl() {
                 setConfirmationText('')
               }}
             >
-              Cancelar
+              Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handlePauseConfirm}
               disabled={confirmationText !== REQUIRED_CONFIRMATION}
             >
-              Confirmar Pausa
+              Confirm Pause
             </Button>
           </DialogFooter>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de confirmación para reanudar */}
+      {/* Confirmation dialog for resume */}
       <Dialog open={showUnpauseDialog} onOpenChange={setShowUnpauseDialog}>
         <DialogContent aria-labelledby="unpause-dialog-title-original" style={DEBUG_MODE ? { outline: '3px solid rgba(0, 128, 0, 0.6)', outlineOffset: '0px' } : {}}>
           <div className="relative">
@@ -638,10 +631,10 @@ export function PauseControl() {
             <DialogHeader>
             <DialogTitle id="unpause-dialog-title-original" className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <Play className="h-5 w-5" />
-              Reanudar Contrato
+              Resume Contract
             </DialogTitle>
             <DialogDescription>
-              ¿Estás seguro de que deseas reanudar el contrato? Esto habilitará todas las funciones nuevamente.
+              Are you sure you want to resume the contract? This will enable all functions again.
             </DialogDescription>
           </DialogHeader>
 
@@ -650,13 +643,13 @@ export function PauseControl() {
               variant="outline"
               onClick={() => setShowUnpauseDialog(false)}
             >
-              Cancelar
+              Cancel
             </Button>
             <Button
               onClick={handleUnpauseConfirm}
               className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 text-white"
             >
-              Reanudar
+              Resume
             </Button>
           </DialogFooter>
           </div>

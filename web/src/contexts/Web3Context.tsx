@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useAccount, useDisconnect, useConnect } from 'wagmi'
+import { clearAppStorage } from '@/lib/storage-cleanup'
 
 interface Web3ContextType {
   isInitialized: boolean
@@ -76,7 +77,8 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       } else if (!isConnected && wasConnected) {
         // Solo limpiar si ESTUVO conectado antes en ESTA pestaña
         // (Evita limpiar cuando es pestaña nueva cargando por primera vez)
-        localStorage.removeItem('lastConnectedAddress')
+        console.log('🧹 [Web3Context] Usuario desconectado, limpiando localStorage')
+        clearAppStorage()
         setLastConnectedAddress(null)
         setWasConnected(false)
       }
@@ -107,7 +109,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       if (accounts.length === 0) {
         // Usuario desconectó desde MetaMask
         console.log('❌ No accounts, clearing localStorage')
-        localStorage.removeItem('lastConnectedAddress')
+        clearAppStorage()
         disconnect()
       } else if (address && accounts[0].toLowerCase() !== address.toLowerCase()) {
         // Cambió de cuenta en MetaMask
@@ -123,8 +125,8 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     }
 
     const handleDisconnect = () => {
-      console.log('❌ Disconnected from MetaMask')
-      localStorage.removeItem('lastConnectedAddress')
+      console.log('❌ Disconnected from MetaMask, clearing localStorage')
+      clearAppStorage()
     }
 
     window.ethereum.on('accountsChanged', handleAccountsChanged)

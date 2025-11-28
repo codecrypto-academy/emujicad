@@ -79,7 +79,7 @@ export function ThemeToggle() {
       size="sm" 
       className="w-10 h-10 p-0"
       onClick={toggleTheme}
-      title={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
+      title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
       aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
       aria-pressed={theme === 'dark'}
     >

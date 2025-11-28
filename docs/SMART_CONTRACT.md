@@ -363,9 +363,18 @@ Allows a user to request a role in the supply chain.
 - `role`: Desired role (Producer, Factory, Retailer, Consumer)
 
 **Requirements:**
-- User must not already be registered
+- User must not already be registered (for new users)
 - Owner cannot request a role
 - Contract must not be paused
+
+**Behavior for Existing Users:**
+- **Pending users**: Can change to a different role, but cannot request the same role again
+- **Rejected users**: Can request any role, including the same role they were rejected for (allows re-application after resolving administrative issues)
+- **Approved users**: Cannot change role (must be canceled first by admin)
+- **Canceled users**: Cannot request any new role
+
+**Special Case - Rejected Users:**
+Users with `Rejected` status can re-request the same role they were rejected for. This allows users who were rejected due to administrative issues (e.g., missing documentation) to re-apply after resolving the problem, without requiring admin intervention to change their status first.
 
 #### `changeStatusUser(address userAddress, UserStatus newStatus)`
 Allows admin to change user status (approve, reject, cancel).

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Package, Factory, ShoppingCart, User, ArrowRight, Calendar, Hash, TrendingUp, CheckCircle2, XCircle, Clock, Ban, ChevronDown, ChevronRight, Filter, X } from 'lucide-react'
 import { AddressDisplay } from '@/components/AddressDisplay'
 import { TokenType, UserRole, TransferStatus } from '@/contracts/config'
+import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
 
 // Función helper para convertir string de rol a UserRole enum
 const getRoleEnum = (role: string): bigint => {
@@ -103,7 +104,7 @@ export function TraceabilityTimeline({ traceability, isLoading, currentUserRole 
     return (
       <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl">
         <CardHeader>
-          <CardTitle>End-to-End Traceability</CardTitle>
+          <CardTitle>Tokens End-to-End Traceability</CardTitle>
           <CardDescription>Complete supply chain journey</CardDescription>
         </CardHeader>
         <CardContent>
@@ -180,7 +181,7 @@ export function TraceabilityTimeline({ traceability, isLoading, currentUserRole 
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-              End-to-End Traceability
+              Tokens End-to-End Traceability
             </CardTitle>
             <CardDescription className="mt-2 text-base">
               Complete supply chain journey from raw material to consumer
@@ -199,7 +200,7 @@ export function TraceabilityTimeline({ traceability, isLoading, currentUserRole 
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">
-                  Started: <span className="font-semibold text-slate-900 dark:text-slate-100">{startDate.date}</span>
+                  Started: <span className="font-semibold text-slate-900 dark:text-slate-100">{startDate.full}</span>
                 </span>
               </div>
             )}
@@ -207,7 +208,7 @@ export function TraceabilityTimeline({ traceability, isLoading, currentUserRole 
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                 <span className="text-muted-foreground">
-                  Completed: <span className="font-semibold text-slate-900 dark:text-slate-100">{endDate.date}</span>
+                  Completed: <span className="font-semibold text-slate-900 dark:text-slate-100">{endDate.full}</span>
                 </span>
               </div>
             )}
@@ -556,7 +557,24 @@ function TreeNodeComponent({
       
       {/* Nodo */}
       {shouldRender && (
-        <div className="relative flex items-start gap-4 mb-4" style={{ marginLeft: `${level * 24}px` }}>
+        <div className="relative flex items-start gap-4 mb-4" style={{ marginLeft: `${level * 24}px`, ...(DEBUG_MODE ? { border: '2px solid rgba(0, 255, 0, 0.4)', borderRadius: '8px', padding: '4px' } : {}) }}>
+          <DebugLabel 
+            component="TraceabilityTimeline" 
+            section={`TreeNode_${nodeId}`}
+            props={{ 
+              nodeId, 
+              level, 
+              role: node.role, 
+              tokenId: node.tokenId.toString(), 
+              isCreation: node.isCreation, 
+              hasChildren: hasChildren,
+              isExpanded,
+              transferId: node.transferId?.toString() || 'none',
+              address: node.address
+            }} 
+            position="top-right" 
+            offset={4} 
+          />
           {/* Botón de expandir/colapsar */}
           {hasChildren && (
             <button

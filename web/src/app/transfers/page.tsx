@@ -109,7 +109,7 @@ export default function TransfersPage() {
                 <div className="p-2.5 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 backdrop-blur-sm border border-blue-200/50 dark:border-blue-500/30">
                   <ArrowRightLeft className="h-7 w-7 text-blue-600 dark:text-blue-400" />
                 </div>
-                {isConsumerRole ? 'Incoming Transfers' : isProducerRole ? 'Sent Transfers' : 'Transfers'}
+                {isConsumerRole ? 'My Incoming Transfer' : isProducerRole ? 'Sent Transfers' : 'Transfers'}
               </h1>
               <p className="text-slate-600 dark:text-slate-400 text-lg font-light">
                 {isConsumerRole 

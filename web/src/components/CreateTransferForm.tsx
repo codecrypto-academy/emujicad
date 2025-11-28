@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useUsersByRole } from '@/hooks/useUsersByRole'
 import { useGetUserTokensWithData } from '@/hooks/useGetUserTokensWithData'
 import { useAccount } from 'wagmi'
+import { useQueryClient } from '@tanstack/react-query'
 import { UserRole, TokenType } from '@/contracts/config'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, CheckCircle, XCircle, Send, Pause, AlertCircle } from 'lucide-react'
 import { isAddress } from 'viem'
+import { getWalletName } from '@/lib/error-formatter'
 
 export function CreateTransferForm() {
   const [to, setTo] = useState('')
@@ -28,21 +30,10 @@ export function CreateTransferForm() {
   const { data: isPaused } = useIsPaused()
   const { userInfo, isAdmin } = useAuth()
   const { address, connector } = useAccount()
+  const queryClient = useQueryClient()
   
-  // Obtener el nombre de la billetera conectada
-  const getWalletName = () => {
-    if (!connector) return 'your wallet'
-    
-    // Si es injected y MetaMask está instalado, mostrar MetaMask
-    if (connector.id === 'injected' && typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
-      return 'MetaMask'
-    }
-    
-    // Usar el nombre del conector
-    return connector.name || 'your wallet'
-  }
-  
-  const walletName = getWalletName()
+  // Obtener el nombre de la billetera conectada usando la función centralizada
+  const walletName = getWalletName(connector)
   
   // Obtener usuarios filtrados por rol según el flujo de la cadena de suministro
   const { users: availableUsers, isLoading: isLoadingUsers, error: usersError, targetRole } = useUsersByRole(userInfo?.role)
@@ -154,20 +145,67 @@ export function CreateTransferForm() {
   }, [userInfo])
 
   useEffect(() => {
-    if (isSuccess && hash) {
+    if (isSuccess && hash && selectedTokenId) {
       // Reset form on successful transaction
       setTo('')
       setSelectedTokenId('')
       setAmount('')
       setFormError(null)
       
+      // Invalidar queries relacionadas con balances y tokens del usuario
+      // Esto actualizará inmediatamente los balances mostrados en las tarjetas
+      const tokenId = BigInt(selectedTokenId)
+      
+      // Invalidar todas las queries de wagmi relacionadas con:
+      // 1. getTokenBalance para el token transferido
+      // 2. getUserTokens para actualizar la lista de tokens
+      // 3. getUserTokensWithData que incluye balances
+      // Wagmi usa query keys con estructura: ['readContract', { address, functionName, args }]
+      
+      // Invalidar getTokenBalance para este token y usuario
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey
+          // Invalidar queries de getTokenBalance para el token transferido
+          if (Array.isArray(queryKey) && queryKey.length >= 2) {
+            const secondKey = queryKey[1] as any
+            if (secondKey?.functionName === 'getTokenBalance') {
+              // Verificar si es para el token transferido y el usuario actual
+              if (Array.isArray(secondKey?.args) && secondKey.args.length >= 2) {
+                const [queryTokenId, queryAddress] = secondKey.args
+                if (queryTokenId === tokenId && queryAddress?.toLowerCase() === address?.toLowerCase()) {
+                  return true
+                }
+              }
+            }
+            // Invalidar getUserTokens para el usuario actual
+            if (secondKey?.functionName === 'getUserTokens') {
+              if (Array.isArray(secondKey?.args) && secondKey.args.length >= 1) {
+                const [queryAddress] = secondKey.args
+                if (queryAddress?.toLowerCase() === address?.toLowerCase()) {
+                  return true
+                }
+              }
+            }
+          }
+          return false
+        },
+      })
+      
+      // También invalidar usando prefijos más amplios para asegurar que todo se actualice
+      // Esto es más seguro aunque pueda invalidar más queries de las necesarias
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['readContract'] })
+        queryClient.invalidateQueries({ queryKey: ['readContracts'] })
+      }, 1000) // Esperar 1 segundo para que la blockchain se actualice
+      
       // Disparar evento personalizado para notificar que se creó una transferencia
       // Esto permitirá que TransferList se actualice inmediatamente
-      const event = new CustomEvent('transferCreated', { detail: { hash } })
+      const event = new CustomEvent('transferCreated', { detail: { hash, tokenId: selectedTokenId } })
       window.dispatchEvent(event)
-      console.log('[CreateTransferForm] Transfer created, dispatching event:', hash)
+      console.log('[CreateTransferForm] Transfer created, invalidating balance queries and dispatching event:', { hash, tokenId: selectedTokenId })
     }
-  }, [isSuccess, hash])
+  }, [isSuccess, hash, selectedTokenId, address, queryClient])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

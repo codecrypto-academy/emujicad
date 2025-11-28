@@ -9,6 +9,7 @@ import { useIsPaused } from '@/hooks/usePause'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUsersByRole } from '@/hooks/useUsersByRole'
 import { useAccount } from 'wagmi'
+import { useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -35,6 +36,7 @@ export default function TokenTransferPage({ params }: PageProps) {
   const router = useRouter()
   const { address } = useAccount()
   const { userInfo, isAdmin } = useAuth()
+  const queryClient = useQueryClient()
   
   const tokenId = BigInt(id)
   
@@ -110,16 +112,62 @@ export default function TokenTransferPage({ params }: PageProps) {
   // Reset form on success
   useEffect(() => {
     if (isSuccess && hash) {
+      // Invalidar queries relacionadas con balances y tokens del usuario
+      // Esto actualizará inmediatamente los balances mostrados en las tarjetas
+      
+      // Invalidar todas las queries de wagmi relacionadas con:
+      // 1. getTokenBalance para el token transferido
+      // 2. getUserTokens para actualizar la lista de tokens
+      // 3. getUserTokensWithData que incluye balances
+      
+      // Invalidar getTokenBalance para este token y usuario
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey
+          // Invalidar queries de getTokenBalance para el token transferido
+          if (Array.isArray(queryKey) && queryKey.length >= 2) {
+            const secondKey = queryKey[1] as any
+            if (secondKey?.functionName === 'getTokenBalance') {
+              // Verificar si es para el token transferido y el usuario actual
+              if (Array.isArray(secondKey?.args) && secondKey.args.length >= 2) {
+                const [queryTokenId, queryAddress] = secondKey.args
+                if (queryTokenId === tokenId && queryAddress?.toLowerCase() === address?.toLowerCase()) {
+                  return true
+                }
+              }
+            }
+            // Invalidar getUserTokens para el usuario actual
+            if (secondKey?.functionName === 'getUserTokens') {
+              if (Array.isArray(secondKey?.args) && secondKey.args.length >= 1) {
+                const [queryAddress] = secondKey.args
+                if (queryAddress?.toLowerCase() === address?.toLowerCase()) {
+                  return true
+                }
+              }
+            }
+          }
+          return false
+        },
+      })
+      
+      // También invalidar usando prefijos más amplios para asegurar que todo se actualice
+      // Esto es más seguro aunque pueda invalidar más queries de las necesarias
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['readContract'] })
+        queryClient.invalidateQueries({ queryKey: ['readContracts'] })
+      }, 1000) // Esperar 1 segundo para que la blockchain se actualice
+      
       // Disparar evento personalizado para notificar que se creó una transferencia
-      const event = new CustomEvent('transferCreated', { detail: { hash } })
+      const event = new CustomEvent('transferCreated', { detail: { hash, tokenId: id } })
       window.dispatchEvent(event)
+      console.log('[TokenTransferPage] Transfer created, invalidating balance queries and dispatching event:', { hash, tokenId: id })
       
       // Redirigir a la página de detalles después de un breve delay
       setTimeout(() => {
         router.push(`/tokens/${id}`)
       }, 2000)
     }
-  }, [isSuccess, hash, router, id])
+  }, [isSuccess, hash, router, id, tokenId, address, queryClient])
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

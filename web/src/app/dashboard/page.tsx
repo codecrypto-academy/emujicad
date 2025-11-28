@@ -17,6 +17,7 @@ import { validateBigIntArray } from '@/lib/validation';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -30,13 +31,14 @@ export default function DashboardPage() {
   const router = useRouter();
   const { address, isConnected } = useAccount();
   const { isAdmin, isAuthenticated, isLoading, userInfo } = useAuth();
+  const queryClient = useQueryClient();
   
-  // Activar diseño moderno si está habilitado
+  // Enable modern design if enabled
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
   
-  // CRÍTICO: TODOS los hooks deben estar ANTES de cualquier return condicional
-  // Esto previene el error "Rendered more hooks than during the previous render"
-  // ORDEN FIJO: useState, useEffect, hooks de datos, useMemo
+  // CRITICAL: ALL hooks must be BEFORE any conditional return
+  // This prevents the "Rendered more hooks than during the previous render" error
+  // FIXED ORDER: useState, useEffect, data hooks, useMemo
   
   const [mounted, setMounted] = useState(false);
   const [stableValidTokens, setStableValidTokens] = useState<bigint[] | null>(null);
@@ -45,16 +47,18 @@ export default function DashboardPage() {
     setMounted(true);
   }, []);
   
-  // Hooks de datos - se ejecutan siempre, pero se deshabilitan si no está autenticado
-  // Usar isAuthenticated para habilitar/deshabilitar consultas
+  // Data hooks - always execute, but are disabled if not authenticated
+  // Use isAuthenticated to enable/disable queries
   const shouldFetchData = isConnected && !isLoading && isAuthenticated;
   
-  const { data: userTokens, isLoading: isLoadingTokens, error: tokensError } = useGetUserTokens(
+  // Use useGetUserTokensWithData instead of useGetUserTokens for the counter
+  // This ensures we only count tokens with balance > 0, same as in the list
+  const { tokens: userTokensWithData, isLoading: isLoadingTokens, error: tokensError, refetch: refetchUserTokens } = useGetUserTokensWithData(
     shouldFetchData ? address : undefined
   );
   
-  // Optimización: usar batch reads en lugar de 3 llamadas separadas
-  // CRÍTICO: Deshabilitar si no está autenticado para evitar consultas innecesarias
+  // Optimization: use batch reads instead of 3 separate calls
+  // CRITICAL: Disable if not authenticated to avoid unnecessary queries
   const { 
     totalTokens, 
     totalUsers, 
@@ -63,24 +67,24 @@ export default function DashboardPage() {
     errors: statsErrors 
   } = useDashboardStats(shouldFetchData);
   
-  // CRÍTICO: Deshabilitar si no está autenticado para evitar consultas innecesarias
+  // CRITICAL: Disable if not authenticated to avoid unnecessary queries
   const { data: isPaused } = useIsPaused(shouldFetchData);
   
-  // Obtener transferencias del usuario para estadísticas (solo para usuarios no-admin)
+  // Get user transfers for statistics (only for non-admin users)
   const { transfers, isLoading: isLoadingTransfers, refetch: refetchTransfers } = useGetUserTransfers(
     shouldFetchData && !isAdmin ? address : undefined
   );
 
-  // Obtener todas las transferencias del sistema (solo para admin)
+  // Get all system transfers (only for admin)
   const { transfers: allTransfers, isLoading: isLoadingAllTransfers } = useGetAllTransfers(
     shouldFetchData && isAdmin
   );
 
-  // Hooks adicionales para admin (solo se ejecutan si es admin)
-  // Nota: useGetAllTokens no acepta argumentos, se ejecuta siempre pero solo se usa si es admin
+  // Additional hooks for admin (only execute if admin)
+  // Note: useGetAllTokens doesn't accept arguments, always executes but only used if admin
   const { tokens: allTokens, isLoading: isLoadingAllTokens } = useGetAllTokens()
 
-  // Calcular estadísticas de tokens por tipo (solo para admin)
+  // Calculate token statistics by type (only for admin)
   const tokenStats = useMemo(() => {
     if (!allTokens || allTokens.length === 0) {
       return {
@@ -100,7 +104,7 @@ export default function DashboardPage() {
     }
   }, [allTokens])
 
-  // Calcular estadísticas de transferencias del sistema (solo para admin)
+  // Calculate system transfer statistics (only for admin)
   const systemTransferStats = useMemo(() => {
     if (!allTransfers || allTransfers.length === 0) {
       return {
@@ -119,7 +123,7 @@ export default function DashboardPage() {
     }
   }, [allTransfers])
   
-  // Separar transferencias en enviadas y recibidas
+  // Separate transfers into sent and received
   const sentTransfers = useMemo(() => {
     if (!transfers || transfers.length === 0 || !address) return []
     return transfers.filter(t => t.from.toLowerCase() === address.toLowerCase())
@@ -130,7 +134,7 @@ export default function DashboardPage() {
     return transfers.filter(t => t.to.toLowerCase() === address.toLowerCase())
   }, [transfers, address])
 
-  // Calcular estadísticas de transferencias enviadas
+  // Calculate sent transfer statistics
   const sentStats = useMemo(() => {
     if (!sentTransfers || sentTransfers.length === 0) {
       return {
@@ -151,7 +155,7 @@ export default function DashboardPage() {
     }
   }, [sentTransfers]);
 
-  // Calcular estadísticas de transferencias recibidas
+  // Calculate received transfer statistics
   const receivedStats = useMemo(() => {
     if (!receivedTransfers || receivedTransfers.length === 0) {
       return {
@@ -172,12 +176,12 @@ export default function DashboardPage() {
     }
   }, [receivedTransfers]);
 
-  // Detectar roles del usuario
+  // Detect user roles
   const isProducer = userInfo && userInfo.role === BigInt(UserRole.Producer)
 
-  // Para Producer: solo usar sentStats
-  // Para Consumer: solo usar receivedStats
-  // Para Factory y Retailer: usar ambas
+  // For Producer: only use sentStats
+  // For Consumer: only use receivedStats
+  // For Factory and Retailer: use both
   const transferStats = useMemo(() => {
     if (!userInfo) return { total: 0, pending: 0, accepted: 0, rejected: 0, cancelled: 0 }
     const roleNum = Number(userInfo.role)
@@ -188,7 +192,7 @@ export default function DashboardPage() {
     if (roleNum === 3) { // Consumer
       return receivedStats
     }
-    // Factory y Retailer: combinar ambas
+    // Factory and Retailer: combine both
     return {
       total: sentStats.total + receivedStats.total,
       pending: sentStats.pending + receivedStats.pending,
@@ -198,75 +202,95 @@ export default function DashboardPage() {
     }
   }, [sentStats, receivedStats, userInfo]);
   
-  // Escuchar evento cuando se crea una nueva transferencia
+  // Listen for events when transfers are created, accepted, rejected, or cancelled
   useEffect(() => {
     const handleTransferCreated = () => {
-      console.log('[Dashboard] Nueva transferencia creada, actualizando estadísticas...')
+      console.log('[Dashboard] New transfer created, updating statistics and tokens...')
+      // Direct refetch of getUserTokens after 2 seconds to update the counter
       setTimeout(() => {
+        refetchUserTokens()
         refetchTransfers()
       }, 2000)
+      
+      // Also invalidate all read queries after 3 seconds to ensure complete update
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['readContract'] })
+        queryClient.invalidateQueries({ queryKey: ['readContracts'] })
+      }, 3000)
+    }
+    
+    const handleTransferUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<{ hash: string; tokenId: string; transferId: string; action: 'accept' | 'reject' | 'cancel' }>
+      console.log('[Dashboard] Transfer updated (accept/reject/cancel), updating statistics and tokens...', customEvent.detail)
+      // Direct refetch of getUserTokens after 2 seconds to update the counter
+      // This is important for all actions:
+      // - accept: Factory/Retailer/Consumer receives tokens (balance increases)
+      // - reject: tokens return to sender (balance increases for sender)
+      // - cancel: tokens return to sender (balance increases for sender)
+      setTimeout(() => {
+        refetchUserTokens()
+        refetchTransfers()
+      }, 2000)
+      
+      // Also invalidate all read queries after 3 seconds to ensure complete update
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['readContract'] })
+        queryClient.invalidateQueries({ queryKey: ['readContracts'] })
+      }, 3000)
     }
     
     window.addEventListener('transferCreated', handleTransferCreated)
+    window.addEventListener('transferUpdated', handleTransferUpdated)
     return () => {
       window.removeEventListener('transferCreated', handleTransferCreated)
+      window.removeEventListener('transferUpdated', handleTransferUpdated)
     }
-  }, [refetchTransfers]);
+  }, [refetchTransfers, refetchUserTokens, queryClient]);
   
-  // Memoizar tokens validados para evitar re-renders innecesarios
-  const validTokens = useMemo(() => {
-    return validateBigIntArray(userTokens);
-  }, [userTokens]);
+  // Use userTokensWithData directly which already filters by balance > 0
+  // This ensures the counter matches what is shown in the list
+  const displayTokens = userTokensWithData || [];
   
-  useEffect(() => {
-    if (validTokens && validTokens.length > 0) {
-      setStableValidTokens(validTokens);
-    }
-  }, [validTokens]);
-  
-  // Usar tokens estables si existen, sino usar los actuales
-  const displayTokens = stableValidTokens || validTokens || [];
-  
-  // Memoizar valores para evitar parpadeos durante refetch
+  // Memoize values to avoid flickering during refetch
   const stableTotalTokens = useMemo(() => totalTokens, [totalTokens]);
   const stableTotalUsers = useMemo(() => totalUsers, [totalUsers]);
   const stableTotalTransfers = useMemo(() => totalTransfers, [totalTransfers]);
   
-  // Solo mostrar loading en la primera carga, no durante refetch
+  // Only show loading on first load, not during refetch
   const isInitialStatsLoading = isLoadingStats && stableTotalTokens === undefined && stableTotalUsers === undefined && stableTotalTransfers === undefined;
 
-  // CRÍTICO: Redirigir INMEDIATAMENTE si no está conectado o no está autenticado
-  // NO esperar a que termine de cargar - redirigir tan pronto como sepamos que no está autorizado
+  // CRITICAL: Redirect IMMEDIATELY if not connected or not authenticated
+  // DO NOT wait for loading to finish - redirect as soon as we know user is not authorized
   useEffect(() => {
     if (!mounted) return;
     
-    // Si no está conectado, redirigir inmediatamente
+    // If not connected, redirect immediately
     if (!isConnected) {
       router.replace('/');
       return;
     }
     
-    // Si ya terminó de cargar y no está autenticado, redirigir INMEDIATAMENTE
-    // No esperar más - si isLoading es false y isAuthenticated es false, redirigir
+    // If already finished loading and not authenticated, redirect IMMEDIATELY
+    // Don't wait more - if isLoading is false and isAuthenticated is false, redirect
     if (!isLoading && !isAuthenticated) {
       router.replace('/');
       return;
     }
   }, [mounted, isConnected, isAuthenticated, isLoading, router]);
 
-  // CRÍTICO: Early return DESPUÉS de todos los hooks
-  // Esto previene cualquier renderizado innecesario
+  // CRITICAL: Early return AFTER all hooks
+  // This prevents any unnecessary rendering
   if (!mounted || !isConnected) {
     return null
   }
   
-  // CRÍTICO: Si ya terminó de cargar y no está autenticado, redirigir INMEDIATAMENTE
-  // No esperar más - mostrar null mientras se redirige
+  // CRITICAL: If already finished loading and not authenticated, redirect IMMEDIATELY
+  // Don't wait more - show null while redirecting
   if (!isLoading && !isAuthenticated) {
-    return null // Redirección en progreso
+    return null // Redirect in progress
   }
   
-  // Si aún está cargando, mostrar loading (pero solo si realmente está cargando)
+  // If still loading, show loading (but only if really loading)
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -288,19 +312,19 @@ export default function DashboardPage() {
     );
   }
 
-  // Diseño moderno 2025
+  // Modern design 2025
   if (useModernDesign) {
     return (
       <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
         <Header />
         
         <div className="container mx-auto px-4 py-12 max-w-7xl">
-          {/* Título Moderno */}
+          {/* Modern Title */}
           <div className="relative mb-10 flex items-start justify-between animate-in fade-in slide-in-from-top-4 duration-700" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
             <DebugLabel component="DashboardPage" section="TitleSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
             <div>
             <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 dark:from-slate-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent mb-3">
-              {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
+              {isAdmin ? '👑 Admin Dashboard' : '📊 My Dashboard'}
             </h1>
             <p className="text-lg text-slate-600 dark:text-slate-400">
               {isAdmin 
@@ -311,15 +335,15 @@ export default function DashboardPage() {
             <Link href="/profile">
               <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-6 py-6">
                 <User className="h-5 w-5 mr-2" />
-                View Profile
+                My Profile
               </Button>
             </Link>
           </div>
 
-          {/* Estadísticas Principales Modernas */}
+          {/* Modern Main Statistics */}
           <div className={`relative grid grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mb-6`} style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
             <DebugLabel component="DashboardPage" section="MainStatsSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
-            {/* Total Users - Solo visible para administrador */}
+            {/* Total Users - Only visible for administrator */}
             {isAdmin && (
             <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] animate-in fade-in slide-in-from-left-4">
                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -367,7 +391,7 @@ export default function DashboardPage() {
                       <Skeleton className="h-10 w-20" />
                     ) : stableTotalTokens !== undefined ? Number(stableTotalTokens) : '-'
                   ) : (
-                    // Usuario: Total de sus tokens
+                    // User: Total of their tokens
                     isLoadingTokens ? (
                       <Skeleton className="h-10 w-20" />
                     ) : displayTokens.length
@@ -400,7 +424,7 @@ export default function DashboardPage() {
                     <Skeleton className="h-10 w-20" />
                     ) : stableTotalTransfers !== undefined ? Number(stableTotalTransfers) : '-'
                   ) : (
-                    // Usuario: Total de sus transferencias
+                    // User: Total of their transfers
                     isLoadingTransfers ? (
                       <Skeleton className="h-10 w-20" />
                     ) : transferStats.total
@@ -413,178 +437,246 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Estadísticas de Transferencias */}
+          {/* Transfer Statistics */}
           {!isAdmin && (
             <div className="relative mb-10" style={DEBUG_MODE ? { border: '3px solid rgba(128, 0, 128, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
               <DebugLabel component="DashboardPage" section="TransferStatsSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
               <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
-                Transfer Statistics
+                Transfers Status
               </h2>
               
-              {/* Para Factory y Retailer: Separar en Enviadas y Recibidas */}
+              {/* For Factory and Retailer: Separate into Sent and Received */}
               {(userInfo && (Number(userInfo.role) === UserRole.Factory || Number(userInfo.role) === UserRole.Retailer)) ? (
                 <>
-                  {/* Estadísticas de Transferencias Enviadas */}
+                  {/* Sent Transfer Statistics */}
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Sent Transfers</h3>
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                      {/* 1. TOTAL */}
                       <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                         <div className="relative p-6">
                           <div className="text-4xl font-bold bg-gradient-to-r from-slate-600 to-slate-800 dark:from-slate-300 dark:to-slate-100 bg-clip-text text-transparent mb-2">
                             {isLoadingTransfers ? '...' : sentStats.total}
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Sent</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total</p>
                         </div>
                       </div>
                       
+                      {/* 2. TOTAL PENDING BY RECEIVER */}
                       <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                         <div className="relative p-6">
                           <div className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 dark:from-yellow-400 dark:to-yellow-300 bg-clip-text text-transparent mb-2">
                             {isLoadingTransfers ? '...' : sentStats.pending}
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Pending</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Pending By Receiver</p>
                         </div>
                       </div>
                       
+                      {/* 3. TOTAL ACCEPTED BY RECEIVER */}
                       <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-green-200/50 dark:border-green-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                         <div className="relative p-6">
                           <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
                             {isLoadingTransfers ? '...' : sentStats.accepted}
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Accepted</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Accepted By Receiver</p>
                         </div>
                       </div>
                       
+                      {/* 4. TOTAL REJECTED BY RECEIVER */}
                       <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-red-200/50 dark:border-red-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                         <div className="relative p-6">
                           <div className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300 bg-clip-text text-transparent mb-2">
                             {isLoadingTransfers ? '...' : sentStats.rejected}
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Rejected</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Rejected By Receiver</p>
                         </div>
                       </div>
                       
+                      {/* 5. TOTAL CANCELLED BY ME */}
                       <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                         <div className="relative p-6">
                           <div className="text-4xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent mb-2">
                             {isLoadingTransfers ? '...' : sentStats.cancelled}
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Cancelled</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Cancelled By Me</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Estadísticas de Transferencias Recibidas */}
+                  {/* Received Transfer Statistics */}
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Received Transfers</h3>
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                      {/* 1. TOTAL */}
                       <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                         <div className="relative p-6">
                           <div className="text-4xl font-bold bg-gradient-to-r from-slate-600 to-slate-800 dark:from-slate-300 dark:to-slate-100 bg-clip-text text-transparent mb-2">
                             {isLoadingTransfers ? '...' : receivedStats.total}
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Received</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total</p>
                         </div>
                       </div>
                       
+                      {/* 2. TOTAL PENDING BY ME */}
                       <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                         <div className="relative p-6">
                           <div className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 dark:from-yellow-400 dark:to-yellow-300 bg-clip-text text-transparent mb-2">
                             {isLoadingTransfers ? '...' : receivedStats.pending}
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Pending</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Pending By Me</p>
                         </div>
                       </div>
                       
+                      {/* 3. TOTAL ACCEPTED BY ME */}
                       <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-green-200/50 dark:border-green-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                         <div className="relative p-6">
                           <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
                             {isLoadingTransfers ? '...' : receivedStats.accepted}
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Accepted</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Accepted By Me</p>
                         </div>
                       </div>
                       
+                      {/* 4. TOTAL REJECTED BY ME */}
                       <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-red-200/50 dark:border-red-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                         <div className="relative p-6">
                           <div className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300 bg-clip-text text-transparent mb-2">
                             {isLoadingTransfers ? '...' : receivedStats.rejected}
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Rejected</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Rejected By Me</p>
                         </div>
                       </div>
                       
+                      {/* 5. TOTAL CANCELLED BY SENDER */}
                       <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                         <div className="relative p-6">
                           <div className="text-4xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent mb-2">
                             {isLoadingTransfers ? '...' : receivedStats.cancelled}
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Cancelled</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Cancelled By Sender</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </>
               ) : (
-                /* Para Producer y Consumer: una sola sección */
+                /* For Producer and Consumer: single section */
+                isProducer ? (
                 <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                    {/* 1. TOTAL */}
                   <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                     <div className="relative p-6">
                       <div className="text-4xl font-bold bg-gradient-to-r from-slate-600 to-slate-800 dark:from-slate-300 dark:to-slate-100 bg-clip-text text-transparent mb-2">
                         {isLoadingTransfers ? '...' : transferStats.total}
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                        {isProducer ? 'Total Sent' : 'Total Received'}
-                      </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total</p>
                     </div>
                   </div>
                   
+                    {/* 2. TOTAL PENDING BY RECEIVER */}
                   <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                     <div className="relative p-6">
                       <div className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 dark:from-yellow-400 dark:to-yellow-300 bg-clip-text text-transparent mb-2">
                         {isLoadingTransfers ? '...' : transferStats.pending}
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Pending</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Pending By Receiver</p>
                     </div>
                   </div>
                   
+                    {/* 3. TOTAL ACCEPTED BY RECEIVER */}
                   <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-green-200/50 dark:border-green-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                     <div className="relative p-6">
                       <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
                         {isLoadingTransfers ? '...' : transferStats.accepted}
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Accepted</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Accepted By Receiver</p>
                     </div>
                   </div>
                   
+                    {/* 4. TOTAL REJECTED BY RECEIVER */}
                   <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-red-200/50 dark:border-red-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                     <div className="relative p-6">
                       <div className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300 bg-clip-text text-transparent mb-2">
                         {isLoadingTransfers ? '...' : transferStats.rejected}
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Rejected</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Rejected By Receiver</p>
+                      </div>
+                    </div>
+                  
+                    {/* 5. TOTAL CANCELLED BY ME */}
+                    <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                      <div className="relative p-6">
+                        <div className="text-4xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent mb-2">
+                          {isLoadingTransfers ? '...' : transferStats.cancelled}
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Cancelled By Me</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* For Consumer: new format */
+                  <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                    {/* 1. TOTAL */}
+                    <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                      <div className="relative p-6">
+                        <div className="text-4xl font-bold bg-gradient-to-r from-slate-600 to-slate-800 dark:from-slate-300 dark:to-slate-100 bg-clip-text text-transparent mb-2">
+                          {isLoadingTransfers ? '...' : transferStats.total}
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total</p>
                     </div>
                   </div>
                   
+                    {/* 2. TOTAL PENDING BY ME */}
+                    <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                      <div className="relative p-6">
+                        <div className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 dark:from-yellow-400 dark:to-yellow-300 bg-clip-text text-transparent mb-2">
+                          {isLoadingTransfers ? '...' : transferStats.pending}
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Pending By Me</p>
+                      </div>
+                    </div>
+                    
+                    {/* 3. TOTAL ACCEPTED BY ME */}
+                    <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-green-200/50 dark:border-green-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                      <div className="relative p-6">
+                        <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 dark:from-green-400 dark:to-green-300 bg-clip-text text-transparent mb-2">
+                          {isLoadingTransfers ? '...' : transferStats.accepted}
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Accepted By Me</p>
+                      </div>
+                    </div>
+                    
+                    {/* 4. TOTAL REJECTED BY ME */}
+                    <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-red-200/50 dark:border-red-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                      <div className="relative p-6">
+                        <div className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300 bg-clip-text text-transparent mb-2">
+                          {isLoadingTransfers ? '...' : transferStats.rejected}
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Rejected By Me</p>
+                      </div>
+                    </div>
+                    
+                    {/* 5. TOTAL CANCELLED BY SENDER */}
                   <div className="group relative overflow-hidden rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
                     <div className="relative p-6">
                       <div className="text-4xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent mb-2">
                         {isLoadingTransfers ? '...' : transferStats.cancelled}
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Cancelled</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Cancelled By Sender</p>
                     </div>
                   </div>
                 </div>
+                )
               )}
             </div>
           )}
 
-          {/* Secciones del Administrador */}
+          {/* Administrator Sections */}
           {isAdmin && (
             <div className="relative mb-10 space-y-6" style={DEBUG_MODE ? { border: '3px solid rgba(255, 192, 203, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
               <DebugLabel component="DashboardPage" section="AdminSection" props={{ useModernDesign: true, isAdmin }} position="top-left" offset={4} />
-              {/* Estadísticas de Usuarios (Solo Admin) */}
+              {/* User Statistics (Admin Only) */}
               <div className="relative mb-10" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
                 <DebugLabel component="DashboardPage" section="UserStatsSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
@@ -593,7 +685,7 @@ export default function DashboardPage() {
                 <UserStatsCards />
               </div>
 
-              {/* Estadísticas de Tokens (Solo Admin) */}
+              {/* Token Statistics (Admin Only) */}
               <div className="relative mb-10" style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
                 <DebugLabel component="DashboardPage" section="TokenStatsSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
@@ -644,7 +736,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Estadísticas de Transferencias del Sistema (Solo Admin) */}
+              {/* System Transfer Statistics (Admin Only) */}
               <div className="relative mb-10" style={DEBUG_MODE ? { border: '3px solid rgba(255, 20, 147, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
                 <DebugLabel component="DashboardPage" section="SystemTransferStatsSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-6">
@@ -698,7 +790,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Panel de Administrador Moderno */}
+              {/* Modern Administrator Panel */}
               <div className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50/80 to-yellow-50/80 dark:from-amber-900/30 dark:to-yellow-900/30 backdrop-blur-xl border border-amber-200/50 dark:border-amber-700/50 shadow-xl" style={DEBUG_MODE ? { border: '3px solid rgba(255, 140, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
                 <DebugLabel component="DashboardPage" section="AdministratorPanel" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
                 <div className="relative p-6">
@@ -742,16 +834,16 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Contenido para usuarios regulares */}
+          {/* Content for regular users */}
           {!isAdmin && (
             <div className="relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
               <DebugLabel component="DashboardPage" section="UserTokensSection" props={{ useModernDesign: true, isAdmin }} position="top-right" offset={4} />
               {/* TokenTypeStatsTable - Muestra tokens agrupados por tipo */}
-              <TokenTypeStatsTable />
+              <TokenTypeStatsTable userRole={userInfo ? Number(userInfo.role) : null} />
             </div>
           )}
 
-          {/* Sección "My Tokens" eliminada - La información se muestra en "My Tokens by Type" */}
+          {/* "My Tokens" section removed - Information is shown in "My Tokens by Type" */}
           {false && !isAdmin && (
             <div className="mb-10">
               <div className="flex justify-between items-center mb-6">
@@ -787,7 +879,9 @@ export default function DashboardPage() {
                 </div>
               ) : displayTokens && displayTokens.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {displayTokens.slice(0, 6).map((tokenId, index) => (
+                  {displayTokens.slice(0, 6).map((token, index) => {
+                    const tokenId = typeof token === 'bigint' ? token : token.tokenId;
+                    return (
                     <div
                       key={tokenId.toString()}
                       className="animate-in fade-in slide-in-from-bottom-4 duration-700"
@@ -807,30 +901,37 @@ export default function DashboardPage() {
                       />
                       )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border-2 border-dashed border-slate-300 dark:border-slate-700 p-12 text-center">
                   <Package className="h-16 w-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">No tokens yet</h3>
                   <p className="text-slate-600 dark:text-slate-400 mb-6">
-                    {userInfo && 
-                     userInfo.status !== undefined &&
-                     (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
-                     Number(userInfo.status) === UserStatus.Approved
-                      ? 'Create your first token to start tracking products'
-                      : 'No tokens available yet'}
+                    {(() => {
+                      if (!userInfo || userInfo?.status === undefined) return 'No tokens available yet'
+                      // TypeScript now knows userInfo is not null after the check
+                      const role = Number(userInfo!.role)
+                      const status = Number(userInfo!.status)
+                      return (role === UserRole.Producer || role === UserRole.Factory) && status === UserStatus.Approved
+                        ? 'Create your first token to start tracking products'
+                        : 'No tokens available yet'
+                    })()}
                   </p>
-                  {userInfo && 
-                   userInfo.status !== undefined &&
-                   (Number(userInfo.role) === UserRole.Producer || Number(userInfo.role) === UserRole.Factory) &&
-                   Number(userInfo.status) === UserStatus.Approved && (
+                  {(() => {
+                    if (!userInfo || userInfo?.status === undefined) return null
+                    // TypeScript now knows userInfo is not null after the check
+                    const role = Number(userInfo!.role)
+                    const status = Number(userInfo!.status)
+                    if ((role === UserRole.Producer || role === UserRole.Factory) && status === UserStatus.Approved) {
+                      return (
                     <>
                       {isPaused === true && (
                         <Alert className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
                           <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                           <AlertDescription className="text-yellow-700 dark:text-yellow-300 text-sm">
-                            <strong>⚠️ Contrato Pausado:</strong> No puedes crear tokens mientras el contrato esté pausado.
+                            <strong>⚠️ Contract Paused:</strong> You cannot create tokens while the contract is paused.
                           </AlertDescription>
                         </Alert>
                       )}
@@ -839,7 +940,7 @@ export default function DashboardPage() {
                         onClick={(e) => {
                           e.preventDefault()
                           e.stopPropagation()
-                          const tokenType = Number(userInfo.role) === UserRole.Producer ? 'raw' : 'product'
+                          const tokenType = role === UserRole.Producer ? 'raw' : 'product'
                           router.push(`/tokens/create?type=${tokenType}`)
                         }}
                         disabled={isPaused === true}
@@ -848,31 +949,34 @@ export default function DashboardPage() {
                         Create Token
                       </Button>
                     </>
-                  )}
+                    )
+                  }
+                  return null
+                  })()}
                 </div>
               )}
             </div>
           )}
 
         </div>
-        {/* DebugLabel de la página principal al final */}
+        {/* Main page DebugLabel at the end */}
         <DebugLabel component="DashboardPage" section="MainContent" props={{ isAdmin, useModernDesign: true, isAuthenticated }} position="bottom-right" offset={4} />
       </div>
     )
   }
 
-  // Diseño original
+  // Original design
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800" style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
       <Header />
       
       <div className="container mx-auto px-4 py-8">
-        {/* Título */}
+        {/* Title */}
         <div className="relative mb-8 flex items-start justify-between" style={DEBUG_MODE ? { border: '3px solid rgba(255, 165, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
           <DebugLabel component="DashboardPage" section="TitleSection" props={{ useModernDesign: false, isAdmin }} position="top-right" offset={4} />
           <div>
           <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2">
-            {isAdmin ? '👑 Admin Dashboard' : '📊 Dashboard'}
+            {isAdmin ? '👑 Admin Dashboard' : '📊 My Dashboard'}
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
             {isAdmin 
@@ -888,7 +992,7 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* Estadísticas Principales */}
+        {/* Main Statistics */}
         <div className={`relative grid grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mb-6`} style={DEBUG_MODE ? { border: '3px solid rgba(0, 0, 255, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
           <DebugLabel component="DashboardPage" section="MainStatsSection" props={{ useModernDesign: false, isAdmin }} position="top-right" offset={4} />
           {/* Total Users - Solo visible para administrador */}
@@ -933,7 +1037,7 @@ export default function DashboardPage() {
                     <Skeleton className="h-9 w-16" />
                   ) : stableTotalTokens !== undefined ? Number(stableTotalTokens) : '-'
                 ) : (
-                  // Usuario: Total de sus tokens
+                  // User: Total of their tokens
                   isLoadingTokens ? (
                     <Skeleton className="h-9 w-16" />
                   ) : displayTokens.length
@@ -963,7 +1067,7 @@ export default function DashboardPage() {
                   <Skeleton className="h-9 w-16" />
                   ) : stableTotalTransfers !== undefined ? Number(stableTotalTransfers) : '-'
                 ) : (
-                  // Usuario: Total de sus transferencias
+                  // User: Total of their transfers
                   isLoadingTransfers ? (
                     <Skeleton className="h-9 w-16" />
                   ) : transferStats.total
@@ -976,171 +1080,239 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Estadísticas de Transferencias */}
+        {/* Transfer Statistics */}
         {!isAdmin && (
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">Transfer Statistics</h2>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">Transfers Status</h2>
             
-            {/* Para Factory y Retailer: Separar en Enviadas y Recibidas */}
+            {/* For Factory and Retailer: Separate into Sent and Received */}
             {(userInfo && (Number(userInfo.role) === UserRole.Factory || Number(userInfo.role) === UserRole.Retailer)) ? (
               <>
-                {/* Estadísticas de Transferencias Enviadas */}
+                {/* Sent Transfer Statistics */}
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-3">Sent Transfers</h3>
                   <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                    {/* 1. TOTAL */}
                     <Card className="border-slate-200 dark:border-slate-700">
                       <CardContent className="pt-6">
                         <div className="text-3xl font-bold text-slate-700 dark:text-slate-300">
                           {isLoadingTransfers ? '...' : sentStats.total}
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Sent</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total</p>
                       </CardContent>
                     </Card>
                     
+                    {/* 2. TOTAL PENDING BY RECEIVER */}
                     <Card className="border-yellow-200 dark:border-yellow-800">
                       <CardContent className="pt-6">
                         <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
                           {isLoadingTransfers ? '...' : sentStats.pending}
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Pending</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Pending By Receiver</p>
                       </CardContent>
                     </Card>
                     
+                    {/* 3. TOTAL ACCEPTED BY RECEIVER */}
                     <Card className="border-green-200 dark:border-green-800">
                       <CardContent className="pt-6">
                         <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                           {isLoadingTransfers ? '...' : sentStats.accepted}
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Accepted</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Accepted By Receiver</p>
                       </CardContent>
                     </Card>
                     
+                    {/* 4. TOTAL REJECTED BY RECEIVER */}
                     <Card className="border-red-200 dark:border-red-800">
                       <CardContent className="pt-6">
                         <div className="text-3xl font-bold text-red-600 dark:text-red-400">
                           {isLoadingTransfers ? '...' : sentStats.rejected}
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Rejected</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Rejected By Receiver</p>
                       </CardContent>
                     </Card>
                     
+                    {/* 5. TOTAL CANCELLED BY ME */}
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardContent className="pt-6">
                         <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
                           {isLoadingTransfers ? '...' : sentStats.cancelled}
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Cancelled</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Cancelled By Me</p>
                       </CardContent>
                     </Card>
                   </div>
                 </div>
 
-                {/* Estadísticas de Transferencias Recibidas */}
+                {/* Received Transfer Statistics */}
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-3">Received Transfers</h3>
                   <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                    {/* 1. TOTAL */}
                     <Card className="border-slate-200 dark:border-slate-700">
                       <CardContent className="pt-6">
                         <div className="text-3xl font-bold text-slate-700 dark:text-slate-300">
                           {isLoadingTransfers ? '...' : receivedStats.total}
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Received</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total</p>
                       </CardContent>
                     </Card>
                     
+                    {/* 2. TOTAL PENDING BY ME */}
                     <Card className="border-yellow-200 dark:border-yellow-800">
                       <CardContent className="pt-6">
                         <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
                           {isLoadingTransfers ? '...' : receivedStats.pending}
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Pending</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Pending By Me</p>
                       </CardContent>
                     </Card>
                     
+                    {/* 3. TOTAL ACCEPTED BY ME */}
                     <Card className="border-green-200 dark:border-green-800">
                       <CardContent className="pt-6">
                         <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                           {isLoadingTransfers ? '...' : receivedStats.accepted}
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Accepted</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Accepted By Me</p>
                       </CardContent>
                     </Card>
                     
+                    {/* 4. TOTAL REJECTED BY ME */}
                     <Card className="border-red-200 dark:border-red-800">
                       <CardContent className="pt-6">
                         <div className="text-3xl font-bold text-red-600 dark:text-red-400">
                           {isLoadingTransfers ? '...' : receivedStats.rejected}
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Rejected</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Rejected By Me</p>
                       </CardContent>
                     </Card>
                     
+                    {/* 5. TOTAL CANCELLED BY SENDER */}
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardContent className="pt-6">
                         <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
                           {isLoadingTransfers ? '...' : receivedStats.cancelled}
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Cancelled</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Cancelled By Sender</p>
                       </CardContent>
                     </Card>
                   </div>
                 </div>
               </>
             ) : (
-              /* Para Producer y Consumer: una sola sección */
+              /* For Producer and Consumer: single section */
+              userInfo && Number(userInfo.role) === UserRole.Producer ? (
               <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                  {/* 1. TOTAL */}
                 <Card className="border-slate-200 dark:border-slate-700">
                   <CardContent className="pt-6">
                     <div className="text-3xl font-bold text-slate-700 dark:text-slate-300">
                       {isLoadingTransfers ? '...' : transferStats.total}
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                      {userInfo && Number(userInfo.role) === UserRole.Producer ? 'Total Sent' : 'Total Received'}
-                    </p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total</p>
                   </CardContent>
                 </Card>
                 
+                  {/* 2. TOTAL PENDING BY RECEIVER */}
                 <Card className="border-yellow-200 dark:border-yellow-800">
                   <CardContent className="pt-6">
                     <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
                       {isLoadingTransfers ? '...' : transferStats.pending}
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Pending</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Pending By Receiver</p>
                   </CardContent>
                 </Card>
                 
+                  {/* 3. TOTAL ACCEPTED BY RECEIVER */}
                 <Card className="border-green-200 dark:border-green-800">
                   <CardContent className="pt-6">
                     <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                       {isLoadingTransfers ? '...' : transferStats.accepted}
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Accepted</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Accepted By Receiver</p>
                   </CardContent>
                 </Card>
                 
+                  {/* 4. TOTAL REJECTED BY RECEIVER */}
                 <Card className="border-red-200 dark:border-red-800">
                   <CardContent className="pt-6">
                     <div className="text-3xl font-bold text-red-600 dark:text-red-400">
                       {isLoadingTransfers ? '...' : transferStats.rejected}
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Rejected</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Rejected By Receiver</p>
+                    </CardContent>
+                  </Card>
+                
+                  {/* 5. TOTAL CANCELLED BY ME */}
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardContent className="pt-6">
+                      <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
+                        {isLoadingTransfers ? '...' : transferStats.cancelled}
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Cancelled By Me</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                /* For Consumer: new format */
+                <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+                  {/* 1. TOTAL */}
+                  <Card className="border-slate-200 dark:border-slate-700">
+                    <CardContent className="pt-6">
+                      <div className="text-3xl font-bold text-slate-700 dark:text-slate-300">
+                        {isLoadingTransfers ? '...' : transferStats.total}
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total</p>
                   </CardContent>
                 </Card>
                 
+                  {/* 2. TOTAL PENDING BY ME */}
+                  <Card className="border-yellow-200 dark:border-yellow-800">
+                    <CardContent className="pt-6">
+                      <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                        {isLoadingTransfers ? '...' : transferStats.pending}
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Pending By Me</p>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* 3. TOTAL ACCEPTED BY ME */}
+                  <Card className="border-green-200 dark:border-green-800">
+                    <CardContent className="pt-6">
+                      <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                        {isLoadingTransfers ? '...' : transferStats.accepted}
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Accepted By Me</p>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* 4. TOTAL REJECTED BY ME */}
+                  <Card className="border-red-200 dark:border-red-800">
+                    <CardContent className="pt-6">
+                      <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+                        {isLoadingTransfers ? '...' : transferStats.rejected}
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Rejected By Me</p>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* 5. TOTAL CANCELLED BY SENDER */}
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardContent className="pt-6">
                     <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
                       {isLoadingTransfers ? '...' : transferStats.cancelled}
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Cancelled</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Total Cancelled By Sender</p>
                   </CardContent>
                 </Card>
               </div>
+              )
             )}
           </div>
         )}
 
-        {/* Panel de Administrador */}
+        {/* Administrator Panel */}
         {isAdmin && (
           <div className="mb-8 space-y-6">
             <Card className="border-amber-300 dark:border-amber-700 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20">
@@ -1187,12 +1359,12 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Contenido para usuarios regulares */}
+        {/* Content for regular users */}
         {!isAdmin && (
           <div className="relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 255, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
             <DebugLabel component="DashboardPage" section="UserTokensSection" props={{ useModernDesign: false, isAdmin }} position="top-right" offset={4} />
-            {/* TokenTypeStatsTable - Muestra tokens agrupados por tipo para todos los usuarios */}
-            <TokenTypeStatsTable />
+            {/* TokenTypeStatsTable - Shows tokens grouped by type for all users */}
+            <TokenTypeStatsTable userRole={userInfo ? Number(userInfo.role) : null} />
           </div>
         )}
 
@@ -1208,16 +1380,16 @@ export default function DashboardPage() {
 /**
  * Component to display token statistics grouped by type in a table with tokens listed below each category
  */
-function TokenTypeStatsTable() {
+function TokenTypeStatsTable({ userRole }: { userRole: number | null }) {
   const { address } = useAccount();
   const router = useRouter();
   const { rowMaterial, finishedProduct, isLoading, error } = useUserTokenStats(address);
   const { tokens: userTokens, isLoading: isLoadingTokens } = useGetUserTokensWithData(address);
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
   
-  // DEBUG_MODE ya está importado a nivel del módulo
+  // DEBUG_MODE is already imported at module level
   
-  // Separar tokens por tipo
+  // Separate tokens by type
   const rawMaterialTokens = useMemo(() => {
     if (!userTokens) return []
     return userTokens.filter(token => Number(token.tokenType) === TokenType.RowMaterial)
@@ -1228,9 +1400,22 @@ function TokenTypeStatsTable() {
     return userTokens.filter(token => Number(token.tokenType) === TokenType.FinishedProduct)
   }, [userTokens])
 
-  // Only show rows that have tokens
-  const hasRowMaterial = rowMaterial.tokenCount > 0 || rowMaterial.totalBalance > BigInt(0);
-  const hasFinishedProduct = finishedProduct.tokenCount > 0 || finishedProduct.totalBalance > BigInt(0);
+  // Determine which token types the user can see according to their role
+  const isProducer = userRole === UserRole.Producer
+  const isFactory = userRole === UserRole.Factory
+  const isRetailer = userRole === UserRole.Retailer
+  const isConsumer = userRole === UserRole.Consumer
+  
+  // Producer: can only see Raw Material
+  // Factory: can see both types
+  // Retailer/Consumer: can only see Finished Product
+  const shouldShowRawMaterial = isProducer || isFactory
+  const shouldShowFinishedProduct = isFactory || isRetailer || isConsumer
+
+  // Only show rows that have tokens AND that the user can see according to their role
+  // Note: We only check tokenCount, not totalBalance, because it doesn't make sense to sum tokens of different types
+  const hasRowMaterial = shouldShowRawMaterial && rowMaterial.tokenCount > 0;
+  const hasFinishedProduct = shouldShowFinishedProduct && finishedProduct.tokenCount > 0;
   const hasAnyTokens = hasRowMaterial || hasFinishedProduct;
 
   if (error) {
@@ -1277,8 +1462,8 @@ function TokenTypeStatsTable() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Raw Material Section */}
-                {hasRowMaterial && (
+            {/* Raw Material Section - Only show if user can see this type AND has tokens */}
+                {shouldShowRawMaterial && hasRowMaterial && rowMaterial.tokenCount > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
                       <div className="flex items-center gap-2">
@@ -1288,9 +1473,6 @@ function TokenTypeStatsTable() {
                         </span>
                       </div>
                   <div className="flex items-center gap-4 text-sm">
-                    <span className="text-slate-600 dark:text-slate-400">
-                      Total Balance: <span className="font-semibold text-slate-800 dark:text-slate-200">{rowMaterial.totalBalance.toString()}</span>
-                    </span>
                     <span className="text-slate-600 dark:text-slate-400">
                       Count: <span className="font-semibold text-slate-800 dark:text-slate-200">{rowMaterial.tokenCount}</span>
                     </span>
@@ -1328,8 +1510,8 @@ function TokenTypeStatsTable() {
               </div>
                 )}
 
-            {/* Finished Product Section */}
-                {hasFinishedProduct && (
+            {/* Finished Product Section - Only show if user can see this type AND has tokens */}
+                {shouldShowFinishedProduct && hasFinishedProduct && finishedProduct.tokenCount > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
                       <div className="flex items-center gap-2">
@@ -1339,9 +1521,6 @@ function TokenTypeStatsTable() {
                         </span>
                       </div>
                   <div className="flex items-center gap-4 text-sm">
-                    <span className="text-slate-600 dark:text-slate-400">
-                      Total Balance: <span className="font-semibold text-slate-800 dark:text-slate-200">{finishedProduct.totalBalance.toString()}</span>
-                    </span>
                     <span className="text-slate-600 dark:text-slate-400">
                       Count: <span className="font-semibold text-slate-800 dark:text-slate-200">{finishedProduct.tokenCount}</span>
                     </span>

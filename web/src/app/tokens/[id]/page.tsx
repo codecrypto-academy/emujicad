@@ -104,6 +104,7 @@ export default function TokenDetailPage({ params }: PageProps) {
   }, [allTransfers, tokenId])
   
   // Estadísticas de transferencias
+  // Usar Number() para asegurar comparación consistente con el dashboard
   const transferStats = useMemo(() => {
     const stats = {
       total: tokenTransfers.length,
@@ -114,10 +115,11 @@ export default function TokenDetailPage({ params }: PageProps) {
     }
     
     tokenTransfers.forEach(t => {
-      if (t.status === TransferStatus.Pending) stats.pending++
-      else if (t.status === TransferStatus.Accepted) stats.accepted++
-      else if (t.status === TransferStatus.Rejected) stats.rejected++
-      else if (t.status === TransferStatus.Cancelled) stats.cancelled++
+      const statusNum = Number(t.status)
+      if (statusNum === TransferStatus.Pending) stats.pending++
+      else if (statusNum === TransferStatus.Accepted) stats.accepted++
+      else if (statusNum === TransferStatus.Rejected) stats.rejected++
+      else if (statusNum === TransferStatus.Cancelled) stats.cancelled++
     })
     
     return stats
@@ -136,7 +138,8 @@ export default function TokenDetailPage({ params }: PageProps) {
       cancelled: TransferStatus.Cancelled,
     }
     
-    return tokenTransfers.filter(t => t.status === statusMap[filterStatus])
+    // Usar Number() para asegurar comparación consistente con el dashboard
+    return tokenTransfers.filter(t => Number(t.status) === statusMap[filterStatus])
   }, [tokenTransfers, filterStatus])
   
   // Verificar si el usuario puede transferir
@@ -207,7 +210,7 @@ export default function TokenDetailPage({ params }: PageProps) {
             className="mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Tokens
+            Back to My Tokens
           </Button>
           <Alert>
             <AlertCircle className="h-4 w-4" />
@@ -234,7 +237,7 @@ export default function TokenDetailPage({ params }: PageProps) {
             className="mb-0"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Tokens
+            Back to My Tokens
           </Button>
           {canTransfer && balance && balance > BigInt(0) && (
             <Link href={`/tokens/${id}/transfer`}>
@@ -359,7 +362,7 @@ export default function TokenDetailPage({ params }: PageProps) {
               </CardContent>
             </Card>
           
-          {/* Transfer History y Transfer Statistics lado a lado */}
+          {/* Token Transfer History y Token Transfer Statistics lado a lado */}
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
             {/* Transfer History */}
             <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg rounded-3xl relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 128, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
@@ -367,7 +370,7 @@ export default function TokenDetailPage({ params }: PageProps) {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Transfer History</CardTitle>
+                    <CardTitle>Token Transfer History</CardTitle>
                     <CardDescription>
                       All transfers related to this token
                     </CardDescription>
@@ -466,7 +469,7 @@ export default function TokenDetailPage({ params }: PageProps) {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
-                  Transfer Statistics
+                  Token Transfer Statistics
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">

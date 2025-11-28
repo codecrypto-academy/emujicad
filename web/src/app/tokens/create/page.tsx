@@ -20,20 +20,24 @@ import { TokenType, UserRole, UserStatus } from '@/contracts/config'
 import { ArrowLeft, Loader2, AlertTriangle, Pause, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
+import { formatTransactionError, getWalletName } from '@/lib/error-formatter'
 
 function CreateTokenPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, connector } = useAccount()
   const { isAuthenticated, userInfo, isLoading: isLoadingAuth } = useAuth()
   const { data: isPaused } = useIsPaused()
   const { tokens, isLoading: isLoadingTokens } = useGetAllTokens()
   const { createToken, isPending, isConfirming, isSuccess, error, hash } = useCreateToken()
   
-  // Obtener tokens de materia prima que el usuario posee (con balance > 0)
+  // Get the connected wallet name using the centralized function
+  const walletName = getWalletName(connector)
+  
+  // Get raw material tokens that the user owns (with balance > 0)
   const { tokens: userRawMaterialTokens, isLoading: isLoadingUserTokens } = useGetUserTokensWithData(address)
   
-  // Activar diseño moderno si está habilitado
+  // Enable modern design if enabled
   const useModernDesign = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
 
   // Form state
@@ -58,7 +62,7 @@ function CreateTokenPageContent() {
   // Filter tokens for parent selection (only RowMaterial tokens that the user owns with balance > 0)
   const availableParentTokens = useMemo(() => {
     if (tokenType !== TokenType.FinishedProduct) return []
-    // Solo mostrar tokens de materia prima que el usuario posee (con balance > 0)
+    // Only show raw material tokens that the user owns (with balance > 0)
     return userRawMaterialTokens.filter(token => Number(token.tokenType) === TokenType.RowMaterial)
   }, [userRawMaterialTokens, tokenType])
 
@@ -293,7 +297,7 @@ function CreateTokenPageContent() {
   // Submit button is disabled if form is disabled OR cannot submit (invalid parent/amount)
   const isSubmitDisabled = isFormDisabled || !canSubmit
 
-  // Diseño moderno 2025
+  // Modern design 2025
   if (useModernDesign) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
@@ -325,12 +329,12 @@ function CreateTokenPageContent() {
                 </p>
               </div>
 
-              {/* Alerts Modernos */}
+              {/* Modern Alerts */}
               {isPaused === true && (
                 <Alert className="mb-6 rounded-xl bg-yellow-50/80 dark:bg-yellow-900/30 backdrop-blur border-yellow-200 dark:border-yellow-800">
                   <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                   <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-                    <strong>⚠️ Contrato Pausado:</strong> No puedes crear tokens mientras el contrato esté pausado.
+                    <strong>⚠️ Contract Paused:</strong> You cannot create tokens while the contract is paused.
                   </AlertDescription>
                 </Alert>
               )}
@@ -339,19 +343,49 @@ function CreateTokenPageContent() {
                 <Alert className="mb-6 rounded-xl bg-green-50/80 dark:bg-green-900/30 backdrop-blur border-green-200 dark:border-green-800">
                   <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                   <AlertDescription className="text-green-700 dark:text-green-300">
-                    <strong>✅ Token creado exitosamente!</strong> Redirigiendo a la página de tokens...
+                    <strong>✅ Token created successfully!</strong> Redirecting to tokens page...
                   </AlertDescription>
                 </Alert>
               )}
 
-              {error && (
+              {error && (() => {
+                const { friendlyMessage, isUserCancelled, technicalDetails } = formatTransactionError(
+                  error,
+                  {
+                    action: 'creating the token',
+                    walletName,
+                  }
+                )
+                // Split message by lines and filter empty lines
+                const messageLines = friendlyMessage.split('\n').filter(line => line.trim() !== '')
+                return (
                 <Alert className="mb-6 rounded-xl bg-red-50/80 dark:bg-red-900/30 backdrop-blur border-red-200 dark:border-red-800">
                   <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
                   <AlertDescription className="text-red-700 dark:text-red-300">
-                    <strong>❌ Error:</strong> {error.message || 'Failed to create token. Please try again.'}
+                      {messageLines.map((line, index) => (
+                        <p key={index} className={index === 0 ? 'font-semibold' : 'mt-1 text-sm'}>
+                          {line}
+                        </p>
+                      ))}
+                      {isUserCancelled && (
+                        <p className="text-sm mt-1">
+                          You can try again by clicking "Create Token" below.
+                        </p>
+                      )}
+                      {process.env.NODE_ENV === 'development' && technicalDetails && (
+                        <details className="mt-2">
+                          <summary className="text-xs text-red-500 cursor-pointer hover:text-red-700">
+                            ▼ Technical details (dev only)
+                          </summary>
+                          <pre className="text-xs mt-1 p-2 bg-red-100 dark:bg-red-900/30 rounded overflow-auto max-h-32">
+                            {technicalDetails}
+                          </pre>
+                        </details>
+                      )}
                   </AlertDescription>
                 </Alert>
-              )}
+                )
+              })()}
 
               <form onSubmit={handleSubmit} className="space-y-6 relative" style={DEBUG_MODE ? { border: '3px solid rgba(0, 128, 0, 0.6)', borderRadius: '4px', padding: '8px' } : {}}>
                 <DebugLabel component="CreateTokenPage" section="FormSection" props={{ useModernDesign: true, tokenType: tokenType === TokenType.RowMaterial ? 'RowMaterial' : 'FinishedProduct', hasParentToken: tokenType === TokenType.FinishedProduct }} position="top-right" offset={4} />
@@ -578,7 +612,7 @@ function CreateTokenPageContent() {
     )
   }
 
-  // Diseño original
+  // Original design
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <Header />
@@ -730,11 +764,11 @@ function CreateTokenPageContent() {
                           if (parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint' && parentBalance === BigInt(0)) {
                             return
                           }
-                          // Si hay balance, validar que no exceda el máximo
+                          // If there's balance, validate it doesn't exceed the maximum
                           if (parentBalance !== undefined && parentBalance !== null && typeof parentBalance === 'bigint' && value) {
                             const numValue = parseInt(value, 10)
                             if (!isNaN(numValue) && numValue > Number(parentBalance)) {
-                              // Limitar al máximo disponible
+                              // Limit to maximum available
                               setParentAmount(parentBalance.toString())
                               return
                             }

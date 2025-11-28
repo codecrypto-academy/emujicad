@@ -6,6 +6,7 @@ import { useGetUserTransfers, type TransferData } from '@/hooks/useGetUserTransf
 import { useTransfer } from '@/hooks/useTransfer'
 import { useIsPaused } from '@/hooks/usePause'
 import { useAuth } from '@/contexts/AuthContext'
+import { useQueryClient } from '@tanstack/react-query'
 import { UserRole, SUPPLY_CHAIN_ADDRESS, SUPPLY_CHAIN_ABI } from '@/contracts/config'
 import { validateTokenDataTuple } from '@/lib/validation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -31,6 +32,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { TransferStatus } from '@/contracts/config'
 import { ArrowRightLeft, CheckCircle2, XCircle, Ban, Clock, Pause, Loader2 } from 'lucide-react'
 import { AddressDisplay } from '@/components/AddressDisplay'
+import { getWalletName } from '@/lib/error-formatter'
 
 type FilterAddress = 'all' | string // string para direcciones específicas
 type FilterStatus = 'all' | 'pending' | 'accepted' | 'rejected' | 'cancelled'
@@ -42,20 +44,8 @@ interface TransferListProps {
 export function TransferList({ userAddress }: TransferListProps): React.ReactElement {
   const { address: connectedAddress, connector } = useAccount()
   
-  // Obtener el nombre de la billetera conectada
-  const getWalletName = () => {
-    if (!connector) return 'your wallet'
-    
-    // Si es injected y MetaMask está instalado, mostrar MetaMask
-    if (connector.id === 'injected' && typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
-      return 'MetaMask'
-    }
-    
-    // Usar el nombre del conector
-    return connector.name || 'your wallet'
-  }
-  
-  const walletName = getWalletName()
+  // Obtener el nombre de la billetera conectada usando la función centralizada
+  const walletName = getWalletName(connector)
   const addressToUse: `0x${string}` | undefined = userAddress || connectedAddress
   
   const { transfers, isLoading, error, totalTransfers, refetch: refetchTransfers } = useGetUserTransfers(addressToUse)
@@ -63,13 +53,14 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
   const { acceptTransfer, rejectTransfer, cancelTransfer, isPending, isConfirming, isSuccess, error: actionError, hash } = useTransfer()
   const { data: isPaused } = useIsPaused()
   const { userInfo } = useAuth()
+  const queryClient = useQueryClient()
   
   const [filterFrom, setFilterFrom] = useState<FilterAddress>('all')
   const [filterTo, setFilterTo] = useState<FilterAddress>('all')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
   const [lastSuccessHash, setLastSuccessHash] = useState<string | null>(null)
-  // Rastrear qué transferencia específica y qué acción se está procesando
-  const [processingAction, setProcessingAction] = useState<{ transferId: bigint; action: 'accept' | 'reject' | 'cancel' } | null>(null)
+  // Rastrear qué transferencia específica y qué acción se está procesando, incluyendo tokenId
+  const [processingAction, setProcessingAction] = useState<{ transferId: bigint; tokenId: bigint; action: 'accept' | 'reject' | 'cancel' } | null>(null)
   
   // Activar diseño moderno si está habilitado
   const useModernDesign: boolean = process.env.NEXT_PUBLIC_MODERN_DESIGN === 'true'
@@ -168,15 +159,47 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
   // Refetch cuando la transacción sea exitosa (accept, reject, cancel)
   useEffect(() => {
     if (isSuccess && hash && hash !== lastSuccessHash) {
+      // Guardar la acción y tokenId antes de limpiarla
+      const action = processingAction?.action
+      const transferId = processingAction?.transferId
+      const tokenId = processingAction?.tokenId
+      
       const timer = setTimeout(() => {
-        console.log('✅ Transacción exitosa (accept/reject/cancel), recargando transferencias...')
+        console.log('✅ Transacción exitosa (accept/reject/cancel), recargando transferencias y actualizando balances...')
         setLastSuccessHash(hash)
         setProcessingAction(null) // Limpiar la acción de transferencia procesada
         refetchTransfers()
+        
+        // Disparar evento para actualizar balances en otras páginas para TODAS las acciones
+        // porque todas pueden afectar los balances (accept: aumenta balance del receptor,
+        // reject: devuelve balance al remitente, cancel: devuelve balance al remitente)
+        if (action && transferId && tokenId) {
+          const event = new CustomEvent('transferUpdated', { 
+            detail: { 
+              hash, 
+              tokenId: tokenId.toString(),
+              transferId: transferId.toString(),
+              action: action // 'accept', 'reject', o 'cancel'
+            } 
+          })
+          window.dispatchEvent(event)
+          console.log('[TransferList] Transfer updated, dispatching event to update balances:', {
+            hash,
+            tokenId: tokenId.toString(),
+            transferId: transferId.toString(),
+            action
+          })
+        }
+        
+        // Invalidar queries de balance después de aceptar/rechazar/cancelar
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['readContract'] })
+          queryClient.invalidateQueries({ queryKey: ['readContracts'] })
+        }, 3000)
       }, 2000)
       return () => clearTimeout(timer)
     }
-  }, [isSuccess, hash, lastSuccessHash, refetchTransfers])
+  }, [isSuccess, hash, lastSuccessHash, refetchTransfers, processingAction, queryClient])
   
   // Limpiar processingAction cuando la transacción falla o se cancela
   useEffect(() => {
@@ -338,20 +361,32 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
 
   const handleAccept = (transferId: bigint) => {
     if (isPaused) return
-    setProcessingAction({ transferId, action: 'accept' })
-    acceptTransfer(transferId)
+    // Obtener el tokenId de la transferencia antes de procesar
+    const transfer = transfers?.find(t => t.id === transferId)
+    if (transfer) {
+      setProcessingAction({ transferId, tokenId: transfer.tokenId, action: 'accept' })
+      acceptTransfer(transferId)
+    }
   }
 
   const handleReject = (transferId: bigint) => {
     if (isPaused) return
-    setProcessingAction({ transferId, action: 'reject' })
-    rejectTransfer(transferId)
+    // Obtener el tokenId de la transferencia antes de procesar
+    const transfer = transfers?.find(t => t.id === transferId)
+    if (transfer) {
+      setProcessingAction({ transferId, tokenId: transfer.tokenId, action: 'reject' })
+      rejectTransfer(transferId)
+    }
   }
 
   const handleCancel = (transferId: bigint) => {
     if (isPaused) return
-    setProcessingAction({ transferId, action: 'cancel' })
-    cancelTransfer(transferId)
+    // Obtener el tokenId de la transferencia antes de procesar
+    const transfer = transfers?.find(t => t.id === transferId)
+    if (transfer) {
+      setProcessingAction({ transferId, tokenId: transfer.tokenId, action: 'cancel' })
+      cancelTransfer(transferId)
+    }
   }
 
   // ⚠️ VALIDACIÓN según permisos del contrato inteligente (SupplyChain.sol):
@@ -606,7 +641,7 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
           {/* Transferencias Recibidas - PRIMERO */}
           <Card className={cardClass}>
             <CardHeader>
-              <CardTitle>Received Transfers</CardTitle>
+              <CardTitle>My Received Transfers</CardTitle>
               <CardDescription>
                 Showing {Number(filteredReceivedTransfers.length)} of {Number(receivedTransfers.length)} received transfer{Number(receivedTransfers.length) !== 1 ? 's' : ''}
               </CardDescription>
@@ -740,7 +775,7 @@ export function TransferList({ userAddress }: TransferListProps): React.ReactEle
       <Card className={cardClass}>
         <CardHeader>
             <CardTitle>
-              {isProducer ? 'Sent Transfers' : isConsumer ? 'Received Transfers' : 'Transfers'}
+              {isProducer ? 'Sent Transfers' : isConsumer ? 'My Received Transfers' : 'Transfers'}
             </CardTitle>
           <CardDescription>
             Showing {Number(filteredTransfers.length)} of {Number(totalTransfers)} transfer{Number(totalTransfers) !== 1 ? 's' : ''}

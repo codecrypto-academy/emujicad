@@ -333,6 +333,12 @@ Modal dialog to change a user's role.
 - Loading states
 - Pause and user status validation
 
+**Special Behavior for Rejected Users**:
+- Users with `Rejected` status can select and request the same role they were rejected for
+- This allows users who were rejected due to administrative issues to re-apply after resolving the problem
+- The UI enables all role options (including the current one) when `userStatus === UserStatus.Rejected`
+- For other statuses (Pending, Approved, Canceled), the same role is disabled to prevent unnecessary requests
+
 #### 6. UserManagementTable.tsx (Admin)
 Complete user management component.
 

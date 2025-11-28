@@ -9,6 +9,8 @@ import { AuthRedirect } from '@/components/AuthRedirect'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { useEffect } from 'react'
+import { initStorageCleanup } from '@/lib/storage-cleanup'
 
 // Crear QueryClient fuera del componente para evitar recreaciones
 const queryClient = new QueryClient({
@@ -35,6 +37,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Inicializar sistema de limpieza automática de localStorage
+  useEffect(() => {
+    const cleanup = initStorageCleanup()
+    return cleanup
+  }, [])
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body

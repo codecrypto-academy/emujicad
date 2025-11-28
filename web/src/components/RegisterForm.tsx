@@ -14,6 +14,7 @@ import { useAccount } from 'wagmi'
 import { Pause, AlertTriangle, Ban } from 'lucide-react'
 import { UserStatus } from '@/contracts/config'
 import type { UserInfo } from '@/types'
+import { getWalletName } from '@/lib/error-formatter'
 
 type RoleType = 'Producer' | 'Factory' | 'Retailer' | 'Consumer' | ''
 
@@ -30,20 +31,8 @@ export function RegisterForm({ onRegistrationSuccess, userInfo, onShowSuccessCha
   const { data: isPaused } = useIsPaused()
   const { requestRole, isPending: isTransactionPending, isConfirming, isSuccess, error, hash } = useRequestRole()
   
-  // Obtener el nombre de la billetera conectada
-  const getWalletName = () => {
-    if (!connector) return 'your wallet'
-    
-    // Si es injected y MetaMask está instalado, mostrar MetaMask
-    if (connector.id === 'injected' && typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
-      return 'MetaMask'
-    }
-    
-    // Usar el nombre del conector
-    return connector.name || 'your wallet'
-  }
-  
-  const walletName = getWalletName()
+  // Obtener el nombre de la billetera conectada usando la función centralizada
+  const walletName = getWalletName(connector)
   
   // CRÍTICO: Si el usuario está cancelado, NO puede solicitar un nuevo rol
   // Solo el administrador puede cambiar el estado de Canceled a Pending
@@ -207,8 +196,8 @@ export function RegisterForm({ onRegistrationSuccess, userInfo, onShowSuccessCha
           <Alert className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
             <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
             <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-              <strong>⚠️ Contrato Pausado:</strong> No puedes solicitar un rol mientras el contrato esté pausado. 
-              Por favor, espera a que el administrador reanude el contrato.
+              <strong>⚠️ Contract Paused:</strong> You cannot request a role while the contract is paused. 
+              Please wait for the administrator to resume the contract.
             </AlertDescription>
           </Alert>
         ) : (

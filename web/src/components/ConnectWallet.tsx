@@ -117,7 +117,7 @@ export function ConnectWallet() {
     return (
       <div className="flex gap-2">
         <Button variant="default" disabled>
-          Conectar Wallet
+          Connect Wallet
         </Button>
       </div>
     )
@@ -144,7 +144,7 @@ export function ConnectWallet() {
           variant="outline"
           aria-label="Disconnect wallet"
         >
-          Desconectar
+          Disconnect
         </Button>
       </div>
     )
@@ -156,14 +156,14 @@ export function ConnectWallet() {
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogTrigger asChild>
           <Button variant="default" aria-label="Open wallet connection dialog">
-            Conectar Wallet
+            Connect Wallet
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-md" aria-labelledby="connect-wallet-title">
           <DialogHeader>
-            <DialogTitle id="connect-wallet-title">Conectar tu Wallet</DialogTitle>
+            <DialogTitle id="connect-wallet-title">Connect your Wallet</DialogTitle>
             <DialogDescription>
-              Selecciona una wallet para conectarte a la aplicación
+              Select a wallet to connect to the application
             </DialogDescription>
           </DialogHeader>
           
@@ -200,7 +200,7 @@ export function ConnectWallet() {
                     <div className="text-2xl">{icon}</div>
                     <div className="text-left">
                       <div className="font-semibold">{displayName}</div>
-                      <div className="text-xs text-muted-foreground">Usar wallet instalada</div>
+                      <div className="text-xs text-muted-foreground">Use installed wallet</div>
                     </div>
                   </div>
                 </Button>
@@ -214,14 +214,14 @@ export function ConnectWallet() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">
-                  ¿No tienes wallet o quieres instalar otra?
+                  Don't you have a wallet or want to install another one?
                 </span>
               </div>
             </div>
 
             {/* Recomendaciones - Top 5 wallets */}
             <div className="text-sm text-muted-foreground text-center mb-2">
-              Top 5 wallets más populares:
+              Top 5 most popular wallets:
             </div>
             
             <div className="grid grid-cols-1 gap-2">
@@ -250,20 +250,20 @@ export function ConnectWallet() {
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
       <DialogTrigger asChild>
         <Button variant="default">
-          Instalar Wallet
+          Install Wallet
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" aria-labelledby="install-wallet-title">
         <DialogHeader>
-          <DialogTitle id="install-wallet-title">📱 Necesitas una Wallet</DialogTitle>
+          <DialogTitle id="install-wallet-title">📱 You Need a Wallet</DialogTitle>
           <DialogDescription>
-            Para usar esta aplicación, necesitas instalar una wallet de criptomonedas
+            To use this application, you need to install a cryptocurrency wallet
           </DialogDescription>
         </DialogHeader>
         
         <div className="flex flex-col gap-3 py-4">
           <p className="text-sm text-muted-foreground">
-            Recomendamos estas wallets populares y seguras:
+            We recommend these popular and secure wallets:
           </p>
           
           {recommendedWallets.map((wallet) => (
@@ -277,7 +277,7 @@ export function ConnectWallet() {
                 <div className="text-2xl">{wallet.icon}</div>
                 <div className="text-left">
                   <div className="font-semibold">{wallet.name}</div>
-                  <div className="text-xs text-muted-foreground">Click para instalar</div>
+                      <div className="text-xs text-muted-foreground">Click to install</div>
                 </div>
               </div>
             </Button>
@@ -285,7 +285,7 @@ export function ConnectWallet() {
 
           <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
             <p className="text-xs text-blue-700 dark:text-blue-300">
-              💡 <strong>Consejo:</strong> Después de instalar, recarga esta página para conectarte
+              💡 <strong>Tip:</strong> After installing, reload this page to connect
             </p>
           </div>
         </div>

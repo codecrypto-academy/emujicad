@@ -31,8 +31,8 @@ export function UserStatsCards() {
       {/* Pending */}
       <Card className="border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-yellow-700 dark:text-yellow-400">⏳ Pendientes</CardTitle>
-          <CardDescription className="dark:text-yellow-300/80">Esperando aprobación</CardDescription>
+          <CardTitle className="text-sm font-medium text-yellow-700 dark:text-yellow-400">⏳ Pending</CardTitle>
+          <CardDescription className="dark:text-yellow-300/80">Awaiting approval</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-3xl font-bold text-yellow-700 dark:text-yellow-400">{stats.pending}</p>
@@ -42,8 +42,8 @@ export function UserStatsCards() {
       {/* Approved */}
       <Card className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-green-700 dark:text-green-400">✅ Aprobados</CardTitle>
-          <CardDescription className="dark:text-green-300/80">Activos en el sistema</CardDescription>
+          <CardTitle className="text-sm font-medium text-green-700 dark:text-green-400">✅ Approved</CardTitle>
+          <CardDescription className="dark:text-green-300/80">Active in the system</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-3xl font-bold text-green-700 dark:text-green-400">{stats.approved}</p>
@@ -53,8 +53,8 @@ export function UserStatsCards() {
       {/* Rejected */}
       <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-red-700 dark:text-red-400">❌ Rechazados</CardTitle>
-          <CardDescription className="dark:text-red-300/80">Solicitudes denegadas</CardDescription>
+          <CardTitle className="text-sm font-medium text-red-700 dark:text-red-400">❌ Rejected</CardTitle>
+          <CardDescription className="dark:text-red-300/80">Denied requests</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-3xl font-bold text-red-700 dark:text-red-400">{stats.rejected}</p>
@@ -64,8 +64,8 @@ export function UserStatsCards() {
       {/* Canceled */}
       <Card className="border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">🚫 Cancelados</CardTitle>
-          <CardDescription className="dark:text-gray-400">Cuentas suspendidas</CardDescription>
+          <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">🚫 Canceled</CardTitle>
+          <CardDescription className="dark:text-gray-400">Suspended accounts</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-3xl font-bold text-gray-700 dark:text-gray-300">{stats.canceled}</p>

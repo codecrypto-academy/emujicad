@@ -11,6 +11,7 @@ import { useContractOwner } from '@/hooks/useContractOwner'
 import { useAccount } from 'wagmi'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useMemo } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -48,11 +49,12 @@ export default function TokensPage() {
   const shouldFetchData = isConnected && !isLoadingAuth && isAuthenticated
   
   const { owner, isLoading: isLoadingOwner } = useContractOwner(shouldFetchData)
-  const { tokens, isLoading, error, totalTokens } = useGetUserTokensWithData(
+  const { tokens, isLoading, error, totalTokens, refetch: refetchUserTokens } = useGetUserTokensWithData(
     shouldFetchData ? address : undefined
   )
   const { data: isPaused } = useIsPaused(shouldFetchData)
   const { rowMaterial, finishedProduct, isLoading: isLoadingStats, error: statsError } = useUserTokenStats(address)
+  const queryClient = useQueryClient()
   
   // Verificación directa de admin (más rápida que esperar por AuthContext)
   const isAdminDirect = address && owner && address.toLowerCase() === owner.toLowerCase()
@@ -133,6 +135,97 @@ export default function TokensPage() {
       console.log('[TokensPage] useModernDesign:', useModernDesign)
     }
   }, [useModernDesign])
+
+  // Listen for events when transfers are created, accepted, rejected, or cancelled
+  useEffect(() => {
+    const handleTransferCreated = () => {
+      console.log('[TokensPage] New transfer created, updating token balances and stats...')
+      // Direct refetch of user tokens after 2 seconds to update balances
+      setTimeout(() => {
+        refetchUserTokens()
+      }, 2000)
+      
+      // Invalidate getTokenBalance queries for all visible tokens to update card balances immediately
+      setTimeout(() => {
+        if (tokens && tokens.length > 0 && address) {
+          // Invalidate getTokenBalance for all visible tokens
+          tokens.forEach((token) => {
+            queryClient.invalidateQueries({
+              predicate: (query) => {
+                const queryKey = query.queryKey
+                if (Array.isArray(queryKey) && queryKey.length >= 2) {
+                  const secondKey = queryKey[1] as any
+                  if (secondKey?.functionName === 'getTokenBalance') {
+                    if (Array.isArray(secondKey?.args) && secondKey.args.length >= 2) {
+                      const [queryTokenId, queryAddress] = secondKey.args
+                      if (queryTokenId?.toString() === token.tokenId.toString() && 
+                          queryAddress?.toLowerCase() === address.toLowerCase()) {
+                        return true
+                      }
+                    }
+                  }
+                }
+                return false
+              },
+            })
+          })
+        }
+        // Also invalidate all read queries to ensure complete update
+        queryClient.invalidateQueries({ queryKey: ['readContract'] })
+        queryClient.invalidateQueries({ queryKey: ['readContracts'] })
+      }, 2000) // Reduced to 2 seconds for faster update
+    }
+    
+    const handleTransferUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<{ hash: string; tokenId: string; transferId: string; action: 'accept' | 'reject' | 'cancel' }>
+      console.log('[TokensPage] Transfer updated (accept/reject/cancel), updating token balances and stats...', customEvent.detail)
+      // Direct refetch of user tokens after 2 seconds to update balances
+      // This is important for all actions:
+      // - accept: Factory/Retailer/Consumer receives tokens (balance increases)
+      // - reject: tokens return to sender (balance increases for sender)
+      // - cancel: tokens return to sender (balance increases for sender)
+      setTimeout(() => {
+        refetchUserTokens()
+      }, 2000)
+      
+      // Invalidate getTokenBalance queries for all visible tokens to update card balances immediately
+      setTimeout(() => {
+        if (tokens && tokens.length > 0 && address) {
+          // Invalidate getTokenBalance for all visible tokens
+          tokens.forEach((token) => {
+            queryClient.invalidateQueries({
+              predicate: (query) => {
+                const queryKey = query.queryKey
+                if (Array.isArray(queryKey) && queryKey.length >= 2) {
+                  const secondKey = queryKey[1] as any
+                  if (secondKey?.functionName === 'getTokenBalance') {
+                    if (Array.isArray(secondKey?.args) && secondKey.args.length >= 2) {
+                      const [queryTokenId, queryAddress] = secondKey.args
+                      if (queryTokenId?.toString() === token.tokenId.toString() && 
+                          queryAddress?.toLowerCase() === address.toLowerCase()) {
+                        return true
+                      }
+                    }
+                  }
+                }
+                return false
+              },
+            })
+          })
+        }
+        // Also invalidate all read queries to ensure complete update
+        queryClient.invalidateQueries({ queryKey: ['readContract'] })
+        queryClient.invalidateQueries({ queryKey: ['readContracts'] })
+      }, 2000) // Reduced to 2 seconds for faster update
+    }
+    
+    window.addEventListener('transferCreated', handleTransferCreated)
+    window.addEventListener('transferUpdated', handleTransferUpdated)
+    return () => {
+      window.removeEventListener('transferCreated', handleTransferCreated)
+      window.removeEventListener('transferUpdated', handleTransferUpdated)
+    }
+  }, [refetchUserTokens, queryClient, tokens, address])
 
   // 4. TODOS los useMemo juntos (DEBEN estar ANTES de cualquier return condicional)
   // Función para normalizar strings (remover acentos y convertir a minúsculas)
@@ -528,6 +621,7 @@ export default function TokensPage() {
             finishedProduct={finishedProduct}
             router={router}
             useModernDesign={useModernDesign}
+            userRole={userRole}
           />
         </div>
         </div>
@@ -731,6 +825,7 @@ export default function TokensPage() {
             finishedProduct={finishedProduct}
             router={router}
             useModernDesign={useModernDesign}
+            userRole={userRole}
           />
         </div>
 
@@ -893,7 +988,8 @@ function TokenTypeStatsSection({
   rowMaterial, 
   finishedProduct, 
   router, 
-  useModernDesign 
+  useModernDesign,
+  userRole
 }: { 
   tokens: any[] | undefined
   isLoading: boolean
@@ -902,6 +998,7 @@ function TokenTypeStatsSection({
   finishedProduct: any
   router: any
   useModernDesign: boolean
+  userRole: number | null
 }) {
   // Separar tokens por tipo
   const rawMaterialTokens = useMemo(() => {
@@ -914,9 +1011,22 @@ function TokenTypeStatsSection({
     return tokens.filter(token => Number(token.tokenType) === TokenType.FinishedProduct)
   }, [tokens])
 
-  // Only show rows that have tokens (tanto en las estadísticas como en los tokens filtrados)
-  const hasRowMaterial = rowMaterial && (rowMaterial.tokenCount > 0 || (rowMaterial.totalBalance && rowMaterial.totalBalance > BigInt(0))) && rawMaterialTokens.length > 0
-  const hasFinishedProduct = finishedProduct && (finishedProduct.tokenCount > 0 || (finishedProduct.totalBalance && finishedProduct.totalBalance > BigInt(0))) && finishedProductTokens.length > 0
+  // Determinar qué tipos de tokens puede ver el usuario según su rol
+  const isProducer = userRole === UserRole.Producer
+  const isFactory = userRole === UserRole.Factory
+  const isRetailer = userRole === UserRole.Retailer
+  const isConsumer = userRole === UserRole.Consumer
+  
+  // Producer: solo puede ver Raw Material
+  // Factory: puede ver ambos tipos
+  // Retailer/Consumer: solo pueden ver Finished Product
+  const shouldShowRawMaterial = isProducer || isFactory
+  const shouldShowFinishedProduct = isFactory || isRetailer || isConsumer
+  
+  // Only show rows that have tokens Y que el usuario puede ver según su rol
+  // Nota: Solo verificamos tokenCount, no totalBalance, porque no tiene sentido sumar tokens de diferentes tipos
+  const hasRowMaterial = shouldShowRawMaterial && rowMaterial && rowMaterial.tokenCount > 0 && rawMaterialTokens.length > 0
+  const hasFinishedProduct = shouldShowFinishedProduct && finishedProduct && finishedProduct.tokenCount > 0 && finishedProductTokens.length > 0
   const hasAnyTokens = hasRowMaterial || hasFinishedProduct
 
   if (statsError) {
@@ -963,8 +1073,8 @@ function TokenTypeStatsSection({
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Raw Material Section */}
-            {hasRowMaterial && rowMaterial && (
+            {/* Raw Material Section - Solo mostrar si el usuario puede ver este tipo Y tiene tokens */}
+            {shouldShowRawMaterial && hasRowMaterial && rowMaterial && rowMaterial.tokenCount > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b-2 border-slate-200 dark:border-slate-700">
                   <div className="flex items-center gap-3">
@@ -975,7 +1085,7 @@ function TokenTypeStatsSection({
                   </div>
                   <div className="flex items-center gap-6 text-sm">
                     <span className="text-slate-600 dark:text-slate-400">
-                      Count: <span className="font-bold text-slate-800 dark:text-slate-200">{rowMaterial?.tokenCount || 0}</span>
+                      Count: <span className="font-bold text-slate-800 dark:text-slate-200">{rowMaterial.tokenCount}</span>
                     </span>
                   </div>
                 </div>
@@ -1008,8 +1118,8 @@ function TokenTypeStatsSection({
               </div>
             )}
 
-            {/* Finished Product Section */}
-            {hasFinishedProduct && finishedProduct && (
+            {/* Finished Product Section - Solo mostrar si el usuario puede ver este tipo Y tiene tokens */}
+            {shouldShowFinishedProduct && hasFinishedProduct && finishedProduct && finishedProduct.tokenCount > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b-2 border-slate-200 dark:border-slate-700">
                   <div className="flex items-center gap-3">
@@ -1020,7 +1130,7 @@ function TokenTypeStatsSection({
                   </div>
                   <div className="flex items-center gap-6 text-sm">
                     <span className="text-slate-600 dark:text-slate-400">
-                      Count: <span className="font-bold text-slate-800 dark:text-slate-200">{finishedProduct?.tokenCount || 0}</span>
+                      Count: <span className="font-bold text-slate-800 dark:text-slate-200">{finishedProduct.tokenCount}</span>
                     </span>
                   </div>
                 </div>

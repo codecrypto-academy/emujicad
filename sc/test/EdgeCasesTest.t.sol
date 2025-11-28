@@ -87,14 +87,15 @@ contract EdgeCasesTest is Test {
         supplyChain.requestUserRole(SupplyChain.UserRole.Factory);
     }
 
-    /// @notice Edge Case 4: Usuario con mismo rol intenta re-registrarse
-    /// @dev Cubre branch: if (uint(role) == uint(user.role)) revert UserWithExistingRole();
+    /// @notice Edge Case 4: Usuario con mismo rol intenta re-registrarse (solo si NO está Rejected)
+    /// @dev Cubre branch: if (uint(role) == uint(user.role) && user.status != UserStatus.Rejected) revert UserWithExistingRole();
+    /// @dev NOTA: Usuarios Rejected pueden volver a solicitar el mismo rol (ver testRejectedUserCanRequestSameRole)
     function testSameRoleReregistration() public {
-        // Registrar usuario
+        // Registrar usuario (estado Pending)
         vm.prank(producerAddress);
         supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
         
-        // Intentar registrarse con el mismo rol
+        // Intentar registrarse con el mismo rol (debe fallar porque está Pending, no Rejected)
         vm.expectRevert(abi.encodeWithSelector(SupplyChain.UserWithExistingRole.selector));
         vm.prank(producerAddress);
         supplyChain.requestUserRole(SupplyChain.UserRole.Producer);
@@ -143,6 +144,34 @@ contract EdgeCasesTest is Test {
         user = supplyChain.getUserInfo(producerAddress);
         assertEq(uint(user.status), uint(SupplyChain.UserStatus.Pending), "Status should be Pending after requesting new role");
         assertEq(uint(user.role), uint(SupplyChain.UserRole.Factory), "Role should be Factory");
+    }
+
+    /// @notice Edge Case 4.7: Usuario rechazado puede volver a solicitar el mismo rol
+    /// @dev Cubre el nuevo comportamiento: usuarios Rejected pueden re-solicitar el mismo rol
+    /// @dev Esto permite que usuarios rechazados por temas administrativos puedan volver a intentar
+    ///      después de resolver el problema que causó el rechazo
+    function testRejectedUserCanRequestSameRole() public {
+        // 1. Usuario solicita rol Consumer y es rechazado
+        vm.prank(consumerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Consumer);
+        
+        vm.prank(owner);
+        supplyChain.changeStatusUser(consumerAddress, SupplyChain.UserStatus.Rejected);
+        
+        // Verificar que el usuario está rechazado
+        SupplyChain.User memory user = supplyChain.getUserInfo(consumerAddress);
+        assertEq(uint(user.status), uint(SupplyChain.UserStatus.Rejected), "User should be rejected");
+        assertEq(uint(user.role), uint(SupplyChain.UserRole.Consumer), "User should have Consumer role");
+        
+        // 2. Usuario rechazado puede volver a solicitar el mismo rol (Consumer)
+        // Esto NO debe revertir porque el usuario está Rejected
+        vm.prank(consumerAddress);
+        supplyChain.requestUserRole(SupplyChain.UserRole.Consumer);
+        
+        // 3. Verificar que el status cambió a Pending y el rol se mantiene (o se actualiza)
+        user = supplyChain.getUserInfo(consumerAddress);
+        assertEq(uint(user.status), uint(SupplyChain.UserStatus.Pending), "Status should be Pending after re-requesting same role");
+        assertEq(uint(user.role), uint(SupplyChain.UserRole.Consumer), "Role should remain Consumer");
     }
 
     /// @notice Edge Case 5: Token con nombre vacío

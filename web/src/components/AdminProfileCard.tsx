@@ -14,10 +14,7 @@ export function AdminProfileCard() {
       <Card>
         <DebugLabel component="AdminProfileCard" section="NotConnectedState" props={{ isConnected, hasAddress: !!address }} />
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Admin Profile
-          </CardTitle>
+          {/* Título removido - ahora está en el elemento #18 de la página */}
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
@@ -32,10 +29,7 @@ export function AdminProfileCard() {
     <Card className="border-purple-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-left-4">
       <DebugLabel component="AdminProfileCard" section="MainContent" props={{ isConnected, hasAddress: !!address }} />
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Shield className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-          Administrator Profile
-        </CardTitle>
+        {/* Título removido - ahora está en el elemento #18 de la página */}
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

@@ -25,7 +25,7 @@ export function useGetUserTokensWithData(userAddress?: `0x${string}`) {
   const addressToUse = userAddress || connectedAddress;
 
   // Get all token IDs owned by the user
-  const { data: userTokens, isLoading: isLoadingUserTokens, error: userTokensError } = useGetUserTokens(addressToUse);
+  const { data: userTokens, isLoading: isLoadingUserTokens, error: userTokensError, refetch: refetchUserTokenIds } = useGetUserTokens(addressToUse);
   
   const validTokenIds = useMemo(() => {
     return validateBigIntArray(userTokens) || [];
@@ -64,7 +64,7 @@ export function useGetUserTokensWithData(userAddress?: `0x${string}`) {
   }, [validTokenIds, addressToUse]);
 
   // Batch read all token data and balances
-  const { data: contractsData, isLoading: isLoadingContracts, error: contractsError } = useReadContracts({
+  const { data: contractsData, isLoading: isLoadingContracts, error: contractsError, refetch: refetchContracts } = useReadContracts({
     contracts: contracts as any,
     query: {
       enabled: contracts.length > 0,
@@ -134,11 +134,20 @@ export function useGetUserTokensWithData(userAddress?: `0x${string}`) {
     return validatedTokens;
   }, [contractsData, validTokenIds]);
 
+  // Función para refetch que actualiza tanto los IDs como los datos de los tokens
+  const refetch = async () => {
+    await refetchUserTokenIds()
+    if (contracts.length > 0) {
+      await refetchContracts()
+    }
+  }
+
   return {
     tokens,
     isLoading: isLoadingUserTokens || isLoadingContracts,
     error: userTokensError || contractsError,
     totalTokens: tokens.length,
+    refetch,
   };
 }
 

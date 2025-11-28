@@ -21,24 +21,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AddressDisplay } from '@/components/AddressDisplay'
 import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
+import { getWalletName } from '@/lib/error-formatter'
 
 export function OwnershipTransfer() {
   const { address, isConnected, connector } = useAccount()
   
-  // Obtener el nombre de la billetera conectada
-  const getWalletName = () => {
-    if (!connector) return 'your wallet'
-    
-    // Si es injected y MetaMask está instalado, mostrar MetaMask
-    if (connector.id === 'injected' && typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
-      return 'MetaMask'
-    }
-    
-    // Usar el nombre del conector
-    return connector.name || 'your wallet'
-  }
-  
-  const walletName = getWalletName()
+  // Obtener el nombre de la billetera conectada usando la función centralizada
+  const walletName = getWalletName(connector)
   const { owner, isLoading: isLoadingOwner } = useContractOwner(isConnected)
   const { pendingOwner, isLoading: isLoadingPending } = usePendingOwner(isConnected)
   const { 
@@ -135,7 +124,7 @@ export function OwnershipTransfer() {
           <DebugLabel component="OwnershipTransfer" section="LoadingState" props={{ isLoadingOwner, isLoadingPending, useModernDesign: true }} position="top-right" offset={4} />
           <div className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin text-slate-600 dark:text-slate-400" />
-            <span className="text-sm text-slate-600 dark:text-slate-400">Verificando ownership...</span>
+            <span className="text-sm text-slate-600 dark:text-slate-400">Verifying ownership...</span>
           </div>
         </div>
       )
@@ -144,7 +133,7 @@ export function OwnershipTransfer() {
       <Card style={DEBUG_MODE ? { border: '3px solid rgba(255, 0, 0, 0.6)', borderRadius: '4px', padding: '4px' } : {}}>
         <DebugLabel component="OwnershipTransfer" section="LoadingState" props={{ isLoadingOwner, isLoadingPending, useModernDesign: false }} position="top-right" offset={4} />
         <CardHeader>
-          <CardTitle>Transferencia de Ownership</CardTitle>
+          <CardTitle>Ownership Transfer</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
@@ -169,8 +158,8 @@ export function OwnershipTransfer() {
                 <Crown className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-purple-700 dark:text-purple-300">Ownership del Contrato</h3>
-                <p className="text-sm text-purple-600 dark:text-purple-400">Gestiona la transferencia de ownership del contrato</p>
+                <h3 className="text-xl font-bold text-purple-700 dark:text-purple-300">Contract Ownership</h3>
+                <p className="text-sm text-purple-600 dark:text-purple-400">Manage the contract ownership transfer</p>
               </div>
             </div>
             
@@ -178,7 +167,7 @@ export function OwnershipTransfer() {
               {/* Owner actual */}
               <div className="rounded-xl bg-white/50 dark:bg-slate-800/50 p-4 border border-purple-200/50 dark:border-purple-700/50">
                 <Label className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-2 block">
-                  Owner Actual:
+                  Current Owner:
                 </Label>
                 <AddressDisplay address={owner || ''} className="text-sm font-mono" />
               </div>
@@ -191,7 +180,7 @@ export function OwnershipTransfer() {
                   </Label>
                   <AddressDisplay address={pendingOwner || ''} className="text-sm font-mono" />
                   <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
-                    Esperando aceptación de la transferencia...
+                    Waiting for transfer acceptance...
                   </p>
                 </div>
               )}
@@ -206,12 +195,12 @@ export function OwnershipTransfer() {
                   {isPendingInitiate || isConfirmingInitiate ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {isPendingInitiate ? 'Confirmando...' : 'Procesando...'}
+                      {isPendingInitiate ? 'Confirming...' : 'Processing...'}
                     </>
                   ) : (
                     <>
                       <Crown className="h-4 w-4 mr-2" />
-                      Iniciar Transferencia de Ownership
+                      Initiate Ownership Transfer
                     </>
                   )}
                 </Button>
@@ -228,12 +217,12 @@ export function OwnershipTransfer() {
                   {isPendingReject || isConfirmingReject ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {isPendingReject ? 'Confirmando...' : 'Procesando...'}
+                      {isPendingReject ? 'Confirming...' : 'Processing...'}
                     </>
                   ) : (
                     <>
                       <XCircle className="h-4 w-4 mr-2" />
-                      Cancelar Transferencia (Owner)
+                      Cancel Transfer (Owner)
                     </>
                   )}
                 </Button>
@@ -249,12 +238,12 @@ export function OwnershipTransfer() {
                     {isPendingAccept || isConfirmingAccept ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        {isPendingAccept ? 'Confirmando...' : 'Procesando...'}
+                        {isPendingAccept ? 'Confirming...' : 'Processing...'}
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="h-4 w-4 mr-2" />
-                        Aceptar Ownership
+                        Accept Ownership
                       </>
                     )}
                   </Button>
@@ -267,12 +256,12 @@ export function OwnershipTransfer() {
                     {isPendingReject || isConfirmingReject ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        {isPendingReject ? 'Confirmando...' : 'Procesando...'}
+                        {isPendingReject ? 'Confirming...' : 'Processing...'}
                       </>
                     ) : (
                       <>
                         <XCircle className="h-4 w-4 mr-2" />
-                        Rechazar Transferencia
+                        Reject Transfer
                       </>
                     )}
                   </Button>
@@ -312,7 +301,7 @@ export function OwnershipTransfer() {
                         )
                       }
                       
-                      return `❌ Error al iniciar transferencia: ${errorMsg}`
+                      return `❌ Error initiating transfer: ${errorMsg}`
                     })()}
                   </AlertDescription>
                 </Alert>
@@ -322,7 +311,7 @@ export function OwnershipTransfer() {
                 <Alert className="rounded-xl bg-green-50/80 dark:bg-green-900/30 backdrop-blur border-green-200 dark:border-green-800">
                   <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                   <AlertDescription className="text-green-700 dark:text-green-300">
-                    ✅ Transferencia iniciada exitosamente. El nuevo owner debe aceptar la transferencia.
+                    ✅ Transfer initiated successfully. The new owner must accept the transfer.
                   </AlertDescription>
                 </Alert>
               )}
@@ -360,7 +349,7 @@ export function OwnershipTransfer() {
                         )
                       }
                       
-                      return `❌ Error al aceptar ownership: ${errorMsg}`
+                      return `❌ Error accepting ownership: ${errorMsg}`
                     })()}
                   </AlertDescription>
                 </Alert>
@@ -370,7 +359,7 @@ export function OwnershipTransfer() {
                 <Alert className="rounded-xl bg-green-50/80 dark:bg-green-900/30 backdrop-blur border-green-200 dark:border-green-800">
                   <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                   <AlertDescription className="text-green-700 dark:text-green-300">
-                    ✅ Ownership aceptado exitosamente. Ahora eres el nuevo owner del contrato.
+                    ✅ Ownership accepted successfully. You are now the new contract owner.
                   </AlertDescription>
                 </Alert>
               )}
@@ -408,7 +397,7 @@ export function OwnershipTransfer() {
                         )
                       }
                       
-                      return `❌ Error al ${isOwner ? 'cancelar' : 'rechazar'} transferencia: ${errorMsg}`
+                      return `❌ Error ${isOwner ? 'cancelling' : 'rejecting'} transfer: ${errorMsg}`
                     })()}
                   </AlertDescription>
                 </Alert>
@@ -418,7 +407,7 @@ export function OwnershipTransfer() {
                 <Alert className="rounded-xl bg-green-50/80 dark:bg-green-900/30 backdrop-blur border-green-200 dark:border-green-800">
                   <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                   <AlertDescription className="text-green-700 dark:text-green-300">
-                    ✅ Transferencia {isOwner ? 'cancelada' : 'rechazada'} exitosamente.
+                    ✅ Transfer {isOwner ? 'cancelled' : 'rejected'} successfully.
                   </AlertDescription>
                 </Alert>
               )}
@@ -427,7 +416,7 @@ export function OwnershipTransfer() {
               {!isOwner && !isPendingOwnerAddress && (
                 <Alert className="rounded-xl bg-slate-50/80 dark:bg-slate-900/30 backdrop-blur border-slate-200 dark:border-slate-700">
                   <AlertDescription className="text-slate-600 dark:text-slate-400 text-sm">
-                    Solo el owner actual puede iniciar transferencias de ownership.
+                    Only the current owner can initiate ownership transfers.
                   </AlertDescription>
                 </Alert>
               )}
@@ -443,10 +432,10 @@ export function OwnershipTransfer() {
               <DialogHeader>
               <DialogTitle id="initiate-transfer-title" className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
                 <Crown className="h-5 w-5" />
-                Iniciar Transferencia de Ownership
+                Initiate Ownership Transfer
               </DialogTitle>
               <DialogDescription>
-                Transfiere el ownership del contrato a otra dirección. El nuevo owner debe aceptar la transferencia.
+                Transfer contract ownership to another address. The new owner must accept the transfer.
               </DialogDescription>
             </DialogHeader>
             
@@ -456,17 +445,17 @@ export function OwnershipTransfer() {
                 <AlertDescription className="text-amber-700 dark:text-amber-300">
                   <strong>⚠️ Importante:</strong>
                   <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                    <li>El nuevo owner NO debe haber solicitado NINGÚN rol en el sistema (ni siquiera Pending)</li>
-                    <li>Si la dirección alguna vez llamó a requestUserRole(), no puede ser owner</li>
-                    <li>El nuevo owner será el único que pueda aprobar/rechazar usuarios</li>
-                    <li>Esta acción es irreversible una vez aceptada</li>
+                    <li>The new owner must NOT have requested ANY role in the system (not even Pending)</li>
+                    <li>If the address has ever called requestUserRole(), it cannot be owner</li>
+                    <li>The new owner will be the only one who can approve/reject users</li>
+                    <li>This action is irreversible once accepted</li>
                   </ul>
                 </AlertDescription>
               </Alert>
 
               <div className="space-y-2">
                 <Label htmlFor="newOwner">
-                  Dirección del nuevo owner:
+                  New owner address:
                 </Label>
                 <Input
                   id="newOwner"
@@ -477,7 +466,7 @@ export function OwnershipTransfer() {
                 />
                 {newOwnerAddress && !/^0x[a-fA-F0-9]{40}$/.test(newOwnerAddress) && (
                   <p className="text-xs text-red-600 dark:text-red-400">
-                    Dirección inválida. Debe ser una dirección Ethereum válida (0x...)
+                    Invalid address. Must be a valid Ethereum address (0x...)
                   </p>
                 )}
               </div>
@@ -492,7 +481,7 @@ export function OwnershipTransfer() {
                 }}
                 className="rounded-xl"
               >
-                Cancelar
+                Cancel
               </Button>
               <Button
                 onClick={handleInitiateConfirm}
@@ -502,10 +491,10 @@ export function OwnershipTransfer() {
                 {isPendingInitiate || isConfirmingInitiate ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Procesando...
+                        Processing...
                   </>
                 ) : (
-                  'Iniciar Transferencia'
+                  'Initiate Transfer'
                 )}
               </Button>
             </DialogFooter>
@@ -521,10 +510,10 @@ export function OwnershipTransfer() {
               <DialogHeader>
               <DialogTitle id="reject-transfer-title" className="flex items-center gap-2 text-red-600 dark:text-red-400">
                 <XCircle className="h-5 w-5" />
-                {isOwner ? 'Cancelar' : 'Rechazar'} Transferencia de Ownership
+                {isOwner ? 'Cancel' : 'Reject'} Ownership Transfer
               </DialogTitle>
               <DialogDescription>
-                ¿Estás seguro de que deseas {isOwner ? 'cancelar' : 'rechazar'} la transferencia de ownership? Esto cancelará la transferencia pendiente.
+                Are you sure you want to {isOwner ? 'cancel' : 'reject'} the ownership transfer? This will cancel the pending transfer.
               </DialogDescription>
             </DialogHeader>
             
@@ -532,11 +521,11 @@ export function OwnershipTransfer() {
               <Alert className="rounded-xl bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
                 <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                 <AlertDescription className="text-amber-700 dark:text-amber-300">
-                  <strong>⚠️ Advertencia:</strong> Al {isOwner ? 'cancelar' : 'rechazar'} la transferencia:
+                  <strong>⚠️ Warning:</strong> By {isOwner ? 'cancelling' : 'rejecting'} the transfer:
                   <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                    <li>La transferencia pendiente será cancelada</li>
-                    <li>El owner actual seguirá siendo el owner</li>
-                    <li>El pendingOwner será limpiado</li>
+                    <li>The pending transfer will be cancelled</li>
+                    <li>The current owner will remain the owner</li>
+                    <li>The pendingOwner will be cleared</li>
                   </ul>
                 </AlertDescription>
               </Alert>
@@ -548,7 +537,7 @@ export function OwnershipTransfer() {
                 onClick={() => setShowRejectDialog(false)}
                 className="rounded-xl"
               >
-                Cancelar
+                Cancel
               </Button>
               <Button
                 onClick={handleRejectConfirm}
@@ -559,12 +548,12 @@ export function OwnershipTransfer() {
                 {isPendingReject || isConfirmingReject ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Procesando...
+                        Processing...
                   </>
                 ) : (
                   <>
                     <XCircle className="h-4 w-4 mr-2" />
-                    {isOwner ? 'Cancelar Transferencia' : 'Rechazar Transferencia'}
+                    {isOwner ? 'Cancel Transfer' : 'Reject Transfer'}
                   </>
                 )}
               </Button>
@@ -581,10 +570,10 @@ export function OwnershipTransfer() {
               <DialogHeader>
               <DialogTitle id="accept-transfer-title" className="flex items-center gap-2 text-green-600 dark:text-green-400">
                 <CheckCircle2 className="h-5 w-5" />
-                Aceptar Ownership
+                Accept Ownership
               </DialogTitle>
               <DialogDescription>
-                ¿Estás seguro de que deseas aceptar el ownership del contrato? Esta acción es irreversible.
+                Are you sure you want to accept the contract ownership? This action is irreversible.
               </DialogDescription>
             </DialogHeader>
             
@@ -592,19 +581,19 @@ export function OwnershipTransfer() {
               <Alert className="rounded-xl bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
                 <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                 <AlertDescription className="text-amber-700 dark:text-amber-300">
-                  <strong>⚠️ Advertencia:</strong> Al aceptar el ownership:
+                  <strong>⚠️ Warning:</strong> By accepting ownership:
                   <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                    <li>Serás el único que pueda aprobar/rechazar usuarios</li>
-                    <li>Serás el único que pueda pausar/despausar el contrato</li>
-                    <li>NO podrás tener un rol en el sistema (Producer, Factory, etc.)</li>
-                    <li>Esta acción es irreversible</li>
+                    <li>You will be the only one who can approve/reject users</li>
+                    <li>You will be the only one who can pause/unpause the contract</li>
+                    <li>You will NOT be able to have a role in the system (Producer, Factory, etc.)</li>
+                    <li>This action is irreversible</li>
                   </ul>
                 </AlertDescription>
               </Alert>
 
               <div className="space-y-2">
                 <Label htmlFor="confirmation">
-                  Escribe <strong className="font-mono">ACEPTAR</strong> para confirmar:
+                  Type <strong className="font-mono">ACEPTAR</strong> to confirm:
                 </Label>
                 <Input
                   id="confirmation"
@@ -625,7 +614,7 @@ export function OwnershipTransfer() {
                 }}
                 className="rounded-xl"
               >
-                Cancelar
+                Cancel
               </Button>
               <Button
                 onClick={handleAcceptConfirm}
@@ -635,10 +624,10 @@ export function OwnershipTransfer() {
                 {isPendingAccept || isConfirmingAccept ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Procesando...
+                        Processing...
                   </>
                 ) : (
-                  'Aceptar Ownership'
+                  'Accept Ownership'
                 )}
               </Button>
             </DialogFooter>
@@ -657,17 +646,17 @@ export function OwnershipTransfer() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            <span className="text-purple-700 dark:text-purple-300">Transferencia de Ownership</span>
+            <span className="text-purple-700 dark:text-purple-300">Ownership Transfer</span>
           </CardTitle>
           <CardDescription className="text-purple-600 dark:text-purple-400">
-            Gestiona la transferencia de ownership del contrato
+            Manage the contract ownership transfer
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Owner actual */}
           <div className="p-4 bg-white dark:bg-slate-800 rounded-lg border border-purple-200 dark:border-purple-700">
             <Label className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-2 block">
-              Owner Actual:
+              Current Owner:
             </Label>
             <AddressDisplay address={owner || ''} className="text-sm font-mono" />
           </div>
@@ -680,7 +669,7 @@ export function OwnershipTransfer() {
               </Label>
               <AddressDisplay address={pendingOwner || ''} className="text-sm font-mono" />
               <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
-                Esperando aceptación de la transferencia...
+                Waiting for transfer acceptance...
               </p>
             </div>
           )}
@@ -700,7 +689,7 @@ export function OwnershipTransfer() {
               ) : (
                 <>
                   <Crown className="h-4 w-4 mr-2" />
-                  Iniciar Transferencia de Ownership
+                  Initiate Ownership Transfer
                 </>
               )}
             </Button>
@@ -722,7 +711,7 @@ export function OwnershipTransfer() {
               ) : (
                 <>
                   <XCircle className="h-4 w-4 mr-2" />
-                  Cancelar Transferencia (Owner)
+                  Cancel Transferencia (Owner)
                 </>
               )}
             </Button>
@@ -743,7 +732,7 @@ export function OwnershipTransfer() {
                 ) : (
                   <>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Aceptar Ownership
+                    Accept Ownership
                   </>
                 )}
               </Button>
@@ -858,7 +847,7 @@ export function OwnershipTransfer() {
             <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
               <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
               <AlertDescription className="text-green-700 dark:text-green-300">
-                ✅ Ownership aceptado exitosamente
+                ✅ Ownership accepted successfully
               </AlertDescription>
             </Alert>
           )}
@@ -931,19 +920,19 @@ export function OwnershipTransfer() {
               Iniciar Transferencia de Ownership
             </DialogTitle>
             <DialogDescription>
-              Transfiere el ownership del contrato a otra dirección.
+              Transfer contract ownership to another address.
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <Alert className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
               <AlertDescription className="text-amber-700 dark:text-amber-300">
-                <strong>⚠️ Importante:</strong> El nuevo owner NO debe haber solicitado NINGÚN rol en el sistema (ni siquiera Pending). Si la dirección alguna vez llamó a requestUserRole(), no puede ser owner.
+                <strong>⚠️ Important:</strong> The new owner must NOT have requested ANY role in the system (not even Pending). If the address has ever called requestUserRole(), it cannot be owner.
               </AlertDescription>
             </Alert>
 
             <div className="space-y-2">
-              <Label htmlFor="newOwner">Dirección del nuevo owner:</Label>
+              <Label htmlFor="newOwner">New owner address:</Label>
               <Input
                 id="newOwner"
                 value={newOwnerAddress}
@@ -965,10 +954,10 @@ export function OwnershipTransfer() {
               {isPendingInitiate || isConfirmingInitiate ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Procesando...
+                        Processing...
                 </>
               ) : (
-                'Iniciar Transferencia'
+                'Initiate Transfer'
               )}
             </Button>
           </DialogFooter>
@@ -993,7 +982,7 @@ export function OwnershipTransfer() {
           <div className="space-y-4 py-4">
             <Alert className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
               <AlertDescription className="text-amber-700 dark:text-amber-300">
-                <strong>⚠️ Advertencia:</strong> Esta acción es irreversible.
+                <strong>⚠️ Warning:</strong> This action is irreversible.
               </AlertDescription>
             </Alert>
 
@@ -1022,7 +1011,7 @@ export function OwnershipTransfer() {
               {isPendingAccept || isConfirmingAccept ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Procesando...
+                        Processing...
                 </>
               ) : (
                 'Aceptar Ownership'
@@ -1062,7 +1051,7 @@ export function OwnershipTransfer() {
               {isPendingReject || isConfirmingReject ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Procesando...
+                        Processing...
                 </>
               ) : (
                 <>

@@ -11,6 +11,8 @@ import { useIsPaused } from '@/hooks/usePause'
 import { UserStatus } from '@/contracts/config'
 import { Pause } from 'lucide-react'
 import { DebugLabel, DEBUG_MODE } from '@/lib/debug'
+import { formatTransactionError, getWalletName } from '@/lib/error-formatter'
+import { useAccount } from 'wagmi'
 
 type RoleType = 'Producer' | 'Factory' | 'Retailer' | 'Consumer'
 
@@ -25,6 +27,10 @@ function DialogFormContent({ currentRole, userStatus, onSuccess, onClose }: { cu
   const [selectedRole, setSelectedRole] = useState<RoleType | ''>('')
   const { data: isPaused } = useIsPaused()
   const { requestRole, isPending, isSuccess, error } = useRequestRole()
+  const { connector } = useAccount()
+  
+  // Obtener nombre de la wallet usando la función helper
+  const walletName = getWalletName(connector)
 
   const getRoleName = (roleNumber: number): RoleType => {
     const roleNames: Record<number, RoleType> = {
@@ -41,7 +47,8 @@ function DialogFormContent({ currentRole, userStatus, onSuccess, onClose }: { cu
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!selectedRole || selectedRole === currentRoleName) return
+    // Permitir enviar el mismo rol si el usuario está Rejected
+    if (!selectedRole || (selectedRole === currentRoleName && userStatus !== UserStatus.Rejected)) return
     
     try {
       requestRole(selectedRole)
@@ -120,8 +127,8 @@ function DialogFormContent({ currentRole, userStatus, onSuccess, onClose }: { cu
             <Alert className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
               <Pause className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
               <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-                <strong>⚠️ Contrato Pausado:</strong> No puedes cambiar tu rol mientras el contrato esté pausado.
-                Por favor, espera a que el administrador reanude el contrato.
+                <strong>⚠️ Contract Paused:</strong> You cannot change your role while the contract is paused.
+                Please wait for the administrator to resume the contract.
               </AlertDescription>
             </Alert>
           ) : (
@@ -140,33 +147,55 @@ function DialogFormContent({ currentRole, userStatus, onSuccess, onClose }: { cu
                     <SelectValue placeholder="Select new role..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Producer" disabled={currentRoleName === 'Producer'}>
+                    {/* Permitir seleccionar el mismo rol si el usuario está Rejected (puede haber resuelto el problema administrativo) */}
+                    <SelectItem value="Producer" disabled={currentRoleName === 'Producer' && userStatus !== UserStatus.Rejected}>
                       👨‍🌾 Producer
                     </SelectItem>
-                    <SelectItem value="Factory" disabled={currentRoleName === 'Factory'}>
+                    <SelectItem value="Factory" disabled={currentRoleName === 'Factory' && userStatus !== UserStatus.Rejected}>
                       🏭 Factory
                     </SelectItem>
-                    <SelectItem value="Retailer" disabled={currentRoleName === 'Retailer'}>
+                    <SelectItem value="Retailer" disabled={currentRoleName === 'Retailer' && userStatus !== UserStatus.Rejected}>
                       🏪 Retailer
                     </SelectItem>
-                    <SelectItem value="Consumer" disabled={currentRoleName === 'Consumer'}>
+                    <SelectItem value="Consumer" disabled={currentRoleName === 'Consumer' && userStatus !== UserStatus.Rejected}>
                       🛒 Consumer
                     </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                  <p className="font-semibold">Error:</p>
-                  <p>{error.message || 'Failed to change role'}</p>
-                </div>
+              {error && (() => {
+                const { friendlyMessage, isUserCancelled, technicalDetails } = formatTransactionError(
+                  error,
+                  {
+                    action: 'the role change',
+                    walletName,
+                  }
+                )
+                
+                return (
+                  <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+                    <AlertDescription className="text-red-700 dark:text-red-300 whitespace-pre-line">
+                      {friendlyMessage}
+                      {technicalDetails && process.env.NODE_ENV === 'development' && (
+                        <details className="mt-2">
+                          <summary className="text-xs text-red-500 cursor-pointer hover:text-red-700">
+                            ▼ Technical details (dev only)
+                          </summary>
+                          <pre className="text-xs mt-1 p-2 bg-red-100 dark:bg-red-900/30 rounded overflow-auto max-h-32">
+                            {technicalDetails}
+                          </pre>
+                        </details>
               )}
+                    </AlertDescription>
+                  </Alert>
+                )
+              })()}
 
               <Button 
                 type="submit" 
                 className="w-full"
-                disabled={!selectedRole || selectedRole === currentRoleName || isPending}
+                disabled={!selectedRole || (selectedRole === currentRoleName && userStatus !== UserStatus.Rejected) || isPending}
               >
                 {isPending ? 'Submitting...' : 'Change Role'}
               </Button>
