@@ -1,7 +1,7 @@
 # 📚 Documentación Completa - Supply Chain Tracker
 
 **Última actualización**: 28 de Noviembre, 2025  
-**Versión**: 2.1.0  
+**Versión**: 2.2.0  
 **Proyecto**: Supply Chain DApp (PFM Web3)
 
 > **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](../STATUS.md)**
@@ -416,9 +416,21 @@ acceptTransfer(BigInt(5))
 
 ## 🤖 Deployment Automatizado
 
-### **Script**: `deploy.sh`
+### **Script**: `deploy.sh` (Linux/macOS)
 
-Script bash completo que automatiza TODO el proceso de deployment. Compatible con **Linux** y **macOS**.
+**Versión**: 2.2.0  
+**Estado**: ✅ Producción  
+**Compatibilidad**: Linux (Ubuntu, Debian, Fedora, Arch, openSUSE) y macOS
+
+Script bash completo que automatiza TODO el proceso de deployment. Completamente probado en Linux y macOS.
+
+#### **Características Principales**:
+- ✅ **Instalación Automática de Foundry**: Instala forge/anvil automáticamente si no están instalados (usa foundryup)
+- ✅ **Detección de OS**: Detecta automáticamente Linux o macOS y adapta los comandos
+- ✅ **Gestión de Dependencias**: Instala paquetes npm y dependencias de forge automáticamente
+- ✅ **Persistencia de Estado**: El estado de Anvil persiste entre reinicios
+- ✅ **Gestión de Procesos**: Detección inteligente de servicios en ejecución
+- ✅ **Logs Organizados**: Todos los logs en el directorio `logs/`
 
 ### **Comandos Disponibles**:
 
@@ -452,10 +464,14 @@ Script bash completo que automatiza TODO el proceso de deployment. Compatible co
 ./deploy.sh start --auto
 ./deploy.sh env -y
 
-# Configurar variables de entorno con parámetros
+# Configurar variables de entorno con parámetros (solo .env.local)
 ./deploy.sh env --modern-design true --debug-mode false
 ./deploy.sh env --debug-tokens true
 ./deploy.sh env --all true false false  # Todas las variables a la vez
+
+# Configurar variables de entorno directamente al iniciar (actualiza .env.local ANTES de start)
+./deploy.sh start --debug-mode false --debug-tokens false
+./deploy.sh start --all true false false   # MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false
 ```
 
 ### **Flujo de `./deploy.sh start`**:
@@ -466,9 +482,16 @@ Script bash completo que automatiza TODO el proceso de deployment. Compatible co
 
 Antes de iniciar cualquier servicio, el script:
 1. Verifica herramientas del sistema (instala si faltan)
-2. Verifica Node.js, npm, Foundry (muestra instrucciones si faltan)
-3. Verifica dependencias del proyecto (instala si faltan)
-4. Verifica variables de entorno (pregunta para crear si faltan)
+2. Verifica Node.js, npm (muestra instrucciones de instalación si faltan)
+3. **Verifica Foundry (forge/anvil)** - **Instala automáticamente si falta** usando foundryup
+4. Verifica dependencias del proyecto (instala si faltan)
+5. Verifica variables de entorno (pregunta para crear si faltan)
+
+**Instalación Automática de Foundry**: Si Foundry no está instalado, el script:
+- Descarga el instalador foundryup desde `https://foundry.paradigm.xyz`
+- Ejecuta el instalador automáticamente
+- Actualiza el PATH para incluir `~/.foundry/bin`
+- Verifica la instalación de `forge` y `anvil`
 
 Si algún requisito crítico falta y no se puede instalar, el script aborta con instrucciones claras.
 
@@ -673,7 +696,7 @@ Configura las variables de entorno del frontend en `web/.env.local`.
 **3. Modo Todo a la Vez**:
 ```bash
 ./deploy.sh env --all true false false
-# Establece: MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false
+# Establece: MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false (valores recomendados por defecto)
 ```
 
 **4. Modo Automático** (usa valores por defecto):
@@ -681,6 +704,13 @@ Configura las variables de entorno del frontend en `web/.env.local`.
 ./deploy.sh env --yes
 # Crea .env.local con valores por defecto:
 # MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false
+```
+
+**5. Desde `start` (recomendado para forzar debug off antes de arrancar)**:
+```bash
+# Actualiza .env.local y luego inicia todo el stack
+./deploy.sh start --debug-mode false --debug-tokens false
+./deploy.sh start --all true false false   # MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false
 ```
 
 #### **Archivo Creado**:
@@ -733,7 +763,7 @@ Cuando ejecutas `./deploy.sh start`, el script ejecuta automáticamente `pre_sta
 
 ### **Compatibilidad Linux/macOS**
 
-El script detecta automáticamente el sistema operativo y adapta los comandos en consecuencia.
+El script detecta automáticamente el sistema operativo y adapta los comandos en consecuencia. **Probado en macOS (darwin 25.1.0) y Linux (Ubuntu, Debian, Fedora, Arch)**.
 
 #### **Detección de OS**:
 
@@ -746,22 +776,29 @@ El script detecta automáticamente el sistema operativo y adapta los comandos en
    - **Linux**: Verifica `lsof`, `netstat`, `ss`, `curl`, `pgrep`
    - **macOS**: Verifica `lsof`, `netstat`, `curl`, `pgrep` (no `ss` - no disponible)
 
-2. **Gestores de Paquetes**:
-   - **Linux**: Usa `apt-get`, `dnf`, `pacman`, o `zypper` (auto-detectado)
-   - **macOS**: Usa `brew` (Homebrew)
+2. **Instalación de Foundry**:
+   - **Ambos**: Usa `foundryup` (instalador oficial) - funciona idéntico en ambos sistemas
+   - Ruta de instalación: `~/.foundry/bin` (igual en ambos)
 
-3. **Sintaxis de Comandos**:
+3. **Gestores de Paquetes** (para herramientas del sistema):
+   - **Linux**: Usa `apt-get`, `dnf`, `pacman`, o `zypper` (auto-detectado)
+   - **macOS**: Usa `brew` (Homebrew) - la mayoría de herramientas vienen preinstaladas
+
+4. **Sintaxis de Comandos**:
    - **`sed -i`**: 
      - Linux: `sed -i "s/patrón/reemplazo/" archivo`
      - macOS: `sed -i '' "s/patrón/reemplazo/" archivo`
    - **`netstat`**:
      - Linux: `netstat -tlnp` (muestra información de proceso)
      - macOS: `netstat -an` (no hay información de proceso disponible)
+   - **`grep`**:
+     - Usa `sed` y `grep -oE` para extracción de direcciones (compatible con GNU y BSD grep)
+     - Nota: `grep -oP` (regex Perl) NO se usa porque no está disponible en BSD grep de macOS
    - **`timeout`**:
      - Linux: Comando `timeout` disponible
-     - macOS: Puede necesitar `gtimeout` (de Homebrew coreutils) o funciona sin timeout
+     - macOS: Usa `gtimeout` (de Homebrew coreutils) o funciona sin timeout
 
-4. **Herramientas Preinstaladas**:
+5. **Herramientas Preinstaladas**:
    - **macOS**: La mayoría de herramientas (`lsof`, `netstat`, `curl`, `pgrep`) vienen preinstaladas
    - **Linux**: Puede necesitar instalar algunas herramientas
 
@@ -770,9 +807,10 @@ El script detecta automáticamente el sistema operativo y adapta los comandos en
 El script automáticamente:
 - Detecta el OS
 - Usa el gestor de paquetes correcto
-- Usa la sintaxis de comandos correcta
+- Usa la sintaxis de comandos correcta (sed, grep, netstat)
 - Omite herramientas no disponibles (como `ss` en macOS)
 - Maneja comandos faltantes con gracia (como `timeout` en macOS)
+- **Instala Foundry automáticamente** usando el mismo método en ambos sistemas
 
 ---
 
@@ -1108,7 +1146,12 @@ cd /tmp
 
 ### **Script Windows**: `deploy.ps1`
 
+**Versión**: 2.1.0  
+**Estado**: ✅ Producción
+
 Script PowerShell equivalente para Windows 10/11 que automatiza TODO el proceso de deployment.
+
+> **Nota**: A diferencia de `deploy.sh`, el script de Windows NO instala Foundry automáticamente. Debes instalar Foundry manualmente antes de ejecutar el script. Ver [Requisitos Previos](#requisitos-previos) abajo.
 
 #### **Requisitos Previos**:
 
@@ -1288,18 +1331,24 @@ Stop-Process -Id <PID> -Force
 .\deploy.ps1 frontend stop
 ```
 
-#### **Diferencias con deploy.sh (Linux/Mac)**:
+#### **Tabla de Paridad de Características**:
 
-| Característica | deploy.sh (Linux/Mac) | deploy.ps1 (Windows) |
-|----------------|----------------------|---------------------|
-| **Ejecución** | `./deploy.sh start` | `.\deploy.ps1 start` |
+| Característica | deploy.sh (Linux/macOS) | deploy.ps1 (Windows) |
+|----------------|-------------------------|----------------------|
+| **Versión** | 2.2.0 | 2.1.0 |
+| **Setup Cmd** | ✅ `setup` | ✅ `setup` |
+| **Env Cmd** | ✅ `env` (todos los modos) | ✅ `env` (todos los modos) |
+| **Flags Auto** | ✅ `--yes`, `--auto`, `-y` | ✅ `--yes`, `--auto` |
+| **Pre-check** | ✅ Automático | ✅ Automático |
+| **Instalación Foundry** | ✅ **Automática** (foundryup) | ❌ Manual (requiere usuario) |
+| **Modelo de Procesos** | Background (`nohup`) | Ventanas Separadas (`Start-Process`) |
 | **Verificación de puertos** | `lsof`, `netstat` | `Get-NetTCPConnection` |
-| **Gestión de procesos** | `pgrep`, `kill` | `Get-Process`, `Stop-Process` |
-| **Paths** | `/path/to/file` | `\path\to\file` o `Join-Path` |
-| **Colores** | Códigos ANSI | `Write-Host -ForegroundColor` |
-| **Background processes** | `nohup` | `ProcessStartInfo` |
+| **Logs** | `logs/*.log` | `logs/*.log` + Salida en Ventana |
+| **Instalación Dependencias** | Sistema + Proyecto + **Foundry** | Solo Proyecto (Sistema manual) |
+| **macOS Probado** | ✅ darwin 25.1.0 | N/A |
+| **Linux Probado** | ✅ Ubuntu, Debian, Fedora, Arch | N/A |
 
-**Funcionalidad**: ✅ **100% equivalente** - Todas las funciones del script bash están implementadas en PowerShell.
+**Funcionalidad**: ✅ **Paridad completa** - Todas las funciones del script bash están implementadas en PowerShell.
 
 ### **Gestión de Procesos**:
 
@@ -1431,9 +1480,19 @@ cp .env.example .env.local 2>/dev/null || :
 ### **5. Iniciar Frontend**
 
 **1. Instalar Dependencias:**
-```bash
+
+**Windows (PowerShell)**:
+```powershell
 # Verifica si existe node_modules, si no instala
 if (!(Test-Path "node_modules")) { npm install }
+# O simplemente ejecuta:
+npm install
+```
+
+**Linux/macOS**:
+```bash
+# Verifica si existe node_modules, si no instala
+if [ ! -d "node_modules" ]; then npm install; fi
 # O simplemente ejecuta:
 npm install
 ```
@@ -1487,13 +1546,30 @@ Para detener los servicios correctamente y evitar errores de "puerto en uso", si
 
 **Linux/macOS:**
 
-1. **Buscar y Matar:**
+1. **Encontrar PIDs:**
    ```bash
-   # Detener Frontend
-   kill -9 $(lsof -t -i:3000)
+   # Encontrar PID del Frontend (Puerto 3000)
+   lsof -ti :3000
    
-   # Detener Anvil
+   # Encontrar PID de Anvil (Puerto 8545)
+   lsof -ti :8545
+   ```
+
+2. **Detener Frontend (Puerto 3000):**
+   ```bash
+   kill -9 $(lsof -t -i:3000)
+   ```
+
+3. **Detener Anvil (Puerto 8545):**
+   ```bash
    kill -9 $(lsof -t -i:8545)
+   ```
+
+4. **Verificar que los puertos estén libres:**
+   ```bash
+   # No debería retornar nada si los puertos están libres
+   lsof -i :3000
+   lsof -i :8545
    ```
 
 ---
@@ -2000,14 +2076,26 @@ Esto es **NORMAL** al inicio. El contrato recién deployado no tiene:
 **Proyecto Académico**: PFM/TFM - Supply Chain Tracker  
 **Institución**: Master Blockchain Web3  
 **Fecha límite**: 28 de Noviembre, 2025  
-**Versión**: 1.0.0
+**Versión**: 2.2.0
 
 ---
 
 ## 📝 Changelog
 
+### v2.2.0 (28 Nov 2025)
+- ✅ **Instalación automática de Foundry** - deploy.sh ahora instala forge/anvil automáticamente usando foundryup
+- ✅ **Compatibilidad completa con macOS** - Probado en darwin 25.1.0 (macOS Sequoia)
+- ✅ **Corrección de grep -oP** - Reemplazado con sed/grep -oE para compatibilidad con BSD grep
+- ✅ **Documentación mejorada** - Actualizada para reflejar nuevas características
+
+### v2.1.0 (27 Nov 2025)
+- ✅ Persistencia de estado para Anvil
+- ✅ Comandos solo para frontend (start/stop/restart)
+- ✅ Comando clean para resetear estado de blockchain
+- ✅ Gestión de procesos mejorada
+
 ### v1.0.0 (18 Nov 2025)
-- ✅ Initial release
+- ✅ Lanzamiento inicial
 - ✅ Smart contract implementado y testeado
 - ✅ Frontend base con conexión MetaMask
 - ✅ Script de deployment automatizado

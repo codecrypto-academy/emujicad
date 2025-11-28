@@ -8,7 +8,7 @@
 # Author: Supply Chain Tracker Team
 # Date: November 18, 2025
 # Last Updated: November 28, 2025
-# Version: 2.1.0
+# Version: 2.2.0
 #
 # Features:
 #   - Start/stop Anvil (local blockchain with state persistence)
@@ -529,6 +529,171 @@ install_project_dependencies() {
 }
 
 # ============================================================================
+# FUNCTION: INSTALL FOUNDRY (FORGE + ANVIL)
+# ============================================================================
+
+install_foundry() {
+    local auto_install=false
+    local os=$(detect_os)
+    
+    # Check if should install automatically
+    if [ "${AUTO_INSTALL:-false}" = "true" ]; then
+        auto_install=true
+    fi
+    
+    print_step "Installing Foundry (forge + anvil)..."
+    
+    # Log start
+    ensure_logs_dir
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting Foundry installation..." >> "$LOGS_DIR/install.log" 2>&1
+    
+    # Always use foundryup (most reliable method for both macOS and Linux)
+    # Homebrew can have issues with macOS version compatibility
+    print_info "Using foundryup script for installation (official method)"
+    
+    # Ask for confirmation if not in auto mode
+    if [ "$auto_install" = false ]; then
+        echo ""
+        print_info "Will run: curl -L https://foundry.paradigm.xyz | bash"
+        print_info "Then: foundryup (to install forge, anvil, cast, chisel)"
+        read -p "Do you want to install Foundry now? (Y/n): " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Nn]$ ]]; then
+            print_warning "Installation cancelled"
+            print_info "Install manually with:"
+            print_info "  curl -L https://foundry.paradigm.xyz | bash"
+            print_info "  source ~/.zshrc  # or ~/.bashrc"
+            print_info "  foundryup"
+            return 1
+        fi
+    fi
+    
+    # Define foundry paths
+    local foundry_dir="$HOME/.foundry"
+    local foundry_bin="$foundry_dir/bin"
+    
+    # Step 1: Download and run the foundryup installer
+    print_step "Downloading Foundry installer..."
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Downloading foundryup installer..." >> "$LOGS_DIR/install.log" 2>&1
+    
+    # Download the installer script
+    local installer_script=$(curl -fsSL https://foundry.paradigm.xyz 2>&1)
+    local curl_exit=$?
+    
+    if [ $curl_exit -ne 0 ]; then
+        print_error "Failed to download Foundry installer"
+        print_info "Check your network connection"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: curl failed with code $curl_exit" >> "$LOGS_DIR/install.log" 2>&1
+        return 1
+    fi
+    
+    print_success "Installer downloaded"
+    
+    # Step 2: Run the installer script
+    print_step "Running Foundry installer..."
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Running installer script..." >> "$LOGS_DIR/install.log" 2>&1
+    
+    # Execute the installer
+    echo "$installer_script" | bash >> "$LOGS_DIR/install.log" 2>&1
+    
+    # Wait a moment for files to be written
+    sleep 1
+    
+    # Step 3: Update PATH for current session
+    if [ -d "$foundry_bin" ]; then
+        export PATH="$foundry_bin:$PATH"
+        print_success "Foundry directory created: $foundry_bin"
+    else
+        print_error "Foundry directory not created at $foundry_bin"
+        print_info "Check logs at: $LOGS_DIR/install.log"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: foundry_bin not found" >> "$LOGS_DIR/install.log" 2>&1
+        return 1
+    fi
+    
+    # Step 4: Run foundryup to install the actual tools
+    print_step "Running foundryup to install toolchain..."
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Running foundryup..." >> "$LOGS_DIR/install.log" 2>&1
+    
+    local foundryup_bin="$foundry_bin/foundryup"
+    
+    if [ -x "$foundryup_bin" ]; then
+        # Run foundryup with full output to log
+        if "$foundryup_bin" >> "$LOGS_DIR/install.log" 2>&1; then
+            print_success "Foundry toolchain installed"
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] foundryup completed successfully" >> "$LOGS_DIR/install.log" 2>&1
+        else
+            print_error "foundryup failed"
+            print_info "Check logs at: $LOGS_DIR/install.log"
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: foundryup returned error" >> "$LOGS_DIR/install.log" 2>&1
+            return 1
+        fi
+    else
+        print_error "foundryup not found at $foundryup_bin"
+        print_info "The installer may have failed. Check logs at: $LOGS_DIR/install.log"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: foundryup binary not found" >> "$LOGS_DIR/install.log" 2>&1
+        return 1
+    fi
+    
+    # Step 5: Verify installation
+    print_step "Verifying Foundry installation..."
+    
+    # Re-export PATH to ensure we find the new binaries
+    export PATH="$foundry_bin:$PATH"
+    
+    local forge_ok=false
+    local anvil_ok=false
+    
+    # Check forge
+    if [ -x "$foundry_bin/forge" ]; then
+        local forge_version=$("$foundry_bin/forge" --version 2>/dev/null | head -1)
+        print_success "forge installed: $forge_version"
+        forge_ok=true
+    elif command -v forge >/dev/null 2>&1; then
+        local forge_version=$(forge --version 2>/dev/null | head -1)
+        print_success "forge installed: $forge_version"
+        forge_ok=true
+    else
+        print_error "forge not found"
+    fi
+    
+    # Check anvil
+    if [ -x "$foundry_bin/anvil" ]; then
+        local anvil_version=$("$foundry_bin/anvil" --version 2>/dev/null | head -1)
+        print_success "anvil installed: $anvil_version"
+        anvil_ok=true
+    elif command -v anvil >/dev/null 2>&1; then
+        local anvil_version=$(anvil --version 2>/dev/null | head -1)
+        print_success "anvil installed: $anvil_version"
+        anvil_ok=true
+    else
+        print_error "anvil not found"
+    fi
+    
+    if [ "$forge_ok" = true ] && [ "$anvil_ok" = true ]; then
+        print_success "✅ Foundry installation complete"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Foundry installation verified successfully" >> "$LOGS_DIR/install.log" 2>&1
+        
+        # Important note for the user
+        echo ""
+        print_warning "IMPORTANT: For future terminal sessions, add this to your shell config:"
+        if [ -n "$ZSH_VERSION" ] || [ "$SHELL" = "/bin/zsh" ]; then
+            print_info "  echo 'export PATH=\"\$HOME/.foundry/bin:\$PATH\"' >> ~/.zshrc"
+        else
+            print_info "  echo 'export PATH=\"\$HOME/.foundry/bin:\$PATH\"' >> ~/.bashrc"
+        fi
+        print_info "Or simply run: source ~/.zshrc (or ~/.bashrc)"
+        echo ""
+        
+        return 0
+    else
+        print_error "Foundry installation incomplete"
+        print_info "Check logs at: $LOGS_DIR/install.log"
+        print_info "Try manual installation: https://book.getfoundry.sh/getting-started/installation"
+        return 1
+    fi
+}
+
+# ============================================================================
 # FUNCTION: SETUP ENVIRONMENT VARIABLES
 # ============================================================================
 
@@ -784,32 +949,70 @@ pre_start_check() {
         print_success "npm $(npm --version) installed"
     fi
     
-    if ! command -v forge >/dev/null 2>&1; then
-        print_error "Foundry (forge) is not installed"
-        if [ "$os" = "macos" ]; then
-            print_info "Install Foundry with:"
-            print_info "  curl -L https://foundry.paradigm.xyz | bash"
-            print_info "  foundryup"
-            print_info "Or using Homebrew: brew install foundry"
+    # Check Foundry (forge + anvil)
+    local foundry_missing=false
+    if ! command -v forge >/dev/null 2>&1 || ! command -v anvil >/dev/null 2>&1; then
+        foundry_missing=true
+        print_warning "Foundry (forge/anvil) is not installed"
+        
+        # Offer to install automatically
+        if [ "$auto_mode" = true ]; then
+            print_info "Automatic mode: installing Foundry..."
+            if install_foundry; then
+                foundry_missing=false
+                # Re-check PATH after installation
+                local foundry_bin="$HOME/.foundry/bin"
+                if [ -d "$foundry_bin" ]; then
+                    export PATH="$foundry_bin:$PATH"
+                fi
+            else
+                print_error "Could not install Foundry automatically"
+                errors=$((errors + 1))
+            fi
         else
-            print_info "Install Foundry with: curl -L https://foundry.paradigm.xyz | bash && foundryup"
+            echo ""
+            read -p "Do you want to install Foundry now? (Y/n): " -n 1 -r
+            echo ""
+            if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+                if install_foundry; then
+                    foundry_missing=false
+                    # Re-check PATH after installation
+                    local foundry_bin="$HOME/.foundry/bin"
+                    if [ -d "$foundry_bin" ]; then
+                        export PATH="$foundry_bin:$PATH"
+                    fi
+                else
+                    print_error "Could not install Foundry"
+                    errors=$((errors + 1))
+                fi
+            else
+                print_error "Foundry is required to continue"
+                if [ "$os" = "macos" ]; then
+                    print_info "Install manually with: brew install foundry"
+                    print_info "Or: curl -L https://foundry.paradigm.xyz | bash && foundryup"
+                else
+                    print_info "Install manually with: curl -L https://foundry.paradigm.xyz | bash && foundryup"
+                fi
+                errors=$((errors + 1))
+            fi
         fi
-        errors=$((errors + 1))
-    else
-        print_success "Foundry installed"
     fi
     
-    if ! command -v anvil >/dev/null 2>&1; then
-        print_error "Foundry (anvil) is not installed"
-        if [ "$os" = "macos" ]; then
-            print_info "Run: foundryup"
-            print_info "Or using Homebrew: brew install foundry"
+    # Final verification of Foundry
+    if [ "$foundry_missing" = false ]; then
+        if command -v forge >/dev/null 2>&1; then
+            print_success "Foundry (forge) installed"
         else
-            print_info "Run: foundryup"
+            print_error "forge not found after installation"
+            errors=$((errors + 1))
         fi
-        errors=$((errors + 1))
-    else
-        print_success "Anvil installed"
+        
+        if command -v anvil >/dev/null 2>&1; then
+            print_success "Foundry (anvil) installed"
+        else
+            print_error "anvil not found after installation"
+            errors=$((errors + 1))
+        fi
     fi
     
     # If there are critical errors, abort
@@ -1109,11 +1312,17 @@ deploy_contract() {
     echo "$deploy_output" > "$DEPLOY_LOG_FILE"
     
     # Extract contract address from output
-    local contract_address=$(echo "$deploy_output" | grep -oP 'Contract Address: \K0x[a-fA-F0-9]{40}' | head -1)
+    # Note: Using sed instead of grep -oP for macOS compatibility (BSD grep doesn't support -P)
+    local contract_address=$(echo "$deploy_output" | sed -n 's/.*Contract Address: \(0x[a-fA-F0-9]\{40\}\).*/\1/p' | head -1)
     
     if [ -z "$contract_address" ]; then
-        # Try to extract in another way
-        contract_address=$(echo "$deploy_output" | grep -oP 'deployed at: \K0x[a-fA-F0-9]{40}' | head -1)
+        # Try to extract in another way (alternative format)
+        contract_address=$(echo "$deploy_output" | sed -n 's/.*deployed at: \(0x[a-fA-F0-9]\{40\}\).*/\1/p' | head -1)
+    fi
+    
+    if [ -z "$contract_address" ]; then
+        # Try grep with extended regex as fallback (works on both Linux and macOS)
+        contract_address=$(echo "$deploy_output" | grep -oE '0x[a-fA-F0-9]{40}' | head -1)
     fi
     
     if [ -z "$contract_address" ]; then
@@ -1878,9 +2087,11 @@ EOF
     echo "  ./deploy.sh stop"
     echo ""
     
-    echo -e "${YELLOW}NOTE:${NC} Anvil now persists state between restarts."
-    echo -e "      Use ${GREEN}./deploy.sh clean${NC} to clean the state."
-    echo -e "      If Anvil is running, it will ask if you want to stop it first."
+    echo -e "${YELLOW}NOTES:${NC}"
+    echo -e "  • Foundry (forge/anvil) will be installed automatically if missing"
+    echo -e "    - Uses foundryup (official installer) on both macOS and Linux"
+    echo -e "  • Anvil persists state between restarts"
+    echo -e "  • Use ${GREEN}./deploy.sh clean${NC} to clean Anvil state"
     echo ""
     
     echo -e "  ${GREEN}help${NC}             Show this help"
@@ -1925,6 +2136,12 @@ main() {
     # Process command
     case "${1:-}" in
         start)
+            # Allow passing environment flags directly with start, e.g.:
+            # ./deploy.sh start --debug-mode false --debug-tokens false
+            shift
+            if [ "$#" -gt 0 ]; then
+                setup_environment_variables "$@"
+            fi
             start_all
             ;;
         stop)
