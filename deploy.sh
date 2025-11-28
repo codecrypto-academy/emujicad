@@ -169,7 +169,13 @@ detect_linux_distro() {
 
 check_system_tools() {
     local missing_tools=()
-    local tools=("lsof" "netstat" "ss" "curl" "pgrep")
+    local os=$(detect_os)
+    local tools=("lsof" "netstat" "curl" "pgrep")
+    
+    # ss solo está disponible en Linux, no en macOS
+    if [ "$os" != "macos" ]; then
+        tools+=("ss")
+    fi
     
     for tool in "${tools[@]}"; do
         if ! command -v "$tool" >/dev/null 2>&1; then
@@ -346,6 +352,7 @@ check_project_dependencies() {
     if [ ${#missing_deps[@]} -eq 0 ]; then
         return 0
     else
+        # Imprimir las dependencias faltantes
         echo "${missing_deps[@]}"
         return 1
     fi
@@ -384,27 +391,60 @@ install_project_dependencies() {
                 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Iniciando instalación de dependencias del frontend..." >> "$LOGS_DIR/install.log" 2>&1
                 
                 # Instalar con timeout (30 minutos = 1800 segundos)
-                if timeout 1800 npm install --progress=true 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
-                    # Mostrar progreso en tiempo real
-                    if [[ "$line" =~ (^[0-9]+/[0-9]+|^added|^removed|^changed|^audited) ]]; then
-                        echo -ne "\r${BLUE}ℹ${NC} $line"
-                    fi
-                done; then
-                    echo "" # Nueva línea después del progreso
-                    print_success "Dependencias del frontend instaladas"
-                    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del frontend instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
-                else
-                    local exit_code=${PIPESTATUS[0]}
-                    echo "" # Nueva línea
-                    if [ $exit_code -eq 124 ]; then
-                        print_error "Timeout: La instalación de dependencias del frontend excedió 30 minutos"
+                # timeout puede no estar disponible en macOS, usar si está disponible
+                local timeout_cmd=""
+                if command -v timeout >/dev/null 2>&1; then
+                    timeout_cmd="timeout 1800"
+                elif command -v gtimeout >/dev/null 2>&1; then
+                    # macOS con Homebrew coreutils
+                    timeout_cmd="gtimeout 1800"
+                fi
+                
+                if [ -n "$timeout_cmd" ]; then
+                    # Con timeout
+                    if $timeout_cmd npm install --progress=true 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
+                        # Mostrar progreso en tiempo real
+                        if [[ "$line" =~ (^[0-9]+/[0-9]+|^added|^removed|^changed|^audited) ]]; then
+                            echo -ne "\r${BLUE}ℹ${NC} $line"
+                        fi
+                    done; then
+                        echo "" # Nueva línea después del progreso
+                        print_success "Dependencias del frontend instaladas"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del frontend instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
                     else
-                        print_error "Error al instalar dependencias del frontend"
+                        local exit_code=${PIPESTATUS[0]}
+                        echo "" # Nueva línea
+                        if [ $exit_code -eq 124 ]; then
+                            print_error "Timeout: La instalación de dependencias del frontend excedió 30 minutos"
+                        else
+                            print_error "Error al instalar dependencias del frontend"
+                        fi
+                        print_info "Ver logs en: $LOGS_DIR/install.log"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del frontend (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
+                        cd "$PROJECT_ROOT"
+                        return 1
                     fi
-                    print_info "Ver logs en: $LOGS_DIR/install.log"
-                    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del frontend (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
-                    cd "$PROJECT_ROOT"
-                    return 1
+                else
+                    # Sin timeout (macOS sin coreutils)
+                    print_info "Nota: timeout no disponible, instalación sin límite de tiempo"
+                    if npm install --progress=true 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
+                        # Mostrar progreso en tiempo real
+                        if [[ "$line" =~ (^[0-9]+/[0-9]+|^added|^removed|^changed|^audited) ]]; then
+                            echo -ne "\r${BLUE}ℹ${NC} $line"
+                        fi
+                    done; then
+                        echo "" # Nueva línea después del progreso
+                        print_success "Dependencias del frontend instaladas"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del frontend instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
+                    else
+                        local exit_code=${PIPESTATUS[0]}
+                        echo "" # Nueva línea
+                        print_error "Error al instalar dependencias del frontend"
+                        print_info "Ver logs en: $LOGS_DIR/install.log"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del frontend (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
+                        cd "$PROJECT_ROOT"
+                        return 1
+                    fi
                 fi
                 cd "$PROJECT_ROOT"
                 ;;
@@ -425,28 +465,60 @@ install_project_dependencies() {
                 ensure_logs_dir
                 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Iniciando instalación de dependencias del smart contract..." >> "$LOGS_DIR/install.log" 2>&1
                 
-                # Instalar con timeout (10 minutos = 600 segundos)
-                if timeout 600 forge install 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
-                    # Mostrar progreso
-                    if [[ "$line" =~ (Installing|Installed|Cloning|Updating) ]]; then
-                        echo -ne "\r${BLUE}ℹ${NC} $line"
-                    fi
-                done; then
-                    echo "" # Nueva línea después del progreso
-                    print_success "Dependencias del smart contract instaladas"
-                    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del smart contract instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
-                else
-                    local exit_code=${PIPESTATUS[0]}
-                    echo "" # Nueva línea
-                    if [ $exit_code -eq 124 ]; then
-                        print_error "Timeout: La instalación de dependencias del smart contract excedió 10 minutos"
+                # Instalar con timeout (10 minutos = 600 segundos) si está disponible
+                local timeout_cmd=""
+                if command -v timeout >/dev/null 2>&1; then
+                    timeout_cmd="timeout 600"
+                elif command -v gtimeout >/dev/null 2>&1; then
+                    # macOS con Homebrew coreutils (gtimeout)
+                    timeout_cmd="gtimeout 600"
+                fi
+                
+                if [ -n "$timeout_cmd" ]; then
+                    # Con timeout
+                    if $timeout_cmd forge install 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
+                        # Mostrar progreso
+                        if [[ "$line" =~ (Installing|Installed|Cloning|Updating) ]]; then
+                            echo -ne "\r${BLUE}ℹ${NC} $line"
+                        fi
+                    done; then
+                        echo "" # Nueva línea después del progreso
+                        print_success "Dependencias del smart contract instaladas"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del smart contract instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
                     else
-                        print_error "Error al instalar dependencias del smart contract"
+                        local exit_code=${PIPESTATUS[0]}
+                        echo "" # Nueva línea
+                        if [ $exit_code -eq 124 ]; then
+                            print_error "Timeout: La instalación de dependencias del smart contract excedió 10 minutos"
+                        else
+                            print_error "Error al instalar dependencias del smart contract"
+                        fi
+                        print_info "Ver logs en: $LOGS_DIR/install.log"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del smart contract (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
+                        cd "$PROJECT_ROOT"
+                        return 1
                     fi
-                    print_info "Ver logs en: $LOGS_DIR/install.log"
-                    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del smart contract (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
-                    cd "$PROJECT_ROOT"
-                    return 1
+                else
+                    # Sin timeout (macOS sin coreutils)
+                    print_info "Nota: timeout no disponible, instalación sin límite de tiempo"
+                    if forge install 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
+                        # Mostrar progreso
+                        if [[ "$line" =~ (Installing|Installed|Cloning|Updating) ]]; then
+                            echo -ne "\r${BLUE}ℹ${NC} $line"
+                        fi
+                    done; then
+                        echo "" # Nueva línea después del progreso
+                        print_success "Dependencias del smart contract instaladas"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del smart contract instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
+                    else
+                        local exit_code=${PIPESTATUS[0]}
+                        echo "" # Nueva línea
+                        print_error "Error al instalar dependencias del smart contract"
+                        print_info "Ver logs en: $LOGS_DIR/install.log"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del smart contract (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
+                        cd "$PROJECT_ROOT"
+                        return 1
+                    fi
                 fi
                 cd "$PROJECT_ROOT"
                 ;;
@@ -748,9 +820,23 @@ pre_start_check() {
     
     # 3. Verificar dependencias del proyecto
     print_step "Verificando dependencias del proyecto..."
-    local missing_deps=$(check_project_dependencies)
-    if [ $? -ne 0 ]; then
-        print_warning "Faltan dependencias: $missing_deps"
+    # Verificar dependencias directamente (más confiable que usar función con $())
+    local missing_deps=()
+    
+    # Verificar dependencias del frontend
+    if [ ! -d "$WEB_DIR/node_modules" ]; then
+        missing_deps+=("frontend")
+    fi
+    
+    # Verificar dependencias del smart contract
+    if [ ! -d "$SC_DIR/lib" ] || [ ! -d "$SC_DIR/lib/forge-std" ]; then
+        missing_deps+=("smart-contract")
+    fi
+    
+    # Si hay dependencias faltantes, procesarlas
+    if [ ${#missing_deps[@]} -ne 0 ]; then
+        local missing_deps_str="${missing_deps[*]}"
+        print_warning "Faltan dependencias: $missing_deps_str"
         
         if [ "$auto_mode" = false ]; then
             echo ""
@@ -1110,8 +1196,15 @@ update_frontend_config() {
     cp "$CONFIG_FILE" "$CONFIG_FILE.backup"
     print_info "Backup creado: $CONFIG_FILE.backup"
     
-    # Actualizar dirección usando sed
-    sed -i "s/export const SUPPLY_CHAIN_ADDRESS = '0x[a-fA-F0-9]\{40\}'/export const SUPPLY_CHAIN_ADDRESS = '$contract_address'/" "$CONFIG_FILE"
+    # Actualizar dirección usando sed (compatible con Linux y macOS)
+    local os=$(detect_os)
+    if [ "$os" = "macos" ]; then
+        # macOS requiere una cadena vacía después de -i
+        sed -i '' "s/export const SUPPLY_CHAIN_ADDRESS = '0x[a-fA-F0-9]\{40\}'/export const SUPPLY_CHAIN_ADDRESS = '$contract_address'/" "$CONFIG_FILE"
+    else
+        # Linux
+        sed -i "s/export const SUPPLY_CHAIN_ADDRESS = '0x[a-fA-F0-9]\{40\}'/export const SUPPLY_CHAIN_ADDRESS = '$contract_address'/" "$CONFIG_FILE"
+    fi
     
     # Verificar que se actualizó correctamente
     if grep -q "$contract_address" "$CONFIG_FILE"; then

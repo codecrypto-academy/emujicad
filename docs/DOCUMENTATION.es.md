@@ -417,31 +417,59 @@ acceptTransfer(BigInt(5))
 
 ### **Script**: `deploy.sh`
 
-Script bash completo que automatiza TODO el proceso de deployment.
+Script bash completo que automatiza TODO el proceso de deployment. Compatible con **Linux** y **macOS**.
 
 ### **Comandos Disponibles**:
 
 ```bash
-# Ver ayuda
+# Ver ayuda completa
 ./deploy.sh help
 
-# Iniciar todo el stack
-./deploy.sh start
+# Comandos principales
+./deploy.sh start      # Inicia todo el stack (Anvil + Contract + Frontend)
+./deploy.sh stop       # Detiene todos los servicios
+./deploy.sh restart    # Reinicia todo el stack
+./deploy.sh status     # Muestra el estado de los servicios
+./deploy.sh metamask   # Muestra instrucciones para configurar MetaMask
+./deploy.sh clean      # Limpia el estado persistente de Anvil
 
-# Ver estado
-./deploy.sh status
+# Comandos de configuración
+./deploy.sh setup      # Verifica requisitos e instala dependencias faltantes
+./deploy.sh env        # Configura variables de entorno (.env.local)
 
-# Instrucciones MetaMask
-./deploy.sh metamask
+# Comandos de frontend (sin afectar Anvil/Contrato)
+./deploy.sh frontend start    # Inicia solo el frontend
+./deploy.sh frontend stop     # Detiene solo el frontend
+./deploy.sh frontend restart  # Reinicia solo el frontend
+```
 
-# Detener todo
-./deploy.sh stop
+### **Opciones**:
 
-# Reiniciar
-./deploy.sh restart
+```bash
+# Modo automático (sin confirmaciones)
+./deploy.sh setup --yes
+./deploy.sh start --auto
+./deploy.sh env -y
+
+# Configurar variables de entorno con parámetros
+./deploy.sh env --modern-design true --debug-mode false
+./deploy.sh env --debug-tokens true
+./deploy.sh env --all true false false  # Todas las variables a la vez
 ```
 
 ### **Flujo de `./deploy.sh start`**:
+
+**Importante**: Antes de iniciar los servicios, el script ejecuta automáticamente `pre_start_check()` que verifica e instala todos los requisitos. Ver sección [Verificación Pre-Inicio Automática](#verificación-pre-inicio-automática) para más detalles.
+
+#### **PASO 0: Verificación Pre-Inicio** (Automático)
+
+Antes de iniciar cualquier servicio, el script:
+1. Verifica herramientas del sistema (instala si faltan)
+2. Verifica Node.js, npm, Foundry (muestra instrucciones si faltan)
+3. Verifica dependencias del proyecto (instala si faltan)
+4. Verifica variables de entorno (pregunta para crear si faltan)
+
+Si algún requisito crítico falta y no se puede instalar, el script aborta con instrucciones claras.
 
 #### **PASO 1: Iniciar Anvil**
 ```bash
@@ -487,15 +515,22 @@ PRIVATE_KEY=0xac097... forge script \
 # 1. Hace backup de config.ts
 cp web/src/contracts/config.ts web/src/contracts/config.ts.backup
 
-# 2. Actualiza SUPPLY_CHAIN_ADDRESS con sed
-sed -i "s/0x[a-fA-F0-9]\{40\}/$contract_address/" config.ts
+# 2. Actualiza SUPPLY_CHAIN_ADDRESS con sed (sintaxis específica del OS)
+# Linux:
+sed -i "s/export const SUPPLY_CHAIN_ADDRESS = '0x[a-fA-F0-9]\{40\}'/export const SUPPLY_CHAIN_ADDRESS = '$contract_address'/" config.ts
+# macOS:
+sed -i '' "s/export const SUPPLY_CHAIN_ADDRESS = '0x[a-fA-F0-9]\{40\}'/export const SUPPLY_CHAIN_ADDRESS = '$contract_address'/" config.ts
 
-# 3. Verifica que se actualizó correctamente
+# 3. Copia el ABI actualizado desde sc/out/SupplyChain.sol/SupplyChain.json
+cp sc/out/SupplyChain.sol/SupplyChain.json web/src/contracts/SupplyChain.json
+
+# 4. Verifica que se actualizó correctamente
 ```
 
 **Resultado**:
 - ✅ `config.ts` actualizado con nueva dirección
 - ✅ Backup guardado en `config.ts.backup`
+- ✅ ABI copiado desde la última compilación (`SupplyChain.json`)
 
 #### **PASO 4: Iniciar Frontend**
 ```bash
@@ -531,10 +566,295 @@ logs/
 ├── frontend.log           # Output de Next.js dev server
 ├── frontend.pid           # PID del proceso Next.js
 ├── deploy.log             # Output del deployment Foundry
-└── contract_address.txt   # Dirección del contrato deployado
+├── contract_address.txt   # Dirección del contrato (guardada después del deployment)
+└── install.log            # Logs de instalación (herramientas del sistema, dependencias)
 ```
 
+**Ubicación de Logs**:
+- Todos los logs se guardan en el directorio `logs/` en la raíz del proyecto
+- Los logs se crean automáticamente cuando los servicios inician
+- Los logs de instalación (`install.log`) se crean al ejecutar `setup` o cuando las dependencias se instalan automáticamente
+
 **Nota sobre persistencia**: El archivo `anvil_state.json` contiene el estado completo de la blockchain local. Si lo eliminas (con `./deploy.sh clean`), Anvil iniciará con una blockchain limpia en el próximo `start`.
+
+---
+
+### **Comando: `./deploy.sh setup`**
+
+Verifica todos los requisitos e instala automáticamente las dependencias faltantes.
+
+#### **Qué hace**:
+
+1. **Verifica Herramientas del Sistema**:
+   - Verifica: `lsof`, `netstat`, `curl`, `pgrep`
+   - En Linux: También verifica `ss`
+   - En macOS: `ss` no se verifica (no está disponible)
+   - Instala automáticamente herramientas faltantes usando:
+     - **Linux**: `apt-get`, `dnf`, `pacman`, o `zypper` (según la distribución)
+     - **macOS**: `brew` (Homebrew)
+
+2. **Verifica Requisitos Básicos**:
+   - **Node.js** v18+ (muestra instrucciones de instalación si falta)
+   - **npm** (viene con Node.js)
+   - **Foundry** (comandos `forge` y `anvil`)
+   - Muestra instrucciones de instalación específicas del OS si faltan
+
+3. **Verifica Dependencias del Proyecto**:
+   - **Frontend**: Verifica si existe `web/node_modules`
+   - **Smart Contract**: Verifica si existe `sc/lib/forge-std`
+   - Instala automáticamente dependencias faltantes:
+     - Frontend: `npm install` en el directorio `web/`
+     - Smart Contract: `forge install` en el directorio `sc/`
+
+4. **Configura Variables de Entorno** (opcional):
+   - Pregunta para configurar `.env.local` si no existe
+   - Se puede omitir y configurar después con `./deploy.sh env`
+
+#### **Uso**:
+
+```bash
+# Modo interactivo (pide confirmación)
+./deploy.sh setup
+
+# Modo automático (sin confirmaciones, usa valores por defecto)
+./deploy.sh setup --yes
+```
+
+#### **Qué se instala automáticamente**:
+
+- **Herramientas del Sistema** (si faltan):
+  - Linux: `lsof`, `net-tools`, `iproute2`, `curl`, `procps` (o `procps-ng` en Arch)
+  - macOS: La mayoría de herramientas vienen preinstaladas, solo instala si realmente faltan
+
+- **Dependencias del Proyecto** (si faltan):
+  - Frontend: Todos los paquetes npm (puede tomar 5-15 minutos)
+  - Smart Contract: `forge-std` y otras dependencias de Foundry
+
+#### **Logs**:
+
+Todos los logs de instalación se guardan en `logs/install.log` para troubleshooting.
+
+---
+
+### **Comando: `./deploy.sh env`**
+
+Configura las variables de entorno del frontend en `web/.env.local`.
+
+#### **Variables Disponibles**:
+
+- `NEXT_PUBLIC_MODERN_DESIGN`: Diseño moderno 2025 (glassmorphism, gradientes, animaciones)
+  - Opciones: `true` | `false`
+  - Por defecto: `true`
+
+- `NEXT_PUBLIC_DEBUG_MODE`: Logs adicionales en consola
+  - Opciones: `true` | `false`
+  - Por defecto: `false`
+
+- `NEXT_PUBLIC_DEBUG_TOKENS`: Información adicional de tokens
+  - Opciones: `true` | `false`
+  - Por defecto: `false`
+
+#### **Modos de Uso**:
+
+**1. Modo Interactivo** (recomendado para primera vez):
+```bash
+./deploy.sh env
+# Pregunta por cada variable con sugerencias por defecto
+```
+
+**2. Modo con Parámetros** (variables individuales):
+```bash
+./deploy.sh env --modern-design true
+./deploy.sh env --debug-mode false
+./deploy.sh env --debug-tokens true
+```
+
+**3. Modo Todo a la Vez**:
+```bash
+./deploy.sh env --all true false false
+# Establece: MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false
+```
+
+**4. Modo Automático** (usa valores por defecto):
+```bash
+./deploy.sh env --yes
+# Crea .env.local con valores por defecto:
+# MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false
+```
+
+#### **Archivo Creado**:
+
+El comando crea/actualiza `web/.env.local` con los valores configurados.
+
+**Importante**: El archivo debe llamarse `.env.local` (no `.env.example`). El archivo `.env.example` es solo una plantilla de referencia.
+
+---
+
+### **Verificación Pre-Inicio Automática**
+
+Cuando ejecutas `./deploy.sh start`, el script ejecuta automáticamente `pre_start_check()` **antes** de iniciar los servicios.
+
+#### **Qué verifica**:
+
+1. **Herramientas del Sistema**: Igual que `./deploy.sh setup` (verifica e instala si es necesario)
+2. **Requisitos Básicos**: Node.js, npm, Foundry (muestra instrucciones si faltan)
+3. **Dependencias del Proyecto**: `node_modules` y `forge-std` (instala si faltan)
+4. **Variables de Entorno**: Verifica si existe `.env.local` (pregunta para crear si falta)
+
+#### **Comportamiento**:
+
+- **Modo Interactivo**: Pide confirmación antes de instalar dependencias faltantes
+- **Modo Automático** (`--yes`/`--auto`/`-y`): Instala todo automáticamente con valores por defecto
+- **Si hay errores críticos**: El script aborta y muestra instrucciones para corregir problemas
+
+#### **Ejemplo de Flujo**:
+
+```bash
+./deploy.sh start
+# 1. Ejecuta pre_start_check()
+#    - Verifica herramientas del sistema ✅
+#    - Verifica Node.js ✅
+#    - Verifica npm ✅
+#    - Verifica Foundry ✅
+#    - Verifica node_modules ❌ (falta)
+#    - Pregunta: "¿Instalar dependencias del frontend? (S/n)"
+#    - Usuario confirma → Instala paquetes npm
+#    - Verifica .env.local ❌ (falta)
+#    - Pregunta: "¿Configurar variables de entorno? (S/n)"
+#    - Usuario confirma → Ejecuta setup_environment_variables()
+# 2. Inicia Anvil
+# 3. Despliega contrato
+# 4. Actualiza config del frontend
+# 5. Inicia frontend
+```
+
+---
+
+### **Compatibilidad Linux/macOS**
+
+El script detecta automáticamente el sistema operativo y adapta los comandos en consecuencia.
+
+#### **Detección de OS**:
+
+- **macOS**: Detectado mediante `OSTYPE == "darwin*"`
+- **Linux**: Detectado mediante `OSTYPE == "linux-gnu*"` y detección de distribución
+
+#### **Diferencias Manejadas**:
+
+1. **Herramientas del Sistema**:
+   - **Linux**: Verifica `lsof`, `netstat`, `ss`, `curl`, `pgrep`
+   - **macOS**: Verifica `lsof`, `netstat`, `curl`, `pgrep` (no `ss` - no disponible)
+
+2. **Gestores de Paquetes**:
+   - **Linux**: Usa `apt-get`, `dnf`, `pacman`, o `zypper` (auto-detectado)
+   - **macOS**: Usa `brew` (Homebrew)
+
+3. **Sintaxis de Comandos**:
+   - **`sed -i`**: 
+     - Linux: `sed -i "s/patrón/reemplazo/" archivo`
+     - macOS: `sed -i '' "s/patrón/reemplazo/" archivo`
+   - **`netstat`**:
+     - Linux: `netstat -tlnp` (muestra información de proceso)
+     - macOS: `netstat -an` (no hay información de proceso disponible)
+   - **`timeout`**:
+     - Linux: Comando `timeout` disponible
+     - macOS: Puede necesitar `gtimeout` (de Homebrew coreutils) o funciona sin timeout
+
+4. **Herramientas Preinstaladas**:
+   - **macOS**: La mayoría de herramientas (`lsof`, `netstat`, `curl`, `pgrep`) vienen preinstaladas
+   - **Linux**: Puede necesitar instalar algunas herramientas
+
+#### **Adaptación Automática**:
+
+El script automáticamente:
+- Detecta el OS
+- Usa el gestor de paquetes correcto
+- Usa la sintaxis de comandos correcta
+- Omite herramientas no disponibles (como `ss` en macOS)
+- Maneja comandos faltantes con gracia (como `timeout` en macOS)
+
+---
+
+### **Casos de Uso Avanzados**
+
+#### **1. Primera Vez - Setup Completo**:
+
+```bash
+# Paso 1: Setup (verificar e instalar todo)
+./deploy.sh setup --yes
+
+# Paso 2: Configurar variables de entorno
+./deploy.sh env
+
+# Paso 3: Iniciar todo
+./deploy.sh start
+```
+
+#### **2. Desarrollo Diario**:
+
+```bash
+# Mañana: Iniciar todo
+./deploy.sh start
+
+# Durante desarrollo: Solo reiniciar frontend después de cambios
+./deploy.sh frontend restart
+
+# Fin del día: Detener todo
+./deploy.sh stop
+```
+
+#### **3. Desarrollo Solo Frontend**:
+
+```bash
+# Iniciar Anvil y desplegar contrato una vez
+./deploy.sh start
+
+# Detener solo frontend
+./deploy.sh frontend stop
+
+# Hacer cambios en frontend...
+
+# Reiniciar solo frontend (Anvil y contrato siguen corriendo)
+./deploy.sh frontend start
+```
+
+#### **4. Desarrollo con Estado Limpio**:
+
+```bash
+# Detener todo
+./deploy.sh stop
+
+# Limpiar estado de Anvil (elimina todos los tokens, transferencias, usuarios)
+./deploy.sh clean
+
+# Iniciar con blockchain limpia
+./deploy.sh start
+```
+
+#### **5. Troubleshooting**:
+
+```bash
+# Verificar estado de todos los servicios
+./deploy.sh status
+
+# Ver logs
+tail -f logs/anvil.log
+tail -f logs/frontend.log
+tail -f logs/deploy.log
+tail -f logs/install.log
+
+# Reiniciar si algo está mal
+./deploy.sh restart
+```
+
+#### **6. CI/CD Automatizado**:
+
+```bash
+# Setup y inicio completamente automatizado (sin interacción del usuario)
+./deploy.sh setup --yes
+./deploy.sh env --yes
+./deploy.sh start --yes
+```
 
 ---
 

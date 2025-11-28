@@ -417,31 +417,59 @@ acceptTransfer(BigInt(5))
 
 ### **Script**: `deploy.sh`
 
-Complete bash script that automates the ENTIRE deployment process.
+Complete bash script that automates the ENTIRE deployment process. Compatible with **Linux** and **macOS**.
 
 ### **Available Commands**:
 
 ```bash
-# Ver ayuda
+# Ver ayuda completa
 ./deploy.sh help
 
-# Iniciar todo el stack
-./deploy.sh start
+# Comandos principales
+./deploy.sh start      # Inicia todo el stack (Anvil + Contract + Frontend)
+./deploy.sh stop       # Detiene todos los servicios
+./deploy.sh restart    # Reinicia todo el stack
+./deploy.sh status     # Muestra el estado de los servicios
+./deploy.sh metamask   # Muestra instrucciones para configurar MetaMask
+./deploy.sh clean      # Limpia el estado persistente de Anvil
 
-# Ver estado
-./deploy.sh status
+# Comandos de configuración
+./deploy.sh setup      # Verifica requisitos e instala dependencias faltantes
+./deploy.sh env        # Configura variables de entorno (.env.local)
 
-# MetaMask instructions
-./deploy.sh metamask
+# Comandos de frontend (sin afectar Anvil/Contrato)
+./deploy.sh frontend start    # Inicia solo el frontend
+./deploy.sh frontend stop     # Detiene solo el frontend
+./deploy.sh frontend restart  # Reinicia solo el frontend
+```
 
-# Detener todo
-./deploy.sh stop
+### **Options**:
 
-# Reiniciar
-./deploy.sh restart
+```bash
+# Modo automático (sin confirmaciones)
+./deploy.sh setup --yes
+./deploy.sh start --auto
+./deploy.sh env -y
+
+# Configurar variables de entorno con parámetros
+./deploy.sh env --modern-design true --debug-mode false
+./deploy.sh env --debug-tokens true
+./deploy.sh env --all true false false  # Todas las variables a la vez
 ```
 
 ### **Flow of `./deploy.sh start`**:
+
+**Important**: Before starting services, the script automatically runs `pre_start_check()` which verifies and installs all requirements. See [Automatic Pre-Start Check](#automatic-pre-start-check) section for details.
+
+#### **STEP 0: Pre-Start Check** (Automatic)
+
+Before starting any service, the script:
+1. Verifies system tools (installs if missing)
+2. Verifies Node.js, npm, Foundry (shows instructions if missing)
+3. Verifies project dependencies (installs if missing)
+4. Checks environment variables (prompts to create if missing)
+
+If any critical requirement is missing and cannot be installed, the script aborts with clear instructions.
 
 #### **STEP 1: Start Anvil**
 ```bash
@@ -487,15 +515,22 @@ PRIVATE_KEY=0xac097... forge script \
 # 1. Makes backup of config.ts
 cp web/src/contracts/config.ts web/src/contracts/config.ts.backup
 
-# 2. Updates SUPPLY_CHAIN_ADDRESS with sed
-sed -i "s/0x[a-fA-F0-9]\{40\}/$contract_address/" config.ts
+# 2. Updates SUPPLY_CHAIN_ADDRESS with sed (OS-specific syntax)
+# Linux:
+sed -i "s/export const SUPPLY_CHAIN_ADDRESS = '0x[a-fA-F0-9]\{40\}'/export const SUPPLY_CHAIN_ADDRESS = '$contract_address'/" config.ts
+# macOS:
+sed -i '' "s/export const SUPPLY_CHAIN_ADDRESS = '0x[a-fA-F0-9]\{40\}'/export const SUPPLY_CHAIN_ADDRESS = '$contract_address'/" config.ts
 
-# 3. Verifies that it was updated correctly
+# 3. Copies updated ABI from sc/out/SupplyChain.sol/SupplyChain.json
+cp sc/out/SupplyChain.sol/SupplyChain.json web/src/contracts/SupplyChain.json
+
+# 4. Verifies that it was updated correctly
 ```
 
 **Result**:
 - ✅ `config.ts` updated with new address
 - ✅ Backup saved in `config.ts.backup`
+- ✅ ABI copied from latest compilation (`SupplyChain.json`)
 
 #### **STEP 4: Start Frontend**
 ```bash
@@ -531,10 +566,295 @@ logs/
 ├── frontend.log           # Next.js dev server output
 ├── frontend.pid           # Next.js process PID
 ├── deploy.log             # Foundry deployment output
-└── contract_address.txt   # Dirección del contrato deployado
+├── contract_address.txt   # Contract address (saved after deployment)
+└── install.log            # Installation logs (system tools, dependencies)
 ```
 
+**Log Locations**:
+- All logs are saved in the `logs/` directory at the project root
+- Logs are automatically created when services start
+- Installation logs (`install.log`) are created when running `setup` or when dependencies are installed automatically
+
 **Note on persistence**: The `anvil_state.json` file contains the complete state of the local blockchain. If you delete it (with `./deploy.sh clean`), Anvil will start with a clean blockchain on the next `start`.
+
+---
+
+### **Command: `./deploy.sh setup`**
+
+Verifies all requirements and automatically installs missing dependencies.
+
+#### **What it does**:
+
+1. **Verifies System Tools**:
+   - Checks for: `lsof`, `netstat`, `curl`, `pgrep`
+   - On Linux: Also checks for `ss`
+   - On macOS: `ss` is not checked (not available)
+   - Automatically installs missing tools using:
+     - **Linux**: `apt-get`, `dnf`, `pacman`, or `zypper` (depending on distribution)
+     - **macOS**: `brew` (Homebrew)
+
+2. **Verifies Basic Requirements**:
+   - **Node.js** v18+ (shows installation instructions if missing)
+   - **npm** (comes with Node.js)
+   - **Foundry** (`forge` and `anvil` commands)
+   - Shows OS-specific installation instructions if missing
+
+3. **Verifies Project Dependencies**:
+   - **Frontend**: Checks if `web/node_modules` exists
+   - **Smart Contract**: Checks if `sc/lib/forge-std` exists
+   - Automatically installs missing dependencies:
+     - Frontend: `npm install` in `web/` directory
+     - Smart Contract: `forge install` in `sc/` directory
+
+4. **Configures Environment Variables** (optional):
+   - Prompts to configure `.env.local` if it doesn't exist
+   - Can be skipped and configured later with `./deploy.sh env`
+
+#### **Usage**:
+
+```bash
+# Interactive mode (asks for confirmation)
+./deploy.sh setup
+
+# Automatic mode (no confirmations, uses defaults)
+./deploy.sh setup --yes
+```
+
+#### **What gets installed automatically**:
+
+- **System Tools** (if missing):
+  - Linux: `lsof`, `net-tools`, `iproute2`, `curl`, `procps` (or `procps-ng` on Arch)
+  - macOS: Most tools come preinstalled, only installs if truly missing
+
+- **Project Dependencies** (if missing):
+  - Frontend: All npm packages (can take 5-15 minutes)
+  - Smart Contract: `forge-std` and other Foundry dependencies
+
+#### **Logs**:
+
+All installation logs are saved to `logs/install.log` for troubleshooting.
+
+---
+
+### **Command: `./deploy.sh env`**
+
+Configures frontend environment variables in `web/.env.local`.
+
+#### **Available Variables**:
+
+- `NEXT_PUBLIC_MODERN_DESIGN`: Modern design 2025 (glassmorphism, gradients, animations)
+  - Options: `true` | `false`
+  - Default: `true`
+
+- `NEXT_PUBLIC_DEBUG_MODE`: Additional console logs
+  - Options: `true` | `false`
+  - Default: `false`
+
+- `NEXT_PUBLIC_DEBUG_TOKENS`: Additional token information
+  - Options: `true` | `false`
+  - Default: `false`
+
+#### **Usage Modes**:
+
+**1. Interactive Mode** (recommended for first time):
+```bash
+./deploy.sh env
+# Prompts for each variable with default suggestions
+```
+
+**2. Parameter Mode** (individual variables):
+```bash
+./deploy.sh env --modern-design true
+./deploy.sh env --debug-mode false
+./deploy.sh env --debug-tokens true
+```
+
+**3. All-at-once Mode**:
+```bash
+./deploy.sh env --all true false false
+# Sets: MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false
+```
+
+**4. Automatic Mode** (uses defaults):
+```bash
+./deploy.sh env --yes
+# Creates .env.local with default values:
+# MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false
+```
+
+#### **File Created**:
+
+The command creates/updates `web/.env.local` with the configured values.
+
+**Important**: The file must be named `.env.local` (not `.env.example`). The `.env.example` file is just a template for reference.
+
+---
+
+### **Automatic Pre-Start Check**
+
+When you run `./deploy.sh start`, the script automatically runs `pre_start_check()` **before** starting services.
+
+#### **What it verifies**:
+
+1. **System Tools**: Same as `./deploy.sh setup` (checks and installs if needed)
+2. **Basic Requirements**: Node.js, npm, Foundry (shows instructions if missing)
+3. **Project Dependencies**: `node_modules` and `forge-std` (installs if missing)
+4. **Environment Variables**: Checks if `.env.local` exists (prompts to create if missing)
+
+#### **Behavior**:
+
+- **Interactive Mode**: Asks for confirmation before installing missing dependencies
+- **Automatic Mode** (`--yes`/`--auto`/`-y`): Installs everything automatically with defaults
+- **If critical errors**: Script aborts and shows instructions to fix issues
+
+#### **Example Flow**:
+
+```bash
+./deploy.sh start
+# 1. Runs pre_start_check()
+#    - Checks system tools ✅
+#    - Checks Node.js ✅
+#    - Checks npm ✅
+#    - Checks Foundry ✅
+#    - Checks node_modules ❌ (missing)
+#    - Asks: "Install frontend dependencies? (S/n)"
+#    - User confirms → Installs npm packages
+#    - Checks .env.local ❌ (missing)
+#    - Asks: "Configure environment variables? (S/n)"
+#    - User confirms → Runs setup_environment_variables()
+# 2. Starts Anvil
+# 3. Deploys contract
+# 4. Updates frontend config
+# 5. Starts frontend
+```
+
+---
+
+### **Linux/macOS Compatibility**
+
+The script automatically detects the operating system and adapts commands accordingly.
+
+#### **OS Detection**:
+
+- **macOS**: Detected via `OSTYPE == "darwin*"`
+- **Linux**: Detected via `OSTYPE == "linux-gnu*"` and distribution detection
+
+#### **Differences Handled**:
+
+1. **System Tools**:
+   - **Linux**: Verifies `lsof`, `netstat`, `ss`, `curl`, `pgrep`
+   - **macOS**: Verifies `lsof`, `netstat`, `curl`, `pgrep` (no `ss` - not available)
+
+2. **Package Managers**:
+   - **Linux**: Uses `apt-get`, `dnf`, `pacman`, or `zypper` (auto-detected)
+   - **macOS**: Uses `brew` (Homebrew)
+
+3. **Command Syntax**:
+   - **`sed -i`**: 
+     - Linux: `sed -i "s/pattern/replacement/" file`
+     - macOS: `sed -i '' "s/pattern/replacement/" file`
+   - **`netstat`**:
+     - Linux: `netstat -tlnp` (shows process info)
+     - macOS: `netstat -an` (no process info available)
+   - **`timeout`**:
+     - Linux: `timeout` command available
+     - macOS: May need `gtimeout` (from Homebrew coreutils) or works without timeout
+
+4. **Preinstalled Tools**:
+   - **macOS**: Most tools (`lsof`, `netstat`, `curl`, `pgrep`) come preinstalled
+   - **Linux**: May need to install some tools
+
+#### **Automatic Adaptation**:
+
+The script automatically:
+- Detects the OS
+- Uses the correct package manager
+- Uses the correct command syntax
+- Skips unavailable tools (like `ss` on macOS)
+- Handles missing commands gracefully (like `timeout` on macOS)
+
+---
+
+### **Advanced Use Cases**
+
+#### **1. First Time Setup (Complete Flow)**:
+
+```bash
+# Step 1: Setup (verify and install everything)
+./deploy.sh setup --yes
+
+# Step 2: Configure environment variables
+./deploy.sh env
+
+# Step 3: Start everything
+./deploy.sh start
+```
+
+#### **2. Daily Development**:
+
+```bash
+# Morning: Start everything
+./deploy.sh start
+
+# During development: Only restart frontend after changes
+./deploy.sh frontend restart
+
+# End of day: Stop everything
+./deploy.sh stop
+```
+
+#### **3. Frontend-Only Development**:
+
+```bash
+# Start Anvil and deploy contract once
+./deploy.sh start
+
+# Stop only frontend
+./deploy.sh frontend stop
+
+# Make frontend changes...
+
+# Restart only frontend (Anvil and contract keep running)
+./deploy.sh frontend start
+```
+
+#### **4. Clean State Development**:
+
+```bash
+# Stop everything
+./deploy.sh stop
+
+# Clean Anvil state (removes all tokens, transfers, users)
+./deploy.sh clean
+
+# Start with fresh blockchain
+./deploy.sh start
+```
+
+#### **5. Troubleshooting**:
+
+```bash
+# Check status of all services
+./deploy.sh status
+
+# View logs
+tail -f logs/anvil.log
+tail -f logs/frontend.log
+tail -f logs/deploy.log
+tail -f logs/install.log
+
+# Restart if something is wrong
+./deploy.sh restart
+```
+
+#### **6. Automated CI/CD**:
+
+```bash
+# Fully automated setup and start (no user interaction)
+./deploy.sh setup --yes
+./deploy.sh env --yes
+./deploy.sh start --yes
+```
 
 ---
 
