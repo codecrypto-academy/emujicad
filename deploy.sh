@@ -4,45 +4,45 @@
 # Supply Chain Tracker - Deployment Automation Script
 ################################################################################
 # 
-# Descripción: Script para automatizar deployment de Anvil + Smart Contract + Frontend
-# Autor: Supply Chain Tracker Team
-# Fecha: 18 Noviembre 2025
-# Última actualización: 27 de Noviembre, 2025
-# Versión: 2.1.0
+# Description: Script to automate deployment of Anvil + Smart Contract + Frontend
+# Author: Supply Chain Tracker Team
+# Date: November 18, 2025
+# Last Updated: November 28, 2025
+# Version: 2.1.0
 #
-# Funcionalidades:
-#   - Iniciar/detener Anvil (blockchain local con persistencia de estado)
-#   - Desplegar smart contract automáticamente
-#   - Actualizar dirección del contrato y ABI en frontend
-#   - Iniciar/detener servidor Next.js
-#   - Gestión independiente del frontend (sin afectar Anvil/Contrato)
-#   - Limpieza de estado persistente de Anvil
-#   - Validar estados de servicios
-#   - Instrucciones para MetaMask
-#   - Detección inteligente de procesos en ejecución
-#   - Logs organizados en directorio logs/
+# Features:
+#   - Start/stop Anvil (local blockchain with state persistence)
+#   - Deploy smart contract automatically
+#   - Update contract address and ABI in frontend
+#   - Start/stop Next.js server
+#   - Independent frontend management (without affecting Anvil/Contract)
+#   - Clean Anvil persistent state
+#   - Validate service states
+#   - MetaMask instructions
+#   - Intelligent detection of running processes
+#   - Logs organized in logs/ directory
 #
-# Uso:
-#   ./deploy.sh start           - Inicia todo el stack (Anvil + Contrato + Frontend)
-#   ./deploy.sh stop            - Detiene todos los servicios
-#   ./deploy.sh restart         - Reinicia todo el stack
-#   ./deploy.sh status          - Muestra estado de servicios
-#   ./deploy.sh metamask        - Muestra instrucciones para configurar MetaMask
-#   ./deploy.sh clean           - Limpia estado persistente de Anvil
-#   ./deploy.sh frontend start  - Inicia solo el frontend
-#   ./deploy.sh frontend stop   - Detiene solo el frontend
-#   ./deploy.sh frontend restart - Reinicia solo el frontend
-#   ./deploy.sh help            - Muestra ayuda completa
+# Usage:
+#   ./deploy.sh start           - Start entire stack (Anvil + Contract + Frontend)
+#   ./deploy.sh stop            - Stop all services
+#   ./deploy.sh restart         - Restart entire stack
+#   ./deploy.sh status          - Show service status
+#   ./deploy.sh metamask        - Show MetaMask configuration instructions
+#   ./deploy.sh clean           - Clean Anvil persistent state
+#   ./deploy.sh frontend start  - Start only frontend
+#   ./deploy.sh frontend stop   - Stop only frontend
+#   ./deploy.sh frontend restart - Restart only frontend
+#   ./deploy.sh help            - Show complete help
 #
 ################################################################################
 
 set -e  # Exit on error
 
 # ============================================================================
-# CONFIGURACIÓN
+# CONFIGURATION
 # ============================================================================
 
-# Colores para output
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -51,13 +51,13 @@ MAGENTA='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Directorios del proyecto
+# Project directories
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SC_DIR="$PROJECT_ROOT/sc"
 WEB_DIR="$PROJECT_ROOT/web"
 LOGS_DIR="$PROJECT_ROOT/logs"
 
-# Archivos de proceso
+# Process files
 ANVIL_PID_FILE="$LOGS_DIR/anvil.pid"
 FRONTEND_PID_FILE="$LOGS_DIR/frontend.pid"
 ANVIL_LOG_FILE="$LOGS_DIR/anvil.log"
@@ -65,26 +65,26 @@ FRONTEND_LOG_FILE="$LOGS_DIR/frontend.log"
 DEPLOY_LOG_FILE="$LOGS_DIR/deploy.log"
 ANVIL_STATE_FILE="$LOGS_DIR/anvil_state.json"
 
-# Configuración de red
+# Network configuration
 ANVIL_PORT=8545
 ANVIL_CHAIN_ID=31337
 ANVIL_HOST="127.0.0.1"
 FRONTEND_PORT=3000
 
-# Cuenta de Anvil (Account #0)
+# Anvil account (Account #0)
 DEPLOYER_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 DEPLOYER_ADDRESS="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 
-# Archivos de configuración del frontend
+# Frontend configuration files
 CONFIG_FILE="$WEB_DIR/src/contracts/config.ts"
 ABI_FILE="$WEB_DIR/src/contracts/SupplyChain.json"
 ABI_SOURCE="$SC_DIR/out/SupplyChain.sol/SupplyChain.json"
 
 # ============================================================================
-# FUNCIONES AUXILIARES
+# HELPER FUNCTIONS
 # ============================================================================
 
-# Función para imprimir mensajes con color
+# Function to print messages with color
 print_header() {
     echo -e "\n${CYAN}═══════════════════════════════════════════════════════════${NC}"
     echo -e "${CYAN}  $1${NC}"
@@ -111,26 +111,26 @@ print_step() {
     echo -e "${MAGENTA}➜${NC} $1"
 }
 
-# Función para crear directorio de logs si no existe
+# Function to create logs directory if it doesn't exist
 ensure_logs_dir() {
     if [ ! -d "$LOGS_DIR" ]; then
         mkdir -p "$LOGS_DIR"
-        print_success "Directorio de logs creado: $LOGS_DIR"
+        print_success "Logs directory created: $LOGS_DIR"
     fi
 }
 
 # ============================================================================
-# FUNCIÓN: DETECTAR SISTEMA OPERATIVO
+# FUNCTION: DETECT OPERATING SYSTEM
 # ============================================================================
 
 detect_os() {
-    # Detectar macOS
+    # Detect macOS
     if [[ "$OSTYPE" == "darwin"* ]]; then
         echo "macos"
         return 0
     fi
     
-    # Detectar Linux
+    # Detect Linux
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if [ -f /etc/os-release ]; then
             . /etc/os-release
@@ -148,12 +148,12 @@ detect_os() {
         return 0
     fi
     
-    # Sistema no reconocido
+    # Unrecognized system
     echo "unknown"
     return 1
 }
 
-# Función legacy para compatibilidad (ahora llama a detect_os)
+# Legacy function for compatibility (now calls detect_os)
 detect_linux_distro() {
     local os=$(detect_os)
     if [ "$os" = "macos" ]; then
@@ -164,7 +164,7 @@ detect_linux_distro() {
 }
 
 # ============================================================================
-# FUNCIÓN: VERIFICAR HERRAMIENTAS DEL SISTEMA
+# FUNCTION: CHECK SYSTEM TOOLS
 # ============================================================================
 
 check_system_tools() {
@@ -172,7 +172,7 @@ check_system_tools() {
     local os=$(detect_os)
     local tools=("lsof" "netstat" "curl" "pgrep")
     
-    # ss solo está disponible en Linux, no en macOS
+    # ss is only available on Linux, not on macOS
     if [ "$os" != "macos" ]; then
         tools+=("ss")
     fi
@@ -192,14 +192,14 @@ check_system_tools() {
 }
 
 # ============================================================================
-# FUNCIÓN: INSTALAR HERRAMIENTAS FALTANTES
+# FUNCTION: INSTALL MISSING TOOLS
 # ============================================================================
 
 install_system_tools() {
     local tools=("$@")
     local auto_install=false
     
-    # Verificar si se debe instalar automáticamente
+    # Check if should install automatically
     if [ "${AUTO_INSTALL:-false}" = "true" ]; then
         auto_install=true
     fi
@@ -210,12 +210,12 @@ install_system_tools() {
     
     case "$os" in
         macos)
-            # Verificar si Homebrew está instalado
+            # Check if Homebrew is installed
             if ! command -v brew >/dev/null 2>&1; then
-                print_error "Homebrew no está instalado en macOS"
-                print_info "Instala Homebrew primero con:"
+                print_error "Homebrew is not installed on macOS"
+                print_info "Install Homebrew first with:"
                 print_info "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-                print_info "Luego ejecuta este script nuevamente."
+                print_info "Then run this script again."
                 return 1
             fi
             install_cmd="brew install"
@@ -233,51 +233,51 @@ install_system_tools() {
             install_cmd="sudo zypper install -y"
             ;;
         *)
-            print_error "Sistema operativo no reconocido: $os"
-            print_info "Por favor instala manualmente: ${tools[*]}"
+            print_error "Unrecognized operating system: $os"
+            print_info "Please install manually: ${tools[*]}"
             return 1
             ;;
     esac
     
-    # Mapear herramientas a nombres de paquetes
+    # Map tools to package names
     for tool in "${tools[@]}"; do
         case "$tool" in
             lsof)
                 if [ "$os" = "macos" ]; then
-                    # lsof viene preinstalado en macOS
-                    print_info "lsof ya está disponible en macOS"
+                    # lsof comes preinstalled on macOS
+                    print_info "lsof is already available on macOS"
                 else
                     packages+=("lsof")
                 fi
                 ;;
             netstat)
                 if [ "$os" = "macos" ]; then
-                    # netstat viene preinstalado en macOS
-                    print_info "netstat ya está disponible en macOS"
+                    # netstat comes preinstalled on macOS
+                    print_info "netstat is already available on macOS"
                 else
                     packages+=("net-tools")
                 fi
                 ;;
             ss)
                 if [ "$os" = "macos" ]; then
-                    # ss no está disponible en macOS, usar netstat como alternativa
-                    print_info "ss no está disponible en macOS, usando netstat como alternativa"
+                    # ss is not available on macOS, use netstat as alternative
+                    print_info "ss is not available on macOS, using netstat as alternative"
                 else
                     packages+=("iproute2")
                 fi
                 ;;
             curl)
                 if [ "$os" = "macos" ]; then
-                    # curl viene preinstalado en macOS
-                    print_info "curl ya está disponible en macOS"
+                    # curl comes preinstalled on macOS
+                    print_info "curl is already available on macOS"
                 else
                     packages+=("curl")
                 fi
                 ;;
             pgrep)
                 if [ "$os" = "macos" ]; then
-                    # pgrep viene preinstalado en macOS
-                    print_info "pgrep ya está disponible en macOS"
+                    # pgrep comes preinstalled on macOS
+                    print_info "pgrep is already available on macOS"
                 elif [[ "$os" == "arch" || "$os" == "manjaro" ]]; then
                     packages+=("procps-ng")
                 else
@@ -287,64 +287,64 @@ install_system_tools() {
         esac
     done
     
-    # Eliminar duplicados y vacíos
+    # Remove duplicates and empty entries
     local unique_packages=($(printf "%s\n" "${packages[@]}" | grep -v '^$' | sort -u))
     
-    # Si no hay paquetes para instalar (todos vienen preinstalados en macOS)
+    # If no packages to install (all come preinstalled on macOS)
     if [ ${#unique_packages[@]} -eq 0 ]; then
-        print_success "Todas las herramientas están disponibles (vienen preinstaladas en macOS)"
+        print_success "All tools are available (preinstalled on macOS)"
         return 0
     fi
     
-    print_warning "Faltan las siguientes herramientas: ${tools[*]}"
-    print_info "Se intentará instalar usando: $install_cmd"
-    print_info "Paquetes a instalar: ${unique_packages[*]}"
+    print_warning "Missing tools: ${tools[*]}"
+    print_info "Will attempt to install using: $install_cmd"
+    print_info "Packages to install: ${unique_packages[*]}"
     
     if [ "$auto_install" = false ]; then
         echo ""
-        read -p "¿Deseas instalar estas herramientas ahora? (s/N): " -n 1 -r
+        read -p "Do you want to install these tools now? (y/N): " -n 1 -r
         echo ""
-        if [[ ! $REPLY =~ ^[Ss]$ ]]; then
-            print_warning "Instalación cancelada. Por favor instala manualmente: ${tools[*]}"
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            print_warning "Installation cancelled. Please install manually: ${tools[*]}"
             return 1
         fi
     else
-        print_info "Modo automático: instalando herramientas sin confirmación..."
+        print_info "Automatic mode: installing tools without confirmation..."
     fi
     
-    print_step "Instalando herramientas del sistema..."
+    print_step "Installing system tools..."
     
-    # Registrar en log
+    # Log to file
     ensure_logs_dir
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Instalando herramientas del sistema: ${unique_packages[*]}" >> "$LOGS_DIR/install.log" 2>&1
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Installing system tools: ${unique_packages[*]}" >> "$LOGS_DIR/install.log" 2>&1
     
     if eval "$install_cmd ${unique_packages[*]}" >> "$LOGS_DIR/install.log" 2>&1; then
-        print_success "Herramientas instaladas correctamente"
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Herramientas instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
+        print_success "Tools installed successfully"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Tools installed successfully" >> "$LOGS_DIR/install.log" 2>&1
         return 0
     else
-        print_error "Error al instalar herramientas"
-        print_info "Ver logs en: $LOGS_DIR/install.log"
-        print_info "Puedes instalar manualmente: ${unique_packages[*]}"
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar herramientas" >> "$LOGS_DIR/install.log" 2>&1
+        print_error "Error installing tools"
+        print_info "Check logs at: $LOGS_DIR/install.log"
+        print_info "You can install manually: ${unique_packages[*]}"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Failed to install tools" >> "$LOGS_DIR/install.log" 2>&1
         return 1
     fi
 }
 
 # ============================================================================
-# FUNCIÓN: VERIFICAR DEPENDENCIAS DEL PROYECTO
+# FUNCTION: CHECK PROJECT DEPENDENCIES
 # ============================================================================
 
 check_project_dependencies() {
     local missing_deps=()
     
-    # Verificar dependencias del frontend
+    # Check frontend dependencies
     if [ ! -d "$WEB_DIR/node_modules" ]; then
         missing_deps+=("frontend")
     fi
     
-    # Verificar dependencias del smart contract
-    # Verificar que lib/ existe Y que forge-std está dentro
+    # Check smart contract dependencies
+    # Check that lib/ exists AND forge-std is inside
     if [ ! -d "$SC_DIR/lib" ] || [ ! -d "$SC_DIR/lib/forge-std" ]; then
         missing_deps+=("smart-contract")
     fi
@@ -352,21 +352,21 @@ check_project_dependencies() {
     if [ ${#missing_deps[@]} -eq 0 ]; then
         return 0
     else
-        # Imprimir las dependencias faltantes
+        # Print missing dependencies
         echo "${missing_deps[@]}"
         return 1
     fi
 }
 
 # ============================================================================
-# FUNCIÓN: INSTALAR DEPENDENCIAS DEL PROYECTO
+# FUNCTION: INSTALL PROJECT DEPENDENCIES
 # ============================================================================
 
 install_project_dependencies() {
     local deps=("$@")
     local auto_install=false
     
-    # Verificar si se debe instalar automáticamente
+    # Check if should install automatically
     if [ "${AUTO_INSTALL:-false}" = "true" ]; then
         auto_install=true
     fi
@@ -374,74 +374,74 @@ install_project_dependencies() {
     for dep in "${deps[@]}"; do
         case "$dep" in
             frontend)
-                # Verificar que npm está disponible
+                # Check that npm is available
                 if ! command -v npm >/dev/null 2>&1; then
-                    print_error "npm no está instalado. No se pueden instalar dependencias del frontend."
-                    print_info "Instala Node.js y npm primero."
+                    print_error "npm is not installed. Cannot install frontend dependencies."
+                    print_info "Install Node.js and npm first."
                     return 1
                 fi
                 
-                print_step "Instalando dependencias del frontend..."
-                print_info "Esto puede tardar varios minutos..."
+                print_step "Installing frontend dependencies..."
+                print_info "This may take several minutes..."
                 
                 cd "$WEB_DIR"
                 
-                # Registrar inicio en log
+                # Log start
                 ensure_logs_dir
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Iniciando instalación de dependencias del frontend..." >> "$LOGS_DIR/install.log" 2>&1
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting frontend dependencies installation..." >> "$LOGS_DIR/install.log" 2>&1
                 
-                # Instalar con timeout (30 minutos = 1800 segundos)
-                # timeout puede no estar disponible en macOS, usar si está disponible
+                # Install with timeout (30 minutes = 1800 seconds)
+                # timeout may not be available on macOS, use if available
                 local timeout_cmd=""
                 if command -v timeout >/dev/null 2>&1; then
                     timeout_cmd="timeout 1800"
                 elif command -v gtimeout >/dev/null 2>&1; then
-                    # macOS con Homebrew coreutils
+                    # macOS with Homebrew coreutils
                     timeout_cmd="gtimeout 1800"
                 fi
                 
                 if [ -n "$timeout_cmd" ]; then
-                    # Con timeout
+                    # With timeout
                     if $timeout_cmd npm install --progress=true 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
-                        # Mostrar progreso en tiempo real
+                        # Show real-time progress
                         if [[ "$line" =~ (^[0-9]+/[0-9]+|^added|^removed|^changed|^audited) ]]; then
                             echo -ne "\r${BLUE}ℹ${NC} $line"
                         fi
                     done; then
-                        echo "" # Nueva línea después del progreso
-                        print_success "Dependencias del frontend instaladas"
-                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del frontend instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
+                        echo "" # New line after progress
+                        print_success "Frontend dependencies installed"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Frontend dependencies installed successfully" >> "$LOGS_DIR/install.log" 2>&1
                     else
                         local exit_code=${PIPESTATUS[0]}
-                        echo "" # Nueva línea
+                        echo "" # New line
                         if [ $exit_code -eq 124 ]; then
-                            print_error "Timeout: La instalación de dependencias del frontend excedió 30 minutos"
+                            print_error "Timeout: Frontend dependencies installation exceeded 30 minutes"
                         else
-                            print_error "Error al instalar dependencias del frontend"
+                            print_error "Error installing frontend dependencies"
                         fi
-                        print_info "Ver logs en: $LOGS_DIR/install.log"
-                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del frontend (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
+                        print_info "Check logs at: $LOGS_DIR/install.log"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Failed to install frontend dependencies (code: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
                         cd "$PROJECT_ROOT"
                         return 1
                     fi
                 else
-                    # Sin timeout (macOS sin coreutils)
-                    print_info "Nota: timeout no disponible, instalación sin límite de tiempo"
+                    # Without timeout (macOS without coreutils)
+                    print_info "Note: timeout not available, installation without time limit"
                     if npm install --progress=true 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
-                        # Mostrar progreso en tiempo real
+                        # Show real-time progress
                         if [[ "$line" =~ (^[0-9]+/[0-9]+|^added|^removed|^changed|^audited) ]]; then
                             echo -ne "\r${BLUE}ℹ${NC} $line"
                         fi
                     done; then
-                        echo "" # Nueva línea después del progreso
-                        print_success "Dependencias del frontend instaladas"
-                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del frontend instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
+                        echo "" # New line after progress
+                        print_success "Frontend dependencies installed"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Frontend dependencies installed successfully" >> "$LOGS_DIR/install.log" 2>&1
                     else
                         local exit_code=${PIPESTATUS[0]}
-                        echo "" # Nueva línea
-                        print_error "Error al instalar dependencias del frontend"
-                        print_info "Ver logs en: $LOGS_DIR/install.log"
-                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del frontend (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
+                        echo "" # New line
+                        print_error "Error installing frontend dependencies"
+                        print_info "Check logs at: $LOGS_DIR/install.log"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Failed to install frontend dependencies (code: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
                         cd "$PROJECT_ROOT"
                         return 1
                     fi
@@ -449,73 +449,73 @@ install_project_dependencies() {
                 cd "$PROJECT_ROOT"
                 ;;
             smart-contract)
-                # Verificar que forge está disponible
+                # Check that forge is available
                 if ! command -v forge >/dev/null 2>&1; then
-                    print_error "forge no está instalado. No se pueden instalar dependencias del smart contract."
-                    print_info "Instala Foundry primero: curl -L https://foundry.paradigm.xyz | bash && foundryup"
+                    print_error "forge is not installed. Cannot install smart contract dependencies."
+                    print_info "Install Foundry first: curl -L https://foundry.paradigm.xyz | bash && foundryup"
                     return 1
                 fi
                 
-                print_step "Instalando dependencias del smart contract..."
-                print_info "Instalando forge-std y otras dependencias..."
+                print_step "Installing smart contract dependencies..."
+                print_info "Installing forge-std and other dependencies..."
                 
                 cd "$SC_DIR"
                 
-                # Registrar inicio en log
+                # Log start
                 ensure_logs_dir
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Iniciando instalación de dependencias del smart contract..." >> "$LOGS_DIR/install.log" 2>&1
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting smart contract dependencies installation..." >> "$LOGS_DIR/install.log" 2>&1
                 
-                # Instalar con timeout (10 minutos = 600 segundos) si está disponible
+                # Install with timeout (10 minutes = 600 seconds) if available
                 local timeout_cmd=""
                 if command -v timeout >/dev/null 2>&1; then
                     timeout_cmd="timeout 600"
                 elif command -v gtimeout >/dev/null 2>&1; then
-                    # macOS con Homebrew coreutils (gtimeout)
+                    # macOS with Homebrew coreutils (gtimeout)
                     timeout_cmd="gtimeout 600"
                 fi
                 
                 if [ -n "$timeout_cmd" ]; then
-                    # Con timeout
+                    # With timeout
                     if $timeout_cmd forge install 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
-                        # Mostrar progreso
+                        # Show progress
                         if [[ "$line" =~ (Installing|Installed|Cloning|Updating) ]]; then
                             echo -ne "\r${BLUE}ℹ${NC} $line"
                         fi
                     done; then
-                        echo "" # Nueva línea después del progreso
-                        print_success "Dependencias del smart contract instaladas"
-                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del smart contract instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
+                        echo "" # New line after progress
+                        print_success "Smart contract dependencies installed"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Smart contract dependencies installed successfully" >> "$LOGS_DIR/install.log" 2>&1
                     else
                         local exit_code=${PIPESTATUS[0]}
-                        echo "" # Nueva línea
+                        echo "" # New line
                         if [ $exit_code -eq 124 ]; then
-                            print_error "Timeout: La instalación de dependencias del smart contract excedió 10 minutos"
+                            print_error "Timeout: Smart contract dependencies installation exceeded 10 minutes"
                         else
-                            print_error "Error al instalar dependencias del smart contract"
+                            print_error "Error installing smart contract dependencies"
                         fi
-                        print_info "Ver logs en: $LOGS_DIR/install.log"
-                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del smart contract (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
+                        print_info "Check logs at: $LOGS_DIR/install.log"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Failed to install smart contract dependencies (code: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
                         cd "$PROJECT_ROOT"
                         return 1
                     fi
                 else
-                    # Sin timeout (macOS sin coreutils)
-                    print_info "Nota: timeout no disponible, instalación sin límite de tiempo"
+                    # Without timeout (macOS without coreutils)
+                    print_info "Note: timeout not available, installation without time limit"
                     if forge install 2>&1 | tee -a "$LOGS_DIR/install.log" | while IFS= read -r line; do
-                        # Mostrar progreso
+                        # Show progress
                         if [[ "$line" =~ (Installing|Installed|Cloning|Updating) ]]; then
                             echo -ne "\r${BLUE}ℹ${NC} $line"
                         fi
                     done; then
-                        echo "" # Nueva línea después del progreso
-                        print_success "Dependencias del smart contract instaladas"
-                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dependencias del smart contract instaladas exitosamente" >> "$LOGS_DIR/install.log" 2>&1
+                        echo "" # New line after progress
+                        print_success "Smart contract dependencies installed"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Smart contract dependencies installed successfully" >> "$LOGS_DIR/install.log" 2>&1
                     else
                         local exit_code=${PIPESTATUS[0]}
-                        echo "" # Nueva línea
-                        print_error "Error al instalar dependencias del smart contract"
-                        print_info "Ver logs en: $LOGS_DIR/install.log"
-                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Fallo al instalar dependencias del smart contract (código: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
+                        echo "" # New line
+                        print_error "Error installing smart contract dependencies"
+                        print_info "Check logs at: $LOGS_DIR/install.log"
+                        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Failed to install smart contract dependencies (code: $exit_code)" >> "$LOGS_DIR/install.log" 2>&1
                         cd "$PROJECT_ROOT"
                         return 1
                     fi
@@ -529,7 +529,7 @@ install_project_dependencies() {
 }
 
 # ============================================================================
-# FUNCIÓN: CONFIGURAR VARIABLES DE ENTORNO
+# FUNCTION: SETUP ENVIRONMENT VARIABLES
 # ============================================================================
 
 setup_environment_variables() {
@@ -539,20 +539,20 @@ setup_environment_variables() {
     local DEBUG_TOKENS=""
     local auto_mode=false
     
-    # Verificar si está en modo automático
+    # Check if in automatic mode
     if [ "${AUTO_INSTALL:-false}" = "true" ]; then
         auto_mode=true
-        # Valores por defecto en modo automático
+        # Default values in automatic mode
         MODERN_DESIGN="true"
         DEBUG_MODE="false"
         DEBUG_TOKENS="false"
-        print_info "Modo automático: usando valores por defecto"
-        print_info "  - NEXT_PUBLIC_MODERN_DESIGN=true (modo moderno activado)"
+        print_info "Automatic mode: using default values"
+        print_info "  - NEXT_PUBLIC_MODERN_DESIGN=true (modern mode enabled)"
         print_info "  - NEXT_PUBLIC_DEBUG_MODE=false"
         print_info "  - NEXT_PUBLIC_DEBUG_TOKENS=false"
     fi
     
-    # Parsear argumentos
+    # Parse arguments
     local use_params=false
     local all_params=false
     
@@ -587,65 +587,65 @@ setup_environment_variables() {
         esac
     done
     
-    # Si se pasaron parámetros, validarlos
+    # If parameters were passed, validate them
     if [ "$use_params" = true ]; then
-        # Validar MODERN_DESIGN
+        # Validate MODERN_DESIGN
         if [ -n "$MODERN_DESIGN" ]; then
             if [[ ! "$MODERN_DESIGN" =~ ^(true|false)$ ]]; then
-                print_error "Valor inválido para --modern-design: $MODERN_DESIGN (debe ser 'true' o 'false')"
+                print_error "Invalid value for --modern-design: $MODERN_DESIGN (must be 'true' or 'false')"
                 return 1
             fi
         fi
         
-        # Validar DEBUG_MODE
+        # Validate DEBUG_MODE
         if [ -n "$DEBUG_MODE" ]; then
             if [[ ! "$DEBUG_MODE" =~ ^(true|false)$ ]]; then
-                print_error "Valor inválido para --debug-mode: $DEBUG_MODE (debe ser 'true' o 'false')"
+                print_error "Invalid value for --debug-mode: $DEBUG_MODE (must be 'true' or 'false')"
                 return 1
             fi
         fi
         
-        # Validar DEBUG_TOKENS
+        # Validate DEBUG_TOKENS
         if [ -n "$DEBUG_TOKENS" ]; then
             if [[ ! "$DEBUG_TOKENS" =~ ^(true|false)$ ]]; then
-                print_error "Valor inválido para --debug-tokens: $DEBUG_TOKENS (debe ser 'true' o 'false')"
+                print_error "Invalid value for --debug-tokens: $DEBUG_TOKENS (must be 'true' or 'false')"
                 return 1
             fi
         fi
         
-        # Si se usó --all, verificar que todos los valores estén presentes
+        # If --all was used, verify all values are present
         if [ "$all_params" = true ]; then
             if [ -z "$MODERN_DESIGN" ] || [ -z "$DEBUG_MODE" ] || [ -z "$DEBUG_TOKENS" ]; then
-                print_error "Uso incorrecto de --all. Debe ser: --all <modern-design> <debug-mode> <debug-tokens>"
+                print_error "Incorrect usage of --all. Must be: --all <modern-design> <debug-mode> <debug-tokens>"
                 return 1
             fi
         fi
     fi
     
-    # Verificar si ya existe el archivo
+    # Check if file already exists
     if [ -f "$env_file" ]; then
         if [ "$use_params" = false ] && [ "$auto_mode" = false ]; then
-            print_info "Archivo .env.local ya existe"
-            read -p "¿Deseas actualizar la configuración? (s/N): " -n 1 -r
+            print_info ".env.local file already exists"
+            read -p "Do you want to update the configuration? (y/N): " -n 1 -r
             echo ""
-            if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
                 return 0
             fi
         elif [ "$auto_mode" = true ]; then
-            print_warning "Archivo .env.local ya existe. Se sobrescribirá con valores por defecto."
+            print_warning ".env.local file already exists. Will be overwritten with default values."
         else
-            print_warning "Archivo .env.local ya existe. Se sobrescribirá."
+            print_warning ".env.local file already exists. Will be overwritten."
         fi
     fi
     
-    # Si no se pasaron parámetros y no está en modo automático, preguntar interactivamente
+    # If no parameters were passed and not in automatic mode, ask interactively
     if [ "$use_params" = false ] && [ "$auto_mode" = false ]; then
-        print_header "Configuración de Variables de Entorno"
+        print_header "Environment Variables Configuration"
         
         # Modern Design
         echo ""
-        echo "¿Deseas activar el diseño moderno 2025? (glassmorphism, gradientes)"
-        read -p "(S/n): " -n 1 -r
+        echo "Do you want to enable modern design 2025? (glassmorphism, gradients)"
+        read -p "(Y/n): " -n 1 -r
         echo ""
         if [[ ! $REPLY =~ ^[Nn]$ ]]; then
             MODERN_DESIGN="true"
@@ -655,10 +655,10 @@ setup_environment_variables() {
         
         # Debug Mode
         echo ""
-        echo "¿Deseas activar el modo debug? (logs adicionales en consola)"
-        read -p "(s/N): " -n 1 -r
+        echo "Do you want to enable debug mode? (additional console logs)"
+        read -p "(y/N): " -n 1 -r
         echo ""
-        if [[ $REPLY =~ ^[Ss]$ ]]; then
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
             DEBUG_MODE="true"
         else
             DEBUG_MODE="false"
@@ -666,23 +666,23 @@ setup_environment_variables() {
         
         # Debug Tokens
         echo ""
-        echo "¿Deseas activar el debug de tokens? (información adicional de tokens)"
-        read -p "(s/N): " -n 1 -r
+        echo "Do you want to enable token debug? (additional token information)"
+        read -p "(y/N): " -n 1 -r
         echo ""
-        if [[ $REPLY =~ ^[Ss]$ ]]; then
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
             DEBUG_TOKENS="true"
         else
             DEBUG_TOKENS="false"
         fi
     else
-        # Usar valores por defecto si no se proporcionaron
-        # MODERN_DESIGN siempre es true por defecto (modo moderno activado)
+        # Use default values if not provided
+        # MODERN_DESIGN is always true by default (modern mode enabled)
         MODERN_DESIGN=${MODERN_DESIGN:-"true"}
         DEBUG_MODE=${DEBUG_MODE:-"false"}
         DEBUG_TOKENS=${DEBUG_TOKENS:-"false"}
     fi
     
-    # Crear archivo .env.local
+    # Create .env.local file
     cat > "$env_file" << EOF
 # Supply Chain Tracker - Environment Variables
 # Generated automatically by deploy.sh
@@ -701,66 +701,66 @@ NEXT_PUBLIC_DEBUG_MODE=$DEBUG_MODE
 NEXT_PUBLIC_DEBUG_TOKENS=$DEBUG_TOKENS
 EOF
     
-    print_success "Archivo .env.local creado/actualizado en: $env_file"
-    print_info "Valores configurados:"
+    print_success ".env.local file created/updated at: $env_file"
+    print_info "Configured values:"
     print_info "  - NEXT_PUBLIC_MODERN_DESIGN=$MODERN_DESIGN"
     print_info "  - NEXT_PUBLIC_DEBUG_MODE=$DEBUG_MODE"
     print_info "  - NEXT_PUBLIC_DEBUG_TOKENS=$DEBUG_TOKENS"
     
-    # Registrar en log
+    # Log to file
     ensure_logs_dir
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Variables de entorno configuradas: MODERN_DESIGN=$MODERN_DESIGN, DEBUG_MODE=$DEBUG_MODE, DEBUG_TOKENS=$DEBUG_TOKENS" >> "$LOGS_DIR/install.log" 2>&1
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Environment variables configured: MODERN_DESIGN=$MODERN_DESIGN, DEBUG_MODE=$DEBUG_MODE, DEBUG_TOKENS=$DEBUG_TOKENS" >> "$LOGS_DIR/install.log" 2>&1
     
     return 0
 }
 
 # ============================================================================
-# FUNCIÓN: VERIFICACIÓN COMPLETA PRE-START
+# FUNCTION: COMPLETE PRE-START VERIFICATION
 # ============================================================================
 
 pre_start_check() {
-    ensure_logs_dir  # Asegurar que logs/ existe para los logs de instalación
+    ensure_logs_dir  # Ensure logs/ exists for installation logs
     
-    print_header "Verificación Pre-Inicio"
+    print_header "Pre-Start Verification"
     
     local errors=0
     local warnings=0
     local auto_mode=false
     
-    # Verificar si está en modo automático
+    # Check if in automatic mode
     if [ "${AUTO_INSTALL:-false}" = "true" ]; then
         auto_mode=true
-        print_info "Modo automático activado: instalaciones sin confirmación"
-        print_info "Valores por defecto que se usarán:"
-        print_info "  - Herramientas del sistema: se instalarán automáticamente"
-        print_info "  - Dependencias del proyecto: se instalarán automáticamente"
-        print_info "  - Variables de entorno: MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false"
+        print_info "Automatic mode enabled: installations without confirmation"
+        print_info "Default values that will be used:"
+        print_info "  - System tools: will be installed automatically"
+        print_info "  - Project dependencies: will be installed automatically"
+        print_info "  - Environment variables: MODERN_DESIGN=true, DEBUG_MODE=false, DEBUG_TOKENS=false"
     fi
     
-    # 1. Verificar herramientas del sistema
-    print_step "Verificando herramientas del sistema..."
+    # 1. Check system tools
+    print_step "Checking system tools..."
     local missing_tools=$(check_system_tools)
     if [ $? -ne 0 ]; then
-        print_warning "Faltan herramientas: $missing_tools"
+        print_warning "Missing tools: $missing_tools"
         if install_system_tools $missing_tools; then
-            print_success "Herramientas instaladas correctamente"
+            print_success "Tools installed successfully"
         else
-            print_error "No se pudieron instalar las herramientas. Abortando."
+            print_error "Could not install tools. Aborting."
             errors=$((errors + 1))
         fi
     else
-        print_success "Todas las herramientas del sistema están instaladas"
+        print_success "All system tools are installed"
     fi
     
-    # 2. Verificar requisitos básicos
-    print_step "Verificando requisitos básicos..."
+    # 2. Check basic requirements
+    print_step "Checking basic requirements..."
     local os=$(detect_os)
     if ! command -v node >/dev/null 2>&1; then
-        print_error "Node.js no está instalado"
-        print_info "Instala Node.js v18+ desde: https://nodejs.org/"
+        print_error "Node.js is not installed"
+        print_info "Install Node.js v18+ from: https://nodejs.org/"
         if [ "$os" = "macos" ]; then
             print_info "  macOS: brew install node"
-            print_info "  O descarga desde: https://nodejs.org/"
+            print_info "  Or download from: https://nodejs.org/"
         else
             print_info "  Ubuntu/Debian: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs"
             print_info "  Fedora/RHEL: sudo dnf install -y nodejs npm"
@@ -770,81 +770,81 @@ pre_start_check() {
     else
         local node_version=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
         if [ "$node_version" -lt 18 ]; then
-            print_error "Node.js versión $node_version es muy antigua. Se requiere v18+"
+            print_error "Node.js version $node_version is too old. v18+ required"
             errors=$((errors + 1))
         else
-            print_success "Node.js $(node --version) instalado"
+            print_success "Node.js $(node --version) installed"
         fi
     fi
     
     if ! command -v npm >/dev/null 2>&1; then
-        print_error "npm no está instalado"
+        print_error "npm is not installed"
         errors=$((errors + 1))
     else
-        print_success "npm $(npm --version) instalado"
+        print_success "npm $(npm --version) installed"
     fi
     
     if ! command -v forge >/dev/null 2>&1; then
-        print_error "Foundry (forge) no está instalado"
+        print_error "Foundry (forge) is not installed"
         if [ "$os" = "macos" ]; then
-            print_info "Instala Foundry con:"
+            print_info "Install Foundry with:"
             print_info "  curl -L https://foundry.paradigm.xyz | bash"
             print_info "  foundryup"
-            print_info "O usando Homebrew: brew install foundry"
+            print_info "Or using Homebrew: brew install foundry"
         else
-            print_info "Instala Foundry con: curl -L https://foundry.paradigm.xyz | bash && foundryup"
+            print_info "Install Foundry with: curl -L https://foundry.paradigm.xyz | bash && foundryup"
         fi
         errors=$((errors + 1))
     else
-        print_success "Foundry instalado"
+        print_success "Foundry installed"
     fi
     
     if ! command -v anvil >/dev/null 2>&1; then
-        print_error "Foundry (anvil) no está instalado"
+        print_error "Foundry (anvil) is not installed"
         if [ "$os" = "macos" ]; then
-            print_info "Ejecuta: foundryup"
-            print_info "O usando Homebrew: brew install foundry"
+            print_info "Run: foundryup"
+            print_info "Or using Homebrew: brew install foundry"
         else
-            print_info "Ejecuta: foundryup"
+            print_info "Run: foundryup"
         fi
         errors=$((errors + 1))
     else
-        print_success "Anvil instalado"
+        print_success "Anvil installed"
     fi
     
-    # Si hay errores críticos, abortar
+    # If there are critical errors, abort
     if [ $errors -gt 0 ]; then
-        print_error "❌ Se encontraron $errors error(es) crítico(s). Abortando."
-        print_info "Corrige los errores antes de continuar."
+        print_error "❌ Found $errors critical error(s). Aborting."
+        print_info "Fix the errors before continuing."
         return 1
     fi
     
-    # 3. Verificar dependencias del proyecto
-    print_step "Verificando dependencias del proyecto..."
-    # Verificar dependencias directamente (más confiable que usar función con $())
+    # 3. Check project dependencies
+    print_step "Checking project dependencies..."
+    # Check dependencies directly (more reliable than using function with $())
     local missing_deps=()
     
-    # Verificar dependencias del frontend
+    # Check frontend dependencies
     if [ ! -d "$WEB_DIR/node_modules" ]; then
         missing_deps+=("frontend")
     fi
     
-    # Verificar dependencias del smart contract
+    # Check smart contract dependencies
     if [ ! -d "$SC_DIR/lib" ] || [ ! -d "$SC_DIR/lib/forge-std" ]; then
         missing_deps+=("smart-contract")
     fi
     
-    # Si hay dependencias faltantes, procesarlas
+    # If there are missing dependencies, process them
     if [ ${#missing_deps[@]} -ne 0 ]; then
         local missing_deps_str="${missing_deps[*]}"
-        print_warning "Faltan dependencias: $missing_deps_str"
+        print_warning "Missing dependencies: $missing_deps_str"
         
         if [ "$auto_mode" = false ]; then
             echo ""
-            read -p "¿Deseas instalar las dependencias faltantes ahora? (S/n): " -n 1 -r
+            read -p "Do you want to install missing dependencies now? (Y/n): " -n 1 -r
             echo ""
             if [[ $REPLY =~ ^[Nn]$ ]]; then
-                print_warning "Instalación cancelada. Debes instalar manualmente:"
+                print_warning "Installation cancelled. You must install manually:"
                 for dep in $missing_deps; do
                     case "$dep" in
                         frontend)
@@ -858,157 +858,157 @@ pre_start_check() {
                 errors=$((errors + 1))
             else
                 if ! install_project_dependencies $missing_deps; then
-                    print_error "Error al instalar dependencias. Abortando."
+                    print_error "Error installing dependencies. Aborting."
                     errors=$((errors + 1))
                 fi
             fi
         else
-            # Modo automático: instalar sin preguntar
-            print_info "Modo automático: instalando dependencias sin confirmación..."
+            # Automatic mode: install without asking
+            print_info "Automatic mode: installing dependencies without confirmation..."
             if ! install_project_dependencies $missing_deps; then
-                print_error "Error al instalar dependencias. Abortando."
+                print_error "Error installing dependencies. Aborting."
                 errors=$((errors + 1))
             fi
         fi
     else
-        print_success "Todas las dependencias del proyecto están instaladas"
+        print_success "All project dependencies are installed"
     fi
     
-    # Si hay errores después de intentar instalar, abortar
+    # If there are errors after trying to install, abort
     if [ $errors -gt 0 ]; then
-        print_error "❌ Se encontraron $errors error(es). Abortando."
+        print_error "❌ Found $errors error(s). Aborting."
         return 1
     fi
     
-    # 4. Configurar variables de entorno (opcional, no crítico)
+    # 4. Configure environment variables (optional, not critical)
     if [ ! -f "$WEB_DIR/.env.local" ]; then
-        print_step "Configuración de variables de entorno..."
+        print_step "Environment variables configuration..."
         if [ "$auto_mode" = false ]; then
             echo ""
-            read -p "¿Deseas configurar las variables de entorno ahora? (S/n): " -n 1 -r
+            read -p "Do you want to configure environment variables now? (Y/n): " -n 1 -r
             echo ""
             if [[ ! $REPLY =~ ^[Nn]$ ]]; then
                 setup_environment_variables
             else
-                print_info "Puedes configurarlas después con: ./deploy.sh env"
+                print_info "You can configure them later with: ./deploy.sh env"
             fi
         else
-            # Modo automático: configurar con valores por defecto
-            print_info "Modo automático: configurando variables de entorno con valores por defecto..."
+            # Automatic mode: configure with default values
+            print_info "Automatic mode: configuring environment variables with default values..."
             setup_environment_variables
         fi
     else
-        print_success "Archivo .env.local encontrado"
+        print_success ".env.local file found"
     fi
     
-    # Resumen
+    # Summary
     echo ""
     if [ $errors -eq 0 ]; then
         if [ $warnings -eq 0 ]; then
-            print_success "✅ Todas las verificaciones pasaron correctamente"
+            print_success "✅ All verifications passed successfully"
         else
-            print_warning "⚠️  Verificación completada con $warnings advertencia(s)"
+            print_warning "⚠️  Verification completed with $warnings warning(s)"
         fi
         return 0
     else
-        print_error "❌ Se encontraron $errors error(es). Abortando."
+        print_error "❌ Found $errors error(s). Aborting."
         return 1
     fi
 }
 
-# Función para verificar si un puerto está en uso
+# Function to check if a port is in use
 check_port() {
     local port=$1
     local os=$(detect_os)
     
-    # Verificar tanto IPv4 como IPv6 usando múltiples métodos
-    # Método 1: lsof (funciona en Linux y macOS)
+    # Check both IPv4 and IPv6 using multiple methods
+    # Method 1: lsof (works on Linux and macOS)
     if lsof -i :$port -t >/dev/null 2>&1; then
-        return 0  # Puerto en uso
+        return 0  # Port in use
     fi
     
-    # Método 2: netstat (funciona en Linux y macOS, pero con sintaxis diferente)
+    # Method 2: netstat (works on Linux and macOS, but with different syntax)
     if [ "$os" = "macos" ]; then
-        # macOS: netstat no tiene -p, usar -an
+        # macOS: netstat doesn't have -p, use -an
         if netstat -an 2>/dev/null | grep -q "\.$port " || netstat -an 2>/dev/null | grep -q ":$port "; then
-            return 0  # Puerto en uso
+            return 0  # Port in use
         fi
     else
-        # Linux: netstat con -p
+        # Linux: netstat with -p
         if netstat -tlnp 2>/dev/null | grep -q ":$port "; then
-            return 0  # Puerto en uso
+            return 0  # Port in use
         fi
-        # Método 3: ss (solo en Linux, alternativa moderna)
+        # Method 3: ss (only on Linux, modern alternative)
         if ss -tlnp 2>/dev/null | grep -q ":$port "; then
-            return 0  # Puerto en uso
+            return 0  # Port in use
         fi
     fi
     
-    return 1  # Puerto libre
+    return 1  # Port free
 }
 
-# Función para obtener PID de un proceso en un puerto
+# Function to get PID of a process on a port
 get_pid_by_port() {
     local port=$1
-    # Obtener PID tanto de IPv4 como IPv6
+    # Get PID for both IPv4 and IPv6
     lsof -ti :$port 2>/dev/null | head -n 1 || echo ""
 }
 
-# Función para esperar a que un puerto esté en uso (servicio iniciado)
+# Function to wait for a port to be in use (service started)
 wait_for_port() {
     local port=$1
     local timeout=${2:-30}
     local elapsed=0
     
-    print_step "Esperando a que el puerto $port esté en uso (servicio iniciado)..."
+    print_step "Waiting for port $port to be in use (service started)..."
     
     while [ $elapsed -lt $timeout ]; do
         if check_port $port; then
-            print_success "Puerto $port está en uso (servicio iniciado)"
+            print_success "Port $port is in use (service started)"
             return 0
         fi
         sleep 1
         elapsed=$((elapsed + 1))
     done
     
-    print_error "Timeout esperando al puerto $port (servicio no inició)"
+    print_error "Timeout waiting for port $port (service did not start)"
     return 1
 }
 
 # ============================================================================
-# FUNCIÓN: INICIAR ANVIL
+# FUNCTION: START ANVIL
 # ============================================================================
 
 start_anvil() {
-    print_header "PASO 1: Iniciar Anvil (Blockchain Local)"
+    print_header "STEP 1: Start Anvil (Local Blockchain)"
     
-    # Verificar si Anvil ya está corriendo
+    # Check if Anvil is already running
     local existing_anvil_pid=$(pgrep -f "anvil.*--port $ANVIL_PORT" | head -n 1)
     if [ -n "$existing_anvil_pid" ]; then
-        print_warning "Anvil ya está corriendo en puerto $ANVIL_PORT (PID: $existing_anvil_pid)"
+        print_warning "Anvil is already running on port $ANVIL_PORT (PID: $existing_anvil_pid)"
         echo "$existing_anvil_pid" > "$ANVIL_PID_FILE"
         return 0
     fi
     
-    print_step "Iniciando Anvil en $ANVIL_HOST:$ANVIL_PORT con Chain ID $ANVIL_CHAIN_ID..."
+    print_step "Starting Anvil on $ANVIL_HOST:$ANVIL_PORT with Chain ID $ANVIL_CHAIN_ID..."
     
-    # Verificar y mostrar estado de persistencia
+    # Check and show persistence state
     local state_exists=false
     local state_size=""
     if [ -f "$ANVIL_STATE_FILE" ]; then
         state_exists=true
         state_size=$(du -h "$ANVIL_STATE_FILE" 2>/dev/null | cut -f1)
-        print_success "✅ Estado persistente encontrado: $ANVIL_STATE_FILE"
-        print_info "   📊 Tamaño: $state_size"
-        print_info "   🔄 Anvil restaurará el estado anterior (tokens, transferencias, usuarios)"
+        print_success "✅ Persistent state found: $ANVIL_STATE_FILE"
+        print_info "   📊 Size: $state_size"
+        print_info "   🔄 Anvil will restore previous state (tokens, transfers, users)"
     else
-        print_info "ℹ️  Iniciando con blockchain limpia (sin estado previo)"
-        print_info "   📝 El estado se guardará en: $ANVIL_STATE_FILE"
+        print_info "ℹ️  Starting with clean blockchain (no previous state)"
+        print_info "   📝 State will be saved to: $ANVIL_STATE_FILE"
     fi
     
-    # Iniciar Anvil en background con nohup y persistencia de estado
+    # Start Anvil in background with nohup and state persistence
     cd "$SC_DIR"
-    print_step "Iniciando Anvil con persistencia de estado habilitada..."
+    print_step "Starting Anvil with state persistence enabled..."
     nohup anvil \
         --host "$ANVIL_HOST" \
         --port "$ANVIL_PORT" \
@@ -1020,86 +1020,86 @@ start_anvil() {
     local anvil_pid=$!
     echo "$anvil_pid" > "$ANVIL_PID_FILE"
     
-    print_info "Anvil iniciado con PID: $anvil_pid"
+    print_info "Anvil started with PID: $anvil_pid"
     print_info "Logs: $ANVIL_LOG_FILE"
     
-    # Esperar a que Anvil esté listo
+    # Wait for Anvil to be ready
     if wait_for_port $ANVIL_PORT 10; then
-        # Validar que Anvil está corriendo con persistencia
+        # Validate that Anvil is running with persistence
         sleep 1
         if pgrep -f "anvil.*--state.*$ANVIL_STATE_FILE" > /dev/null; then
-            print_success "Anvil iniciado correctamente"
-            print_success "✅ Persistencia de estado: HABILITADA"
-            print_info "   📁 Archivo de estado: $ANVIL_STATE_FILE"
+            print_success "Anvil started successfully"
+            print_success "✅ State persistence: ENABLED"
+            print_info "   📁 State file: $ANVIL_STATE_FILE"
             if [ "$state_exists" = true ]; then
-                print_info "   ✅ Estado anterior restaurado ($state_size)"
+                print_info "   ✅ Previous state restored ($state_size)"
             else
-                print_info "   📝 Nuevo estado se guardará automáticamente"
+                print_info "   📝 New state will be saved automatically"
             fi
         else
-            print_warning "Anvil iniciado, pero no se pudo verificar el flag --state"
-            print_info "Verifica manualmente: ps aux | grep anvil | grep --state"
+            print_warning "Anvil started, but could not verify --state flag"
+            print_info "Verify manually: ps aux | grep anvil | grep --state"
         fi
         
-        # Mostrar cuentas disponibles
-        print_info "Cuenta deployer: $DEPLOYER_ADDRESS"
-        print_info "Balance inicial: 10,000 ETH"
+        # Show available accounts
+        print_info "Deployer account: $DEPLOYER_ADDRESS"
+        print_info "Initial balance: 10,000 ETH"
         
         return 0
     else
-        print_error "Anvil no pudo iniciar correctamente"
+        print_error "Anvil could not start correctly"
         return 1
     fi
 }
 
 # ============================================================================
-# FUNCIÓN: DESPLEGAR SMART CONTRACT
+# FUNCTION: DEPLOY SMART CONTRACT
 # ============================================================================
 
 deploy_contract() {
-    print_header "PASO 2: Desplegar Smart Contract"
+    print_header "STEP 2: Deploy Smart Contract"
     
     if ! check_port $ANVIL_PORT; then
-        print_error "Anvil no está corriendo. Inicia Anvil primero."
+        print_error "Anvil is not running. Start Anvil first."
         return 1
     fi
     
-    # Verificar si ya hay un contrato desplegado y Anvil sigue corriendo
+    # Check if contract is already deployed and Anvil is still running
     local contract_address_file="$LOGS_DIR/contract_address.txt"
     if [ -f "$contract_address_file" ]; then
         local existing_contract=$(cat "$contract_address_file")
         if [ -n "$existing_contract" ]; then
-            # Verificar si el contrato sigue accesible (Anvil no se reinició)
+            # Check if contract is still accessible (Anvil didn't restart)
             local rpc_check=$(curl -s -X POST \
                 -H "Content-Type: application/json" \
                 --data '{"jsonrpc":"2.0","method":"eth_getCode","params":["'$existing_contract'","latest"],"id":1}' \
                 "http://$ANVIL_HOST:$ANVIL_PORT" 2>/dev/null)
             
-            # Si el contrato tiene código (no es "0x"), está desplegado
+            # If contract has code (not "0x"), it's deployed
             if echo "$rpc_check" | grep -q '"result":"0x[0-9a-f]\{10,\}"'; then
-                print_warning "Contrato ya desplegado en: $existing_contract"
-                print_info "Anvil no se reinició, usando contrato existente"
-                print_info "Para redesplegar, ejecuta: ./deploy.sh restart"
+                print_warning "Contract already deployed at: $existing_contract"
+                print_info "Anvil did not restart, using existing contract"
+                print_info "To redeploy, run: ./deploy.sh restart"
                 return 0
             else
-                print_warning "Contrato anterior no encontrado (Anvil reiniciado)"
-                print_info "Desplegando nuevo contrato..."
+                print_warning "Previous contract not found (Anvil restarted)"
+                print_info "Deploying new contract..."
             fi
         fi
     fi
     
-    # Asegurar que el contrato esté compilado antes de desplegar (para tener ABI actualizado)
-    print_step "Compilando contrato para asegurar ABI actualizado..."
+    # Ensure contract is compiled before deploying (to have updated ABI)
+    print_step "Compiling contract to ensure updated ABI..."
     cd "$SC_DIR"
     if ! forge build --force > /dev/null 2>&1; then
-        print_error "Error al compilar el contrato"
+        print_error "Error compiling contract"
         return 1
     fi
-    print_success "Contrato compilado correctamente"
+    print_success "Contract compiled successfully"
     
-    print_step "Desplegando SupplyChain.sol en Anvil..."
+    print_step "Deploying SupplyChain.sol to Anvil..."
     
-    # Ejecutar script de deployment
+    # Execute deployment script
     local deploy_output=$(PRIVATE_KEY=$DEPLOYER_PRIVATE_KEY forge script \
         script/SupplyChainDeploy.s.sol:SupplyChainDeployScript \
         --rpc-url "http://$ANVIL_HOST:$ANVIL_PORT" \
@@ -1108,136 +1108,136 @@ deploy_contract() {
     
     echo "$deploy_output" > "$DEPLOY_LOG_FILE"
     
-    # Extraer dirección del contrato del output
+    # Extract contract address from output
     local contract_address=$(echo "$deploy_output" | grep -oP 'Contract Address: \K0x[a-fA-F0-9]{40}' | head -1)
     
     if [ -z "$contract_address" ]; then
-        # Intentar extraer de otra forma
+        # Try to extract in another way
         contract_address=$(echo "$deploy_output" | grep -oP 'deployed at: \K0x[a-fA-F0-9]{40}' | head -1)
     fi
     
     if [ -z "$contract_address" ]; then
-        print_error "No se pudo obtener la dirección del contrato"
-        print_info "Ver logs en: $DEPLOY_LOG_FILE"
+        print_error "Could not get contract address"
+        print_info "Check logs at: $DEPLOY_LOG_FILE"
         return 1
     fi
     
-    print_success "Contrato desplegado exitosamente"
-    print_info "Dirección: $contract_address"
+    print_success "Contract deployed successfully"
+    print_info "Address: $contract_address"
     print_info "Owner: $DEPLOYER_ADDRESS"
     print_info "Logs: $DEPLOY_LOG_FILE"
     
-    # Guardar dirección para el siguiente paso
+    # Save address for next step
     echo "$contract_address" > "$LOGS_DIR/contract_address.txt"
     
     return 0
 }
 
 # ============================================================================
-# FUNCIÓN: ACTUALIZAR CONFIGURACIÓN DEL FRONTEND
+# FUNCTION: UPDATE FRONTEND CONFIGURATION
 # ============================================================================
 
 update_frontend_config() {
-    print_header "PASO 3: Actualizar Configuración del Frontend"
+    print_header "STEP 3: Update Frontend Configuration"
     
     local contract_address_file="$LOGS_DIR/contract_address.txt"
     
     if [ ! -f "$contract_address_file" ]; then
-        print_error "Archivo de dirección del contrato no encontrado"
+        print_error "Contract address file not found"
         return 1
     fi
     
     local contract_address=$(cat "$contract_address_file")
     
     if [ -z "$contract_address" ]; then
-        print_error "Dirección del contrato vacía"
+        print_error "Contract address is empty"
         return 1
     fi
     
     # ============================================================
-    # 3.1: Actualizar ABI del contrato
+    # 3.1: Update contract ABI
     # ============================================================
-    print_step "Actualizando ABI del contrato..."
+    print_step "Updating contract ABI..."
     
     if [ ! -f "$ABI_SOURCE" ]; then
-        print_error "ABI fuente no encontrado: $ABI_SOURCE"
-        print_info "Asegúrate de que el contrato esté compilado (forge build)"
+        print_error "Source ABI not found: $ABI_SOURCE"
+        print_info "Make sure the contract is compiled (forge build)"
         return 1
     fi
     
-    # Hacer backup del ABI existente
+    # Make backup of existing ABI
     if [ -f "$ABI_FILE" ]; then
         cp "$ABI_FILE" "$ABI_FILE.backup"
-        print_info "Backup del ABI creado: $ABI_FILE.backup"
+        print_info "ABI backup created: $ABI_FILE.backup"
     fi
     
-    # Copiar ABI actualizado
+    # Copy updated ABI
     cp "$ABI_SOURCE" "$ABI_FILE"
     
     if [ -f "$ABI_FILE" ]; then
-        print_success "ABI actualizado correctamente"
-        print_info "ABI copiado desde: $ABI_SOURCE"
+        print_success "ABI updated successfully"
+        print_info "ABI copied from: $ABI_SOURCE"
     else
-        print_error "No se pudo copiar el ABI"
+        print_error "Could not copy ABI"
         return 1
     fi
     
     # ============================================================
-    # 3.2: Actualizar dirección del contrato
+    # 3.2: Update contract address
     # ============================================================
-    print_step "Actualizando $CONFIG_FILE con dirección: $contract_address"
+    print_step "Updating $CONFIG_FILE with address: $contract_address"
     
-    # Verificar que el archivo existe
+    # Verify file exists
     if [ ! -f "$CONFIG_FILE" ]; then
-        print_error "Archivo de configuración no encontrado: $CONFIG_FILE"
+        print_error "Configuration file not found: $CONFIG_FILE"
         return 1
     fi
     
-    # Hacer backup del archivo original
+    # Make backup of original file
     cp "$CONFIG_FILE" "$CONFIG_FILE.backup"
-    print_info "Backup creado: $CONFIG_FILE.backup"
+    print_info "Backup created: $CONFIG_FILE.backup"
     
-    # Actualizar dirección usando sed (compatible con Linux y macOS)
+    # Update address using sed (compatible with Linux and macOS)
     local os=$(detect_os)
     if [ "$os" = "macos" ]; then
-        # macOS requiere una cadena vacía después de -i
+        # macOS requires empty string after -i
         sed -i '' "s/export const SUPPLY_CHAIN_ADDRESS = '0x[a-fA-F0-9]\{40\}'/export const SUPPLY_CHAIN_ADDRESS = '$contract_address'/" "$CONFIG_FILE"
     else
         # Linux
         sed -i "s/export const SUPPLY_CHAIN_ADDRESS = '0x[a-fA-F0-9]\{40\}'/export const SUPPLY_CHAIN_ADDRESS = '$contract_address'/" "$CONFIG_FILE"
     fi
     
-    # Verificar que se actualizó correctamente
+    # Verify it was updated correctly
     if grep -q "$contract_address" "$CONFIG_FILE"; then
-        print_success "Configuración actualizada correctamente"
-        print_info "Nueva dirección: $contract_address"
-        print_info "ABI actualizado desde la última compilación"
+        print_success "Configuration updated successfully"
+        print_info "New address: $contract_address"
+        print_info "ABI updated from latest compilation"
         return 0
     else
-        print_error "No se pudo actualizar la configuración"
-        # Restaurar backups
+        print_error "Could not update configuration"
+        # Restore backups
         if [ -f "$CONFIG_FILE.backup" ]; then
         mv "$CONFIG_FILE.backup" "$CONFIG_FILE"
         fi
         if [ -f "$ABI_FILE.backup" ]; then
             mv "$ABI_FILE.backup" "$ABI_FILE"
         fi
-        print_info "Configuración restaurada desde backups"
+        print_info "Configuration restored from backups"
         return 1
     fi
 }
 
 # ============================================================================
-# FUNCIÓN: INICIAR FRONTEND
+# FUNCTION: START FRONTEND
 # ============================================================================
 
 start_frontend() {
-    print_header "PASO 4: Iniciar Frontend (Next.js)"
+    print_header "STEP 4: Start Frontend (Next.js)"
     
-    # Verificar si frontend ya está corriendo (buscar por puerto primero, luego por proceso)
+    # Check if frontend is already running (search by port first, then by process)
     local existing_frontend_pid=$(get_pid_by_port $FRONTEND_PORT)
     if [ -z "$existing_frontend_pid" ]; then
-        # Si no hay proceso en el puerto, buscar por nombre
+        # If no process on port, search by name
         existing_frontend_pid=$(pgrep -f "next-server" 2>/dev/null | head -n 1)
     fi
     if [ -z "$existing_frontend_pid" ]; then
@@ -1245,48 +1245,48 @@ start_frontend() {
     fi
     
     if [ -n "$existing_frontend_pid" ] && kill -0 "$existing_frontend_pid" 2>/dev/null; then
-        print_warning "Frontend ya está corriendo en puerto $FRONTEND_PORT (PID: $existing_frontend_pid)"
+        print_warning "Frontend is already running on port $FRONTEND_PORT (PID: $existing_frontend_pid)"
         echo "$existing_frontend_pid" > "$FRONTEND_PID_FILE"
         return 0
     fi
     
-    print_step "Iniciando servidor Next.js en puerto $FRONTEND_PORT..."
+    print_step "Starting Next.js server on port $FRONTEND_PORT..."
     
     cd "$WEB_DIR"
     
-    # Iniciar Next.js en background con nohup
+    # Start Next.js in background with nohup
     nohup npm run dev > "$FRONTEND_LOG_FILE" 2>&1 &
     
     local frontend_pid=$!
     echo "$frontend_pid" > "$FRONTEND_PID_FILE"
     
-    print_info "Frontend iniciado con PID: $frontend_pid"
+    print_info "Frontend started with PID: $frontend_pid"
     print_info "Logs: $FRONTEND_LOG_FILE"
     
-    # Esperar a que el frontend esté listo
+    # Wait for frontend to be ready
     if wait_for_port $FRONTEND_PORT 30; then
-        print_success "Frontend iniciado correctamente"
+        print_success "Frontend started successfully"
         print_info "URL: http://localhost:$FRONTEND_PORT"
         return 0
     else
-        print_error "Frontend no pudo iniciar correctamente"
+        print_error "Frontend could not start correctly"
         return 1
     fi
 }
 
 # ============================================================================
-# FUNCIÓN: DETENER SERVICIOS
+# FUNCTION: STOP SERVICES
 # ============================================================================
 
 stop_services() {
-    print_header "Deteniendo Servicios"
+    print_header "Stopping Services"
     
     local stopped_count=0
     
-    # Detener Frontend - Buscar todos los procesos relacionados
+    # Stop Frontend - Find all related processes
     local frontend_pids=""
     
-    # Buscar por PID file
+    # Search by PID file
     if [ -f "$FRONTEND_PID_FILE" ]; then
         local file_pid=$(cat "$FRONTEND_PID_FILE")
         if kill -0 "$file_pid" 2>/dev/null; then
@@ -1295,13 +1295,13 @@ stop_services() {
         rm -f "$FRONTEND_PID_FILE"
     fi
     
-    # Buscar por puerto
+    # Search by port
     local port_pid=$(get_pid_by_port $FRONTEND_PORT)
     if [ -n "$port_pid" ]; then
         frontend_pids="$frontend_pids $port_pid"
     fi
     
-    # Buscar por nombre de proceso
+    # Search by process name
     local process_pids=$(pgrep -f "next-server" 2>/dev/null || true)
     if [ -n "$process_pids" ]; then
         frontend_pids="$frontend_pids $process_pids"
@@ -1312,11 +1312,11 @@ stop_services() {
         frontend_pids="$frontend_pids $npm_pids"
     fi
     
-    # Eliminar duplicados y espacios
+    # Remove duplicates and spaces
     frontend_pids=$(echo $frontend_pids | tr ' ' '\n' | sort -u | tr '\n' ' ')
     
     if [ -n "$frontend_pids" ]; then
-        print_step "Deteniendo Frontend (PIDs: $frontend_pids)..."
+        print_step "Stopping Frontend (PIDs: $frontend_pids)..."
         for pid in $frontend_pids; do
             if kill -0 "$pid" 2>/dev/null; then
                 kill "$pid" 2>/dev/null || true
@@ -1324,23 +1324,23 @@ stop_services() {
         done
             sleep 2
             
-        # Forzar si siguen corriendo
+        # Force if still running
         for pid in $frontend_pids; do
             if kill -0 "$pid" 2>/dev/null; then
                 kill -9 "$pid" 2>/dev/null || true
             fi
         done
             
-            print_success "Frontend detenido"
+            print_success "Frontend stopped"
             stopped_count=$((stopped_count + 1))
     else
-        print_info "Frontend no está corriendo"
+        print_info "Frontend is not running"
     fi
     
-    # Detener Anvil - Buscar todos los procesos relacionados
+    # Stop Anvil - Find all related processes
     local anvil_pids=""
     
-    # Buscar por PID file
+    # Search by PID file
     if [ -f "$ANVIL_PID_FILE" ]; then
         local file_pid=$(cat "$ANVIL_PID_FILE")
         if kill -0 "$file_pid" 2>/dev/null; then
@@ -1349,23 +1349,23 @@ stop_services() {
         rm -f "$ANVIL_PID_FILE"
     fi
     
-    # Buscar por puerto
+    # Search by port
     local port_pid=$(get_pid_by_port $ANVIL_PORT)
     if [ -n "$port_pid" ]; then
         anvil_pids="$anvil_pids $port_pid"
     fi
     
-    # Buscar por nombre de proceso
+    # Search by process name
     local process_pids=$(pgrep -f "anvil.*--port $ANVIL_PORT" 2>/dev/null || true)
     if [ -n "$process_pids" ]; then
         anvil_pids="$anvil_pids $process_pids"
     fi
     
-    # Eliminar duplicados y espacios
+    # Remove duplicates and spaces
     anvil_pids=$(echo $anvil_pids | tr ' ' '\n' | sort -u | tr '\n' ' ')
     
     if [ -n "$anvil_pids" ]; then
-        print_step "Deteniendo Anvil (PIDs: $anvil_pids)..."
+        print_step "Stopping Anvil (PIDs: $anvil_pids)..."
         for pid in $anvil_pids; do
             if kill -0 "$pid" 2>/dev/null; then
                 kill "$pid" 2>/dev/null || true
@@ -1373,71 +1373,71 @@ stop_services() {
         done
             sleep 2
             
-        # Forzar si siguen corriendo
+        # Force if still running
         for pid in $anvil_pids; do
             if kill -0 "$pid" 2>/dev/null; then
                 kill -9 "$pid" 2>/dev/null || true
             fi
         done
             
-            print_success "Anvil detenido"
+            print_success "Anvil stopped"
             stopped_count=$((stopped_count + 1))
     else
-        print_info "Anvil no está corriendo"
+        print_info "Anvil is not running"
     fi
     
     if [ $stopped_count -eq 0 ]; then
-        print_warning "No hay servicios corriendo"
+        print_warning "No services are running"
     else
-        print_success "Se detuvieron $stopped_count servicio(s)"
+        print_success "Stopped $stopped_count service(s)"
     fi
 }
 
 # ============================================================================
-# FUNCIÓN: MOSTRAR ESTADO
+# FUNCTION: SHOW STATUS
 # ============================================================================
 
 show_status() {
-    print_header "Estado de Servicios"
+    print_header "Service Status"
     
-    # Estado de Anvil
-    echo -e "${CYAN}Anvil (Blockchain Local):${NC}"
+    # Anvil status
+    echo -e "${CYAN}Anvil (Local Blockchain):${NC}"
     local anvil_pid=$(pgrep -f "anvil.*--port $ANVIL_PORT" | head -n 1)
     if [ -n "$anvil_pid" ]; then
-        print_success "CORRIENDO (PID: $anvil_pid, Puerto: $ANVIL_PORT)"
+        print_success "RUNNING (PID: $anvil_pid, Port: $ANVIL_PORT)"
         print_info "RPC URL: http://$ANVIL_HOST:$ANVIL_PORT"
         print_info "Chain ID: $ANVIL_CHAIN_ID"
     else
-        print_error "DETENIDO"
+        print_error "STOPPED"
     fi
     
     echo ""
     
-    # Estado del Frontend
+    # Frontend status
     echo -e "${CYAN}Frontend (Next.js):${NC}"
     local frontend_pid=$(pgrep -f "next-server" 2>/dev/null || pgrep -f "npm.*run dev" 2>/dev/null | head -n 1)
     if [ -n "$frontend_pid" ]; then
-        print_success "CORRIENDO (PID: $frontend_pid, Puerto: $FRONTEND_PORT)"
+        print_success "RUNNING (PID: $frontend_pid, Port: $FRONTEND_PORT)"
         print_info "URL: http://localhost:$FRONTEND_PORT"
     else
-        print_error "DETENIDO"
+        print_error "STOPPED"
     fi
     
     echo ""
     
-    # Información del contrato
+    # Contract information
     echo -e "${CYAN}Smart Contract:${NC}"
     if [ -f "$LOGS_DIR/contract_address.txt" ]; then
         local contract_address=$(cat "$LOGS_DIR/contract_address.txt")
-        print_info "Dirección: $contract_address"
+        print_info "Address: $contract_address"
         print_info "Owner: $DEPLOYER_ADDRESS"
     else
-        print_warning "No desplegado"
+        print_warning "Not deployed"
     fi
     
     echo ""
     
-    # Archivos de log
+    # Log files
     echo -e "${CYAN}Logs:${NC}"
     if [ -f "$ANVIL_LOG_FILE" ]; then
         print_info "Anvil: $ANVIL_LOG_FILE"
@@ -1451,107 +1451,107 @@ show_status() {
 }
 
 # ============================================================================
-# FUNCIÓN: MOSTRAR INSTRUCCIONES DE METAMASK
+# FUNCTION: SHOW METAMASK INSTRUCTIONS
 # ============================================================================
 
 show_metamask_instructions() {
-    print_header "Configuración de MetaMask"
+    print_header "MetaMask Configuration"
     
-    echo -e "${YELLOW}📝 INSTRUCCIONES PARA CONFIGURAR METAMASK${NC}\n"
+    echo -e "${YELLOW}📝 METAMASK CONFIGURATION INSTRUCTIONS${NC}\n"
     
-    echo -e "${CYAN}1. Agregar Red Anvil Local:${NC}"
-    echo "   • Abrir MetaMask → Selector de red (arriba izquierda)"
-    echo "   • Clic en 'Add network' → 'Add a network manually'"
-    echo "   • Completar los siguientes datos:"
+    echo -e "${CYAN}1. Add Anvil Local Network:${NC}"
+    echo "   • Open MetaMask → Network selector (top left)"
+    echo "   • Click 'Add network' → 'Add a network manually'"
+    echo "   • Fill in the following data:"
     echo ""
     echo -e "     ${GREEN}Network Name:${NC}     Anvil Local"
     echo -e "     ${GREEN}RPC URL:${NC}          http://$ANVIL_HOST:$ANVIL_PORT"
     echo -e "     ${GREEN}Chain ID:${NC}         $ANVIL_CHAIN_ID"
     echo -e "     ${GREEN}Currency Symbol:${NC}  ETH"
     echo ""
-    echo "   • Clic en 'Save'"
+    echo "   • Click 'Save'"
     echo ""
     
-    echo -e "${CYAN}2. Importar Cuenta de Anvil (Owner):${NC}"
-    echo "   • Abrir MetaMask → Icono de cuenta (arriba derecha)"
-    echo "   • Clic en 'Import Account'"
-    echo "   • Seleccionar 'Private Key'"
-    echo "   • Pegar el siguiente private key:"
+    echo -e "${CYAN}2. Import Anvil Account (Owner):${NC}"
+    echo "   • Open MetaMask → Account icon (top right)"
+    echo "   • Click 'Import Account'"
+    echo "   • Select 'Private Key'"
+    echo "   • Paste the following private key:"
     echo ""
     echo -e "     ${GREEN}$DEPLOYER_PRIVATE_KEY${NC}"
     echo ""
-    echo "   • Clic en 'Import'"
+    echo "   • Click 'Import'"
     echo ""
-    echo -e "   ${YELLOW}⚠ IMPORTANTE:${NC} Este private key es SOLO para desarrollo local."
-    echo "   NUNCA usar en mainnet o con fondos reales."
-    echo ""
-    
-    echo -e "${CYAN}3. Verificar Configuración:${NC}"
-    echo "   • La cuenta importada debe tener dirección: $DEPLOYER_ADDRESS"
-    echo "   • El balance debe ser ~10,000 ETH"
-    echo "   • La red debe estar en 'Anvil Local'"
+    echo -e "   ${YELLOW}⚠ IMPORTANT:${NC} This private key is ONLY for local development."
+    echo "   NEVER use on mainnet or with real funds."
     echo ""
     
-    echo -e "${CYAN}4. Conectar a la DApp:${NC}"
-    echo "   • Abrir http://localhost:$FRONTEND_PORT"
-    echo "   • Clic en 'Conectar MetaMask'"
-    echo "   • Autorizar la conexión en MetaMask"
-    echo "   • ¡Listo! Deberías ver tu dirección y las estadísticas del contrato"
+    echo -e "${CYAN}3. Verify Configuration:${NC}"
+    echo "   • The imported account should have address: $DEPLOYER_ADDRESS"
+    echo "   • Balance should be ~10,000 ETH"
+    echo "   • Network should be on 'Anvil Local'"
     echo ""
     
-    echo -e "${CYAN}5. Cuentas Adicionales (Opcional):${NC}"
-    echo "   Para probar transferencias entre usuarios, puedes importar más cuentas:"
+    echo -e "${CYAN}4. Connect to DApp:${NC}"
+    echo "   • Open http://localhost:$FRONTEND_PORT"
+    echo "   • Click 'Connect MetaMask'"
+    echo "   • Authorize connection in MetaMask"
+    echo "   • Done! You should see your address and contract statistics"
     echo ""
-    echo -e "   ${YELLOW}Cuenta #1:${NC} 0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+    
+    echo -e "${CYAN}5. Additional Accounts (Optional):${NC}"
+    echo "   To test transfers between users, you can import more accounts:"
+    echo ""
+    echo -e "   ${YELLOW}Account #1:${NC} 0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
     echo -e "   ${YELLOW}Private Key:${NC} 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
     echo ""
-    echo -e "   ${YELLOW}Cuenta #2:${NC} 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+    echo -e "   ${YELLOW}Account #2:${NC} 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
     echo -e "   ${YELLOW}Private Key:${NC} 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
     echo ""
 }
 
 # ============================================================================
-# FUNCIÓN: GESTIÓN SOLO DEL FRONTEND
+# FUNCTION: FRONTEND ONLY MANAGEMENT
 # ============================================================================
 
 start_frontend_only() {
     ensure_logs_dir
     
-    print_header "🚀 Iniciar Solo Frontend"
+    print_header "🚀 Start Frontend Only"
     
-    # Verificar que Anvil esté corriendo
+    # Verify Anvil is running
     if ! check_port $ANVIL_PORT; then
-        print_error "Anvil no está corriendo. Inicia Anvil primero con: ./deploy.sh start"
+        print_error "Anvil is not running. Start Anvil first with: ./deploy.sh start"
         return 1
     fi
     
-    # Verificar que el contrato esté desplegado
+    # Verify contract is deployed
     local contract_address_file="$LOGS_DIR/contract_address.txt"
     if [ ! -f "$contract_address_file" ]; then
-        print_error "Contrato no está desplegado. Ejecuta: ./deploy.sh start"
+        print_error "Contract is not deployed. Run: ./deploy.sh start"
         return 1
     fi
     
-    # Iniciar frontend
+    # Start frontend
     if ! start_frontend; then
-        print_error "No se pudo iniciar el frontend"
+        print_error "Could not start frontend"
         return 1
     fi
     
-    print_success "Frontend iniciado correctamente"
+    print_success "Frontend started successfully"
     print_info "URL: http://localhost:$FRONTEND_PORT"
-    print_info "Anvil y contrato siguen corriendo"
+    print_info "Anvil and contract continue running"
 }
 
 stop_frontend_only() {
-    print_header "🛑 Detener Solo Frontend"
+    print_header "🛑 Stop Frontend Only"
     
     local stopped=false
     
-    # Detener Frontend - Buscar todos los procesos relacionados
+    # Stop Frontend - Find all related processes
     local frontend_pids=""
     
-    # Buscar por PID file
+    # Search by PID file
     if [ -f "$FRONTEND_PID_FILE" ]; then
         local file_pid=$(cat "$FRONTEND_PID_FILE")
         if kill -0 "$file_pid" 2>/dev/null; then
@@ -1560,13 +1560,13 @@ stop_frontend_only() {
         rm -f "$FRONTEND_PID_FILE"
     fi
     
-    # Buscar por puerto
+    # Search by port
     local port_pid=$(get_pid_by_port $FRONTEND_PORT)
     if [ -n "$port_pid" ]; then
         frontend_pids="$frontend_pids $port_pid"
     fi
     
-    # Buscar por nombre de proceso
+    # Search by process name
     local process_pids=$(pgrep -f "next-server" 2>/dev/null || true)
     if [ -n "$process_pids" ]; then
         frontend_pids="$frontend_pids $process_pids"
@@ -1577,11 +1577,11 @@ stop_frontend_only() {
         frontend_pids="$frontend_pids $npm_pids"
     fi
     
-    # Eliminar duplicados y espacios
+    # Remove duplicates and spaces
     frontend_pids=$(echo $frontend_pids | tr ' ' '\n' | sort -u | tr '\n' ' ')
     
     if [ -n "$frontend_pids" ]; then
-        print_step "Deteniendo Frontend (PIDs: $frontend_pids)..."
+        print_step "Stopping Frontend (PIDs: $frontend_pids)..."
         for pid in $frontend_pids; do
             if kill -0 "$pid" 2>/dev/null; then
                 kill "$pid" 2>/dev/null || true
@@ -1589,27 +1589,27 @@ stop_frontend_only() {
         done
         sleep 2
         
-        # Forzar si siguen corriendo
+        # Force if still running
         for pid in $frontend_pids; do
             if kill -0 "$pid" 2>/dev/null; then
                 kill -9 "$pid" 2>/dev/null || true
             fi
         done
         
-        print_success "Frontend detenido"
+        print_success "Frontend stopped"
         stopped=true
     else
-        print_info "Frontend no está corriendo"
+        print_info "Frontend is not running"
     fi
     
     if [ "$stopped" = true ]; then
-        print_info "Anvil y contrato siguen corriendo"
-        print_info "Para reiniciar frontend: ./deploy.sh frontend start"
+        print_info "Anvil and contract continue running"
+        print_info "To restart frontend: ./deploy.sh frontend start"
     fi
 }
 
 restart_frontend_only() {
-    print_header "🔄 Reiniciar Solo Frontend"
+    print_header "🔄 Restart Frontend Only"
     
     stop_frontend_only
     sleep 2
@@ -1617,14 +1617,14 @@ restart_frontend_only() {
 }
 
 # ============================================================================
-# FUNCIÓN: DETENER SOLO ANVIL
+# FUNCTION: STOP ANVIL ONLY
 # ============================================================================
 
 stop_anvil_only() {
-    # Buscar todos los procesos de Anvil
+    # Find all Anvil processes
     local anvil_pids=""
     
-    # Buscar por PID file
+    # Search by PID file
     if [ -f "$ANVIL_PID_FILE" ]; then
         local file_pid=$(cat "$ANVIL_PID_FILE")
         if kill -0 "$file_pid" 2>/dev/null; then
@@ -1633,23 +1633,23 @@ stop_anvil_only() {
         rm -f "$ANVIL_PID_FILE"
     fi
     
-    # Buscar por puerto
+    # Search by port
     local port_pid=$(get_pid_by_port $ANVIL_PORT)
     if [ -n "$port_pid" ]; then
         anvil_pids="$anvil_pids $port_pid"
     fi
     
-    # Buscar por nombre de proceso
+    # Search by process name
     local process_pids=$(pgrep -f "anvil.*--port $ANVIL_PORT" 2>/dev/null || true)
     if [ -n "$process_pids" ]; then
         anvil_pids="$anvil_pids $process_pids"
     fi
     
-    # Eliminar duplicados y espacios
+    # Remove duplicates and spaces
     anvil_pids=$(echo $anvil_pids | tr ' ' '\n' | sort -u | tr '\n' ' ')
     
     if [ -n "$anvil_pids" ]; then
-        print_step "Deteniendo Anvil (PIDs: $anvil_pids)..."
+        print_step "Stopping Anvil (PIDs: $anvil_pids)..."
         for pid in $anvil_pids; do
             if kill -0 "$pid" 2>/dev/null; then
                 kill "$pid" 2>/dev/null || true
@@ -1657,153 +1657,153 @@ stop_anvil_only() {
         done
         sleep 2
         
-        # Forzar si siguen corriendo
+        # Force if still running
         for pid in $anvil_pids; do
             if kill -0 "$pid" 2>/dev/null; then
                 kill -9 "$pid" 2>/dev/null || true
             fi
         done
         
-        # Verificar que se detuvo
+        # Verify it stopped
         sleep 1
         if check_port $ANVIL_PORT; then
-            print_error "No se pudo detener Anvil completamente"
+            print_error "Could not stop Anvil completely"
             return 1
         else
-            print_success "Anvil detenido correctamente"
+            print_success "Anvil stopped successfully"
             return 0
         fi
     else
-        print_info "Anvil no está corriendo"
+        print_info "Anvil is not running"
         return 0
     fi
 }
 
 # ============================================================================
-# FUNCIÓN: LIMPIAR ESTADO DE ANVIL
+# FUNCTION: CLEAN ANVIL STATE
 # ============================================================================
 
 clean_anvil_state() {
-    print_header "🧹 Limpiar Estado Persistente de Anvil"
+    print_header "🧹 Clean Anvil Persistent State"
     
     local anvil_running=false
     
-    # Verificar si Anvil está corriendo
+    # Check if Anvil is running
     if check_port $ANVIL_PORT; then
         anvil_running=true
-        print_warning "Anvil está corriendo en puerto $ANVIL_PORT"
-        print_warning "Para limpiar el estado, Anvil debe estar detenido"
+        print_warning "Anvil is running on port $ANVIL_PORT"
+        print_warning "To clean state, Anvil must be stopped"
         echo ""
-        read -p "¿Deseas detener Anvil ahora? (s/N): " -n 1 -r
+        read -p "Do you want to stop Anvil now? (y/N): " -n 1 -r
         echo ""
-        if [[ $REPLY =~ ^[Ss]$ ]]; then
-            print_step "Deteniendo Anvil..."
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            print_step "Stopping Anvil..."
             if ! stop_anvil_only; then
-                print_error "No se pudo detener Anvil. Operación cancelada."
+                print_error "Could not stop Anvil. Operation cancelled."
                 return 1
             fi
             sleep 1
             anvil_running=false
         else
-            print_info "Operación cancelada. El estado no se limpiará mientras Anvil esté corriendo."
+            print_info "Operation cancelled. State will not be cleaned while Anvil is running."
             return 0
         fi
     fi
     
-    # Verificar nuevamente que Anvil no esté corriendo
+    # Verify again that Anvil is not running
     if check_port $ANVIL_PORT; then
-        print_error "Anvil sigue corriendo. No se puede limpiar el estado."
+        print_error "Anvil is still running. Cannot clean state."
         return 1
     fi
     
-    # Limpiar el estado
+    # Clean state
     if [ -f "$ANVIL_STATE_FILE" ]; then
         local state_size=$(du -h "$ANVIL_STATE_FILE" | cut -f1)
-        print_warning "Eliminando estado persistente de Anvil (tamaño: $state_size)"
-        print_warning "Esto eliminará todos los datos de la blockchain local (tokens, transferencias, usuarios)"
+        print_warning "Deleting Anvil persistent state (size: $state_size)"
+        print_warning "This will delete all local blockchain data (tokens, transfers, users)"
         echo ""
-        read -p "¿Estás seguro de que deseas eliminar el estado? (s/N): " -n 1 -r
+        read -p "Are you sure you want to delete the state? (y/N): " -n 1 -r
         echo ""
-        if [[ $REPLY =~ ^[Ss]$ ]]; then
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
             rm -f "$ANVIL_STATE_FILE"
-            print_success "Estado persistente eliminado"
-            print_info "Anvil iniciará con una blockchain limpia en el próximo start"
+            print_success "Persistent state deleted"
+            print_info "Anvil will start with a clean blockchain on next start"
             return 0
         else
-            print_info "Operación cancelada. El estado no se eliminó."
+            print_info "Operation cancelled. State was not deleted."
             return 0
         fi
     else
-        print_info "No hay estado persistente para eliminar"
-        print_info "Anvil iniciará con una blockchain limpia en el próximo start"
+        print_info "No persistent state to delete"
+        print_info "Anvil will start with a clean blockchain on next start"
         return 0
     fi
 }
 
 # ============================================================================
-# FUNCIÓN: START (INICIAR TODO)
+# FUNCTION: START (START EVERYTHING)
 # ============================================================================
 
 start_all() {
     ensure_logs_dir
     
-    # NUEVO: Verificación pre-start
+    # NEW: Pre-start verification
     if ! pre_start_check; then
-        print_error "Verificación pre-inicio falló. Corrige los errores antes de continuar."
-        print_info "Puedes ejecutar './deploy.sh setup' para verificar e instalar dependencias"
+        print_error "Pre-start verification failed. Fix errors before continuing."
+        print_info "You can run './deploy.sh setup' to verify and install dependencies"
         exit 1
     fi
     
-    print_header "🚀 Iniciando Supply Chain Tracker"
+    print_header "🚀 Starting Supply Chain Tracker"
     
-    # Paso 1: Iniciar Anvil
+    # Step 1: Start Anvil
     if ! start_anvil; then
-        print_error "No se pudo iniciar Anvil"
+        print_error "Could not start Anvil"
         exit 1
     fi
     
     sleep 2
     
-    # Paso 2: Desplegar contrato
+    # Step 2: Deploy contract
     if ! deploy_contract; then
-        print_error "No se pudo desplegar el contrato"
+        print_error "Could not deploy contract"
         exit 1
     fi
     
     sleep 1
     
-    # Paso 3: Actualizar configuración
+    # Step 3: Update configuration
     if ! update_frontend_config; then
-        print_error "No se pudo actualizar la configuración"
+        print_error "Could not update configuration"
         exit 1
     fi
     
     sleep 1
     
-    # Paso 4: Iniciar frontend
+    # Step 4: Start frontend
     if ! start_frontend; then
-        print_error "No se pudo iniciar el frontend"
+        print_error "Could not start frontend"
         exit 1
     fi
     
-    # Mostrar resumen
-    print_header "✅ Deployment Completado"
+    # Show summary
+    print_header "✅ Deployment Completed"
     
-    echo -e "${GREEN}Todos los servicios están corriendo correctamente:${NC}\n"
+    echo -e "${GREEN}All services are running correctly:${NC}\n"
     echo -e "  ${CYAN}Anvil:${NC}    http://$ANVIL_HOST:$ANVIL_PORT"
     echo -e "  ${CYAN}Frontend:${NC} http://localhost:$FRONTEND_PORT"
     echo -e "  ${CYAN}Contract:${NC} $(cat $LOGS_DIR/contract_address.txt)"
     echo ""
     
-    # Mostrar instrucciones de MetaMask
+    # Show MetaMask instructions
     show_metamask_instructions
     
-    print_info "Para ver el estado: ./deploy.sh status"
-    print_info "Para detener todo: ./deploy.sh stop"
+    print_info "To view status: ./deploy.sh status"
+    print_info "To stop everything: ./deploy.sh stop"
 }
 
 # ============================================================================
-# FUNCIÓN: HELP
+# FUNCTION: HELP
 # ============================================================================
 
 show_help() {
@@ -1817,84 +1817,84 @@ show_help() {
 EOF
     echo -e "${NC}"
     
-    echo -e "${YELLOW}USO:${NC}"
-    echo "  ./deploy.sh [comando] [opciones]"
+    echo -e "${YELLOW}USAGE:${NC}"
+    echo "  ./deploy.sh [command] [options]"
     echo ""
     
-    echo -e "${YELLOW}COMANDOS PRINCIPALES:${NC}"
-    echo -e "  ${GREEN}start${NC}           Inicia todo el stack (Anvil + Deploy + Frontend)"
-    echo -e "  ${GREEN}stop${NC}            Detiene todos los servicios"
-    echo -e "  ${GREEN}restart${NC}         Reinicia todos los servicios"
-    echo -e "  ${GREEN}status${NC}          Muestra el estado de los servicios"
-    echo -e "  ${GREEN}metamask${NC}        Muestra instrucciones para configurar MetaMask"
-    echo -e "  ${GREEN}clean${NC}           Limpia el estado persistente de Anvil (requiere Anvil detenido)"
+    echo -e "${YELLOW}MAIN COMMANDS:${NC}"
+    echo -e "  ${GREEN}start${NC}           Start entire stack (Anvil + Deploy + Frontend)"
+    echo -e "  ${GREEN}stop${NC}            Stop all services"
+    echo -e "  ${GREEN}restart${NC}         Restart all services"
+    echo -e "  ${GREEN}status${NC}          Show service status"
+    echo -e "  ${GREEN}metamask${NC}        Show MetaMask configuration instructions"
+    echo -e "  ${GREEN}clean${NC}           Clean Anvil persistent state (requires Anvil stopped)"
     echo ""
     
-    echo -e "${YELLOW}COMANDOS DE CONFIGURACIÓN:${NC}"
-    echo -e "  ${GREEN}setup${NC}           Verifica requisitos e instala dependencias faltantes"
-    echo -e "  ${GREEN}env${NC}             Configura variables de entorno (.env.local)"
+    echo -e "${YELLOW}CONFIGURATION COMMANDS:${NC}"
+    echo -e "  ${GREEN}setup${NC}           Verify requirements and install missing dependencies"
+    echo -e "  ${GREEN}env${NC}             Configure environment variables (.env.local)"
     echo ""
     
-    echo -e "${YELLOW}COMANDOS DE FRONTEND (sin afectar Anvil/Contrato):${NC}"
-    echo -e "  ${GREEN}frontend start${NC}  Inicia solo el frontend (requiere Anvil corriendo)"
-    echo -e "  ${GREEN}frontend stop${NC}   Detiene solo el frontend"
-    echo -e "  ${GREEN}frontend restart${NC} Reinicia solo el frontend"
+    echo -e "${YELLOW}FRONTEND COMMANDS (without affecting Anvil/Contract):${NC}"
+    echo -e "  ${GREEN}frontend start${NC}  Start only frontend (requires Anvil running)"
+    echo -e "  ${GREEN}frontend stop${NC}   Stop only frontend"
+    echo -e "  ${GREEN}frontend restart${NC} Restart only frontend"
     echo ""
     
-    echo -e "${YELLOW}OPCIONES:${NC}"
-    echo -e "  ${GREEN}--yes${NC}, ${GREEN}--auto${NC}, ${GREEN}-y${NC}  Modo automático (sin confirmaciones)"
+    echo -e "${YELLOW}OPTIONS:${NC}"
+    echo -e "  ${GREEN}--yes${NC}, ${GREEN}--auto${NC}, ${GREEN}-y${NC}  Automatic mode (no confirmations)"
     echo ""
     
-    echo -e "${YELLOW}EJEMPLOS:${NC}"
-    echo "  # Primera vez - Setup completo"
+    echo -e "${YELLOW}EXAMPLES:${NC}"
+    echo "  # First time - Complete setup"
     echo "  ./deploy.sh setup"
     echo "  ./deploy.sh env"
     echo "  ./deploy.sh start"
     echo ""
-    echo "  # Modo automático (sin preguntar)"
+    echo "  # Automatic mode (no prompts)"
     echo "  ./deploy.sh setup --yes"
     echo "  ./deploy.sh start --auto"
     echo ""
-    echo "  # Configurar variables de entorno interactivamente"
+    echo "  # Configure environment variables interactively"
     echo "  ./deploy.sh env"
     echo ""
-    echo "  # Configurar variables con parámetros"
+    echo "  # Configure variables with parameters"
     echo "  ./deploy.sh env --modern-design true --debug-mode false"
     echo "  ./deploy.sh env --all true false false"
     echo ""
-    echo "  # Iniciar todo"
+    echo "  # Start everything"
     echo "  ./deploy.sh start"
     echo ""
-    echo "  # Detener solo el frontend (Anvil y contrato siguen corriendo)"
+    echo "  # Stop only frontend (Anvil and contract continue running)"
     echo "  ./deploy.sh frontend stop"
     echo ""
-    echo "  # Reiniciar solo el frontend después de cambios"
+    echo "  # Restart only frontend after changes"
     echo "  ./deploy.sh frontend restart"
     echo ""
-    echo "  # Ver estado"
+    echo "  # View status"
     echo "  ./deploy.sh status"
     echo ""
-    echo "  # Detener todo"
+    echo "  # Stop everything"
     echo "  ./deploy.sh stop"
     echo ""
     
-    echo -e "${YELLOW}NOTA:${NC} Anvil ahora persiste el estado entre reinicios."
-    echo -e "      Usa ${GREEN}./deploy.sh clean${NC} para limpiar el estado."
-    echo -e "      Si Anvil está corriendo, te preguntará si deseas detenerlo primero."
+    echo -e "${YELLOW}NOTE:${NC} Anvil now persists state between restarts."
+    echo -e "      Use ${GREEN}./deploy.sh clean${NC} to clean the state."
+    echo -e "      If Anvil is running, it will ask if you want to stop it first."
     echo ""
     
-    echo -e "  ${GREEN}help${NC}             Muestra esta ayuda"
+    echo -e "  ${GREEN}help${NC}             Show this help"
     echo ""
     
     echo -e "${YELLOW}LOGS:${NC}"
-    echo "  Los logs se guardan en: $LOGS_DIR"
-    echo "  • anvil.log     - Logs de Anvil"
-    echo "  • frontend.log  - Logs del frontend"
-    echo "  • deploy.log    - Logs del deployment"
-    echo "  • install.log   - Logs de instalación de dependencias"
+    echo "  Logs are saved in: $LOGS_DIR"
+    echo "  • anvil.log     - Anvil logs"
+    echo "  • frontend.log  - Frontend logs"
+    echo "  • deploy.log    - Deployment logs"
+    echo "  • install.log   - Dependency installation logs"
     echo ""
     
-    echo -e "${YELLOW}PUERTOS:${NC}"
+    echo -e "${YELLOW}PORTS:${NC}"
     echo "  • Anvil:    $ANVIL_PORT"
     echo "  • Frontend: $FRONTEND_PORT"
     echo ""
@@ -1905,14 +1905,14 @@ EOF
 # ============================================================================
 
 main() {
-    # Verificar que estamos en el directorio correcto
+    # Verify we are in the correct directory
     if [ ! -d "$SC_DIR" ] || [ ! -d "$WEB_DIR" ]; then
-        print_error "Este script debe ejecutarse desde la raíz del proyecto"
-        print_info "Directorio actual: $PROJECT_ROOT"
+        print_error "This script must be run from the project root"
+        print_info "Current directory: $PROJECT_ROOT"
         exit 1
     fi
     
-    # Verificar flags de modo automático
+    # Check automatic mode flags
     local auto_flag=false
     for arg in "$@"; do
         if [[ "$arg" == "--yes" || "$arg" == "--auto" || "$arg" == "-y" ]]; then
@@ -1922,7 +1922,7 @@ main() {
         fi
     done
     
-    # Procesar comando
+    # Process command
     case "${1:-}" in
         start)
             start_all
@@ -1939,7 +1939,7 @@ main() {
             pre_start_check
             ;;
         env|environment)
-            shift  # Remover 'env' o 'environment'
+            shift  # Remove 'env' or 'environment'
             setup_environment_variables "$@"
             ;;
         frontend)
@@ -1954,12 +1954,12 @@ main() {
                     restart_frontend_only
                     ;;
                 *)
-                    print_error "Comando de frontend inválido: ${2:-}"
+                    print_error "Invalid frontend command: ${2:-}"
                     echo ""
-                    echo "Comandos disponibles:"
-                    echo "  ./deploy.sh frontend start    - Iniciar solo frontend"
-                    echo "  ./deploy.sh frontend stop     - Detener solo frontend"
-                    echo "  ./deploy.sh frontend restart  - Reiniciar solo frontend"
+                    echo "Available commands:"
+                    echo "  ./deploy.sh frontend start    - Start only frontend"
+                    echo "  ./deploy.sh frontend stop     - Stop only frontend"
+                    echo "  ./deploy.sh frontend restart  - Restart only frontend"
                     exit 1
                     ;;
             esac
@@ -1977,7 +1977,7 @@ main() {
             show_help
             ;;
         *)
-            print_error "Comando inválido: ${1:-}"
+            print_error "Invalid command: ${1:-}"
             echo ""
             show_help
             exit 1
@@ -1985,5 +1985,5 @@ main() {
     esac
 }
 
-# Ejecutar main con todos los argumentos
+# Execute main with all arguments
 main "$@"
