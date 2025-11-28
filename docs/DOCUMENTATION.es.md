@@ -1,7 +1,7 @@
 # 📚 Documentación Completa - Supply Chain Tracker
 
-**Última actualización**: 27 de Noviembre, 2025  
-**Versión**: 1.4.0  
+**Última actualización**: 28 de Noviembre, 2025  
+**Versión**: 2.1.0  
 **Proyecto**: Supply Chain DApp (PFM Web3)
 
 > **📋 Para el estado más actualizado del proyecto, consulta [STATUS.md](../STATUS.md)**
@@ -15,10 +15,11 @@
 3. [Smart Contract](#smart-contract)
 4. [Frontend](#frontend)
 5. [Deployment Automatizado](#deployment-automatizado)
-6. [Configuración de MetaMask](#configuración-de-metamask)
-7. [Testing](#testing)
-8. [Troubleshooting](#troubleshooting)
-9. [Roadmap](#roadmap)
+6. [Guía de Despliegue Manual](#guía-de-despliegue-manual-sin-scripts)
+7. [Configuración de MetaMask](#configuración-de-metamask)
+8. [Testing](#testing)
+9. [Troubleshooting](#troubleshooting)
+10. [Roadmap](#roadmap)
 
 ---
 
@@ -222,10 +223,10 @@ event OwnershipTransferProposed(address indexed currentOwner, address indexed ne
 
 **Cobertura**:
 ```
-Lines:      83.33% (168/202)
-Statements: 80.09% (180/224)
-Branches:   61.22% (30/49)
-Functions:  80.95% (34/42)
+Lines:      85.60%
+Statements: 82.67%
+Branches:   72.15%
+Functions:  80.95%
 ```
 
 **Ejecutar tests**:
@@ -1312,6 +1313,191 @@ El script gestiona los procesos de forma inteligente:
 
 ---
 
+## 🛠️ Guía de Despliegue Manual (Sin Scripts)
+
+Si prefieres entender el proceso subyacente o no puedes usar los scripts de automatización, sigue estas instrucciones paso a paso.
+
+### **1. Prerrequisitos y Verificación**
+
+Herramientas necesarias:
+- **Git**: [Descargar](https://git-scm.com/downloads)
+- **Node.js (v18+)**: [Descargar](https://nodejs.org/)
+- **Foundry (Forge & Anvil)**: [Guía de Instalación](https://book.getfoundry.sh/getting-started/installation)
+
+**Verificar en Windows (PowerShell):**
+```powershell
+# Verificar Git
+git --version
+# Esperado: git version 2.x.x
+
+# Verificar Node.js
+node --version
+# Esperado: v18.x.x o superior
+
+# Verificar Foundry
+forge --version
+anvil --version
+# Esperado: forge 0.2.0... / anvil 0.2.0...
+```
+
+**Cómo instalar si falta:**
+- **Node.js**: Descarga el instalador del sitio oficial.
+- **Foundry**: Ejecuta en PowerShell:
+  ```powershell
+  curl -L https://foundry.paradigm.xyz | bash
+  foundryup
+  ```
+
+### **2. Iniciar Blockchain Local (Anvil)**
+
+Abre una **nueva terminal** (Terminal 1) y ejecuta:
+
+```powershell
+# Windows (PowerShell)
+anvil
+```
+
+**Linux/macOS**:
+```bash
+anvil
+```
+
+> **Mantén esta terminal abierta.** Deberías ver "Listening on 127.0.0.1:8545".
+
+### **3. Desplegar Smart Contract**
+
+Abre una **segunda terminal** (Terminal 2) y ejecuta:
+
+**1. Instalar Dependencias:**
+```bash
+cd sc
+forge install
+```
+
+**2. Compilar y Desplegar:**
+```bash
+# Windows (PowerShell)
+$env:PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+forge script script/SupplyChainDeploy.s.sol:SupplyChainDeployScript --rpc-url http://127.0.0.1:8545 --broadcast
+
+# Linux/macOS
+PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 forge script script/SupplyChainDeploy.s.sol:SupplyChainDeployScript --rpc-url http://127.0.0.1:8545 --broadcast
+```
+
+**3. Copiar Dirección del Contrato:**
+Busca en los logs una línea como: `Contract Address: 0x...`
+**Copia esta dirección.**
+
+### **4. Configurar Frontend**
+
+Aún en la Terminal 2:
+
+**1. Copiar ABI del Contrato:**
+El frontend necesita el JSON ABI para hablar con el contrato.
+
+**Windows (PowerShell)**:
+```powershell
+Copy-Item "..\out\SupplyChain.sol\SupplyChain.json" "..\..\web\src\contracts\SupplyChain.json" -Force
+```
+
+**Linux/macOS**:
+```bash
+cp ../out/SupplyChain.sol/SupplyChain.json ../../web/src/contracts/SupplyChain.json
+```
+
+**2. Actualizar Dirección del Contrato:**
+Abre `web/src/contracts/config.ts` en tu editor.
+Encuentra la línea:
+```typescript
+export const SUPPLY_CHAIN_ADDRESS = '0x...' as `0x${string}`
+```
+Reemplaza la dirección con la que copiaste en el Paso 3.
+
+**3. Configurar Variables de Entorno:**
+Crea `web/.env.local` si no existe.
+
+**Windows (PowerShell)**:
+```powershell
+cd ..\web
+if (!(Test-Path .env.local)) { Copy-Item .env.example .env.local }
+```
+
+**Linux/macOS**:
+```bash
+cd ../web
+cp .env.example .env.local 2>/dev/null || :
+```
+
+### **5. Iniciar Frontend**
+
+**1. Instalar Dependencias:**
+```bash
+# Verifica si existe node_modules, si no instala
+if (!(Test-Path "node_modules")) { npm install }
+# O simplemente ejecuta:
+npm install
+```
+
+**2. Iniciar Servidor de Desarrollo:**
+```bash
+npm run dev
+```
+
+> **Mantén esta terminal abierta.** Deberías ver "Ready in ... ms".
+
+### **6. Verificar Despliegue**
+
+**1. Chequeo de Navegador:**
+- Abre `http://localhost:3000`.
+- Deberías ver la Landing Page con el título "Supply Chain Tracker".
+- **Criterio de Éxito**: La página carga sin pantallas blancas ni errores de consola.
+
+**2. Conectar MetaMask:**
+- Haz clic en "Conectar Billetera".
+- Selecciona la cuenta importada (Owner).
+- **Criterio de Éxito**:
+  - El botón muestra tu dirección (e.g., `0xf39...2266`).
+  - Ves las tarjetas de estadísticas (inicialmente en 0).
+
+**3. Probar Conexión:**
+- Ve al Dashboard o Admin panel.
+- Si los datos cargan (aunque estén vacíos), la conexión funciona.
+
+### **7. Detener Servicios (Manual)**
+
+Para detener los servicios correctamente y evitar errores de "puerto en uso", sigue este orden: **Frontend Primero -> Luego Anvil**.
+
+**Windows (PowerShell):**
+
+1. **Encontrar PIDs:**
+   ```powershell
+   Get-NetTCPConnection -LocalPort 3000, 8545 -ErrorAction SilentlyContinue | Select-Object LocalPort, OwningProcess, State
+   ```
+   *Nota: Puerto 3000 es Frontend, 8545 es Anvil.*
+
+2. **Detener Frontend (Puerto 3000):**
+   ```powershell
+   Stop-Process -Id <PID> -Force
+   ```
+
+3. **Detener Anvil (Puerto 8545):**
+   ```powershell
+   Stop-Process -Id <PID> -Force
+   ```
+
+**Linux/macOS:**
+
+1. **Buscar y Matar:**
+   ```bash
+   # Detener Frontend
+   kill -9 $(lsof -t -i:3000)
+   
+   # Detener Anvil
+   kill -9 $(lsof -t -i:8545)
+   ```
+
+---
+
 ## 🦊 Configuración de MetaMask
 
 ### **Paso 1: Agregar Red Anvil Local**
@@ -1848,7 +2034,8 @@ Este proyecto es parte de un trabajo académico y se proporciona con fines educa
 ├── 📄 CHANGELOG.md                 ⭐ Historial de cambios
 ├── 📄 CONTRIBUTING.md              ⭐ Guía de contribución
 ├── 📄 IA.md                        ⭐ Retrospectiva uso de IA
-├── 🚀 deploy.sh                    ⭐ Script automatizado
+├── 🚀 deploy.sh                    ⭐ Script automatizado (Linux/Mac)
+├── 🚀 deploy.ps1                   ⭐ Script automatizado (Windows)
 │
 ├── 📁 docs/                        ⭐ Documentación consolidada
 │   ├── DOCUMENTATION.md            ⭐ Este archivo (guía técnica completa)
@@ -1899,4 +2086,4 @@ Este proyecto es parte de un trabajo académico y se proporciona con fines educa
 
 ---
 
-**Última actualización**: 27 de Noviembre, 2025
+**Última actualización**: 28 de Noviembre, 2025

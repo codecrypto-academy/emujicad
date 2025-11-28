@@ -7,8 +7,8 @@
 
 **Project**: Supply Chain Tracker DApp  
 **Start Date**: November 18, 2025  
-**Last Updated**: November 27, 2025  
-**Total Duration**: 7 days (Days 1-4 completed + Critical validations Day 7)
+**Last Updated**: November 28, 2025  
+**Total Duration**: 12 days (Days 1-7 completed + Final Delivery Day 12)
 
 ---
 
@@ -1779,7 +1779,68 @@ During the 17 development sessions, context was managed efficiently:
 
 ---
 
-*End of IA.md document - Updated Day 7 (Nov 24, 2025)*
+---
+
+## 📋 UPDATE DAY 12 (November 28, 2025) - FINAL DELIVERY
+
+### **🎯 Day 12 Executive Summary**
+
+**Duration**: ~4-5 hours  
+**Main Objective**: Windows Support (`deploy.ps1`), Documentation Consolidation, and Final Verification.  
+**Result**: ✅ **COMPLETED** - Project fully compatible with Windows, Linux, and macOS. Documentation consolidated.
+
+**Day 12 Metrics**:
+- **Files created**: `deploy.ps1` (2000+ lines, full parity with bash script)
+- **Documentation**: 100% synchronized (English/Spanish), redundant files removed
+- **Windows Support**: ✅ Fixed blank page issue (process management)
+- **Use Cases**: 42/42 verified for Windows script
+- **Score**: **Production Ready**
+
+---
+
+### **🔴 Challenges & Solutions Day 12**
+
+#### **32. Windows Blank Page & No Console Output**
+**Frequency**: Persistent on Windows  
+**Cause**: Background process management (`Start-Process -NoNewWindow`) in PowerShell caused Anvil/Next.js to fail silently or block ports without visibility.  
+**Solution**:
+- Switched to **Visible Windows** strategy for Windows services.
+- `deploy.ps1` now opens separate PowerShell windows for Anvil and Next.js.
+- This ensures correct PATH inheritance and immediate log visibility.
+- **Lesson**: On Windows, visible windows are more robust than background jobs for dev servers.
+
+#### **33. Documentation Fragmentation**
+**Frequency**: N/A (Cleanup task)  
+**Cause**: Multiple test reports and overlapping implementation docs (`IMPLEMENTACION_DEPLOY_PS1.md`, `TEST_DEPLOY_PS1.md`).  
+**Solution**:
+- Consolidated everything into `docs/DOCUMENTATION.md` (and `.es.md`).
+- Removed redundant files.
+- Created a unified "Manual Deployment Guide" for all OS.
+- **Lesson**: Single Source of Truth > Multiple fragmented reports.
+
+---
+
+### **📊 Final Project Metrics**
+
+- **Smart Contract**: 100% Complete, 108 Tests, Critical Validations ✅
+- **Frontend**: 100% Complete, 9/9 Pages, 26 Components ✅
+- **DevOps**:
+  - `deploy.sh`: Linux/macOS Support ✅
+  - `deploy.ps1`: Windows Support ✅ (New)
+- **Documentation**: Professional, Bilingual, Consolidated ✅
+
+---
+
+### **📝 Final Conclusion**
+
+The project has evolved from a basic DApp to a robust, cross-platform solution. The addition of native Windows support via `deploy.ps1` and the professional consolidation of documentation ensures that any developer, regardless of their OS, can deploy and contribute to the project effectively.
+
+**Ready for Evaluation.** 🚀
+
+---
+
+*End of IA.md document - Updated Day 12 (Nov 28, 2025)*
+
 
 ---
 

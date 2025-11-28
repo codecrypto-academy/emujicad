@@ -88,35 +88,35 @@ $ENV_FILE = Join-Path $WEB_DIR ".env.local"
 function Print-Header {
     param([string]$Message)
     Write-Host ""
-    Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host "=================================================================" -ForegroundColor Cyan
     Write-Host "  $Message" -ForegroundColor Cyan
-    Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host "=================================================================" -ForegroundColor Cyan
     Write-Host ""
 }
 
 function Print-Success {
     param([string]$Message)
-    Write-Host "✓ $Message" -ForegroundColor Green
+    Write-Host "[OK] $Message" -ForegroundColor Green
 }
 
 function Print-Error {
     param([string]$Message)
-    Write-Host "✗ $Message" -ForegroundColor Red
+    Write-Host "[ERROR] $Message" -ForegroundColor Red
 }
 
 function Print-Warning {
     param([string]$Message)
-    Write-Host "⚠ $Message" -ForegroundColor Yellow
+    Write-Host "[WARN] $Message" -ForegroundColor Yellow
 }
 
 function Print-Info {
     param([string]$Message)
-    Write-Host "ℹ $Message" -ForegroundColor Blue
+    Write-Host "[INFO] $Message" -ForegroundColor Blue
 }
 
 function Print-Step {
     param([string]$Message)
-    Write-Host "➜ $Message" -ForegroundColor Magenta
+    Write-Host "-> $Message" -ForegroundColor Magenta
 }
 
 # Function to create logs directory if it doesn't exist
@@ -207,6 +207,60 @@ function Test-SystemTools {
     }
     else {
         return $false, $missingTools
+    }
+}
+
+function Install-WingetPackage {
+    param(
+        [string]$Name,
+        [string]$Id
+    )
+    
+    # Check if winget is available
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+        Print-Error "winget is not available. Cannot install $Name automatically."
+        return $false
+    }
+    
+    $autoMode = $script:AUTO_INSTALL
+    
+    if (-not $autoMode) {
+        Write-Host ""
+        $response = Read-Host "Do you want to install $Name automatically via winget? (Y/n)"
+        if ($response -match '^[Nn]$') {
+            Print-Info "Installation cancelled."
+            return $false
+        }
+    }
+    
+    Print-Step "Installing $Name ($Id) via winget..."
+    
+    try {
+        $processInfo = New-Object System.Diagnostics.ProcessStartInfo
+        $processInfo.FileName = "winget"
+        $processInfo.Arguments = "install -e --id $Id --accept-source-agreements --accept-package-agreements"
+        $processInfo.UseShellExecute = $false
+        $processInfo.RedirectStandardOutput = $true
+        $processInfo.RedirectStandardError = $true
+        
+        $process = New-Object System.Diagnostics.Process
+        $process.StartInfo = $processInfo
+        $process.Start() | Out-Null
+        $process.WaitForExit()
+        
+        if ($process.ExitCode -eq 0) {
+            Print-Success "$Name installed successfully"
+            Print-Info "You may need to restart your terminal for changes to take effect."
+            return $true
+        }
+        else {
+            Print-Error "Failed to install $Name (Exit code: $($process.ExitCode))"
+            return $false
+        }
+    }
+    catch {
+        Print-Error "Error running winget: $($_.Exception.Message)"
+        return $false
     }
 }
 
@@ -593,12 +647,44 @@ function Start-PreStartCheck {
     
     # Check Node.js
     $nodePath = Get-Command node -ErrorAction SilentlyContinue
+    
+    # Check if node is in standard directories but not in PATH
+    if (-not $nodePath) {
+        $commonNodePaths = @(
+            "C:\Program Files\nodejs\node.exe",
+            "C:\Program Files (x86)\nodejs\node.exe"
+        )
+        
+        foreach ($path in $commonNodePaths) {
+            if (Test-Path $path) {
+                $nodeDir = Split-Path $path -Parent
+                $env:Path = "$env:Path;$nodeDir"
+                Print-Info "Node.js detected at $path and added to PATH."
+                $nodePath = $path
+                break
+            }
+        }
+    }
+
     if (-not $nodePath) {
         Print-Error "Node.js is not installed"
-        Print-Info "Install Node.js v18+ from: https://nodejs.org/"
-        Print-Info "  Or using winget: winget install OpenJS.NodeJS.LTS"
-        Print-Info "  Or using Chocolatey: choco install nodejs-lts"
-        $errors++
+        
+        # Try to install via winget
+        if (Install-WingetPackage -Name "Node.js LTS" -Id "OpenJS.NodeJS.LTS") {
+            # Refresh path to detect new installation (limited scope, might not work without restart)
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+            if (Get-Command node -ErrorAction SilentlyContinue) {
+                Print-Success "Node.js detected after installation"
+            }
+            else {
+                Print-Warning "Node.js installed but not detected. Please restart your terminal."
+            }
+        }
+        else {
+            Print-Info "Install Node.js v18+ from: https://nodejs.org/"
+            Print-Info "  Or using winget manually: winget install OpenJS.NodeJS.LTS"
+            $errors++
+        }
     }
     else {
         $nodeVersion = (node --version) -replace 'v', ''
@@ -624,10 +710,28 @@ function Start-PreStartCheck {
     
     # Check Foundry (forge)
     $forgePath = Get-Command forge -ErrorAction SilentlyContinue
+    
+    # Check if forge is in the user's .foundry directory
+    if (-not $forgePath) {
+        $userFoundryPath = Join-Path $env:USERPROFILE ".foundry\bin\forge.exe"
+        if (Test-Path $userFoundryPath) {
+            # Add to PATH temporarily for this session
+            $foundryBinDir = Join-Path $env:USERPROFILE ".foundry\bin"
+            $env:Path = "$env:Path;$foundryBinDir"
+            Print-Info "Foundry detected at $userFoundryPath and added to PATH."
+            $forgePath = $userFoundryPath
+        }
+    }
+    
     if (-not $forgePath) {
         Print-Error "Foundry (forge) is not installed"
-        Print-Info "Install Foundry with: https://book.getfoundry.sh/getting-started/installation"
-        Print-Info "  Or using winget: winget install Foundry.Foundry"
+        
+        # We don't try winget for Foundry as it is often broken/missing
+        # Instead we give clear instructions
+        Print-Info "Automatic installation for Foundry is not available via winget."
+        Print-Info "Please install Foundry manually:"
+        Print-Info "  1. If you have Git Bash, run: curl -L https://foundry.paradigm.xyz | bash"
+        Print-Info "  2. Or visit: https://book.getfoundry.sh/getting-started/installation"
         $errors++
     }
     else {
@@ -636,10 +740,25 @@ function Start-PreStartCheck {
     
     # Check Anvil
     $anvilPath = Get-Command anvil -ErrorAction SilentlyContinue
+    
+    # Check if anvil is in the user's .foundry directory
+    if (-not $anvilPath) {
+        $userAnvilPath = Join-Path $env:USERPROFILE ".foundry\bin\anvil.exe"
+        if (Test-Path $userAnvilPath) {
+            # PATH should have been updated by forge check, but just in case
+            if ($env:Path -notlike "*$env:USERPROFILE\.foundry\bin*") {
+                $foundryBinDir = Join-Path $env:USERPROFILE ".foundry\bin"
+                $env:Path = "$env:Path;$foundryBinDir"
+            }
+            Print-Info "Anvil detected at $userAnvilPath."
+            $anvilPath = $userAnvilPath
+        }
+    }
+
     if (-not $anvilPath) {
         Print-Error "Foundry (anvil) is not installed"
-        Print-Info "Run: foundryup"
-        Print-Info "Or reinstall Foundry: https://book.getfoundry.sh/getting-started/installation"
+        Print-Info "It should be installed with Foundry."
+        Print-Info "Run 'foundryup' if available, or reinstall Foundry."
         $errors++
     }
     else {
@@ -648,7 +767,7 @@ function Start-PreStartCheck {
     
     # If there are critical errors, abort
     if ($errors -gt 0) {
-        Print-Error "❌ Found $errors critical error(s). Aborting."
+        Print-Error "[ERROR] Found $errors critical error(s). Aborting."
         Print-Info "Fix the errors before continuing."
         return $false
     }
@@ -700,7 +819,7 @@ function Start-PreStartCheck {
     
     # If there are errors after trying to install, abort
     if ($errors -gt 0) {
-        Print-Error "❌ Found $errors error(s). Aborting."
+        Print-Error "[ERROR] Found $errors error(s). Aborting."
         return $false
     }
     
@@ -711,7 +830,7 @@ function Start-PreStartCheck {
             Write-Host ""
             $response = Read-Host "Do you want to configure environment variables now? (Y/n)"
             if ($response -notmatch '^[Nn]$') {
-                Set-EnvironmentVariables
+                Set-EnvironmentVariables | Out-Null
             }
             else {
                 Print-Info "You can configure them later with: .\deploy.ps1 env"
@@ -720,7 +839,7 @@ function Start-PreStartCheck {
         else {
             # Automatic mode: configure with default values
             Print-Info "Automatic mode: configuring environment variables with default values..."
-            Set-EnvironmentVariables
+            Set-EnvironmentVariables | Out-Null
         }
     }
     else {
@@ -731,15 +850,15 @@ function Start-PreStartCheck {
     Write-Host ""
     if ($errors -eq 0) {
         if ($warnings -eq 0) {
-            Print-Success "✅ All verifications passed successfully"
+            Print-Success "All verifications passed successfully"
         }
         else {
-            Print-Warning "⚠️  Verification completed with $warnings warning(s)"
+            Print-Warning "Verification completed with $warnings warning(s)"
         }
         return $true
     }
     else {
-        Print-Error "❌ Found $errors error(s). Aborting."
+        Print-Error "[ERROR] Found $errors error(s). Aborting."
         return $false
     }
 }
@@ -776,13 +895,13 @@ function Start-AnvilService {
     if ($stateExists) {
         $stateSizeBytes = (Get-Item $ANVIL_STATE_FILE).Length
         $stateSize = "{0:N2} KB" -f ($stateSizeBytes / 1KB)
-        Print-Success "✅ Persistent state found: $ANVIL_STATE_FILE"
-        Print-Info "   📊 Size: $stateSize"
-        Print-Info "   🔄 Anvil will restore previous state (tokens, transfers, users)"
+        Print-Success "[OK] Persistent state found: $ANVIL_STATE_FILE"
+        Print-Info "   Size: $stateSize"
+        Print-Info "   Anvil will restore previous state (tokens, transfers, users)"
     }
     else {
-        Print-Info "ℹ️  Starting with clean blockchain (no previous state)"
-        Print-Info "   📝 State will be saved to: $ANVIL_STATE_FILE"
+        Print-Info "Starting with clean blockchain (no previous state)"
+        Print-Info "   State will be saved to: $ANVIL_STATE_FILE"
     }
     
     # Verify that anvil is installed
@@ -793,101 +912,29 @@ function Start-AnvilService {
         return $false
     }
     
-    # Start Anvil in background with state persistence
-    Push-Location $SC_DIR
-    Print-Step "Starting Anvil with state persistence enabled..."
+    # Start Anvil in a new visible window (more reliable on Windows)
+    Print-Step "Starting Anvil in a new window..."
     
-    $anvilArgs = @(
-        "--host", $ANVIL_HOST,
-        "--port", $ANVIL_PORT.ToString(),
-        "--chain-id", $ANVIL_CHAIN_ID.ToString(),
-        "--state", $ANVIL_STATE_FILE,
-        "--accounts", "15"
-    )
-    
-    # Start process in background and redirect output to log file
-    $processInfo = New-Object System.Diagnostics.ProcessStartInfo
-    $processInfo.FileName = "anvil"
-    $processInfo.Arguments = $anvilArgs -join " "
-    $processInfo.WorkingDirectory = $SC_DIR
-    $processInfo.UseShellExecute = $false
-    $processInfo.RedirectStandardOutput = $true
-    $processInfo.RedirectStandardError = $true
-    $processInfo.CreateNoWindow = $true
-    
-    $process = New-Object System.Diagnostics.Process
-    $process.StartInfo = $processInfo
-    
-    # Create empty log file
-    "" | Out-File -FilePath $ANVIL_LOG_FILE -Encoding UTF8
-    
-    # Configure event handlers to capture output
-    $stdoutBuilder = New-Object System.Text.StringBuilder
-    $stderrBuilder = New-Object System.Text.StringBuilder
-    
-    $outputHandler = {
-        if (-not [string]::IsNullOrEmpty($EventArgs.Data)) {
-            [void]$stdoutBuilder.AppendLine($EventArgs.Data)
-            Add-Content -Path $ANVIL_LOG_FILE -Value $EventArgs.Data -Encoding UTF8
-        }
-    }
-    
-    $errorHandler = {
-        if (-not [string]::IsNullOrEmpty($EventArgs.Data)) {
-            [void]$stderrBuilder.AppendLine($EventArgs.Data)
-            Add-Content -Path $ANVIL_LOG_FILE -Value $EventArgs.Data -Encoding UTF8
-        }
-    }
-    
-    $process.add_OutputDataReceived($outputHandler)
-    $process.add_ErrorDataReceived($errorHandler)
+    $anvilArgs = "--host $ANVIL_HOST --port $ANVIL_PORT --chain-id $ANVIL_CHAIN_ID --state $ANVIL_STATE_FILE --accounts 15"
+    $command = "Write-Host '=== ANVIL LOCAL BLOCKCHAIN ===' -ForegroundColor Cyan; Write-Host 'Do not close this window!' -ForegroundColor Yellow; cd '$SC_DIR'; anvil $anvilArgs"
     
     try {
-        $process.Start() | Out-Null
-        $process.BeginOutputReadLine()
-        $process.BeginErrorReadLine()
+        Start-Process powershell -ArgumentList "-NoExit", "-Command", "$command"
         
-        $process.Id | Out-File -FilePath $ANVIL_PID_FILE -Encoding ASCII
+        Print-Success "Anvil started in a new window"
+        Print-Info "Please keep the Anvil window open."
         
-        Print-Info "Anvil iniciado con PID: $($process.Id)"
-        Print-Info "Logs: $ANVIL_LOG_FILE"
-        
-        # Esperar a que Anvil esté listo
+        # Wait for Anvil to be ready
         if (Wait-ForPort -Port $ANVIL_PORT -Timeout 10) {
-            Start-Sleep -Seconds 1
-            
-            # Verify that Anvil is running
-            if (Test-Port -Port $ANVIL_PORT) {
-                Print-Success "Anvil started successfully"
-                Print-Success "✅ State persistence: ENABLED"
-                Print-Info "   📁 State file: $ANVIL_STATE_FILE"
-                if ($stateExists) {
-                    Print-Info "   ✅ Previous state restored ($stateSize)"
-                }
-                else {
-                    Print-Info "   📝 New state will be saved automatically"
-                }
-            }
-            
-            # Show available accounts
-            Print-Info "Deployer account: $DEPLOYER_ADDRESS"
-            Print-Info "Initial balance: 10,000 ETH"
-            
-            Pop-Location
             return $true
         }
         else {
-            Print-Error "Anvil could not start correctly"
-            if (-not $process.HasExited) {
-                $process.Kill()
-            }
-            Pop-Location
+            Print-Error "Anvil did not start correctly (port not open)"
             return $false
         }
     }
     catch {
         Print-Error "Error starting Anvil: $($_.Exception.Message)"
-        Pop-Location
         return $false
     }
 }
@@ -965,23 +1012,29 @@ function Deploy-Contract {
     
     $deployOutput | Out-File -FilePath $DEPLOY_LOG_FILE -Encoding UTF8
     
+    # Convert output to single string for regex matching
+    # IMPORTANT: If $deployOutput is an array, -match returns matches but doesn't set $matches variable
+    $deployOutputString = $deployOutput -join "`n"
+    
     # Extract contract address from output
     $contractAddress = $null
     
-    # Search for pattern "Contract Address: 0x..."
-    if ($deployOutput -match 'Contract Address:\s*(0x[a-fA-F0-9]{40})') {
+    # 1. Try "Contract Address: 0x..."
+    if ($deployOutputString -match 'Contract Address:\s*(0x[a-fA-F0-9]{40})') {
         $contractAddress = $matches[1]
     }
-    # Search for pattern "deployed at: 0x..."
-    elseif ($deployOutput -match 'deployed at:\s*(0x[a-fA-F0-9]{40})') {
-        $contractAddress = $matches[1]
+    
+    # 2. Try "deployed at: 0x..." (This is what appears in your logs: "SupplyChain deployed at: 0x...")
+    if (-not $contractAddress) {
+        if ($deployOutputString -match 'deployed at:\s*(0x[a-fA-F0-9]{40})') {
+            $contractAddress = $matches[1]
+        }
     }
-    # Search for any 42-character address (0x + 40 hex)
-    elseif ($deployOutput -match '\b(0x[a-fA-F0-9]{40})\b') {
-        # Take the first address found (probably the contract)
-        $allMatches = [regex]::Matches($deployOutput, '\b(0x[a-fA-F0-9]{40})\b')
+    
+    # 3. Fallback: Search for any 42-character address
+    if (-not $contractAddress) {
+        $allMatches = [regex]::Matches($deployOutputString, '\b(0x[a-fA-F0-9]{40})\b')
         if ($allMatches.Count -gt 0) {
-            # Filter out deployer address
             foreach ($match in $allMatches) {
                 if ($match.Value -ne $DEPLOYER_ADDRESS) {
                     $contractAddress = $match.Value
@@ -1158,57 +1211,56 @@ function Start-FrontendService {
     # Create empty log file
     "" | Out-File -FilePath $FRONTEND_LOG_FILE -Encoding UTF8
     
-    # Start Next.js in background using Start-Process with redirection
-    $processInfo = New-Object System.Diagnostics.ProcessStartInfo
-    $processInfo.FileName = "npm"
-    $processInfo.Arguments = "run dev"
-    $processInfo.WorkingDirectory = $WEB_DIR
-    $processInfo.UseShellExecute = $false
-    $processInfo.RedirectStandardOutput = $true
-    $processInfo.RedirectStandardError = $true
-    $processInfo.CreateNoWindow = $true
-    
-    $process = New-Object System.Diagnostics.Process
-    $process.StartInfo = $processInfo
-    
-    # Configure event handlers to capture output
-    $outputHandler = {
-        if (-not [string]::IsNullOrEmpty($EventArgs.Data)) {
-            Add-Content -Path $FRONTEND_LOG_FILE -Value $EventArgs.Data -Encoding UTF8
+    # Determine npm executable
+    $npmExecutable = "npm"
+    if ($IsWindows -or $env:OS -like "*Windows*") {
+        # On Windows with UseShellExecute=false, we need the .cmd file
+        $npmCommand = Get-Command npm -ErrorAction SilentlyContinue
+        if ($npmCommand) {
+            # Try to find npm.cmd in the same directory
+            $npmDir = Split-Path $npmCommand.Source -Parent
+            $npmCmdPath = Join-Path $npmDir "npm.cmd"
+            if (Test-Path $npmCmdPath) {
+                $npmExecutable = $npmCmdPath
+            }
+            else {
+                # Fallback to just npm.cmd hoping it is in PATH
+                $npmExecutable = "npm.cmd"
+            }
+        }
+        else {
+             $npmExecutable = "npm.cmd"
         }
     }
+
+    # Start Next.js in a new visible window (more reliable on Windows)
+    Print-Step "Starting Next.js server in a new window..."
     
-    $errorHandler = {
-        if (-not [string]::IsNullOrEmpty($EventArgs.Data)) {
-            Add-Content -Path $FRONTEND_LOG_FILE -Value $EventArgs.Data -Encoding UTF8
-        }
-    }
-    
-    $process.add_OutputDataReceived($outputHandler)
-    $process.add_ErrorDataReceived($errorHandler)
+    $command = "Write-Host '=== NEXT.JS FRONTEND ===' -ForegroundColor Cyan; Write-Host 'Do not close this window!' -ForegroundColor Yellow; cd '$WEB_DIR'; npm run dev"
     
     try {
-        $process.Start() | Out-Null
-        $process.BeginOutputReadLine()
-        $process.BeginErrorReadLine()
+        Start-Process powershell -ArgumentList "-NoExit", "-Command", "$command"
         
-        $process.Id | Out-File -FilePath $FRONTEND_PID_FILE -Encoding ASCII
-        
-        Print-Info "Frontend started with PID: $($process.Id)"
-        Print-Info "Logs: $FRONTEND_LOG_FILE"
+        Print-Success "Frontend process started in a new window"
+        Print-Info "Please keep the Frontend window open."
         
         # Wait for frontend to be ready
-        if (Wait-ForPort -Port $FRONTEND_PORT -Timeout 30) {
+        if (Wait-ForPort -Port $FRONTEND_PORT -Timeout 60) {
             Print-Success "Frontend started successfully"
             Print-Info "URL: http://localhost:$FRONTEND_PORT"
             Pop-Location
             return $true
         }
         else {
-            Print-Error "Frontend could not start correctly"
-            if (-not $process.HasExited) {
-                $process.Kill()
+            # Check if port is in use anyway
+            if (Test-Port -Port $FRONTEND_PORT) {
+                Print-Success "Frontend is running (detected on port $FRONTEND_PORT)"
+                Print-Info "URL: http://localhost:$FRONTEND_PORT"
+                Pop-Location
+                return $true
             }
+            
+            Print-Error "Frontend could not start correctly or timed out"
             Pop-Location
             return $false
         }
@@ -1262,9 +1314,9 @@ function Stop-Services {
     
     if ($frontendPids.Count -gt 0) {
         Print-Step "Stopping Frontend (PIDs: $($frontendPids -join ', '))..."
-        foreach ($pid in $frontendPids) {
+        foreach ($procId in $frontendPids) {
             try {
-                Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+                Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
             }
             catch {
                 # Process already terminated
@@ -1273,9 +1325,9 @@ function Stop-Services {
         Start-Sleep -Seconds 2
         
         # Force if still running
-        foreach ($pid in $frontendPids) {
-            if (Get-Process -Id $pid -ErrorAction SilentlyContinue) {
-                Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+        foreach ($procId in $frontendPids) {
+            if (Get-Process -Id $procId -ErrorAction SilentlyContinue) {
+                Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
             }
         }
         
@@ -1317,9 +1369,9 @@ function Stop-Services {
     
     if ($anvilPids.Count -gt 0) {
         Print-Step "Stopping Anvil (PIDs: $($anvilPids -join ', '))..."
-        foreach ($pid in $anvilPids) {
+        foreach ($procId in $anvilPids) {
             try {
-                Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+                Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
             }
             catch {
                 # Process already terminated
@@ -1328,9 +1380,9 @@ function Stop-Services {
         Start-Sleep -Seconds 2
         
         # Force if still running
-        foreach ($pid in $anvilPids) {
-            if (Get-Process -Id $pid -ErrorAction SilentlyContinue) {
-                Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+        foreach ($procId in $anvilPids) {
+            if (Get-Process -Id $procId -ErrorAction SilentlyContinue) {
+                Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
             }
         }
         
@@ -1427,7 +1479,7 @@ function Show-Status {
 function Show-MetamaskInstructions {
     Print-Header "MetaMask Configuration"
     
-    Write-Host "📝 METAMASK CONFIGURATION INSTRUCTIONS" -ForegroundColor Yellow
+    Write-Host "METAMASK CONFIGURATION INSTRUCTIONS" -ForegroundColor Yellow
     Write-Host ""
     
     Write-Host "1. Add Anvil Local Network:" -ForegroundColor Cyan
@@ -1453,7 +1505,7 @@ function Show-MetamaskInstructions {
     Write-Host ""
     Write-Host "   • Click 'Import'"
     Write-Host ""
-    Write-Host "   ⚠ IMPORTANT: This private key is ONLY for local development." -ForegroundColor Yellow
+    Write-Host "   [WARNING] IMPORTANT: This private key is ONLY for local development." -ForegroundColor Yellow
     Write-Host "   NEVER use on mainnet or with real funds."
     Write-Host ""
     
@@ -1488,7 +1540,7 @@ function Show-MetamaskInstructions {
 function Start-FrontendOnly {
     Ensure-LogsDir
     
-    Print-Header "🚀 Start Frontend Only"
+    Print-Header "Start Frontend Only"
     
     # Verify Anvil is running
     if (-not (Test-Port -Port $ANVIL_PORT)) {
@@ -1516,7 +1568,7 @@ function Start-FrontendOnly {
 }
 
 function Stop-FrontendOnly {
-    Print-Header "🛑 Stop Frontend Only"
+    Print-Header "Stop Frontend Only"
     
     $stopped = $false
     
@@ -1553,9 +1605,9 @@ function Stop-FrontendOnly {
     
     if ($frontendPids.Count -gt 0) {
         Print-Step "Stopping Frontend (PIDs: $($frontendPids -join ', '))..."
-        foreach ($pid in $frontendPids) {
+        foreach ($procId in $frontendPids) {
             try {
-                Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+                Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
             }
             catch {
                 # Process already terminated
@@ -1564,9 +1616,9 @@ function Stop-FrontendOnly {
         Start-Sleep -Seconds 2
         
         # Force if still running
-        foreach ($pid in $frontendPids) {
-            if (Get-Process -Id $pid -ErrorAction SilentlyContinue) {
-                Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+        foreach ($procId in $frontendPids) {
+            if (Get-Process -Id $procId -ErrorAction SilentlyContinue) {
+                Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
             }
         }
         
@@ -1584,7 +1636,7 @@ function Stop-FrontendOnly {
 }
 
 function Restart-FrontendOnly {
-    Print-Header "🔄 Restart Frontend Only"
+    Print-Header "Restart Frontend Only"
     
     Stop-FrontendOnly
     Start-Sleep -Seconds 2
@@ -1626,9 +1678,9 @@ function Stop-AnvilOnly {
     
     if ($anvilPids.Count -gt 0) {
         Print-Step "Stopping Anvil (PIDs: $($anvilPids -join ', '))..."
-        foreach ($pid in $anvilPids) {
+        foreach ($procId in $anvilPids) {
             try {
-                Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+                Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
             }
             catch {
                 # Process already terminated
@@ -1637,9 +1689,9 @@ function Stop-AnvilOnly {
         Start-Sleep -Seconds 2
         
         # Force if still running
-        foreach ($pid in $anvilPids) {
-            if (Get-Process -Id $pid -ErrorAction SilentlyContinue) {
-                Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+        foreach ($procId in $anvilPids) {
+            if (Get-Process -Id $procId -ErrorAction SilentlyContinue) {
+                Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
             }
         }
         
@@ -1665,7 +1717,7 @@ function Stop-AnvilOnly {
 # ============================================================================
 
 function Clean-AnvilState {
-    Print-Header "🧹 Clean Anvil Persistent State"
+    Print-Header "Clean Anvil Persistent State"
     
     $anvilRunning = Test-Port -Port $ANVIL_PORT
     
@@ -1736,7 +1788,7 @@ function Start-All {
         exit 1
     }
     
-    Print-Header "🚀 Starting Supply Chain Tracker"
+    Print-Header "Starting Supply Chain Tracker"
     
     # Step 1: Start Anvil
     if (-not (Start-AnvilService)) {
@@ -1769,7 +1821,7 @@ function Start-All {
     }
     
     # Show summary
-    Print-Header "✅ Deployment Completed"
+    Print-Header "Deployment Completed"
     
     Write-Host "All services are running correctly:" -ForegroundColor Green
     Write-Host ""
@@ -1792,11 +1844,11 @@ function Start-All {
 
 function Show-Help {
     Write-Host ""
-    Write-Host "╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║                                                               ║" -ForegroundColor Cyan
-    Write-Host "║        Supply Chain Tracker - Deployment Script              ║" -ForegroundColor Cyan
-    Write-Host "║                                                               ║" -ForegroundColor Cyan
-    Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host "=================================================================" -ForegroundColor Cyan
+    Write-Host "                                                               " -ForegroundColor Cyan
+    Write-Host "        Supply Chain Tracker - Deployment Script              " -ForegroundColor Cyan
+    Write-Host "                                                               " -ForegroundColor Cyan
+    Write-Host "=================================================================" -ForegroundColor Cyan
     Write-Host ""
     
     Write-Host "USAGE:" -ForegroundColor Yellow
@@ -1804,27 +1856,27 @@ function Show-Help {
     Write-Host ""
     
     Write-Host "MAIN COMMANDS:" -ForegroundColor Yellow
-    Write-Host "  start           Start entire stack (Anvil + Deploy + Frontend)" -ForegroundColor Green
+    Write-Host '  start           Start entire stack (Anvil, Deploy, Frontend)' -ForegroundColor Green
     Write-Host "  stop            Stop all services" -ForegroundColor Green
     Write-Host "  restart         Restart all services" -ForegroundColor Green
     Write-Host "  status          Show service status" -ForegroundColor Green
     Write-Host "  metamask        Show MetaMask configuration instructions" -ForegroundColor Green
-    Write-Host "  clean           Clean Anvil persistent state (requires Anvil stopped)" -ForegroundColor Green
+    Write-Host '  clean           Clean Anvil persistent state (requires Anvil stopped)' -ForegroundColor Green
     Write-Host ""
     
     Write-Host "CONFIGURATION COMMANDS:" -ForegroundColor Yellow
     Write-Host "  setup           Verify requirements and install missing dependencies" -ForegroundColor Green
-    Write-Host "  env             Configure environment variables (.env.local)" -ForegroundColor Green
+    Write-Host '  env             Configure environment variables (.env.local)' -ForegroundColor Green
     Write-Host ""
     
-    Write-Host "FRONTEND COMMANDS (without affecting Anvil/Contract):" -ForegroundColor Yellow
-    Write-Host "  frontend start  Start only frontend (requires Anvil running)" -ForegroundColor Green
+    Write-Host 'FRONTEND COMMANDS (without affecting Anvil/Contract):' -ForegroundColor Yellow
+    Write-Host '  frontend start  Start only frontend (requires Anvil running)' -ForegroundColor Green
     Write-Host "  frontend stop   Stop only frontend" -ForegroundColor Green
     Write-Host "  frontend restart Restart only frontend" -ForegroundColor Green
     Write-Host ""
     
     Write-Host "OPTIONS:" -ForegroundColor Yellow
-    Write-Host "  --yes, --auto, -y  Automatic mode (no confirmations)" -ForegroundColor Green
+    Write-Host '  --yes, --auto, -y  Automatic mode (no confirmations)' -ForegroundColor Green
     Write-Host ""
     
     Write-Host "EXAMPLES:" -ForegroundColor Yellow
@@ -1847,7 +1899,7 @@ function Show-Help {
     Write-Host "  # Start everything"
     Write-Host "  .\deploy.ps1 start"
     Write-Host ""
-    Write-Host "  # Stop only frontend (Anvil and contract continue running)"
+    Write-Host '  # Stop only frontend (Anvil and contract continue running)'
     Write-Host "  .\deploy.ps1 frontend stop"
     Write-Host ""
     Write-Host "  # Restart only frontend after changes"
@@ -1887,8 +1939,6 @@ function Show-Help {
 # ============================================================================
 
 function Main {
-    param([string[]]$Args)
-    
     # Verify we are in the correct directory
     if (-not (Test-Path $SC_DIR) -or -not (Test-Path $WEB_DIR)) {
         Print-Error "This script must be run from the project root"
@@ -1896,9 +1946,12 @@ function Main {
         exit 1
     }
     
+    # Get script arguments (passed from command line)
+    $scriptArgs = $args
+    
     # Check automatic mode flags
     $script:AUTO_INSTALL = $false
-    foreach ($arg in $Args) {
+    foreach ($arg in $scriptArgs) {
         if ($arg -in @("--yes", "--auto", "-y")) {
             $script:AUTO_INSTALL = $true
             break
@@ -1906,10 +1959,26 @@ function Main {
     }
     
     # Process command (filter out flags)
-    $filteredArgs = $Args | Where-Object { $_ -notin @("--yes", "--auto", "-y") }
+    $filteredArgs = $scriptArgs | Where-Object { $_ -notin @("--yes", "--auto", "-y") }
     $command = if ($filteredArgs.Count -gt 0) { $filteredArgs[0] } else { "" }
     $subCommand = if ($filteredArgs.Count -gt 1) { $filteredArgs[1] } else { "" }
-    $remainingArgs = if ($filteredArgs.Count -gt 1) { $filteredArgs[1..($filteredArgs.Count-1)] } else { @() }
+    # For env command, remainingArgs should be all args after "env"
+    # For frontend command, remainingArgs should be all args after "frontend"
+    if ($command -in @("env", "environment")) {
+        $remainingArgs = if ($filteredArgs.Count -gt 1) { $filteredArgs[1..($filteredArgs.Count-1)] } else { @() }
+    }
+    elseif ($command -eq "frontend") {
+        $remainingArgs = if ($filteredArgs.Count -gt 2) { $filteredArgs[2..($filteredArgs.Count-1)] } else { @() }
+    }
+    else {
+        $remainingArgs = @()
+    }
+    
+    # Handle help commands first (before switch to avoid default case)
+    if ($command -eq "" -or $command -in @("help", "--help", "-h")) {
+        Show-Help
+        return
+    }
     
     switch ($command.ToLower()) {
         "start" {
@@ -1924,7 +1993,7 @@ function Main {
             Start-All
         }
         "setup" {
-            Start-PreStartCheck
+            Start-PreStartCheck | Out-Null
         }
         { $_ -in "env", "environment" } {
             Set-EnvironmentVariables -RemainingArgs $remainingArgs
@@ -1960,9 +2029,6 @@ function Main {
         { $_ -in "clean", "reset" } {
             Clean-AnvilState
         }
-        { $_ -in "help", "--help", "-h" } {
-            Show-Help
-        }
         default {
             Print-Error "Invalid command: $command"
             Write-Host ""
@@ -1974,4 +2040,3 @@ function Main {
 
 # Execute main with all arguments
 Main $args
-

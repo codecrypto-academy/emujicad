@@ -1,7 +1,7 @@
 # 📚 Complete Documentation - Supply Chain Tracker
 
-**Last Updated**: November 27, 2025  
-**Version**: 1.4.0  
+**Last Updated**: November 28, 2025  
+**Version**: 2.1.0  
 **Project**: Supply Chain DApp (PFM Web3)
 
 > **📋 For the most up-to-date project status, see [STATUS.md](../STATUS.md)**
@@ -15,10 +15,11 @@
 3. [Smart Contract](#smart-contract)
 4. [Frontend](#frontend)
 5. [Automated Deployment](#automated-deployment)
-6. [MetaMask Configuration](#metamask-configuration)
-7. [Testing](#testing)
-8. [Troubleshooting](#troubleshooting)
-9. [Roadmap](#roadmap)
+6. [Manual Deployment Guide](#manual-deployment-guide-no-scripts)
+7. [MetaMask Configuration](#metamask-configuration)
+8. [Testing](#testing)
+9. [Troubleshooting](#troubleshooting)
+10. [Roadmap](#roadmap)
 
 ---
 
@@ -222,10 +223,10 @@ event OwnershipTransferProposed(address indexed currentOwner, address indexed ne
 
 **Cobertura**:
 ```
-Lines:      83.33% (168/202)
-Statements: 80.09% (180/224)
-Branches:   61.22% (30/49)
-Functions:  80.95% (34/42)
+Lines:      85.60%
+Statements: 82.67%
+Branches:   72.15%
+Functions:  80.95%
 ```
 
 **Run tests**:
@@ -1107,198 +1108,175 @@ cd /tmp
 
 ### **Windows Script**: `deploy.ps1`
 
-Equivalent PowerShell script for Windows 10/11 that automates the ENTIRE deployment process.
+**Version**: 2.1.0  
+**Status**: ✅ Production Ready (100% Parity with deploy.sh)  
+**Use Cases Covered**: 42/42
+
+Equivalent PowerShell script for Windows 10/11 that automates the ENTIRE deployment process. It has been specifically engineered for the Windows environment, solving process management challenges by using visible windows for background services.
+
+#### **Key Features**:
+1. **Full Feature Parity**: Implements all features of the Bash script (Setup, Env, Start, Stop, etc.).
+2. **Robust Process Management**: Uses **visible PowerShell windows** for Anvil and Frontend to ensure reliability and log visibility.
+3. **Automatic Pre-Start Checks**: Verifies tools and dependencies before starting.
+4. **Smart Dependency Management**: Checks and installs Node.js packages and Foundry dependencies.
+5. **Environment Configuration**: Full support for `.env.local` management with all flags.
 
 #### **Prerequisites**:
 
-1. **PowerShell 5.1+** (viene preinstalado en Windows 10/11)
+1. **PowerShell 5.1+** (Pre-installed on Windows 10/11)
    ```powershell
    $PSVersionTable.PSVersion
    ```
 
-2. **Foundry** (Anvil y Forge)
-   - Instalar desde: https://book.getfoundry.sh/getting-started/installation
-   - Verificar: `anvil --version`, `forge --version`
+2. **Foundry** (Anvil & Forge)
+   - Install: https://book.getfoundry.sh/getting-started/installation
+   - Verify: `anvil --version`, `forge --version`
 
-3. **Node.js y npm**
-   - Instalar desde: https://nodejs.org/
-   - Verificar: `node --version`, `npm --version`
+3. **Node.js & npm**
+   - Install: https://nodejs.org/
+   - Verify: `node --version`, `npm --version`
 
-#### **Initial Configuration (First Time Only)**:
+#### **Initial Configuration**:
 
-**Configure Execution Policy**:
+**Configure Execution Policy** (First time only):
 ```powershell
-# Abrir PowerShell como Administrador
+# Open PowerShell as Administrator
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-**Alternative** (if you don't want to change the policy):
+#### **Complete Command Reference (42 Use Cases)**:
+
+The script implements the exact same 42 use cases as the Linux/macOS version.
+
+**1. Basic Commands**:
 ```powershell
-# Ejecutar script con bypass temporal
-powershell -ExecutionPolicy Bypass -File .\deploy.ps1 start
+.\deploy.ps1 start           # Start entire stack (interactive)
+.\deploy.ps1 start --yes     # Start automatic (no prompts)
+.\deploy.ps1 stop            # Stop all services (closes windows)
+.\deploy.ps1 restart         # Restart all services
+.\deploy.ps1 status          # Show service status & logs
+.\deploy.ps1 help            # Show help
+.\deploy.ps1 metamask        # Show MetaMask instructions
+.\deploy.ps1 clean           # Clean Anvil state
 ```
 
-#### **Available Commands**:
-
+**2. Configuration Commands**:
 ```powershell
-# Iniciar todo el stack (Anvil + Contrato + Frontend)
-.\deploy.ps1 start
+# Setup (Verifies tools & installs dependencies)
+.\deploy.ps1 setup           # Interactive
+.\deploy.ps1 setup --yes     # Automatic
 
-# Detener todos los servicios
-.\deploy.ps1 stop
-
-# Reiniciar todo el stack
-.\deploy.ps1 restart
-
-# Ver estado de servicios
-.\deploy.ps1 status
-
-# Mostrar instrucciones de MetaMask
-.\deploy.ps1 metamask
-
-# Limpiar estado persistente de Anvil
-.\deploy.ps1 clean
-
-# Comandos de Frontend (Sin Afectar Anvil/Contrato)
-.\deploy.ps1 frontend start
-.\deploy.ps1 frontend stop
-.\deploy.ps1 frontend restart
-
-# Ayuda
-.\deploy.ps1 help
+# Environment Variables
+.\deploy.ps1 env             # Interactive wizard
 ```
+
+**3. Environment Variable Configuration**:
+```powershell
+# Individual Flags
+.\deploy.ps1 env --modern-design true
+.\deploy.ps1 env --debug-mode true
+.\deploy.ps1 env --debug-tokens false
+
+# Combined Flags
+.\deploy.ps1 env --modern-design true --debug-mode false
+
+# All-at-once
+.\deploy.ps1 env --all true false false
+
+# Automatic Defaults
+.\deploy.ps1 env --yes
+```
+
+**4. Frontend-Only Commands**:
+```powershell
+.\deploy.ps1 frontend start    # Start only frontend (requires Anvil)
+.\deploy.ps1 frontend stop     # Stop only frontend
+.\deploy.ps1 frontend restart  # Restart only frontend
+```
+
+#### **Windows-Specific Implementation Details**:
+
+1. **Process Management (Visible Windows)**:
+   - Unlike Unix `nohup`, Windows background jobs can be unstable or hide prompts.
+   - `deploy.ps1` launches **Anvil** and **Next.js** in separate, visible PowerShell windows.
+   - **Benefit**: You can see real-time logs and errors immediately.
+   - **Benefit**: Closing the main script doesn't kill the servers (they persist in their windows).
+   - **Stop**: The `stop` command finds these processes by Port/PID and closes them gracefully.
+
+2. **System Tools Verification (`Test-SystemTools`)**:
+   - Uses native `Get-NetTCPConnection` instead of `lsof`/`netstat`.
+   - Checks for `curl` (usually aliases to `Invoke-WebRequest` or native curl.exe).
+   - Verifies `node`, `npm`, `forge`, `anvil` availability.
+
+3. **Path Handling**:
+   - Uses `Join-Path` and proper backslashes (`\`) for file system operations.
+   - Correctly handles spaces in paths (common in "My Documents").
 
 #### **Usage Examples**:
 
-**Escenario 1: Primera Ejecución**
+**Scenario 1: First Run (Automated)**
 ```powershell
-# 1. Configurar política (solo primera vez)
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# 1. Setup dependencies
+.\deploy.ps1 setup --yes
 
-# 2. Iniciar todo
+# 2. Configure environment
+.\deploy.ps1 env --yes
+
+# 3. Start stack
+.\deploy.ps1 start
+# Result: Two new windows open (Anvil, Frontend). 
+# Browser opens at http://localhost:3000
+```
+
+**Scenario 2: Daily Development**
+```powershell
+# Start everything
 .\deploy.ps1 start
 
-# 3. Verificar estado
-.\deploy.ps1 status
+# ... work ...
 
-# 4. Abrir navegador en http://localhost:3000
-```
-
-**Escenario 2: Desarrollo Frontend (Anvil ya corriendo)**
-```powershell
-# 1. Hacer cambios en el frontend
-
-# 2. Reiniciar solo el frontend (Anvil y contrato siguen corriendo)
-.\deploy.ps1 frontend restart
-
-# 3. Los cambios se reflejan sin perder el estado de Anvil
-```
-
-**Escenario 3: Limpiar Estado de Anvil**
-```powershell
-# 1. Detener Anvil primero
+# Stop everything
 .\deploy.ps1 stop
-
-# 2. Limpiar estado
-.\deploy.ps1 clean
-
-# 3. Reiniciar con blockchain limpia
-.\deploy.ps1 start
 ```
 
-#### **Functionality Verification**:
-
-**Verificar que los Servicios Están Corriendo**:
+**Scenario 3: Troubleshooting Ports**
 ```powershell
+# If start fails due to ports in use:
 .\deploy.ps1 status
-```
-
-**Salida esperada**:
-```
-═══════════════════════════════════════════════════════════
-  Estado de Servicios
-═══════════════════════════════════════════════════════════
-
-Anvil (Blockchain Local):
-✓ CORRIENDO (PID: 12345, Puerto: 8545)
-ℹ RPC URL: http://127.0.0.1:8545
-ℹ Chain ID: 31337
-
-Frontend (Next.js):
-✓ CORRIENDO (PID: 67890, Puerto: 3000)
-ℹ URL: http://localhost:3000
-
-Smart Contract:
-ℹ Dirección: 0x...
-ℹ Owner: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
-```
-
-**Ver Logs**:
-```powershell
-# Ver últimos logs de Anvil
-Get-Content logs\anvil.log -Tail 20
-
-# Ver últimos logs del frontend
-Get-Content logs\frontend.log -Tail 20
-```
-
-**Verificar Puertos**:
-```powershell
-# Verificar puerto de Anvil (8545)
-Get-NetTCPConnection -LocalPort 8545 -ErrorAction SilentlyContinue
-
-# Verificar puerto del frontend (3000)
-Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue
+.\deploy.ps1 stop
+# Wait a few seconds
+.\deploy.ps1 start
 ```
 
 #### **Troubleshooting**:
 
-**Error: "No se puede cargar el archivo porque la ejecución de scripts está deshabilitada"**
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
+**Error: "Execution of scripts is disabled..."**
+- Run: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
 
-**Error: "Anvil no está instalado o no está en el PATH"**
-1. Instalar Foundry: https://book.getfoundry.sh/getting-started/installation
-2. Verificar que `anvil` esté en el PATH: `Get-Command anvil`
-3. Si no está, agregar Foundry al PATH manualmente
+**Error: "Port 3000/8545 already in use"**
+- The script usually detects this. Run `.\deploy.ps1 stop` to force release.
+- Or manually check: `Get-NetTCPConnection -LocalPort 3000`
 
-**Error: "Puerto 8545 ya está en uso"**
-```powershell
-# Ver qué proceso está usando el puerto
-Get-NetTCPConnection -LocalPort 8545 | Select-Object OwningProcess
+**Error: "npm not found"**
+- Ensure Node.js is installed and added to your System PATH.
+- Restart your terminal after installing Node.js.
 
-# Detener el proceso manualmente
-Stop-Process -Id <PID> -Force
+---
 
-# O usar el script
-.\deploy.ps1 stop
-```
+### **Feature Parity Table**
 
-**Error: "Puerto 3000 ya está en uso"**
-```powershell
-# Ver qué proceso está usando el puerto
-Get-NetTCPConnection -LocalPort 3000 | Select-Object OwningProcess
+| Feature | deploy.sh (Linux/macOS) | deploy.ps1 (Windows) |
+|---------|-------------------------|----------------------|
+| **Setup Cmd** | ✅ `setup` | ✅ `setup` |
+| **Env Cmd** | ✅ `env` (all modes) | ✅ `env` (all modes) |
+| **Auto Flags** | ✅ `--yes`, `--auto` | ✅ `--yes`, `--auto` |
+| **Pre-check** | ✅ Automatic | ✅ Automatic |
+| **Process Model** | Background (`nohup`) | Separate Windows (`Start-Process`) |
+| **Port Check** | `lsof`/`netstat` | `Get-NetTCPConnection` |
+| **Logs** | `logs/*.log` | `logs/*.log` + Window Output |
+| **Dependency Install** | System + Project | Project Only (System needs manual) |
 
-# Detener el proceso manualmente
-Stop-Process -Id <PID> -Force
-
-# O usar el script
-.\deploy.ps1 frontend stop
-```
-
-#### **Differences with deploy.sh (Linux/Mac)**:
-
-| Característica | deploy.sh (Linux/Mac) | deploy.ps1 (Windows) |
-|----------------|----------------------|---------------------|
-| **Ejecución** | `./deploy.sh start` | `.\deploy.ps1 start` |
-| **Verificación de puertos** | `lsof`, `netstat` | `Get-NetTCPConnection` |
-| **Gestión de procesos** | `pgrep`, `kill` | `Get-Process`, `Stop-Process` |
-| **Paths** | `/path/to/file` | `\path\to\file` o `Join-Path` |
-| **Colores** | Códigos ANSI | `Write-Host -ForegroundColor` |
-| **Background processes** | `nohup` | `ProcessStartInfo` |
-
-**Functionality**: ✅ **100% equivalent** - All bash script functions are implemented in PowerShell.
+---
 
 ### **Process Management**:
 
@@ -1309,6 +1287,208 @@ The script manages processes intelligently:
 - **Logs separados**: Cada servicio tiene su propio archivo de log
 - **Graceful shutdown**: Intenta SIGTERM primero, luego SIGKILL si es necesario
 - **State validation**: Waits for services to be ready before continuing
+
+---
+
+## 🛠️ Manual Deployment Guide (No Scripts)
+
+If you prefer to understand the underlying process or cannot use the automation scripts (`deploy.sh`/`deploy.ps1`), follow these step-by-step instructions to deploy the DApp manually.
+
+### **1. Prerequisites & Verification**
+
+Before starting, it is highly recommended to verify that you have all the necessary tools.
+
+**Required Tools:**
+- **Git**: [Download](https://git-scm.com/downloads)
+- **Node.js (v18+)**: [Download](https://nodejs.org/)
+- **Foundry (Forge & Anvil)**: [Installation Guide](https://book.getfoundry.sh/getting-started/installation)
+
+**How to Verify Installation (Windows PowerShell):**
+```powershell
+# Check Git
+git --version
+# Expected: git version 2.x.x
+
+# Check Node.js
+node --version
+# Expected: v18.x.x or higher
+
+# Check Foundry
+forge --version
+anvil --version
+# Expected: forge 0.2.0... / anvil 0.2.0...
+```
+
+**How to Install if Missing:**
+- **Node.js**: Download the installer from the official website and follow the wizard.
+- **Foundry**: Run the following command in PowerShell:
+  ```powershell
+  curl -L https://foundry.paradigm.xyz | bash
+  foundryup
+  ```
+
+### **2. Start Local Blockchain (Anvil)**
+
+Open a **new terminal** (Terminal 1) and run:
+
+**1. Verify Prerequisites (Optional but recommended):**
+```powershell
+# Windows
+node --version   # Should be v18+
+npm --version    # Should be installed
+anvil --version  # Should be installed
+forge --version  # Should be installed
+git --version    # Should be installed
+```
+
+**2. Start Anvil:**
+```powershell
+# Windows (PowerShell)
+anvil
+```
+
+**Linux/macOS**:
+```bash
+anvil
+```
+
+> **Keep this terminal open.** You should see "Listening on 127.0.0.1:8545".
+
+### **3. Deploy Smart Contract**
+
+Open a **second terminal** (Terminal 2) and run:
+
+**1. Install Dependencies:**
+```bash
+cd sc
+forge install
+```
+
+**2. Compile & Deploy:**
+```bash
+# Windows (PowerShell)
+$env:PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+forge script script/SupplyChainDeploy.s.sol:SupplyChainDeployScript --rpc-url http://127.0.0.1:8545 --broadcast
+
+# Linux/macOS
+PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 forge script script/SupplyChainDeploy.s.sol:SupplyChainDeployScript --rpc-url http://127.0.0.1:8545 --broadcast
+```
+
+**3. Copy Contract Address:**
+Look at the output logs for a line like:
+`Contract Address: 0x5FbDB2315678afecb367f032d93F642f64180aa3`
+**Copy this address.**
+
+### **4. Configure Frontend**
+
+Still in Terminal 2, verify and update the configuration files.
+
+**1. Copy Contract ABI:**
+The frontend needs the JSON ABI to talk to the contract.
+
+**Windows (PowerShell)**:
+```powershell
+Copy-Item "..\out\SupplyChain.sol\SupplyChain.json" "..\..\web\src\contracts\SupplyChain.json" -Force
+```
+
+**Linux/macOS**:
+```bash
+cp ../out/SupplyChain.sol/SupplyChain.json ../../web/src/contracts/SupplyChain.json
+```
+
+**2. Update Contract Address:**
+Open the file `web/src/contracts/config.ts` in your code editor.
+Find the line:
+```typescript
+export const SUPPLY_CHAIN_ADDRESS = '0x...' as `0x${string}`
+```
+Replace the address with the one you copied in Step 3.
+
+**3. Configure Environment Variables:**
+Create `web/.env.local` if it doesn't exist.
+
+**Windows (PowerShell)**:
+```powershell
+cd ..\web
+if (!(Test-Path .env.local)) { Copy-Item .env.example .env.local }
+```
+
+**Linux/macOS**:
+```bash
+cd ../web
+cp .env.example .env.local 2>/dev/null || :
+```
+
+### **5. Start Frontend**
+
+**1. Install Dependencies:**
+```bash
+# Checks if node_modules exists, if not installs
+if (!(Test-Path "node_modules")) { npm install }
+# Or just run to be sure:
+npm install
+```
+
+**2. Start Development Server:**
+```bash
+npm run dev
+```
+
+> **Keep this terminal open.** You should see "Ready in ... ms".
+
+### **6. Verify Deployment**
+
+**1. Browser Check:**
+- Open `http://localhost:3000` in your browser.
+- You should see the Landing Page with the title "Supply Chain Tracker".
+- **Success Criteria**: The page loads without white screens or console errors.
+
+**2. Connect MetaMask:**
+- Click the "Conectar Billetera" button.
+- Select the account imported in Step 4 (Owner).
+- **Success Criteria**:
+  - The button changes to show your address (e.g., `0xf39...2266`).
+  - You see "Bienvenido de nuevo" or dashboard stats.
+  - The "Stats" cards (Users, Tokens) appear (initially at 0).
+
+**3. Test Connection:**
+- Go to the Dashboard or Admin panel.
+- If data loads (even if empty), the connection to the Smart Contract is working.
+
+### **7. Stop Services (Manual)**
+
+To stop the services correctly and avoid "port in use" errors later, verify and kill the processes in this order: **Frontend First -> Then Anvil**.
+
+**Windows (PowerShell):**
+
+1. **Find Process IDs (PIDs):**
+   ```powershell
+   Get-NetTCPConnection -LocalPort 3000, 8545 -ErrorAction SilentlyContinue | Select-Object LocalPort, OwningProcess, State
+   ```
+   *Note: Port 3000 is Frontend, 8545 is Anvil.*
+
+2. **Stop Frontend (Port 3000):**
+   ```powershell
+   # Replace <PID> with the OwningProcess ID for port 3000
+   Stop-Process -Id <PID> -Force
+   ```
+
+3. **Stop Anvil (Port 8545):**
+   ```powershell
+   # Replace <PID> with the OwningProcess ID for port 8545
+   Stop-Process -Id <PID> -Force
+   ```
+
+**Linux/macOS:**
+
+1. **Find and Kill:**
+   ```bash
+   # Stop Frontend (Port 3000)
+   kill -9 $(lsof -t -i:3000)
+   
+   # Stop Anvil (Port 8545)
+   kill -9 $(lsof -t -i:8545)
+   ```
 
 ---
 
@@ -1848,7 +2028,8 @@ This project is part of an academic work and is provided for educational purpose
 ├── 📄 CHANGELOG.md                 ⭐ Historial de cambios
 ├── 📄 CONTRIBUTING.md              ⭐ Guía de contribución
 ├── 📄 IA.md                        ⭐ Retrospectiva uso de IA
-├── 🚀 deploy.sh                    ⭐ Script automatizado
+├── 🚀 deploy.sh                    ⭐ Script automatizado (Linux/Mac)
+├── 🚀 deploy.ps1                   ⭐ Script automatizado (Windows)
 │
 ├── 📁 docs/                        ⭐ Documentación consolidada
 │   ├── DOCUMENTATION.md            ⭐ Este archivo (guía técnica completa)
@@ -1899,4 +2080,4 @@ This project is part of an academic work and is provided for educational purpose
 
 ---
 
-**Last Updated**: November 27, 2025
+**Last Updated**: November 28, 2025

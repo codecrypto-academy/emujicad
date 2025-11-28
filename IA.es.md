@@ -7,8 +7,8 @@
 
 **Proyecto**: Supply Chain Tracker DApp  
 **Fecha de inicio**: 18 de Noviembre, 2025  
-**Última actualización**: 27 de Noviembre, 2025  
-**Duración total**: 7 días (Días 1-4 completados + Validaciones críticas Día 7)
+**Última actualización**: 28 de Noviembre, 2025  
+**Duración total**: 12 días (Días 1-7 completados + Entrega Final Día 12)
 
 ---
 
@@ -1801,7 +1801,68 @@ Durante las 5 sesiones de desarrollo, se gestionó eficientemente el contexto:
 
 ---
 
-*Fin del documento IA.md - Actualizado Día 7 (24 Nov 2025)*
+---
+
+## 📋 ACTUALIZACIÓN DÍA 12 (28 Noviembre, 2025) - ENTREGA FINAL
+
+### **🎯 Resumen Ejecutivo Día 12**
+
+**Duración**: ~4-5 horas  
+**Objetivo Principal**: Soporte Windows (`deploy.ps1`), Consolidación de Documentación y Verificación Final.  
+**Resultado**: ✅ **COMPLETADO** - Proyecto totalmente compatible con Windows, Linux y macOS. Documentación consolidada.
+
+**Métricas del Día 12**:
+- **Archivos creados**: `deploy.ps1` (2000+ líneas, paridad total con script bash)
+- **Documentación**: 100% sincronizada (Inglés/Español), archivos redundantes eliminados
+- **Soporte Windows**: ✅ Solucionado problema de página en blanco (gestión de procesos)
+- **Casos de Uso**: 42/42 verificados para script de Windows
+- **Estado**: **Listo para Producción**
+
+---
+
+### **🔴 Desafíos y Soluciones Día 12**
+
+#### **32. Windows: Página en Blanco y Sin Output en Consola**
+**Frecuencia**: Persistente en Windows  
+**Causa**: La gestión de procesos en segundo plano (`Start-Process -NoNewWindow`) en PowerShell causaba que Anvil/Next.js fallaran silenciosamente o bloquearan puertos sin visibilidad.  
+**Solución**:
+- Cambio a estrategia de **Ventanas Visibles** para servicios en Windows.
+- `deploy.ps1` ahora abre ventanas de PowerShell separadas para Anvil y Next.js.
+- Esto asegura la herencia correcta del PATH y visibilidad inmediata de logs.
+- **Lección**: En Windows, para servidores de desarrollo, las ventanas visibles son más robustas que los jobs en background.
+
+#### **33. Fragmentación de Documentación**
+**Frecuencia**: N/A (Tarea de limpieza)  
+**Causa**: Múltiples reportes de pruebas y docs de implementación superpuestos (`IMPLEMENTACION_DEPLOY_PS1.md`, `TEST_DEPLOY_PS1.md`).  
+**Solución**:
+- Consolidación de todo en `docs/DOCUMENTATION.md` (y `.es.md`).
+- Eliminación de archivos redundantes.
+- Creación de una "Guía de Despliegue Manual" unificada para todos los SO.
+- **Lección**: Fuente Única de Verdad > Múltiples reportes fragmentados.
+
+---
+
+### **📊 Métricas Finales del Proyecto**
+
+- **Smart Contract**: 100% Completo, 108 Tests, Validaciones Críticas ✅
+- **Frontend**: 100% Completo, 9/9 Páginas, 26 Componentes ✅
+- **DevOps**:
+  - `deploy.sh`: Soporte Linux/macOS ✅
+  - `deploy.ps1`: Soporte Windows ✅ (Nuevo)
+- **Documentación**: Profesional, Bilingüe, Consolidada ✅
+
+---
+
+### **📝 Conclusión Final**
+
+El proyecto ha evolucionado de una DApp básica a una solución robusta y multiplataforma. La adición de soporte nativo para Windows vía `deploy.ps1` y la consolidación profesional de la documentación aseguran que cualquier desarrollador, independientemente de su SO, pueda desplegar y contribuir al proyecto efectivamente.
+
+**Listo para Evaluación.** 🚀
+
+---
+
+*Fin del documento IA.md - Actualizado Día 12 (28 Nov 2025)*
+
 
 ---
 

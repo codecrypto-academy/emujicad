@@ -13,22 +13,24 @@ git clone <repo-url>
 cd emujicad
 ```
 
-### Paso 2: Dar Permisos al Script
+### Step 2: Give Script Permissions (Linux/macOS)
 
 ```bash
 chmod +x deploy.sh
 ```
 
-### Paso 3: Setup Automático (Recomendado)
+### Step 3: Automatic Setup (Recommended)
 
-El script puede verificar e instalar automáticamente todo lo necesario:
+The script can automatically verify and install everything needed:
 
+**Linux/macOS**:
 ```bash
-# Verificar requisitos e instalar dependencias faltantes
 ./deploy.sh setup
+```
 
-# O en modo automático (sin confirmaciones)
-./deploy.sh setup --yes
+**Windows (PowerShell)**:
+```powershell
+.\deploy.ps1 setup
 ```
 
 Este comando:
@@ -85,26 +87,33 @@ NEXT_PUBLIC_DEBUG_TOKENS=false
 
 **⚠️ IMPORTANTE:** El archivo debe llamarse exactamente **`.env.local`** (con el punto al inicio). El archivo `.env.example` es solo un template de referencia que puedes copiar, pero el archivo real que usa Next.js debe llamarse `.env.local`.
 
-### Paso 5: Iniciar el Proyecto
+### Step 5: Start the Project
 
+**Linux/macOS**:
 ```bash
 ./deploy.sh start
-
-# O en modo automático
-./deploy.sh start --yes
 ```
 
-El script automáticamente:
-1. Verifica que todo esté instalado (si no, te pregunta si quieres instalarlo)
-2. Inicia Anvil (blockchain local)
-3. Despliega el smart contract
-4. Actualiza la configuración del frontend
-5. Inicia el servidor Next.js
+**Windows (PowerShell)**:
+```powershell
+.\deploy.ps1 start
+```
 
-### Paso 6: Configurar MetaMask
+The script automatically:
+1. Verifies installation
+2. Starts Anvil (local blockchain)
+3. Deploys smart contract
+4. Updates frontend config
+5. Starts Next.js server
+
+### Step 6: Configure MetaMask
 
 ```bash
+# Linux/macOS
 ./deploy.sh metamask
+
+# Windows
+.\deploy.ps1 metamask
 ```
 
 Sigue las instrucciones mostradas para:
@@ -237,35 +246,45 @@ web/src/hooks/
 
 ### Start the project in 3 commands:
 
+**Linux/macOS**:
 ```bash
-# 1. Give script permissions (first time only)
 chmod +x deploy.sh
-
-# 2. Start EVERYTHING (Anvil + Contract + Frontend)
 ./deploy.sh start
-
-# 3. See MetaMask instructions
 ./deploy.sh metamask
+```
+
+**Windows**:
+```powershell
+.\deploy.ps1 start
+.\deploy.ps1 metamask
 ```
 
 **Ready!** Open http://localhost:3000 and connect MetaMask.
 
 ---
 
-## 📋 `deploy.sh` Script Commands
+## 📋 Deployment Scripts Commands
 
 > **📚 For complete script documentation, see [docs/DOCUMENTATION.md - Automated Deployment](./docs/DOCUMENTATION.md#-deployment-automatizado)**
 
-### Main Commands
+### Linux/macOS (`deploy.sh`)
 
 ```bash
-./deploy.sh start      # Start entire stack (Anvil + Contract + Frontend)
+./deploy.sh start      # Start entire stack
 ./deploy.sh stop       # Stop all services
 ./deploy.sh restart    # Restart entire stack
 ./deploy.sh status     # See service status
-./deploy.sh metamask   # Instructions to configure MetaMask
-./deploy.sh clean      # Clean Anvil persistent state (requires Anvil stopped)
-./deploy.sh help       # Complete help with all commands
+./deploy.sh clean      # Clean Anvil state
+```
+
+### Windows (`deploy.ps1`)
+
+```powershell
+.\deploy.ps1 start     # Start entire stack (opens new windows)
+.\deploy.ps1 stop      # Stop all services
+.\deploy.ps1 restart   # Restart entire stack
+.\deploy.ps1 status    # See service status
+.\deploy.ps1 clean     # Clean Anvil state
 ```
 
 ### Frontend Commands (without affecting Anvil/Contract)
@@ -740,7 +759,9 @@ netstat -an | findstr 3000  # Debe mostrar LISTENING en 127.0.0.1:3000
 
 ---
 
-## 🪟 Windows - Instalación Manual Completa
+## 🪟 Windows - Setup Manual
+
+> **💡 RECOMENDADO**: Usa el script automatizado `.\deploy.ps1 setup` y `.\deploy.ps1 start` para una experiencia sin fricción. Sigue esta guía solo si prefieres hacerlo manualmente.
 
 ### Paso 1: Instalar Node.js y npm
 
@@ -1808,9 +1829,9 @@ See **[docs/DOCUMENTATION.md - Troubleshooting](./docs/DOCUMENTATION.md#-trouble
 ---
 
 **Created**: November 18, 2025  
-**Last Updated**: November 27, 2025  
-**Version**: 1.6.0  
-**Status**: ✅ 9/9 pages completed (100%), 24 hooks implemented, critical contract validations implemented
+**Last Updated**: November 28, 2025  
+**Version**: 2.1.0  
+**Status**: ✅ 9/9 pages completed (100%), 24 hooks implemented, critical contract validations implemented, Windows support added
 
 > **📋 For the most up-to-date status, see [STATUS.md](./STATUS.md)**
 
